@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Contact Young Africans Network — Get in touch for partnerships, media, membership and general inquiries.">
+<title>Contact | Young Africans Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Poppins',sans-serif;background:var(--white);color:var(--navy);}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 2rem;height:75px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:0.75rem;text-decoration:none;}
+.nav-logo img{height:48px;}
+.nav-logo-text{font-size:0.9rem;font-weight:700;color:var(--navy);line-height:1.2;}
+.nav-logo-text span{display:block;font-size:0.7rem;font-weight:400;color:var(--gray);}
+.nav-links{display:flex;gap:1.5rem;list-style:none;}
+.nav-links a{font-size:0.82rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;}
+.nav-links a:hover,.nav-links a.active{color:var(--red);}
+.nav-btn{background:var(--red);color:var(--white);padding:0.6rem 1.5rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:600;}
+.page-hero{background:linear-gradient(135deg,var(--navy),var(--dark));padding:8rem 2rem 4rem;text-align:center;}
+.page-hero-inner{max-width:800px;margin:0 auto;}
+.hero-tag{display:inline-block;background:rgba(245,166,35,0.15);color:var(--gold);padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:600;letter-spacing:1px;margin-bottom:1rem;border:1px solid rgba(245,166,35,0.3);}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:var(--white);margin-bottom:1rem;}
+.page-title span{color:var(--gold);}
+.page-sub{font-size:1rem;color:rgba(255,255,255,0.75);line-height:1.8;}
+.section-tag{display:inline-block;background:rgba(230,51,41,0.1);color:var(--red);padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;letter-spacing:1px;margin-bottom:0.75rem;}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:var(--navy);margin-bottom:1rem;}
+.section-title span{color:var(--red);}
+/* CONTACT OPTIONS */
+.contact-options{background:var(--red);padding:3rem 2rem;}
+.options-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+.option-card{background:rgba(255,255,255,0.15);border-radius:16px;padding:1.5rem;text-align:center;}
+.option-icon{font-size:2rem;margin-bottom:0.75rem;}
+.option-title{font-size:0.9rem;font-weight:700;color:var(--white);margin-bottom:0.4rem;}
+.option-desc{font-size:0.78rem;color:rgba(255,255,255,0.85);line-height:1.6;}
+/* CONTACT SECTION */
+.contact-section{padding:5rem 2rem;max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;}
+.contact-info h2{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--navy);margin-bottom:1rem;}
+.contact-info p{color:var(--gray);line-height:1.8;margin-bottom:2rem;font-size:0.92rem;}
+.contact-item{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;background:var(--light);border-radius:12px;padding:1rem 1.25rem;transition:background 0.2s;}
+.contact-item:hover{background:rgba(27,42,107,0.05);}
+.contact-icon{width:44px;height:44px;background:var(--navy);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.contact-type{font-size:0.72rem;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem;}
+.contact-val a,.contact-val{color:var(--navy);text-decoration:none;font-weight:500;font-size:0.88rem;}
+.contact-val a:hover{color:var(--red);}
+/* FORM */
+.contact-form{background:var(--light);border-radius:24px;padding:2.5rem;}
+.form-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;}
+.form-sub{font-size:0.82rem;color:var(--gray);margin-bottom:1.75rem;line-height:1.7;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.form-group{margin-bottom:1rem;}
+.form-group label{display:block;font-size:0.78rem;font-weight:600;color:var(--navy);margin-bottom:0.4rem;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.75rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.85rem;outline:none;transition:border-color 0.2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--navy);}
+.form-group textarea{resize:vertical;min-height:120px;}
+.btn-submit{width:100%;padding:0.9rem;background:var(--red);color:var(--white);font-family:'Poppins',sans-serif;font-size:0.95rem;font-weight:700;border:none;border-radius:50px;cursor:pointer;transition:all 0.3s;}
+.btn-submit:hover{background:var(--navy);}
+/* SOCIALS */
+.socials{background:var(--navy);padding:5rem 2rem;text-align:center;}
+.socials-inner{max-width:1000px;margin:0 auto;}
+.social-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:3rem;}
+.social-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:2rem;text-decoration:none;transition:all 0.3s;display:block;}
+.social-card:hover{background:rgba(255,255,255,0.08);border-color:var(--gold);transform:translateY(-4px);}
+.social-icon{font-size:2.5rem;margin-bottom:0.75rem;}
+.social-name{font-size:0.88rem;font-weight:700;color:var(--white);margin-bottom:0.25rem;}
+.social-handle{font-size:0.75rem;color:var(--gold);}
+/* FAQ */
+.faq{padding:5rem 2rem;max-width:1000px;margin:0 auto;}
+.faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:3rem;}
+.faq-item{background:var(--light);border-radius:16px;padding:1.75rem;border-left:4px solid var(--navy);}
+.faq-item:nth-child(even){border-left-color:var(--red);}
+.faq-q{font-size:0.9rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;}
+.faq-a{font-size:0.82rem;color:var(--gray);line-height:1.7;}
+footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255,0.1);}
+.footer-bottom{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
+.footer-copy{font-size:0.78rem;color:rgba(255,255,255,0.5);}
+.footer-copy a{color:var(--gold);text-decoration:none;}
+.footer-links-row{display:flex;gap:1.5rem;}
+.footer-links-row a{font-size:0.78rem;color:rgba(255,255,255,0.6);text-decoration:none;}
+.footer-links-row a:hover{color:var(--gold);}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="images/logo.jpeg" alt="YAN Logo">
+    <div class="nav-logo-text">Young Africans Network<span>Building the Future, Together</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="programs.html">Programs</a></li>
+    <li><a href="team.html">Team</a></li>
+    <li><a href="events.html">Events</a></li>
+    <li><a href="join.html">Join Us</a></li>
+    <li><a href="contact.html" class="active">Contact</a></li>
+  </ul>
+  <a href="join.html" class="nav-btn">Join YAN</a>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <span class="hero-tag">Get In Touch</span>
+    <h1 class="page-title">Contact <span>YAN</span></h1>
+    <p class="page-sub">Whether you want to partner, join, collaborate or just learn more — we would love to hear from you. Reach out and let's build together!</p>
+  </div>
+</div>
+
+<!-- OPTIONS -->
+<div class="contact-options">
+  <div class="options-inner">
+    <div class="option-card">
+      <div class="option-icon">🤝</div>
+      <div class="option-title">Partner With Us</div>
+      <div class="option-desc">Organizations, institutions and individuals who want to collaborate with YAN</div>
+    </div>
+    <div class="option-card">
+      <div class="option-icon">📰</div>
+      <div class="option-title">Media & Press</div>
+      <div class="option-desc">Journalists and media outlets seeking information, interviews or press materials</div>
+    </div>
+    <div class="option-card">
+      <div class="option-icon">💡</div>
+      <div class="option-title">General Inquiry</div>
+      <div class="option-desc">Any question, suggestion or feedback about YAN's programs and activities</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<div class="contact-section">
+  <div class="contact-info">
+    <span class="section-tag">Direct Contact</span>
+    <h2>Let's Connect</h2>
+    <p>YAN is open to partnerships, collaborations, media inquiries and general questions. Our team responds within 48 hours. For urgent matters, WhatsApp is the fastest channel.</p>
+    <div class="contact-item">
+      <div class="contact-icon">📧</div>
+      <div>
+        <div class="contact-type">Email</div>
+        <div class="contact-val"><a href="mailto:youngafricansn@gmail.com">youngafricansn@gmail.com</a></div>
+      </div>
+    </div>
+    <div class="contact-item">
+      <div class="contact-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></div>
+      <div>
+        <div class="contact-type">WhatsApp Platform</div>
+        <div class="contact-val"><a href="https://chat.whatsapp.com/BlvxC0j6sUUBfWjbIW9dH9" target="_blank">Be part of the Vibrant Community</a></div>
+      </div>
+    </div>
+    <div class="contact-item">
+      <div class="contact-icon">📍</div>
+      <div>
+        <div class="contact-type">Location</div>
+        <div class="contact-val">Kenya | Pan-African & Global</div>
+      </div>
+    </div>
+    <div class="contact-item">
+      <div class="contact-icon">🌐</div>
+      <div>
+        <div class="contact-type">Website</div>
+        <div class="contact-val"><a href="https://youngafricansnetwork.org">youngafricansnetwork.org</a></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="contact-form">
+    <div class="form-title">Send a Message</div>
+    <div class="form-sub">Fill in the form and we will get back to you within 48 hours.</div>
+    <form onsubmit="submitContact(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name *</label>
+          <input type="text" placeholder="Amara" required>
+        </div>
+        <div class="form-group">
+          <label>Last Name *</label>
+          <input type="text" placeholder="Diallo" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email Address *</label>
+        <input type="email" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label>Subject</label>
+        <select>
+          <option value="">Select a subject...</option>
+          <option>Partnership Inquiry</option>
+          <option>Media & Press</option>
+          <option>Membership Question</option>
+          <option>Program Information</option>
+          <option>Volunteer Opportunity</option>
+          <option>General Inquiry</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Your Message *</label>
+        <textarea placeholder="Tell us how we can help or how you want to collaborate..." required></textarea>
+      </div>
+      <button type="submit" class="btn-submit" id="contactBtn">Send Message 🚀</button>
+    </form>
+  </div>
+</div>
+
+<!-- SOCIALS -->
+<div class="socials">
+  <div class="socials-inner">
+    <span style="display:inline-block;background:rgba(245,166,35,0.15);color:var(--gold);padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;letter-spacing:1px;margin-bottom:0.75rem;border:1px solid rgba(245,166,35,0.3);">Follow Us</span>
+    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:var(--white);margin-bottom:0.5rem;">Find Us <span style="color:var(--gold);">Online</span></h2>
+    <p style="color:rgba(255,255,255,0.65);font-size:0.88rem;max-width:500px;margin:0 auto;">Stay connected with YAN across all platforms for updates, opportunities and community</p>
+    <div class="social-grid">
+      <a href="#" class="social-card">
+        <div class="social-icon">📘</div>
+        <div class="social-name">Facebook</div>
+        <div class="social-handle">Young Africans Network</div>
+      </a>
+      <a href="#" class="social-card">
+        <div class="social-icon">📸</div>
+        <div class="social-name">Instagram</div>
+        <div class="social-handle">@youngafricansnetwork</div>
+      </a>
+      <a href="#" class="social-card">
+        <div class="social-icon">🐦</div>
+        <div class="social-name">Twitter / X</div>
+        <div class="social-handle">@YAN_Africa</div>
+      </a>
+      <a href="#" class="social-card">
+        <div class="social-icon">💼</div>
+        <div class="social-name">LinkedIn</div>
+        <div class="social-handle">Young Africans Network</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq">
+  <div style="text-align:center;">
+    <span class="section-tag">Quick Answers</span>
+    <h2 class="section-title">Frequently Asked <span>Questions</span></h2>
+  </div>
+  <div class="faq-grid">
+    <div class="faq-item">
+      <div class="faq-q">How do I join YAN?</div>
+      <div class="faq-a">Visit our Join page, fill in the membership form and we will contact you within 48 hours to complete your onboarding and add you to our community.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Is YAN free to join?</div>
+      <div class="faq-a">Yes! YAN membership is completely free. We are a volunteer-driven organization committed to making our programs accessible to all African youth.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How can organizations partner with YAN?</div>
+      <div class="faq-a">Send us an email or fill in our contact form with your partnership proposal. All partnerships are governed by formal MoUs outlining roles and responsibilities.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Where is YAN based?</div>
+      <div class="faq-a">YAN is founded in Kenya with pan-African reach. Our members and activities span across Africa and the diaspora — we are a truly continental network.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How are activities conducted?</div>
+      <div class="faq-a">Most YAN activities are virtual — via Google Meet, Zoom and WhatsApp — making them accessible to members across different countries and time zones.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">When does YAN officially launch?</div>
+      <div class="faq-a">YAN officially launches on 1st June 2026 with a continental launch event. Join us to be part of history — register through our Join page today!</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2026 Young Africans Network. All Rights Reserved. | Website by <a href="https://rayiecho.github.io" target="_blank">Regan Ayiecho</a></p>
+    <div class="footer-links-row">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="programs.html">Programs</a>
+      <a href="team.html">Team</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function submitContact(e){
+  e.preventDefault();
+  const btn=document.getElementById('contactBtn');
+  btn.textContent='✓ Message Sent!';
+  btn.style.background='#27AE60';
+  setTimeout(()=>{btn.textContent='Send Message 🚀';btn.style.background='';},3000);
+  e.target.reset();
+}
+</script>
+</body>
+</html>

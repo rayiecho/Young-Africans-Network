@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="YAN Programs — IT Training, Scholarships, Career Development, Leadership, Community Impact and Mental Health programs for African youth.">
+<title>Programs | Young Africans Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Poppins',sans-serif;background:var(--white);color:var(--navy);}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 2rem;height:75px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:0.75rem;text-decoration:none;}
+.nav-logo img{height:48px;}
+.nav-logo-text{font-size:0.9rem;font-weight:700;color:var(--navy);line-height:1.2;}
+.nav-logo-text span{display:block;font-size:0.7rem;font-weight:400;color:var(--gray);}
+.nav-links{display:flex;gap:1.5rem;list-style:none;}
+.nav-links a{font-size:0.82rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;}
+.nav-links a:hover,.nav-links a.active{color:var(--red);}
+.nav-btn{background:var(--red);color:var(--white);padding:0.6rem 1.5rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:600;}
+.page-hero{background:linear-gradient(135deg,var(--navy),var(--dark));padding:8rem 2rem 4rem;text-align:center;}
+.page-hero-inner{max-width:800px;margin:0 auto;}
+.hero-tag{display:inline-block;background:rgba(245,166,35,0.15);color:var(--gold);padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:600;letter-spacing:1px;margin-bottom:1rem;border:1px solid rgba(245,166,35,0.3);}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:var(--white);margin-bottom:1rem;}
+.page-title span{color:var(--gold);}
+.page-sub{font-size:1rem;color:rgba(255,255,255,0.75);line-height:1.8;}
+.section-tag{display:inline-block;background:rgba(230,51,41,0.1);color:var(--red);padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;letter-spacing:1px;margin-bottom:0.75rem;}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:var(--navy);margin-bottom:1rem;}
+.section-title span{color:var(--red);}
+/* PROGRAMS */
+.programs-section{padding:5rem 2rem;max-width:1200px;margin:0 auto;}
+.program-block{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;margin-bottom:5rem;padding-bottom:5rem;border-bottom:1px solid rgba(27,42,107,0.1);}
+.program-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.program-block.reverse{direction:rtl;}
+.program-block.reverse>*{direction:ltr;}
+.program-visual{background:linear-gradient(135deg,var(--navy),var(--dark));border-radius:24px;min-height:300px;display:flex;align-items:center;justify-content:center;font-size:8rem;position:relative;}
+.program-num{position:absolute;top:20px;left:20px;font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;color:rgba(255,255,255,0.1);}
+.program-sdg-badge{position:absolute;bottom:20px;right:20px;background:var(--gold);color:var(--navy);padding:0.5rem 1rem;border-radius:50px;font-size:0.72rem;font-weight:700;}
+.program-content h3{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--navy);margin-bottom:1rem;line-height:1.2;}
+.program-content p{font-size:0.92rem;color:var(--gray);line-height:1.9;margin-bottom:1rem;}
+.program-activities{margin-top:1.5rem;}
+.program-activities h4{font-size:0.85rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:1px;}
+.activity-list{list-style:none;display:flex;flex-direction:column;gap:0.5rem;}
+.activity-list li{display:flex;align-items:flex-start;gap:0.75rem;font-size:0.82rem;color:var(--gray);}
+.activity-list li::before{content:'✅';flex-shrink:0;}
+/* SDG */
+.sdg-section{background:var(--navy);padding:5rem 2rem;text-align:center;}
+.sdg-inner{max-width:1200px;margin:0 auto;}
+.sdg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem;}
+.sdg-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:2rem;transition:background 0.3s;}
+.sdg-card:hover{background:rgba(255,255,255,0.08);}
+.sdg-num{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;color:var(--gold);line-height:1;margin-bottom:0.5rem;}
+.sdg-title{font-size:0.88rem;font-weight:700;color:var(--white);margin-bottom:0.5rem;}
+.sdg-desc{font-size:0.78rem;color:rgba(255,255,255,0.6);line-height:1.7;}
+/* CTA */
+.cta{background:linear-gradient(135deg,var(--red),#C0392B);padding:5rem 2rem;text-align:center;}
+.cta h2{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);font-weight:900;color:var(--white);margin-bottom:1rem;}
+.cta p{color:rgba(255,255,255,0.85);font-size:1rem;margin-bottom:2rem;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.8;}
+.btn-white{background:var(--white);color:var(--red);padding:0.85rem 2.5rem;border-radius:50px;text-decoration:none;font-weight:700;font-size:0.95rem;transition:all 0.3s;display:inline-block;}
+.btn-white:hover{background:var(--gold);color:var(--navy);}
+footer{background:var(--navy);padding:2rem;text-align:center;border-top:1px solid rgba(255,255,255,0.1);}
+.footer-bottom{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
+.footer-copy{font-size:0.78rem;color:rgba(255,255,255,0.5);}
+.footer-copy a{color:var(--gold);text-decoration:none;}
+.footer-links-row{display:flex;gap:1.5rem;flex-wrap:wrap;}
+.footer-links-row a{font-size:0.78rem;color:rgba(255,255,255,0.6);text-decoration:none;}
+.footer-links-row a:hover{color:var(--gold);}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="images/logo.jpeg" alt="YAN Logo">
+    <div class="nav-logo-text">Young Africans Network<span>Building the Future, Together</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="programs.html" class="active">Programs</a></li>
+    <li><a href="team.html">Team</a></li>
+    <li><a href="events.html">Events</a></li>
+    <li><a href="join.html">Join Us</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <a href="join.html" class="nav-btn">Join YAN</a>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <span class="hero-tag">What We Do</span>
+    <h1 class="page-title">Our Core <span>Programs</span></h1>
+    <p class="page-sub">Six transformative programs aligned with the United Nations Sustainable Development Goals — designed to empower African youth comprehensively.</p>
+  </div>
+</div>
+
+<div class="programs-section">
+
+  <div class="program-block">
+    <div class="program-visual">
+      💻
+      <div class="program-num">01</div>
+      <div class="program-sdg-badge">SDG 4 — Quality Education</div>
+    </div>
+    <div class="program-content">
+      <h3>IT Training & Digital Awareness</h3>
+      <p>In today's world, digital skills are no longer optional — they are essential. YAN's IT Training program equips African youth with practical digital competencies that open doors to careers, entrepreneurship and global opportunities.</p>
+      <p>We cover everything from basic computer literacy to advanced digital tools, online safety, and emerging technologies like Artificial Intelligence.</p>
+      <div class="program-activities">
+        <h4>Key Activities</h4>
+        <ul class="activity-list">
+          <li>IT and Digital Skills Training sessions</li>
+          <li>Online Safety and Cybersecurity awareness</li>
+          <li>AI tools and Digital Entrepreneurship workshops</li>
+          <li>21st Century Skills development</li>
+          <li>Facilitator and trainer coordination</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="program-block reverse">
+    <div class="program-visual">
+      🏆
+      <div class="program-num">02</div>
+      <div class="program-sdg-badge">SDG 4 & SDG 10</div>
+    </div>
+    <div class="program-content">
+      <h3>Scholarships & Global Opportunities</h3>
+      <p>Access to quality education should not be limited by financial circumstances. YAN's Scholarships department works tirelessly to research, verify and share global opportunities that can transform lives.</p>
+      <p>From fully-funded scholarships to internships, fellowships and exchange programmes — we ensure our members know what is available and how to apply successfully.</p>
+      <div class="program-activities">
+        <h4>Key Activities</h4>
+        <ul class="activity-list">
+          <li>Research and verification of global opportunities</li>
+          <li>Scholarship, internship and fellowship sharing</li>
+          <li>Application process support and guidance</li>
+          <li>Success story tracking and celebration</li>
+          <li>Information sessions and webinars</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="program-block">
+    <div class="program-visual">
+      🎤
+      <div class="program-num">03</div>
+      <div class="program-sdg-badge">SDG 8 — Decent Work</div>
+    </div>
+    <div class="program-content">
+      <h3>Career Development & Public Speaking</h3>
+      <p>YAN believes every young African deserves the tools to build a fulfilling career. Our Career Development program provides practical, hands-on training in employability skills, professional communication and confidence building.</p>
+      <div class="program-activities">
+        <h4>Key Activities</h4>
+        <ul class="activity-list">
+          <li>CV writing and motivation letter training</li>
+          <li>Interview preparation and mock interviews</li>
+          <li>Public speaking and confidence sessions</li>
+          <li>Personal branding and networking skills</li>
+          <li>Career guidance and mentorship</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="program-block reverse">
+    <div class="program-visual">
+      👑
+      <div class="program-num">04</div>
+      <div class="program-sdg-badge">SDG 16 — Strong Institutions</div>
+    </div>
+    <div class="program-content">
+      <h3>Leadership & 21st Century Skills</h3>
+      <p>Africa needs ethical, visionary and impactful leaders. YAN's Leadership program identifies and nurtures the next generation of African leaders — equipping them with the skills, mindset and networks to lead positive change.</p>
+      <div class="program-activities">
+        <h4>Key Activities</h4>
+        <ul class="activity-list">
+          <li>Leadership training workshops and retreats</li>
+          <li>Self-leadership and personal development</li>
+          <li>Governance and civic education sessions</li>
+          <li>Youth leadership forums and dialogues</li>
+          <li>Mentorship from established African leaders</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="program-block">
+    <div class="program-visual">
+      🌍
+      <div class="program-num">05</div>
+      <div class="program-sdg-badge">SDG 17 — Partnerships</div>
+    </div>
+    <div class="program-content">
+      <h3>Community Impact & Giving Back</h3>
+      <p>Real development happens in communities. YAN's Community Impact program mobilizes young Africans to serve their communities — creating tangible, lasting change through volunteerism, outreach and collaborative projects.</p>
+      <div class="program-activities">
+        <h4>Key Activities</h4>
+        <ul class="activity-list">
+          <li>Community outreach and service activities</li>
+          <li>Volunteer mobilization and management</li>
+          <li>Partnerships with local organizations</li>
+          <li>Youth-led community projects</li>
+          <li>Impact documentation and storytelling</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="program-block reverse">
+    <div class="program-visual">
+      💚
+      <div class="program-num">06</div>
+      <div class="program-sdg-badge">SDG 3 — Good Health</div>
+    </div>
+    <div class="program-content">
+      <h3>Mental Health & Wellbeing</h3>
+      <p>Mental health is health. YAN recognizes that young Africans face unique pressures — academic, financial, social and emotional. Our Mental Health program provides a safe space for awareness, peer support and resilience building.</p>
+      <p><strong>Note:</strong> This department provides non-clinical peer support and referral pathways only.</p>
+      <div class="program-activities">
+        <h4>Key Activities</h4>
+        <ul class="activity-list">
+          <li>Mental health awareness sessions</li>
+          <li>Peer support programs and safe spaces</li>
+          <li>Resilience and wellness workshops</li>
+          <li>Stress management and self-care training</li>
+          <li>Referral pathways to professional support</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SDG ALIGNMENT -->
+<div class="sdg-section">
+  <div class="sdg-inner">
+    <span style="display:inline-block;background:rgba(245,166,35,0.15);color:var(--gold);padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;letter-spacing:1px;margin-bottom:0.75rem;border:1px solid rgba(245,166,35,0.3);">Global Alignment</span>
+    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:var(--white);margin-bottom:0.5rem;">SDG <span style="color:var(--gold);">Alignment</span></h2>
+    <p style="color:rgba(255,255,255,0.7);font-size:0.92rem;max-width:600px;margin:0 auto;">All YAN programs are designed to contribute to the United Nations Sustainable Development Goals</p>
+    <div class="sdg-grid">
+      <div class="sdg-card">
+        <div class="sdg-num">SDG 3</div>
+        <div class="sdg-title">Good Health & Wellbeing</div>
+        <p class="sdg-desc">Mental Health & Wellbeing program promoting youth resilience and emotional awareness</p>
+      </div>
+      <div class="sdg-card">
+        <div class="sdg-num">SDG 4</div>
+        <div class="sdg-title">Quality Education</div>
+        <p class="sdg-desc">IT Training and Scholarships programs increasing access to quality education and digital skills</p>
+      </div>
+      <div class="sdg-card">
+        <div class="sdg-num">SDG 8</div>
+        <div class="sdg-title">Decent Work & Growth</div>
+        <p class="sdg-desc">Career Development program improving employability and economic opportunities for youth</p>
+      </div>
+      <div class="sdg-card">
+        <div class="sdg-num">SDG 10</div>
+        <div class="sdg-title">Reduced Inequalities</div>
+        <p class="sdg-desc">Scholarships and inclusion programs reducing barriers to opportunity for all African youth</p>
+      </div>
+      <div class="sdg-card">
+        <div class="sdg-num">SDG 16</div>
+        <div class="sdg-title">Strong Institutions</div>
+        <p class="sdg-desc">Leadership program nurturing ethical future-ready African leaders for strong governance</p>
+      </div>
+      <div class="sdg-card">
+        <div class="sdg-num">SDG 17</div>
+        <div class="sdg-title">Partnerships for Goals</div>
+        <p class="sdg-desc">Community Impact and Partnerships programs building collaborative networks across Africa</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cta">
+  <h2>Get Involved in Our Programs</h2>
+  <p>Whether you want to participate, facilitate, or partner — there is a place for you in YAN's programs. Join us and make a difference!</p>
+  <a href="join.html" class="btn-white">Join a Program Today</a>
+</div>
+
+<footer>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2026 Young Africans Network. All Rights Reserved. | Website by <a href="https://rayiecho.github.io" target="_blank">Regan Ayiecho</a></p>
+    <div class="footer-links-row">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="programs.html">Programs</a>
+      <a href="team.html">Team</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

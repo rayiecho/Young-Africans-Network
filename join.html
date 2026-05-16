@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Join Young Africans Network — Become a member and be part of the movement building Africa's future.">
+<title>Join YAN | Young Africans Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Poppins',sans-serif;background:var(--white);color:var(--navy);}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 2rem;height:75px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:0.75rem;text-decoration:none;}
+.nav-logo img{height:48px;}
+.nav-logo-text{font-size:0.9rem;font-weight:700;color:var(--navy);line-height:1.2;}
+.nav-logo-text span{display:block;font-size:0.7rem;font-weight:400;color:var(--gray);}
+.nav-links{display:flex;gap:1.5rem;list-style:none;}
+.nav-links a{font-size:0.82rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;}
+.nav-links a:hover,.nav-links a.active{color:var(--red);}
+.nav-btn{background:var(--red);color:var(--white);padding:0.6rem 1.5rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:600;}
+.page-hero{background:linear-gradient(135deg,var(--navy),var(--dark));padding:8rem 2rem 4rem;text-align:center;}
+.page-hero-inner{max-width:800px;margin:0 auto;}
+.hero-tag{display:inline-block;background:rgba(245,166,35,0.15);color:var(--gold);padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:600;letter-spacing:1px;margin-bottom:1rem;border:1px solid rgba(245,166,35,0.3);}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:var(--white);margin-bottom:1rem;}
+.page-title span{color:var(--gold);}
+.page-sub{font-size:1rem;color:rgba(255,255,255,0.75);line-height:1.8;}
+.section-tag{display:inline-block;background:rgba(230,51,41,0.1);color:var(--red);padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;letter-spacing:1px;margin-bottom:0.75rem;}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:var(--navy);margin-bottom:1rem;}
+.section-title span{color:var(--red);}
+/* BENEFITS */
+.benefits{padding:5rem 2rem;background:var(--light);}
+.benefits-inner{max-width:1200px;margin:0 auto;}
+.benefits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:3rem;}
+.benefit-card{background:var(--white);border-radius:20px;padding:2rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.06);transition:transform 0.3s;}
+.benefit-card:hover{transform:translateY(-4px);}
+.benefit-icon{font-size:3rem;margin-bottom:1rem;}
+.benefit-title{font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;}
+.benefit-desc{font-size:0.82rem;color:var(--gray);line-height:1.7;}
+/* MEMBERSHIP TYPES */
+.membership{padding:5rem 2rem;max-width:1200px;margin:0 auto;}
+.membership-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem;}
+.membership-card{border-radius:20px;padding:2rem;border:2px solid var(--light);transition:all 0.3s;}
+.membership-card:hover{border-color:var(--navy);transform:translateY(-4px);}
+.membership-card.featured{background:var(--navy);border-color:var(--navy);}
+.membership-icon{font-size:2.5rem;margin-bottom:1rem;}
+.membership-type{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;}
+.membership-card.featured .membership-type{color:var(--gold);}
+.membership-age{font-size:0.78rem;color:var(--red);font-weight:600;margin-bottom:1rem;}
+.membership-card.featured .membership-age{color:var(--gold);opacity:0.8;}
+.membership-desc{font-size:0.82rem;color:var(--gray);line-height:1.7;}
+.membership-card.featured .membership-desc{color:rgba(255,255,255,0.75);}
+/* FORM */
+.join-form-section{background:var(--light);padding:5rem 2rem;}
+.join-form-inner{max-width:800px;margin:0 auto;}
+.form-card{background:var(--white);border-radius:24px;padding:3rem;box-shadow:0 8px 40px rgba(0,0,0,0.08);}
+.form-title{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;}
+.form-sub{font-size:0.88rem;color:var(--gray);margin-bottom:2rem;line-height:1.7;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+.form-group{margin-bottom:1.25rem;}
+.form-group label{display:block;font-size:0.8rem;font-weight:600;color:var(--navy);margin-bottom:0.5rem;letter-spacing:0.3px;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.8rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--navy);}
+.form-group textarea{resize:vertical;min-height:100px;}
+.btn-submit{width:100%;padding:1rem;background:var(--red);color:var(--white);font-family:'Poppins',sans-serif;font-size:1rem;font-weight:700;border:none;border-radius:50px;cursor:pointer;transition:all 0.3s;}
+.btn-submit:hover{background:var(--navy);transform:translateY(-2px);}
+/* EXPECTATIONS */
+.expectations{padding:5rem 2rem;max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;}
+.exp-card{background:var(--light);border-radius:20px;padding:2rem;}
+.exp-title{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;display:flex;align-items:center;gap:0.75rem;}
+.exp-list{list-style:none;display:flex;flex-direction:column;gap:0.75rem;}
+.exp-list li{display:flex;align-items:flex-start;gap:0.75rem;font-size:0.85rem;color:var(--gray);line-height:1.6;}
+.exp-list li span{flex-shrink:0;}
+footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255,0.1);}
+.footer-bottom{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
+.footer-copy{font-size:0.78rem;color:rgba(255,255,255,0.5);}
+.footer-copy a{color:var(--gold);text-decoration:none;}
+.footer-links-row{display:flex;gap:1.5rem;}
+.footer-links-row a{font-size:0.78rem;color:rgba(255,255,255,0.6);text-decoration:none;}
+.footer-links-row a:hover{color:var(--gold);}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="images/logo.jpeg" alt="YAN Logo">
+    <div class="nav-logo-text">Young Africans Network<span>Building the Future, Together</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="programs.html">Programs</a></li>
+    <li><a href="team.html">Team</a></li>
+    <li><a href="events.html">Events</a></li>
+    <li><a href="join.html" class="active">Join Us</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <a href="join.html" class="nav-btn">Join YAN</a>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <span class="hero-tag">Be Part of the Movement</span>
+    <h1 class="page-title">Join <span>Young Africans Network</span></h1>
+    <p class="page-sub">Become a member of a growing pan-African community of young leaders, changemakers and opportunity-seekers. Your journey starts here!</p>
+  </div>
+</div>
+
+<!-- BENEFITS -->
+<div class="benefits">
+  <div class="benefits-inner">
+    <div style="text-align:center;">
+      <span class="section-tag">Why Join YAN</span>
+      <h2 class="section-title">Member <span>Benefits</span></h2>
+    </div>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="benefit-icon">🏆</div>
+        <div class="benefit-title">Scholarship Access</div>
+        <div class="benefit-desc">Get first access to scholarships, fellowships, internships and global opportunities shared weekly by our dedicated team.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">👑</div>
+        <div class="benefit-title">Leadership Development</div>
+        <div class="benefit-desc">Participate in leadership training, workshops and mentorship programs designed to build future African leaders.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🌍</div>
+        <div class="benefit-title">Pan-African Network</div>
+        <div class="benefit-desc">Connect with young Africans from Kenya, Cameroon, Rwanda, Nigeria, Ghana and beyond — building lifelong friendships.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">💼</div>
+        <div class="benefit-title">Career Support</div>
+        <div class="benefit-desc">Get CV reviews, mock interviews, career guidance and public speaking training to boost your professional life.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🎓</div>
+        <div class="benefit-title">Certificates</div>
+        <div class="benefit-desc">Earn official YAN certificates of participation, volunteer service and leadership — recognized across Africa.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">💚</div>
+        <div class="benefit-title">Mental Health Support</div>
+        <div class="benefit-desc">Access peer support, wellness sessions and a safe community that understands and supports your wellbeing journey.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MEMBERSHIP TYPES -->
+<div class="membership">
+  <div style="text-align:center;">
+    <span class="section-tag">Who Can Join</span>
+    <h2 class="section-title">Membership <span>Categories</span></h2>
+  </div>
+  <div class="membership-grid">
+    <div class="membership-card">
+      <div class="membership-icon">🌟</div>
+      <div class="membership-type">Ordinary Member</div>
+      <div class="membership-age">Ages 18–35</div>
+      <div class="membership-desc">Actively participate in all programs. Eligible to vote and hold leadership positions within YAN.</div>
+    </div>
+    <div class="membership-card featured">
+      <div class="membership-icon">🔥</div>
+      <div class="membership-type">Volunteer Member</div>
+      <div class="membership-age">Ages 18–40</div>
+      <div class="membership-desc">Join a department and contribute your skills to building YAN. Minimum 3-month commitment required.</div>
+    </div>
+    <div class="membership-card">
+      <div class="membership-icon">🤝</div>
+      <div class="membership-type">Associate Member</div>
+      <div class="membership-age">All Ages</div>
+      <div class="membership-desc">Organizations, mentors, researchers and allies who support YAN's mission and want to partner with us.</div>
+    </div>
+  </div>
+</div>
+
+<!-- JOIN FORM -->
+<div class="join-form-section">
+  <div class="join-form-inner">
+    <div style="text-align:center;margin-bottom:2rem;">
+      <span class="section-tag">Register Now</span>
+      <h2 class="section-title">Join <span>YAN Today</span></h2>
+    </div>
+    <div class="form-card">
+      <div class="form-title">Membership Application</div>
+      <div class="form-sub">Fill in this form to join the Young Africans Network. We will reach out within 48 hours to complete your onboarding and add you to our WhatsApp community.</div>
+      <form onsubmit="submitJoin(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name *</label>
+            <input type="text" placeholder="Your first name" required>
+          </div>
+          <div class="form-group">
+            <label>Last Name *</label>
+            <input type="text" placeholder="Your last name" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email Address *</label>
+          <input type="email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>WhatsApp Number *</label>
+            <input type="tel" placeholder="+254 700 000 000" required>
+          </div>
+          <div class="form-group">
+            <label>Country *</label>
+            <input type="text" placeholder="e.g. Kenya" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Age</label>
+            <input type="number" placeholder="e.g. 24" min="14" max="45">
+          </div>
+          <div class="form-group">
+            <label>Profession / Field of Study</label>
+            <input type="text" placeholder="e.g. Software Engineering">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Which department interests you most?</label>
+          <select>
+            <option value="">Select a department...</option>
+            <option>Programs & Training</option>
+            <option>Scholarships & Global Opportunities</option>
+            <option>Career Development & Public Speaking</option>
+            <option>Community Impact & Volunteering</option>
+            <option>Mental Health & Wellbeing</option>
+            <option>Communications & Media</option>
+            <option>Partnerships & External Relations</option>
+            <option>Operations, Administration & Finance</option>
+            <option>General Member — No specific department</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Why do you want to join YAN?</label>
+          <textarea placeholder="Tell us what motivated you to join and what you hope to gain or contribute..."></textarea>
+        </div>
+        <button type="submit" class="btn-submit" id="joinBtn">Submit Application 🚀</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- EXPECTATIONS -->
+<div class="expectations">
+  <div class="exp-card">
+    <div class="exp-title">✅ What You Get</div>
+    <ul class="exp-list">
+      <li><span>🏆</span> Access to scholarships and global opportunities</li>
+      <li><span>👑</span> Leadership training and development programs</li>
+      <li><span>💼</span> Career guidance, CV support and mock interviews</li>
+      <li><span>🌍</span> Pan-African network and community</li>
+      <li><span>🎓</span> Official YAN certificates after 3 months</li>
+      <li><span>💚</span> Mental health support and peer community</li>
+      <li><span>📢</span> Platform to share your voice and ideas</li>
+    </ul>
+  </div>
+  <div class="exp-card">
+    <div class="exp-title">📋 What We Expect</div>
+    <ul class="exp-list">
+      <li><span>⏰</span> Minimum 3-month commitment to YAN</li>
+      <li><span>🤝</span> Active participation in activities and meetings</li>
+      <li><span>💡</span> Professional conduct in all engagements</li>
+      <li><span>📱</span> Regular engagement on WhatsApp and platforms</li>
+      <li><span>🌍</span> Uphold African values of unity and respect</li>
+      <li><span>🚀</span> Represent YAN positively in all spaces</li>
+      <li><span>❤️</span> Service over self — impact over titles</li>
+    </ul>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2026 Young Africans Network. All Rights Reserved. | Website by <a href="https://rayiecho.github.io" target="_blank">Regan Ayiecho</a></p>
+    <div class="footer-links-row">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="programs.html">Programs</a>
+      <a href="team.html">Team</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function submitJoin(e){
+  e.preventDefault();
+  const btn=document.getElementById('joinBtn');
+  btn.textContent='✓ Application Submitted!';
+  btn.style.background='#27AE60';
+  setTimeout(()=>{btn.textContent='Submit Application 🚀';btn.style.background='';},4000);
+  e.target.reset();
+}
+</script>
+</body>
+</html>

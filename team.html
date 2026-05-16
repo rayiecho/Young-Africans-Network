@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Meet the YAN Team — Leadership core and 8 department coordinators from across Africa.">
+<title>Our Team | Young Africans Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Poppins',sans-serif;background:var(--white);color:var(--navy);}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 2rem;height:75px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:0.75rem;text-decoration:none;}
+.nav-logo img{height:48px;}
+.nav-logo-text{font-size:0.9rem;font-weight:700;color:var(--navy);line-height:1.2;}
+.nav-logo-text span{display:block;font-size:0.7rem;font-weight:400;color:var(--gray);}
+.nav-links{display:flex;gap:1.5rem;list-style:none;}
+.nav-links a{font-size:0.82rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;}
+.nav-links a:hover,.nav-links a.active{color:var(--red);}
+.nav-btn{background:var(--red);color:var(--white);padding:0.6rem 1.5rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:600;}
+.page-hero{background:linear-gradient(135deg,var(--navy),var(--dark));padding:8rem 2rem 4rem;text-align:center;}
+.page-hero-inner{max-width:800px;margin:0 auto;}
+.hero-tag{display:inline-block;background:rgba(245,166,35,0.15);color:var(--gold);padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:600;letter-spacing:1px;margin-bottom:1rem;border:1px solid rgba(245,166,35,0.3);}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:var(--white);margin-bottom:1rem;}
+.page-title span{color:var(--gold);}
+.page-sub{font-size:1rem;color:rgba(255,255,255,0.75);line-height:1.8;}
+.section-tag{display:inline-block;background:rgba(230,51,41,0.1);color:var(--red);padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;letter-spacing:1px;margin-bottom:0.75rem;}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:var(--navy);margin-bottom:1rem;}
+.section-title span{color:var(--red);}
+/* LEADERSHIP */
+.leadership{padding:5rem 2rem;max-width:1200px;margin:0 auto;}
+.leadership-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:3rem;}
+.leader-card{background:var(--light);border-radius:24px;padding:2.5rem;text-align:center;border-top:4px solid var(--navy);transition:transform 0.3s;position:relative;overflow:hidden;}
+.leader-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--navy),var(--red),var(--gold));}
+.leader-card:hover{transform:translateY(-6px);}
+.leader-image{width:150px;height:150px;object-fit:cover;object-position:top;border-radius:50%;display:block;margin:0 auto 1.25rem;border:4px solid var(--white);box-shadow:0 4px 20px rgba(27,42,107,0.2);}
+.leader-name{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;}
+.leader-role{font-size:0.75rem;color:var(--red);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem;}
+.leader-country{font-size:0.78rem;color:var(--gray);margin-bottom:1rem;}
+.leader-email{font-size:0.75rem;color:var(--navy);opacity:0.7;}
+.leader-duties{margin-top:1rem;text-align:left;}
+.leader-duties h4{font-size:0.75rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem;}
+.leader-duties ul{list-style:none;display:flex;flex-direction:column;gap:0.3rem;}
+.leader-duties li{font-size:0.75rem;color:var(--gray);display:flex;align-items:flex-start;gap:0.5rem;}
+.leader-duties li::before{content:'•';color:var(--red);font-weight:700;flex-shrink:0;}
+/* DEPARTMENTS */
+.departments{background:var(--light);padding:5rem 2rem;}
+.dept-inner{max-width:1200px;margin:0 auto;}
+.dept-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2rem;margin-top:3rem;}
+.dept-card{background:var(--white);border-radius:20px;padding:2rem;box-shadow:0 4px 20px rgba(0,0,0,0.06);border-left:4px solid var(--navy);}
+.dept-card:nth-child(2){border-left-color:var(--red);}
+.dept-card:nth-child(3){border-left-color:var(--gold);}
+.dept-card:nth-child(4){border-left-color:var(--red);}
+.dept-card:nth-child(5){border-left-color:var(--gold);}
+.dept-card:nth-child(6){border-left-color:var(--navy);}
+.dept-card:nth-child(7){border-left-color:var(--red);}
+.dept-card:nth-child(8){border-left-color:var(--gold);}
+.dept-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;}
+.dept-icon{font-size:2rem;}
+.dept-name{font-size:0.95rem;font-weight:700;color:var(--navy);}
+.dept-country-tag{font-size:0.72rem;color:var(--red);font-weight:600;}
+.dept-members{display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1.25rem;}
+.dept-member{background:var(--light);border-radius:10px;padding:0.75rem 1rem;}
+.member-name{font-size:0.82rem;font-weight:600;color:var(--navy);margin-bottom:0.15rem;}
+.member-role{font-size:0.72rem;color:var(--red);font-weight:600;margin-bottom:0.15rem;}
+.member-info{font-size:0.7rem;color:var(--gray);}
+.dept-duties h4{font-size:0.75rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem;}
+.dept-duties ul{list-style:none;display:flex;flex-direction:column;gap:0.3rem;}
+.dept-duties li{font-size:0.75rem;color:var(--gray);display:flex;align-items:flex-start;gap:0.5rem;}
+.dept-duties li::before{content:'✅';flex-shrink:0;font-size:0.65rem;}
+/* JOIN */
+.join-team{background:var(--navy);padding:5rem 2rem;text-align:center;}
+.join-team h2{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);font-weight:900;color:var(--white);margin-bottom:1rem;}
+.join-team p{color:rgba(255,255,255,0.75);font-size:1rem;margin-bottom:2rem;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.8;}
+.btn-gold{background:var(--gold);color:var(--navy);padding:0.85rem 2.5rem;border-radius:50px;text-decoration:none;font-weight:700;font-size:0.95rem;transition:all 0.3s;display:inline-block;}
+.btn-gold:hover{background:var(--white);transform:translateY(-2px);}
+footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255,0.1);}
+.footer-bottom{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
+.footer-copy{font-size:0.78rem;color:rgba(255,255,255,0.5);}
+.footer-copy a{color:var(--gold);text-decoration:none;}
+.footer-links-row{display:flex;gap:1.5rem;}
+.footer-links-row a{font-size:0.78rem;color:rgba(255,255,255,0.6);text-decoration:none;}
+.footer-links-row a:hover{color:var(--gold);}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="images/logo.jpeg" alt="YAN Logo">
+    <div class="nav-logo-text">Young Africans Network<span>Building the Future, Together</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="programs.html">Programs</a></li>
+    <li><a href="team.html" class="active">Team</a></li>
+    <li><a href="events.html">Events</a></li>
+    <li><a href="join.html">Join Us</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <a href="join.html" class="nav-btn">Join YAN</a>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <span class="hero-tag">Our People</span>
+    <h1 class="page-title">Meet the <span>YAN Team</span></h1>
+    <p class="page-sub">A diverse, passionate team of young Africans from across the continent — united by one purpose: Building the Future, Together.</p>
+  </div>
+</div>
+
+<!-- LEADERSHIP CORE -->
+<div class="leadership">
+  <div style="text-align:center;">
+    <span class="section-tag">Leadership Core</span>
+    <h2 class="section-title">Founding <span>Leadership</span></h2>
+    <p style="color:var(--gray);font-size:0.92rem;max-width:600px;margin:0.5rem auto 0;line-height:1.8;">The founding team providing strategic direction, oversight and institutional continuity for YAN.</p>
+  </div>
+  <div class="leadership-grid">
+
+    <div class="leader-card">
+      <img src="images/Emmanuel.jpeg" alt="Emmanuel Ikumilu Mwori - Founder & Executive Director, Young Africans Network" class="leader-image">
+      <div class="leader-name">Mr. Emmanuel Ikumilu Mwori</div>
+      <div class="leader-role">Founder & Executive Director</div>
+      <div class="leader-country">📍 Kenya</div>
+      <div class="leader-email">emmanuelmwori540@gmail.com</div>
+      <div class="leader-duties">
+        <h4>Key Duties</h4>
+        <ul>
+          <li>Provides vision, strategic direction and final oversight</li>
+          <li>Approves major commitments and key decisions</li>
+          <li>Signs all official certificates and documents</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="leader-card">
+      <img src="images/Merlyne.jpeg" alt="Merlene Kamanda - Co-Founder, Young Africans Network" class="leader-image">
+      <div class="leader-name">Ms. Merlene Kamanda</div>
+      <div class="leader-role">Co-Founder</div>
+      <div class="leader-country">📍 Kenya</div>
+      <div class="leader-email">merlenekamanda@gmail.com</div>
+      <div class="leader-duties">
+        <h4>Key Duties</h4>
+        <ul>
+          <li>Supports strategy, mentorship and institutional continuity</li>
+          <li>Deputy strategic and operational leader</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="leader-card">
+      <img src="images/Regan.jpeg" alt="Regan Ayiecho - Co-Founder, Young Africans Network" class="leader-image">
+      <div class="leader-name">Mr. Regan Ayiecho</div>
+      <div class="leader-role">Co-Founder</div>
+      <div class="leader-country">📍 Kenya</div>
+      <div class="leader-email">odhiamboregan6440@gmail.com</div>
+      <div class="leader-duties">
+        <h4>Key Duties</h4>
+        <ul>
+          <li>Supports strategy, mentorship and institutional continuity</li>
+          <li>Deputy strategic and operational leader</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DEPARTMENTS -->
+<div class="departments">
+  <div class="dept-inner">
+    <div style="text-align:center;">
+      <span class="section-tag">8 Departments</span>
+      <h2 class="section-title">Department <span>Coordinators</span></h2>
+      <p style="color:var(--gray);font-size:0.92rem;max-width:600px;margin:0.5rem auto 0;line-height:1.8;">Eight volunteer-driven departments each led by passionate young Africans from across the continent.</p>
+    </div>
+    <div class="dept-grid">
+
+      <div class="dept-card">
+        <div class="dept-header">
+          <div class="dept-icon">💻</div>
+          <div>
+            <div class="dept-name">Programs & Training Department</div>
+          </div>
+        </div>
+        <div class="dept-members">
+          <div class="dept-member">
+            <div class="member-name">Mr. Manga Manga Samuel</div>
+            <div class="member-role">Department Lead</div>
+            <div class="member-info">📍 Cameroon | samuelmanga178@gmail.com | +237 658 043 266</div>
+          </div>
+        </div>
+        <div class="dept-duties">
+          <h4>Key Duties</h4>
+          <ul>
+            <li>Organize IT and Digital Skills Training</li>
+            <li>Conduct Leadership and 21st Century Skills sessions</li>
+            <li>Coordinate facilitators and trainers</li>
+            <li>Develop structured training programs</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="dept-card">
+        <div class="dept-header">
+          <div class="dept-icon">🏆</div>
+          <div>
+            <div class="dept-name">Scholarships & Global Opportunities</div>
+          </div>
+        </div>
+        <div class="dept-members">
+          <div class="dept-member">
+            <div class="member-name">Mr. Sapih Defo Fodjou Chris</div>
+            <div class="member-role">Department Lead</div>
+            <div class="member-info">📍 Cameroon | sdfchrisscience@gmail.com | +237 678 319 331</div>
+          </div>
+          <div class="dept-member">
+            <div class="member-name">Miss Nformi Jizzy</div>
+            <div class="member-role">Member</div>
+            <div class="member-info">📍 Rwanda | j.nformi2@alustudent.com | +250 792 891 208</div>
+          </div>
+          <div class="dept-member">
+            <div class="member-name">Mr. Benjamin Odiwuor</div>
+            <div class="member-role">Member</div>
+            <div class="member-info">📍 Kenya | benjaminotienooduor@gmail.com | +254 713 101 120</div>
+          </div>
+        </div>
+        <div class="dept-duties">
+          <h4>Key Duties</h4>
+          <ul>
+            <li>Research and verify global opportunities</li>
+            <li>Share scholarships, internships and fellowships</li>
+            <li>Support application processes</li>
+            <li>Track success stories and beneficiaries</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="dept-card">
+        <div class="dept-header">
+          <div class="dept-icon">🎤</div>
+          <div>
+            <div class="dept-name">Career Development & Public Speaking</div>
+          </div>
+        </div>
+        <div class="dept-members">
+          <div class="dept-member">
+            <div class="member-name">Mr. Dinizio Danis Zangazee Elias</div>
+            <div class="member-role">Department Lead</div>
+            <div class="member-info">📍 South Sudan | deniszangazeedinizio@gmail.com | +211 920 842 273</div>
+          </div>
+          <div class="dept-member">
+            <div class="member-name">Miss Ayamba Precious</div>
+            <div class="member-role">Member</div>
+            <div class="member-info">📍 Cameroon | ayambaebobprecious@gmail.com | +237 680 551 894</div>
+          </div>
+        </div>
+        <div class="dept-duties">
+          <h4>Key Duties</h4>
+          <ul>
+            <li>Deliver CV, interview and employability training</li>
+            <li>Conduct public speaking and confidence sessions</li>
+            <li>Provide mentorship and career guidance</li>
+            <li>Organise coaching and mock interviews</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="dept-card">
+        <div class="dept-header">
+          <div class="dept-icon">🌍</div>
+          <div>
+            <div class="dept-name">Community Impact & Volunteer Engagement</div>
+          </div>
+        </div>
+        <div class="dept-members">
+          <div class="dept-member">
+            <div class="member-name">Miss Debra Chepkorir</div>
+            <div class="member-role">Department Lead</div>
+            <div class="member-info">📍 Kenya | csdebra977@gmail.com | +254 762 109 001</div>
+          </div>
+          <div class="dept-member">
+            <div class="member-name">Miss Abdul Rahman</div>
+            <div class="member-role">Member</div>
+            <div class="member-info">📍 Ghana | e.abdulrahm@alustudent.com | +233 593 589 261</div>
+          </div>
+          <div class="dept-member">
+            <div class="member-name">Miss Grace Idoko</div>
+            <div class="member-role">Member</div>
+            <div class="member-info">📍 Nigeria | g.idoko@alustudent.com | +234 9012 290 692</div>
+          </div>
+          <div class="dept-member">
+            <div class="member-name">Mr. Shami Blaise</div>
+            <div class="member-role">Member</div>
+            <div class="member-info">📍 Rwanda | shabrami007@gmail.com | +250 793 677 778</div>
+          </div>
+        </div>
+        <div class="dept-duties">
+          <h4>Key Duties</h4>
+          <ul>
+            <li>Plan outreach and community service activities</li>
+            <li>Mobilize and manage volunteers</li>
+            <li>Partner with local organisations</li>
+            <li>Document impact and outcomes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="dept-card">
+        <div class="dept-header">
+          <div class="dept-icon">💚</div>
+          <div>
+            <div class="dept-name">Mental Health & Wellbeing Department</div>
+          </div>
+        </div>
+        <div class="dept-members">
+          <div class="dept-member">
+            <div class="member-name">Miss Bella Dushime</div>
+            <div class="member-role">Department Lead</div>
+            <div class="member-info">📍 Rwanda | b.dushime@alustudent.com | +250 791 531 854</div>
+          </div>
+          <div class="dept-member">
+            <div class="member-name">Mr. Ronny Ochieng</div>
+            <div class="member-role">Member</div>
+            <div class="member-info">📍 Kenya | ochiengronny022@gmail.com | +254 741 739 788</div>
+          </div>
+        </div>
+        <div class="dept-duties">
+          <h4>Key Duties</h4>
+          <ul>
+            <li>Promote mental health awareness</li>
+            <li>Provide peer support programs</li>
+            <li>Integrate wellbeing into all YAN activities</li>
+            <li>Conduct resilience and wellness sessions</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="dept-card">
+        <div class="dept-header">
+          <div class="dept-icon">📢</div>
+          <div>
+            <div class="dept-name">Communications & Media Department</div>
+          </div>
+        </div>
+        <div class="dept-members">
+          <div class="dept-member">
+            <div class="member-name">Miss Diligence Joso Matute</div>
+            <div class="member-role">Department Lead</div>
+            <div class="member-info">📍 Cameroon | diligencematute@gmail.com | +237 672 289 714</div>
+          </div>
+        </div>
+        <div class="dept-duties">
+          <h4>Key Duties</h4>
+          <ul>
+            <li>Manage branding and visibility</li>
+            <li>Handle social media platforms</li>
+            <li>Design posters and content</li>
+            <li>Document activities and storytelling</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="dept-card">
+        <div class="dept-header">
+          <div class="dept-icon">🤝</div>
+          <div>
+            <div class="dept-name">Partnerships & External Relations</div>
+          </div>
+        </div>
+        <div class="dept-members">
+          <div class="dept-member">
+            <div class="member-name">Mr. Shema Marvin</div>
+            <div class="member-role">Department Lead</div>
+            <div class="member-info">📍 Rwanda | marvinshema12@gmail.com | +250 788 859 112</div>
+          </div>
+        </div>
+        <div class="dept-duties">
+          <h4>Key Duties</h4>
+          <ul>
+            <li>Build strategic partnerships</li>
+            <li>Represent YAN externally</li>
+            <li>Develop proposals and collaborations</li>
+            <li>Maintain stakeholder relationships</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="dept-card">
+        <div class="dept-header">
+          <div class="dept-icon">⚙️</div>
+          <div>
+            <div class="dept-name">Operations, Administration & Finance</div>
+          </div>
+        </div>
+        <div class="dept-members">
+          <div class="dept-member">
+            <div class="member-name">Mr. Innosent Onesmo Nnko</div>
+            <div class="member-role">Department Lead</div>
+            <div class="member-info">📍 Tanzania | onesmoinnocent6@gmail.com | +250 793 154 529</div>
+          </div>
+        </div>
+        <div class="dept-duties">
+          <h4>Key Duties</h4>
+          <ul>
+            <li>Coordinate operations and workflow</li>
+            <li>Maintain records and documentation</li>
+            <li>Track attendance and reports</li>
+            <li>Support planning and resource management</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- JOIN TEAM -->
+<div class="join-team">
+  <h2>Want to Join the Team?</h2>
+  <p>YAN is always looking for passionate young Africans to join our volunteer team. Whether you have skills in communications, tech, finance or community work — there is a place for you!</p>
+  <a href="join.html" class="btn-gold">Join as a Volunteer</a>
+</div>
+
+<footer>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2026 Young Africans Network. All Rights Reserved. | Website by <a href="https://rayiecho.github.io" target="_blank">Regan Ayiecho</a></p>
+    <div class="footer-links-row">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="programs.html">Programs</a>
+      <a href="team.html">Team</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

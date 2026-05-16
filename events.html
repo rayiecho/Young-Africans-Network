@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="YAN Events — Action plan and upcoming activities from June to December 2026.">
+<title>Events | Young Africans Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Poppins',sans-serif;background:var(--white);color:var(--navy);}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 2rem;height:75px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:0.75rem;text-decoration:none;}
+.nav-logo img{height:48px;}
+.nav-logo-text{font-size:0.9rem;font-weight:700;color:var(--navy);line-height:1.2;}
+.nav-logo-text span{display:block;font-size:0.7rem;font-weight:400;color:var(--gray);}
+.nav-links{display:flex;gap:1.5rem;list-style:none;}
+.nav-links a{font-size:0.82rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;}
+.nav-links a:hover,.nav-links a.active{color:var(--red);}
+.nav-btn{background:var(--red);color:var(--white);padding:0.6rem 1.5rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:600;}
+.page-hero{background:linear-gradient(135deg,var(--navy),var(--dark));padding:8rem 2rem 4rem;text-align:center;}
+.page-hero-inner{max-width:800px;margin:0 auto;}
+.hero-tag{display:inline-block;background:rgba(245,166,35,0.15);color:var(--gold);padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:600;letter-spacing:1px;margin-bottom:1rem;border:1px solid rgba(245,166,35,0.3);}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:var(--white);margin-bottom:1rem;}
+.page-title span{color:var(--gold);}
+.page-sub{font-size:1rem;color:rgba(255,255,255,0.75);line-height:1.8;}
+.section-tag{display:inline-block;background:rgba(230,51,41,0.1);color:var(--red);padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;letter-spacing:1px;margin-bottom:0.75rem;}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:var(--navy);margin-bottom:1rem;}
+.section-title span{color:var(--red);}
+/* LAUNCH */
+.launch{background:linear-gradient(135deg,var(--red),#C0392B);padding:4rem 2rem;text-align:center;}
+.launch-inner{max-width:800px;margin:0 auto;}
+.launch-date{font-family:'Playfair Display',serif;font-size:clamp(3rem,8vw,6rem);font-weight:900;color:var(--white);line-height:1;margin-bottom:0.5rem;}
+.launch-label{font-size:1rem;color:rgba(255,255,255,0.85);letter-spacing:3px;text-transform:uppercase;margin-bottom:1.5rem;}
+.launch-desc{font-size:1rem;color:rgba(255,255,255,0.8);line-height:1.8;margin-bottom:2rem;}
+.btn-white{background:var(--white);color:var(--red);padding:0.85rem 2.5rem;border-radius:50px;text-decoration:none;font-weight:700;font-size:0.95rem;transition:all 0.3s;display:inline-block;}
+.btn-white:hover{background:var(--gold);color:var(--navy);}
+/* TIMELINE */
+.timeline{padding:5rem 2rem;max-width:1000px;margin:0 auto;}
+.month-block{margin-bottom:3rem;}
+.month-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid var(--light);}
+.month-name{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);}
+.month-theme{font-size:0.78rem;color:var(--red);font-weight:600;background:rgba(230,51,41,0.1);padding:0.3rem 0.75rem;border-radius:50px;}
+.events-list{display:flex;flex-direction:column;gap:1rem;}
+.event-item{background:var(--light);border-radius:16px;padding:1.25rem 1.5rem;border-left:4px solid var(--navy);display:flex;gap:1.5rem;align-items:flex-start;}
+.event-item:nth-child(even){border-left-color:var(--red);}
+.event-date-box{background:var(--navy);color:var(--white);border-radius:12px;padding:0.75rem 1rem;text-align:center;min-width:60px;flex-shrink:0;}
+.event-day{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;line-height:1;}
+.event-month{font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;opacity:0.8;}
+.event-content{};
+.event-title{font-size:0.92rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;}
+.event-lead{font-size:0.75rem;color:var(--red);font-weight:600;margin-bottom:0.25rem;}
+.event-desc{font-size:0.78rem;color:var(--gray);line-height:1.6;}
+/* KPIs */
+.kpis{background:var(--navy);padding:5rem 2rem;}
+.kpi-inner{max-width:1200px;margin:0 auto;}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:3rem;}
+.kpi-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:1.5rem;text-align:center;}
+.kpi-num{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--gold);line-height:1;margin-bottom:0.5rem;}
+.kpi-label{font-size:0.78rem;color:rgba(255,255,255,0.65);line-height:1.5;}
+/* PRINCIPLES */
+.op-principles{padding:5rem 2rem;background:var(--light);}
+.op-inner{max-width:1200px;margin:0 auto;}
+.op-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:3rem;}
+.op-card{background:var(--white);border-radius:16px;padding:1.5rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.op-icon{font-size:2rem;margin-bottom:0.75rem;}
+.op-text{font-size:0.82rem;color:var(--navy);font-weight:600;}
+footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255,0.1);}
+.footer-bottom{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
+.footer-copy{font-size:0.78rem;color:rgba(255,255,255,0.5);}
+.footer-copy a{color:var(--gold);text-decoration:none;}
+.footer-links-row{display:flex;gap:1.5rem;}
+.footer-links-row a{font-size:0.78rem;color:rgba(255,255,255,0.6);text-decoration:none;}
+.footer-links-row a:hover{color:var(--gold);}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="images/logo.jpeg" alt="YAN Logo">
+    <div class="nav-logo-text">Young Africans Network<span>Building the Future, Together</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="programs.html">Programs</a></li>
+    <li><a href="team.html">Team</a></li>
+    <li><a href="events.html" class="active">Events</a></li>
+    <li><a href="join.html">Join Us</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <a href="join.html" class="nav-btn">Join YAN</a>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <span class="hero-tag">What's Happening</span>
+    <h1 class="page-title">YAN <span>Events & Activities</span></h1>
+    <p class="page-sub">Our integrated operational work plan for June–December 2026. One Organization, One Calendar, Shared Execution.</p>
+  </div>
+</div>
+
+<!-- LAUNCH -->
+<div class="launch">
+  <div class="launch-inner">
+    <div class="launch-date">1st June</div>
+    <div class="launch-label">2026 — Official Continental Launch</div>
+    <p class="launch-desc">Join us as we officially launch the Young Africans Network to the world! The continental launch marks the beginning of a new era for African youth empowerment, leadership and opportunity.</p>
+    <a href="join.html" class="btn-white">Register for Launch 🚀</a>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div class="timeline">
+  <div style="text-align:center;margin-bottom:3rem;">
+    <span class="section-tag">2026 Calendar</span>
+    <h2 class="section-title">Upcoming <span>Events</span></h2>
+    <p style="color:var(--gray);font-size:0.92rem;line-height:1.8;">Maximum 2–3 structured activities per week. Mostly virtual. One major continental event monthly.</p>
+  </div>
+
+  <!-- JUNE -->
+  <div class="month-block">
+    <div class="month-header">
+      <div class="month-name">June 2026</div>
+      <div class="month-theme">Orientation, Leadership & Organizational Culture</div>
+    </div>
+    <div class="events-list">
+      <div class="event-item">
+        <div class="event-date-box" style="background:var(--red);">
+          <div class="event-day">1</div>
+          <div class="event-month">June</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">🚀 OFFICIAL YAN CONTINENTAL LAUNCH</div>
+          <div class="event-lead">Lead: Communications & Media + Founder's Office</div>
+          <div class="event-desc">Official launch announcement, introducing YAN's mission, vision and values to the world. Welcome messages, leadership introductions and media coverage.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-date-box">
+          <div class="event-day">3</div>
+          <div class="event-month">June</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Members Introduction Day</div>
+          <div class="event-lead">Lead: Programs & Administration</div>
+          <div class="event-desc">Members introduce themselves: Name, Country, Profession, Passion, Why they joined YAN and their expectations.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-date-box">
+          <div class="event-day">6</div>
+          <div class="event-month">June</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Executive Orientation Session</div>
+          <div class="event-lead">Platform: Google Meet | 7:00 PM EAT</div>
+          <div class="event-desc">Understanding YAN, department overview, member expectations, code of conduct and volunteer culture. Interactive Q&A session.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-date-box">
+          <div class="event-day">9</div>
+          <div class="event-month">June</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Mental Health Session 1 — Understanding Mental Health Among Young Africans</div>
+          <div class="event-lead">Lead: Mental Health Department</div>
+          <div class="event-desc">Myths vs facts, academic pressure, unemployment stress, family expectations and emotional burnout. Anonymous emotional check-in exercise.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-date-box">
+          <div class="event-day">11</div>
+          <div class="event-month">June</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Public Speaking Session 1 — Overcoming Fear of Public Speaking</div>
+          <div class="event-lead">Lead: Career Development Department</div>
+          <div class="event-desc">Confidence building, voice projection, body language, eye contact and fear management. Exercise: 1-minute speech "Who I Am & My Vision".</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-date-box">
+          <div class="event-day">18</div>
+          <div class="event-month">June</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Scholarships & Global Opportunities Session 1</div>
+          <div class="event-lead">Lead: Scholarships Department</div>
+          <div class="event-desc">Types of scholarships, fully funded opportunities, eligibility understanding and common mistakes in applications.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-date-box">
+          <div class="event-day">20</div>
+          <div class="event-month">June</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Leadership Training Session 1 — Self-Leadership & Leading Others</div>
+          <div class="event-lead">Lead: Programs & Training</div>
+          <div class="event-desc">International Alignment: World Refugee Day. Youth solidarity discussion and leadership fundamentals.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-date-box">
+          <div class="event-day">27</div>
+          <div class="event-month">June</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Monthly Reflection & Member Feedback Session</div>
+          <div class="event-lead">Lead: All Departments</div>
+          <div class="event-desc">Reflection survey, department updates, successes and lessons learned from our first month.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JULY -->
+  <div class="month-block">
+    <div class="month-header">
+      <div class="month-name">July 2026</div>
+      <div class="month-theme">Communication, Confidence & Employability</div>
+    </div>
+    <div class="events-list">
+      <div class="event-item">
+        <div class="event-date-box" style="background:var(--gold);color:var(--navy);">
+          <div class="event-day">2</div>
+          <div class="event-month">July</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Building a Strong Personal Brand as a Young African</div>
+          <div class="event-lead">Lead: Career Guidance, Public Speaking & Media</div>
+          <div class="event-desc">Personal branding, professional image, online reputation, networking etiquette. Exercise: 60-second professional introduction.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-date-box" style="background:var(--gold);color:var(--navy);">
+          <div class="event-day">4</div>
+          <div class="event-month">July</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Writing a Strong CV & Motivation Letter</div>
+          <div class="event-lead">Lead: Career Guidance + Scholarships + Media</div>
+          <div class="event-desc">CV structure, common mistakes, scholarship-aligned CV writing, motivation letters. Exercise: Members draft their first CV.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-date-box" style="background:var(--gold);color:var(--navy);">
+          <div class="event-day">7</div>
+          <div class="event-month">July</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Dealing with Career Anxiety & Self-Doubt</div>
+          <div class="event-lead">Lead: Mental Health + Career Guidance + Public Speaking</div>
+          <div class="event-desc">Fear of failure, comparing with peers, career pressure and managing rejection.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPCOMING -->
+  <div class="month-block">
+    <div class="month-header">
+      <div class="month-name">August — December 2026</div>
+      <div class="month-theme">Ongoing Programs & Continental Events</div>
+    </div>
+    <div class="events-list">
+      <div class="event-item">
+        <div class="event-date-box" style="background:var(--navy);">
+          <div class="event-day">Aug</div>
+          <div class="event-month">2026</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Digital Skills Bootcamp</div>
+          <div class="event-lead">Lead: Programs & Training</div>
+          <div class="event-desc">Intensive digital skills training covering AI tools, online entrepreneurship and tech for development.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-date-box" style="background:var(--navy);">
+          <div class="event-day">Sep</div>
+          <div class="event-month">2026</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Continental Scholarship Fair</div>
+          <div class="event-lead">Lead: Scholarships & Global Opportunities</div>
+          <div class="event-desc">Major continental event showcasing global scholarship opportunities. Guest speakers from scholarship organizations worldwide.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-date-box" style="background:var(--navy);">
+          <div class="event-day">Oct</div>
+          <div class="event-month">2026</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">YAN Leadership Summit</div>
+          <div class="event-lead">Lead: All Departments</div>
+          <div class="event-desc">Major leadership summit bringing together YAN members from across Africa for networking, learning and community building.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-date-box" style="background:var(--red);">
+          <div class="event-day">Dec</div>
+          <div class="event-month">2026</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">YAN End of Year Celebration & Awards</div>
+          <div class="event-lead">Lead: All Departments</div>
+          <div class="event-desc">Celebrating achievements, recognizing outstanding members, certificate distribution and planning for 2027.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- KPIs -->
+<div class="kpis">
+  <div class="kpi-inner">
+    <div style="text-align:center;">
+      <span style="display:inline-block;background:rgba(245,166,35,0.15);color:var(--gold);padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;letter-spacing:1px;margin-bottom:0.75rem;border:1px solid rgba(245,166,35,0.3);">Our Standards</span>
+      <h2 style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:var(--white);margin-bottom:0.5rem;">Monthly <span style="color:var(--gold);">KPIs</span></h2>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-num">70%</div>
+        <div class="kpi-label">Average member attendance across all sessions</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-num">2+</div>
+        <div class="kpi-label">Scholarship and opportunity posts every week</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-num">1</div>
+        <div class="kpi-label">Guest speaker invited every month</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-num">80%</div>
+        <div class="kpi-label">WhatsApp engagement rate target</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OPERATING PRINCIPLES -->
+<div class="op-principles">
+  <div class="op-inner">
+    <div style="text-align:center;">
+      <span class="section-tag">How We Operate</span>
+      <h2 class="section-title">Operating <span>Principles</span></h2>
+    </div>
+    <div class="op-grid">
+      <div class="op-card">
+        <div class="op-icon">📅</div>
+        <div class="op-text">Max 2–3 structured activities per week</div>
+      </div>
+      <div class="op-card">
+        <div class="op-icon">💻</div>
+        <div class="op-text">Mostly virtual to reduce costs</div>
+      </div>
+      <div class="op-card">
+        <div class="op-icon">📱</div>
+        <div class="op-text">Strong WhatsApp coordination</div>
+      </div>
+      <div class="op-card">
+        <div class="op-icon">🌍</div>
+        <div class="op-text">One major continental event monthly</div>
+      </div>
+      <div class="op-card">
+        <div class="op-icon">🤝</div>
+        <div class="op-text">Department collaboration for every activity</div>
+      </div>
+      <div class="op-card">
+        <div class="op-icon">🚫</div>
+        <div class="op-text">No event collisions in scheduling</div>
+      </div>
+      <div class="op-card">
+        <div class="op-icon">🎯</div>
+        <div class="op-text">Youth-centered and practical sessions</div>
+      </div>
+      <div class="op-card">
+        <div class="op-icon">🌐</div>
+        <div class="op-text">Country inclusivity across Africa</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2026 Young Africans Network. All Rights Reserved. | Website by <a href="https://rayiecho.github.io" target="_blank">Regan Ayiecho</a></p>
+    <div class="footer-links-row">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="programs.html">Programs</a>
+      <a href="team.html">Team</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
