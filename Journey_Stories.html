@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Journey & Stories — Inspiring words and reflections from the founding team of Young Africans Network.">
+<title>Journey & Stories | Young Africans Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Poppins',sans-serif;background:var(--white);color:var(--navy);overflow-x:hidden;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 2rem;height:75px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:0.75rem;text-decoration:none;}
+.nav-logo img{height:48px;}
+.nav-logo-text{font-size:0.9rem;font-weight:700;color:var(--navy);line-height:1.2;}
+.nav-logo-text span{display:block;font-size:0.7rem;font-weight:400;color:var(--gray);}
+.nav-links{display:flex;gap:1.5rem;list-style:none;}
+.nav-links a{font-size:0.82rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;}
+.nav-links a:hover,.nav-links a.active{color:var(--red);}
+.nav-btn{background:var(--red);color:var(--white);padding:0.6rem 1.5rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:600;}
+
+/* HERO */
+.page-hero{background:linear-gradient(135deg,var(--navy),var(--dark));padding:8rem 2rem 5rem;text-align:center;position:relative;overflow:hidden;}
+.page-hero::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,0.1) 0%,transparent 70%);}
+.page-hero::after{content:'';position:absolute;bottom:-100px;left:-100px;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle,rgba(230,51,41,0.08) 0%,transparent 70%);}
+.page-hero-inner{max-width:800px;margin:0 auto;position:relative;z-index:2;}
+.hero-tag{display:inline-block;background:rgba(245,166,35,0.15);color:var(--gold);padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:600;letter-spacing:1px;margin-bottom:1rem;border:1px solid rgba(245,166,35,0.3);}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:var(--white);margin-bottom:1rem;line-height:1.1;}
+.page-title span{color:var(--gold);font-style:italic;}
+.page-sub{font-size:1rem;color:rgba(255,255,255,0.75);line-height:1.8;max-width:600px;margin:0 auto;}
+
+/* INTRO */
+.intro{padding:5rem 2rem;text-align:center;background:var(--light);}
+.intro-inner{max-width:800px;margin:0 auto;}
+.intro blockquote{font-family:'Playfair Display',serif;font-size:clamp(1.3rem,3vw,2rem);font-style:italic;color:var(--navy);line-height:1.6;margin-bottom:1.5rem;position:relative;padding:0 2rem;}
+.intro blockquote::before{content:'"';font-size:6rem;color:var(--gold);opacity:0.3;position:absolute;top:-2rem;left:-1rem;font-family:'Playfair Display',serif;line-height:1;}
+.intro-attr{font-size:0.85rem;color:var(--red);font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+
+/* FOUNDERS SECTION */
+.founders{padding:5rem 2rem;max-width:1200px;margin:0 auto;}
+.section-tag{display:inline-block;background:rgba(230,51,41,0.1);color:var(--red);padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;letter-spacing:1px;margin-bottom:0.75rem;}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:var(--navy);margin-bottom:1rem;}
+.section-title span{color:var(--red);}
+
+.founder-story{display:grid;grid-template-columns:1fr 2fr;gap:3rem;align-items:start;margin-bottom:4rem;padding-bottom:4rem;border-bottom:1px solid rgba(27,42,107,0.1);}
+.founder-story:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.founder-story.reverse{grid-template-columns:2fr 1fr;}
+.founder-story.reverse .founder-profile{order:2;}
+.founder-story.reverse .founder-words{order:1;}
+
+.founder-profile{background:var(--light);border-radius:24px;padding:2rem;text-align:center;position:sticky;top:100px;}
+.founder-img{width:120px;height:120px;border-radius:50%;object-fit:cover;object-position:top;margin:0 auto 1rem;display:block;border:4px solid var(--white);box-shadow:0 4px 20px rgba(27,42,107,0.2);}
+.founder-avatar{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;color:var(--white);margin:0 auto 1rem;}
+.founder-name{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;}
+.founder-role{font-size:0.75rem;color:var(--red);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem;}
+.founder-country{font-size:0.78rem;color:var(--gray);}
+.founder-tag{display:inline-block;margin-top:0.75rem;background:rgba(27,42,107,0.1);color:var(--navy);padding:0.3rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:600;}
+
+.founder-words{}
+.founder-quote{font-family:'Playfair Display',serif;font-size:clamp(1.2rem,2.5vw,1.6rem);font-style:italic;color:var(--navy);line-height:1.6;margin-bottom:1.5rem;padding-left:1.5rem;border-left:4px solid var(--gold);}
+.founder-message{font-size:0.92rem;color:var(--gray);line-height:1.9;margin-bottom:1.5rem;}
+.founder-message p{margin-bottom:1rem;}
+.founder-message p:last-child{margin-bottom:0;}
+.founder-signature{font-family:'Playfair Display',serif;font-size:1.1rem;font-style:italic;color:var(--navy);font-weight:700;}
+
+/* WISE WORDS */
+.wise-words{background:var(--navy);padding:5rem 2rem;}
+.wise-inner{max-width:1200px;margin:0 auto;}
+.wise-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem;}
+.wise-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:2rem;transition:all 0.3s;position:relative;overflow:hidden;}
+.wise-card::before{content:'"';font-family:'Playfair Display',serif;font-size:8rem;color:rgba(245,166,35,0.1);position:absolute;top:-1rem;left:1rem;line-height:1;}
+.wise-card:hover{background:rgba(255,255,255,0.08);transform:translateY(-4px);}
+.wise-text{font-family:'Playfair Display',serif;font-size:1rem;font-style:italic;color:var(--white);line-height:1.7;margin-bottom:1rem;position:relative;z-index:1;}
+.wise-author{font-size:0.75rem;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:1px;}
+
+/* VISION */
+.vision{padding:5rem 2rem;background:var(--light);}
+.vision-inner{max-width:1000px;margin:0 auto;text-align:center;}
+.vision-text{font-family:'Playfair Display',serif;font-size:clamp(1.3rem,3vw,2rem);color:var(--navy);line-height:1.7;margin:2rem 0;font-style:italic;}
+.vision-text span{color:var(--red);}
+
+/* TIMELINE */
+.timeline-section{padding:5rem 2rem;max-width:900px;margin:0 auto;}
+.timeline{position:relative;margin-top:3rem;}
+.timeline::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--navy),var(--red),var(--gold));transform:translateX(-50%);}
+.timeline-item{display:grid;grid-template-columns:1fr 1fr;gap:3rem;margin-bottom:3rem;position:relative;}
+.timeline-item:nth-child(odd) .timeline-content{grid-column:1;text-align:right;}
+.timeline-item:nth-child(odd) .timeline-date{grid-column:2;}
+.timeline-item:nth-child(even) .timeline-content{grid-column:2;}
+.timeline-item:nth-child(even) .timeline-date{grid-column:1;text-align:right;}
+.timeline-dot{position:absolute;left:50%;top:0;width:16px;height:16px;border-radius:50%;background:var(--gold);border:3px solid var(--white);box-shadow:0 0 0 3px var(--navy);transform:translateX(-50%);}
+.timeline-content{background:var(--light);border-radius:16px;padding:1.5rem;}
+.timeline-title{font-size:0.9rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;}
+.timeline-desc{font-size:0.8rem;color:var(--gray);line-height:1.6;}
+.timeline-date{display:flex;align-items:center;}
+.timeline-item:nth-child(odd) .timeline-date{justify-content:flex-start;padding-top:1.5rem;}
+.timeline-item:nth-child(even) .timeline-date{justify-content:flex-end;padding-top:1.5rem;}
+.date-badge{background:var(--navy);color:var(--gold);padding:0.4rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:700;}
+
+/* CTA */
+.cta{background:linear-gradient(135deg,var(--red),#C0392B);padding:5rem 2rem;text-align:center;}
+.cta h2{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);font-weight:900;color:var(--white);margin-bottom:1rem;}
+.cta p{color:rgba(255,255,255,0.85);font-size:1rem;margin-bottom:2rem;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.8;}
+.btn-white{background:var(--white);color:var(--red);padding:0.85rem 2.5rem;border-radius:50px;text-decoration:none;font-weight:700;font-size:0.95rem;transition:all 0.3s;display:inline-block;}
+.btn-white:hover{background:var(--gold);color:var(--navy);transform:translateY(-2px);}
+
+footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255,0.1);}
+.footer-bottom{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
+.footer-copy{font-size:0.78rem;color:rgba(255,255,255,0.5);}
+.footer-copy a{color:var(--gold);text-decoration:none;}
+.footer-links-row{display:flex;gap:1.5rem;flex-wrap:wrap;}
+.footer-links-row a{font-size:0.78rem;color:rgba(255,255,255,0.6);text-decoration:none;}
+.footer-links-row a:hover{color:var(--gold);}
+
+@media(max-width:768px){
+  .founder-story,.founder-story.reverse{grid-template-columns:1fr;}
+  .founder-story.reverse .founder-profile,.founder-story.reverse .founder-words{order:unset;}
+  .wise-grid{grid-template-columns:1fr;}
+  .timeline::before{left:20px;}
+  .timeline-item{grid-template-columns:1fr;padding-left:3rem;}
+  .timeline-item:nth-child(odd) .timeline-content,.timeline-item:nth-child(even) .timeline-content{grid-column:1;text-align:left;}
+  .timeline-item:nth-child(odd) .timeline-date,.timeline-item:nth-child(even) .timeline-date{grid-column:1;text-align:left;justify-content:flex-start;}
+  .timeline-dot{left:20px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="images/logo.jpeg" alt="YAN Logo">
+    <div class="nav-logo-text">Young Africans Network<span>Building the Future, Together</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="programs.html">Programs</a></li>
+    <li><a href="team.html">Team</a></li>
+    <li><a href="events.html">Events</a></li>
+    <li><a href="join.html">Join Us</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <a href="join.html" class="nav-btn">Join YAN</a>
+</nav>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <span class="hero-tag">Our Story</span>
+    <h1 class="page-title">Journey & <span>Stories</span></h1>
+    <p class="page-sub">Every great movement begins with a story. Here are the voices, reflections and wisdom of the people who dared to dream of a united, empowered Africa.</p>
+  </div>
+</div>
+
+<!-- INTRO QUOTE -->
+<div class="intro">
+  <div class="intro-inner">
+    <blockquote>"Africa does not need charity. Africa needs young people who believe in her, who rise together, and who refuse to wait for permission to build the future."</blockquote>
+    <div class="intro-attr">— The Spirit of Young Africans Network</div>
+  </div>
+</div>
+
+<!-- FOUNDER STORIES -->
+<div class="founders">
+  <div style="text-align:center;margin-bottom:3rem;">
+    <span class="section-tag">Founding Voices</span>
+    <h2 class="section-title">Words from the <span>Founders</span></h2>
+    <p style="color:var(--gray);font-size:0.92rem;max-width:600px;margin:0.5rem auto 0;line-height:1.8;">The hearts, minds and souls behind Young Africans Network share their journey, motivation and vision for Africa's future.</p>
+  </div>
+
+  <!-- EMMANUEL -->
+  <div class="founder-story">
+    <div class="founder-profile">
+      <img src="images/Emmanuel.jpeg" alt="Emmanuel Ikumilu Mwori" class="founder-img">
+      <div class="founder-name">Mr. Emmanuel Ikumilu Mwori</div>
+      <div class="founder-role">Founder & Executive Director</div>
+      <div class="founder-country">📍 Kenya</div>
+      <span class="founder-tag">Visionary & Builder</span>
+    </div>
+    <div class="founder-words">
+      <div class="founder-quote">"The idea of YAN was not born in a boardroom. It was born in the heart of a young African who refused to accept that our generation was destined to be spectators of our own continent's story."</div>
+      <div class="founder-message">
+        <p>When I look across Africa, I do not see poverty. I see potential. I do not see problems. I see people — brilliant, resilient, creative young people who lack not capability but opportunity. That is why I founded Young Africans Network.</p>
+        <p>YAN was born from a simple but powerful conviction: that African youth, when connected, equipped and empowered, can and will transform this continent. We do not need to wait for governments or institutions to give us permission to build. We can start now, with what we have, where we are.</p>
+        <p>Every young African who joins YAN is not just joining an organization. They are joining a movement — a continental family committed to each other's growth, success and wellbeing. I am honoured to walk this journey with every single one of you.</p>
+        <p>The future of Africa is not coming. It is here. And you are it.</p>
+      </div>
+      <div class="founder-signature">— Emmanuel Ikumilu Mwori</div>
+    </div>
+  </div>
+
+  <!-- MERLENE -->
+  <div class="founder-story reverse">
+    <div class="founder-profile">
+      <img src="images/Merlyne.jpeg" alt="Merlene Kamanda" class="founder-img">
+      <div class="founder-name">Ms. Merlene Kamanda</div>
+      <div class="founder-role">Co-Founder</div>
+      <div class="founder-country">📍 Kenya</div>
+      <span class="founder-tag">Mentor & Strategist</span>
+    </div>
+    <div class="founder-words">
+      <div class="founder-quote">"I joined this journey because I believe in the power of young African women and men to rewrite the narrative — not just for themselves, but for generations that will come after us."</div>
+      <div class="founder-message">
+        <p>Growing up, I often felt that the systems around me were not designed with people like me in mind. Opportunities existed, but they were not equally accessible. Information was available, but not equally distributed. Networks existed, but not everyone was invited in.</p>
+        <p>YAN is our answer to that reality. It is a deliberate, intentional space where every young African — regardless of country, background or circumstances — is welcomed, valued and equipped to succeed.</p>
+        <p>What excites me most about YAN is not just what we will achieve, but who we will become in the process. When young Africans come together in pursuit of a shared vision, something magical happens. Friendships are formed, ideas are born, and futures are transformed.</p>
+        <p>I am proud to be part of this founding team. And I am even more proud of every member who trusts us with their journey.</p>
+      </div>
+      <div class="founder-signature">— Merlene Kamanda</div>
+    </div>
+  </div>
+
+  <!-- REGAN -->
+  <div class="founder-story">
+    <div class="founder-profile">
+      <img src="images/Regan.jpeg" alt="Regan Ayiecho" class="founder-img">
+      <div class="founder-name">Mr. Regan Ayiecho</div>
+      <div class="founder-role">Co-Founder</div>
+      <div class="founder-country">📍 Kenya</div>
+      <span class="founder-tag">Technologist & Builder</span>
+    </div>
+    <div class="founder-words">
+      <div class="founder-quote">"Technology has the power to connect, to equip and to amplify. YAN exists to ensure that the tools of the future are in the hands of every young African who is ready to use them."</div>
+      <div class="founder-message">
+        <p>I have always believed that the gap between where African youth are and where they could be is not a gap of talent — it is a gap of access. Access to information. Access to networks. Access to skills. Access to opportunity.</p>
+        <p>When Emmanuel shared his vision for YAN, I immediately saw it as more than an organization. I saw it as infrastructure — a platform that could systematically close those gaps at scale, across borders, across cultures, across generations.</p>
+        <p>Building YAN has been one of the most meaningful things I have ever done. Seeing young people from Kenya, Cameroon, Rwanda, South Sudan, Nigeria, Ghana and beyond come together under one roof — united by one purpose — is nothing short of extraordinary.</p>
+        <p>We are just getting started. The best chapters of this story are yet to be written. And I cannot wait to write them together with all of you.</p>
+      </div>
+      <div class="founder-signature">— Regan Ayiecho</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- WISE WORDS -->
+<div class="wise-words">
+  <div class="wise-inner">
+    <div style="text-align:center;">
+      <span style="display:inline-block;background:rgba(245,166,35,0.15);color:var(--gold);padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;letter-spacing:1px;margin-bottom:0.75rem;border:1px solid rgba(245,166,35,0.3);">Wisdom</span>
+      <h2 style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:var(--white);margin-bottom:0.5rem;">Words That <span style="color:var(--gold);">Guide Us</span></h2>
+      <p style="color:rgba(255,255,255,0.65);font-size:0.88rem;max-width:500px;margin:0 auto;">Principles and wisdom that shape how we think, lead and serve at Young Africans Network.</p>
+    </div>
+    <div class="wise-grid">
+      <div class="wise-card">
+        <div class="wise-text">"Service is the rent we pay for the privilege of living on this earth."</div>
+        <div class="wise-author">— YAN Leadership Principle</div>
+      </div>
+      <div class="wise-card">
+        <div class="wise-text">"Unity is strength. When there is teamwork and collaboration, wonderful things can be achieved."</div>
+        <div class="wise-author">— Mattie Stepanek</div>
+      </div>
+      <div class="wise-card">
+        <div class="wise-text">"Education is the most powerful weapon which you can use to change the world."</div>
+        <div class="wise-author">— Nelson Mandela</div>
+      </div>
+      <div class="wise-card">
+        <div class="wise-text">"The African child is not a problem to be solved. The African child is a solution waiting to be unleashed."</div>
+        <div class="wise-author">— YAN Founding Belief</div>
+      </div>
+      <div class="wise-card">
+        <div class="wise-text">"If you want to go fast, go alone. If you want to go far, go together."</div>
+        <div class="wise-author">— African Proverb</div>
+      </div>
+      <div class="wise-card">
+        <div class="wise-text">"It always seems impossible until it is done. Start where you are. Use what you have. Do what you can."</div>
+        <div class="wise-author">— Nelson Mandela</div>
+      </div>
+      <div class="wise-card">
+        <div class="wise-text">"Leadership is not about titles or positions. It is about impact, influence and inspiration."</div>
+        <div class="wise-author">— Robin Sharma</div>
+      </div>
+      <div class="wise-card">
+        <div class="wise-text">"We may encounter many defeats but we must not be defeated. It may even be necessary to encounter the defeat, so that we can know who we are."</div>
+        <div class="wise-author">— Maya Angelou</div>
+      </div>
+      <div class="wise-card">
+        <div class="wise-text">"The time is always right to do what is right. And the right thing for Africa is for its youth to rise — together."</div>
+        <div class="wise-author">— YAN Mission Statement</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OUR VISION -->
+<div class="vision">
+  <div class="vision-inner">
+    <span class="section-tag">Our Vision</span>
+    <h2 class="section-title">Where We Are <span>Going</span></h2>
+    <div class="vision-text">"We envision an Africa where <span>every young person</span> has access to the education, skills, networks and opportunities they need to live a life of <span>dignity, purpose and impact</span> — regardless of where they were born."</div>
+    <p style="color:var(--gray);font-size:0.92rem;line-height:1.9;max-width:700px;margin:0 auto;">This vision drives every program we run, every session we host, every opportunity we share and every member we welcome. It is not just a statement — it is a commitment. A promise. A covenant between us and every young African who trusts us with their journey.</p>
+  </div>
+</div>
+
+<!-- JOURNEY TIMELINE -->
+<div class="timeline-section">
+  <div style="text-align:center;margin-bottom:3rem;">
+    <span class="section-tag">Our Journey</span>
+    <h2 class="section-title">The YAN <span>Story So Far</span></h2>
+  </div>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-content">
+        <div class="timeline-title">🌱 The Idea is Born</div>
+        <div class="timeline-desc">Emmanuel Ikumilu Mwori envisions a pan-African network that connects, equips and empowers young Africans across the continent and diaspora.</div>
+      </div>
+      <div class="timeline-date"><span class="date-badge">Early 2026</span></div>
+      <div class="timeline-dot"></div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-content">
+        <div class="timeline-title">🤝 The Founding Team Forms</div>
+        <div class="timeline-desc">Emmanuel, Merlene and Regan come together as co-founders, united by a shared vision and a commitment to serve African youth.</div>
+      </div>
+      <div class="timeline-date"><span class="date-badge">March 2026</span></div>
+      <div class="timeline-dot"></div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-content">
+        <div class="timeline-title">🏗️ Building the Foundation</div>
+        <div class="timeline-desc">8 departments are established, department leads recruited from across Africa, and the organizational structure is set in place.</div>
+      </div>
+      <div class="timeline-date"><span class="date-badge">April 2026</span></div>
+      <div class="timeline-dot"></div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-content">
+        <div class="timeline-title">🌍 Members Join from Across Africa</div>
+        <div class="timeline-desc">Young Africans from Kenya, Cameroon, Rwanda, Tanzania, South Sudan, Ghana, Nigeria and beyond begin joining the network.</div>
+      </div>
+      <div class="timeline-date"><span class="date-badge">May 2026</span></div>
+      <div class="timeline-dot"></div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-content">
+        <div class="timeline-title">🚀 Official Continental Launch</div>
+        <div class="timeline-desc">YAN officially launches to the world on 1st June 2026 — marking the beginning of a new era for African youth empowerment.</div>
+      </div>
+      <div class="timeline-date"><span class="date-badge">1 June 2026</span></div>
+      <div class="timeline-dot"></div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-content">
+        <div class="timeline-title">✨ The Journey Continues...</div>
+        <div class="timeline-desc">Programs, training, scholarships, leadership summits and continental events — the best chapters of the YAN story are still being written.</div>
+      </div>
+      <div class="timeline-date"><span class="date-badge">2026 & Beyond</span></div>
+      <div class="timeline-dot"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta">
+  <h2>Be Part of This Story</h2>
+  <p>Every great story needs more characters. Join Young Africans Network and add your chapter to this pan-African movement. Your journey starts today!</p>
+  <a href="join.html" class="btn-white">Join YAN Today 🚀</a>
+</div>
+
+<footer>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2026 Young Africans Network. All Rights Reserved. | Website by <a href="https://rayiecho.github.io" target="_blank">Regan Ayiecho</a></p>
+    <div class="footer-links-row">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="programs.html">Programs</a>
+      <a href="team.html">Team</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
