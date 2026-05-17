@@ -3,35 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Young Africans Network — Building the Future, Together. Empowering African youth through education, leadership, and opportunities.">
-<meta name="keywords" content="Young Africans Network, YAN, African Youth, Leadership, Scholarships, Empowerment, Africa">
+<meta name="robots" content="index, follow">
+<meta name="description" content="Young Africans Network (YAN) is a pan-African, youth-led volunteer organization empowering African youth through education, leadership, mentorship and access to global opportunities.">
+<meta name="keywords" content="Young Africans Network, YAN, African Youth, Leadership, Scholarships, Empowerment, Africa, Pan-African, Youth Organization, Mentorship">
 <meta name="author" content="Young Africans Network">
-<meta name="google-site-verification" content="0Z3O9u77LV8jMvZ5xjj0SNwZonzcj173Sa9ooP5nzGE" />
+<meta name="google-site-verification" content="0Z3O9u77LV8jMvZ5xjj0SNwZonzcj173Sa9ooP5nzGE">
+
+<!-- Open Graph -->
 <meta property="og:title" content="Young Africans Network — Building the Future, Together">
 <meta property="og:description" content="Young Africans Network (YAN) is a pan-African, youth-led volunteer organization empowering African youth through education, leadership, mentorship and global opportunities.">
 <meta property="og:url" content="https://youngafricansnetwork.org">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://youngafricansnetwork.org/images/logo.jpeg">
+
+<!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@YoungAfricanNet">
 <meta name="twitter:title" content="Young Africans Network — Building the Future, Together">
 <meta name="twitter:description" content="Pan-African youth-led organization empowering young Africans through education, leadership and global opportunities.">
 <meta name="twitter:image" content="https://youngafricansnetwork.org/images/logo.jpeg">
+
+<!-- Canonical -->
 <link rel="canonical" href="https://youngafricansnetwork.org/">
+
+<!-- Favicon -->
+<link rel="icon" href="/images/logo.jpeg" type="image/jpeg">
+
+<!-- Sitemap -->
+<link rel="sitemap" type="application/xml" href="/sitemap.xml">
+
+<!-- Font Preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+
+<!-- Title -->
+<title>Young Africans Network | Pan-African Youth Empowerment & Leadership</title>
+
+<!-- Structured Data (Single merged JSON-LD) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "NGO",
   "name": "Young Africans Network",
   "alternateName": "YAN",
+  "description": "Young Africans Network (YAN) is a pan-African, youth-led volunteer organization founded in Kenya in April 2026, empowering African youth through education, leadership, mentorship and access to global opportunities.",
   "url": "https://youngafricansnetwork.org",
   "logo": "https://youngafricansnetwork.org/images/logo.jpeg",
-  "description": "Young Africans Network (YAN) is a pan-African, youth-led volunteer organization founded in Kenya in April 2026, empowering African youth through education, leadership, mentorship and access to global opportunities.",
   "foundingDate": "2026",
-  "foundingLocation": "Kenya",
+  "foundingLocation": {
+    "@type": "Place",
+    "name": "Kenya, Africa"
+  },
   "areaServed": "Africa",
   "email": "youngafricansn@gmail.com",
   "telephone": "+254791887609",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+254791887609",
+    "email": "youngafricansn@gmail.com",
+    "contactType": "General Inquiry"
+  },
   "sameAs": [
     "https://www.linkedin.com/company/115838329",
     "https://www.instagram.com/youngafricansnetwork",
@@ -40,8 +72,7 @@
   ]
 }
 </script>
-<title>Young Africans Network | Building the Future, Together</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+
 <style>
 :root{
   --navy:#1B2A6B;
@@ -184,43 +215,101 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
 .footer-bottom{border-top:1px solid rgba(255,255,255,0.1);padding-top:1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
 .footer-copy{font-size:0.78rem;color:rgba(255,255,255,0.5);}
 .footer-copy a{color:var(--gold);text-decoration:none;}
-</style>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "Young Africans Network",
-  "alternateName": "YAN",
-  "description": "Young Africans Network (YAN) is a pan-African, youth-led, volunteer-driven organization empowering African youth through education, leadership, mentorship and access to global opportunities.",
-  "url": "https://youngafricansnetwork.org",
-  "logo": "https://youngafricansnetwork.org/images/logo.jpg",
-  "foundingDate": "2026",
-  "foundingLocation": {
-    "@type": "Place",
-    "name": "Kenya, Africa"
-  },
-  "areaServed": "Africa",
-  "sameAs": [
-    "https://www.facebook.com/youngafricansnetwork",
-    "https://www.instagram.com/youngafricansnetwork",
-    "https://twitter.com/YAN_Africa",
-    "https://www.linkedin.com/company/youngafricansnetwork"
-  ],
-  "contactPoint": {
-    "@type": "ContactPoint",
-    "telephone": "+254115889942",
-    "email": "youngafricansnetwork@gmail.com",
-    "contactType": "General Inquiry"
-  }
+
+/* HAMBURGER MENU */
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none;}
+.hamburger span{display:block;width:24px;height:2px;background:var(--navy);border-radius:2px;transition:all 0.3s;}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+.mobile-menu{display:none;position:fixed;top:75px;left:0;right:0;background:var(--white);box-shadow:0 8px 24px rgba(27,42,107,0.12);z-index:99;padding:1.5rem 2rem;flex-direction:column;gap:0;}
+.mobile-menu.open{display:flex;}
+.mobile-menu li{list-style:none;border-bottom:1px solid rgba(27,42,107,0.07);}
+.mobile-menu li:last-child{border-bottom:none;}
+.mobile-menu a{display:block;padding:0.85rem 0;font-size:0.95rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;}
+.mobile-menu a:hover,.mobile-menu a.active{color:var(--red);}
+.mobile-menu .mobile-join{display:inline-block;margin-top:1rem;background:var(--red);color:var(--white);padding:0.75rem 2rem;border-radius:50px;font-weight:600;font-size:0.9rem;text-align:center;text-decoration:none;}
+
+/* TABLET — 768px to 1024px */
+@media(max-width:1024px){
+  .hero-inner{grid-template-columns:1fr;gap:2.5rem;}
+  .hero-visual{display:none;}
+  .about-inner{grid-template-columns:1fr;gap:2.5rem;}
+  .about-img{min-height:260px;}
+  .stats-inner{grid-template-columns:repeat(2,1fr);}
+  .programs-grid{grid-template-columns:repeat(2,1fr);}
+  .team-grid{grid-template-columns:repeat(2,1fr);}
+  .footer-inner{grid-template-columns:1fr 1fr;gap:2rem;}
 }
-</script>
+
+/* MOBILE — up to 768px */
+@media(max-width:768px){
+  /* NAV */
+  .nav-links{display:none;}
+  .nav-btn{display:none;}
+  .hamburger{display:flex;}
+  nav{padding:0 1.25rem;}
+
+  /* HERO */
+  .hero{padding:5rem 1.25rem 3rem;}
+  .hero-inner{grid-template-columns:1fr;gap:2rem;}
+  .hero-visual{display:none;}
+  .hero h1{font-size:2.2rem;}
+  .hero-sub{font-size:0.9rem;}
+  .hero-stats{gap:1.5rem;}
+  .hero-stat-num{font-size:1.6rem;}
+
+  /* ABOUT */
+  .about-preview{padding:3rem 1.25rem;}
+  .about-inner{grid-template-columns:1fr;gap:2rem;}
+  .about-img{min-height:220px;}
+  .values-grid{grid-template-columns:1fr 1fr;}
+
+  /* STATS */
+  .stats{padding:3rem 1.25rem;}
+  .stats-inner{grid-template-columns:repeat(2,1fr);gap:1.5rem;}
+  .stat-num{font-size:2rem;}
+
+  /* PROGRAMS */
+  .programs{padding:3rem 1.25rem;}
+  .programs-grid{grid-template-columns:1fr;gap:1rem;}
+
+  /* TEAM */
+  .team-preview{padding:3rem 1.25rem;}
+  .team-grid{grid-template-columns:1fr;gap:1.25rem;}
+
+  /* COUNTRIES */
+  .countries{padding:3rem 1.25rem;}
+
+  /* JOIN CTA */
+  .join-cta{padding:3.5rem 1.25rem;}
+  .join-cta h2{font-size:1.8rem;}
+
+  /* FOOTER */
+  footer{padding:3rem 1.25rem 1.5rem;}
+  .footer-inner{grid-template-columns:1fr;gap:2rem;margin-bottom:2rem;}
+  .footer-bottom{flex-direction:column;text-align:center;gap:0.5rem;}
+
+  /* SECTION TITLES */
+  .section-title{font-size:1.7rem;}
+}
+
+/* SMALL MOBILE — up to 480px */
+@media(max-width:480px){
+  .hero h1{font-size:1.9rem;}
+  .values-grid{grid-template-columns:1fr;}
+  .stats-inner{grid-template-columns:repeat(2,1fr);}
+  .hero-btns{flex-direction:column;}
+  .btn-primary,.btn-outline{text-align:center;}
+}
+</style>
 </head>
 <body>
 
 <!-- NAV -->
 <nav>
   <a href="index.html" class="nav-logo">
-    <img src="images/logo.jpeg" alt="YAN Logo">
+    <img src="images/logo.jpeg" alt="Young Africans Network Logo">
     <div class="nav-logo-text">
       Young Africans Network
       <span>Building the Future, Together</span>
@@ -237,7 +326,23 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
     <li><a href="Journey_Stories.html">Journey Stories</a></li>
   </ul>
   <a href="join.html" class="nav-btn">Join YAN</a>
+  <button class="hamburger" id="hamburger" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- MOBILE MENU -->
+<ul class="mobile-menu" id="mobileMenu">
+  <li><a href="index.html" class="active">Home</a></li>
+  <li><a href="about.html">About</a></li>
+  <li><a href="programs.html">Programs</a></li>
+  <li><a href="team.html">Team</a></li>
+  <li><a href="events.html">Events</a></li>
+  <li><a href="join.html">Join Us</a></li>
+  <li><a href="contact.html">Contact</a></li>
+  <li><a href="Journey_Stories.html">Journey Stories</a></li>
+  <li><a href="join.html" class="mobile-join">Join YAN 🚀</a></li>
+</ul>
 
 <!-- HERO -->
 <section class="hero">
@@ -268,7 +373,7 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
     <div class="hero-visual">
       <div class="hero-card">
         <div class="hero-card-logo">
-          <img src="images/logo.jpg" alt="YAN">
+          <img src="images/logo.jpeg" alt="Young Africans Network">
         </div>
         <div class="hero-card-title">Young Africans Network</div>
         <div class="hero-card-sub">Est. April 2026 · Kenya</div>
@@ -345,7 +450,7 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
       </div>
     </div>
     <div class="about-img">
-      <img src="images/logo.jpg" class="about-img-logo" alt="YAN">
+      <img src="images/logo.jpeg" class="about-img-logo" alt="Young Africans Network">
       <div class="about-badge">
         <span>🌍</span>
         Pan-African<br>& Global Reach
@@ -491,15 +596,15 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
   <div class="footer-inner">
     <div>
       <div class="footer-logo">
-        <img src="images/logo.jpg" alt="YAN">
+        <img src="images/logo.jpeg" alt="Young Africans Network Logo">
         <div class="footer-logo-text">Young Africans Network</div>
       </div>
       <p class="footer-desc">Empowering African youth through education, leadership, mentorship and access to global opportunities. Building the Future, Together.</p>
       <div class="footer-social">
-        <a href="https://www.facebook.com/profile.php?id=61589163254586" target="_blank" class="social-btn">📘</a>
-        <a href="https://x.com/YoungAfricanNet" target="_blank" class="social-btn">🐦</a>
-        <a href="https://www.instagram.com/youngafricansnetwork" target="_blank" class="social-btn">📸</a>
-        <a href="https://www.linkedin.com/company/115838329" target="_blank" class="social-btn">💼</a>
+        <a href="https://www.facebook.com/profile.php?id=61589163254586" target="_blank" class="social-btn" aria-label="Facebook">📘</a>
+        <a href="https://x.com/YoungAfricanNet" target="_blank" class="social-btn" aria-label="X / Twitter">🐦</a>
+        <a href="https://www.instagram.com/youngafricansnetwork" target="_blank" class="social-btn" aria-label="Instagram">📸</a>
+        <a href="https://www.linkedin.com/company/115838329" target="_blank" class="social-btn" aria-label="LinkedIn">💼</a>
       </div>
     </div>
     <div>
@@ -528,7 +633,7 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
     <div>
       <div class="footer-title">Contact</div>
       <ul class="footer-links">
-        <li><a href="mailto:youngafricansn@gmail.com">📧 Email Us</a></li>
+        <li><a href="mailto:youngafricansn@gmail.com">📧 youngafricansn@gmail.com</a></li>
         <li><a href="tel:+254791887609">📞 +254 791 887 609</a></li>
         <li><a href="#">📍 Kenya | Pan-African</a></li>
       </ul>
@@ -540,5 +645,20 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
   </div>
 </footer>
 
+<script>
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('open');
+  mobileMenu.classList.toggle('open');
+});
+// Close menu when a link is clicked
+mobileMenu.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+  });
+});
+</script>
 </body>
 </html>
