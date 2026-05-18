@@ -103,17 +103,41 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .action-btn.liked{color:var(--red);}
 .action-btn.liked svg path{fill:var(--red);}
 
+/* ADMIN DELETE BUTTON */
+.btn-delete{display:flex;align-items:center;gap:0.4rem;background:none;border:none;font-family:'Poppins',sans-serif;font-size:0.8rem;color:#cc0000;cursor:pointer;padding:0.4rem 0.75rem;border-radius:50px;transition:all 0.2s;margin-left:auto;}
+.btn-delete:hover{background:rgba(204,0,0,0.08);}
+.btn-delete-reply{background:none;border:none;font-size:0.72rem;color:#cc0000;cursor:pointer;font-family:'Poppins',sans-serif;padding:0.2rem 0.5rem;border-radius:6px;transition:background 0.2s;margin-left:auto;}
+.btn-delete-reply:hover{background:rgba(204,0,0,0.08);}
+
+/* ADMIN BAR */
+.admin-bar{background:#1a1a2e;color:#fff;padding:0.6rem 2rem;display:flex;align-items:center;justify-content:space-between;font-size:0.8rem;position:sticky;top:75px;z-index:90;}
+.admin-bar.hidden{display:none;}
+.admin-bar span{color:var(--gold);font-weight:600;}
+.btn-admin-logout{background:var(--red);color:#fff;border:none;padding:0.35rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;}
+
+/* ADMIN LOGIN MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:center;justify-content:center;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--white);border-radius:20px;padding:2rem;width:90%;max-width:380px;text-align:center;}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;}
+.modal-sub{font-size:0.82rem;color:var(--gray);margin-bottom:1.25rem;}
+.modal-input{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.75rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.9rem;outline:none;margin-bottom:1rem;text-align:center;letter-spacing:2px;}
+.modal-input:focus{border-color:var(--navy);}
+.modal-actions{display:flex;gap:0.75rem;justify-content:center;}
+.btn-modal-login{background:var(--navy);color:#fff;border:none;padding:0.7rem 2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;}
+.btn-modal-cancel{background:var(--light);color:var(--navy);border:none;padding:0.7rem 1.5rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;}
+
 /* REPLIES */
 .replies-section{margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(27,42,107,0.07);display:none;}
 .replies-section.open{display:block;}
-.reply-item{display:flex;gap:0.75rem;margin-bottom:0.75rem;}
+.reply-item{display:flex;gap:0.75rem;margin-bottom:0.75rem;align-items:flex-start;}
 .reply-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--red));display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--white);flex-shrink:0;}
 .reply-bubble{background:var(--light);border-radius:12px;padding:0.75rem 1rem;flex:1;}
 .reply-author{font-size:0.78rem;font-weight:700;color:var(--navy);}
 .reply-text{font-size:0.82rem;color:var(--gray);line-height:1.6;margin-top:0.2rem;}
 .reply-time{font-size:0.7rem;color:var(--gray);margin-top:0.25rem;}
-.reply-composer{display:flex;gap:0.75rem;margin-top:0.75rem;}
-.reply-composer input{flex:1;background:var(--light);border:1.5px solid rgba(27,42,107,0.12);color:var(--navy);padding:0.6rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;outline:none;}
+.reply-composer{display:flex;gap:0.75rem;margin-top:0.75rem;flex-wrap:wrap;}
+.reply-composer input{flex:1;min-width:80px;background:var(--light);border:1.5px solid rgba(27,42,107,0.12);color:var(--navy);padding:0.6rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;outline:none;}
 .reply-composer input:focus{border-color:var(--navy);}
 .btn-reply-send{background:var(--navy);color:var(--white);border:none;padding:0.6rem 1.25rem;border-radius:50px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:background 0.2s;}
 .btn-reply-send:hover{background:var(--red);}
@@ -136,6 +160,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .stat-value{font-size:0.88rem;font-weight:700;color:var(--navy);}
 .guideline-item{display:flex;gap:0.75rem;margin-bottom:0.75rem;font-size:0.8rem;color:var(--gray);line-height:1.5;}
 .guideline-item:last-child{margin-bottom:0;}
+
+/* ADMIN TRIGGER — hidden small link at bottom of sidebar */
+.admin-trigger{font-size:0.65rem;color:rgba(107,114,128,0.3);text-align:center;cursor:pointer;margin-top:0.5rem;user-select:none;}
+.admin-trigger:hover{color:var(--gray);}
 
 /* FOOTER */
 footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255,0.1);}
@@ -170,6 +198,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
   footer{padding:2rem 1.25rem;}
   .footer-bottom{flex-direction:column;text-align:center;}
   .footer-links-row{justify-content:center;}
+  .admin-bar{padding:0.6rem 1.25rem;}
 }
 @media(max-width:480px){
   .page-title{font-size:2rem;}
@@ -178,6 +207,25 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
 </style>
 </head>
 <body>
+
+<!-- ADMIN LOGIN MODAL -->
+<div class="modal-overlay hidden" id="adminModal">
+  <div class="modal-box">
+    <div class="modal-title">🔐 Admin Login</div>
+    <div class="modal-sub">Enter the admin password to manage community posts.</div>
+    <input type="password" class="modal-input" id="adminPasswordInput" placeholder="Password">
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" id="btnModalCancel">Cancel</button>
+      <button class="btn-modal-login" id="btnModalLogin">Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN BAR (shown when logged in) -->
+<div class="admin-bar hidden" id="adminBar">
+  <div>🛡️ Logged in as <span>Admin</span> — delete buttons are now visible on all posts and replies.</div>
+  <button class="btn-admin-logout" id="btnAdminLogout">Logout</button>
+</div>
 
 <!-- NAV -->
 <nav>
@@ -275,6 +323,8 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
       <div class="stat-row"><span class="stat-label">Countries</span><span class="stat-value" id="statCountries">—</span></div>
       <div class="stat-row"><span class="stat-label">Total Replies</span><span class="stat-value" id="statReplies">—</span></div>
       <div class="stat-row"><span class="stat-label">Total Likes</span><span class="stat-value" id="statLikes">—</span></div>
+      <!-- Hidden admin trigger — triple click to activate -->
+      <div class="admin-trigger" id="adminTrigger" title="">· · ·</div>
     </div>
     <div class="sidebar-card">
       <div class="sidebar-title">📋 Community Guidelines</div>
@@ -315,8 +365,8 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, collection, addDoc, getDocs, doc,
-  updateDoc, increment, query, orderBy, onSnapshot, serverTimestamp
+  getFirestore, collection, addDoc, getDocs, deleteDoc,
+  doc, updateDoc, increment, query, orderBy, onSnapshot, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -330,6 +380,61 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+// ---- ADMIN STATE ----
+const ADMIN_PASSWORD = 'YAN@Admin2026';
+let isAdmin = false;
+
+// ---- ADMIN TRIGGER (triple click on "· · ·") ----
+let triggerClicks = 0;
+let triggerTimer = null;
+document.getElementById('adminTrigger').addEventListener('click', () => {
+  triggerClicks++;
+  clearTimeout(triggerTimer);
+  triggerTimer = setTimeout(() => { triggerClicks = 0; }, 800);
+  if (triggerClicks >= 3) {
+    triggerClicks = 0;
+    if (!isAdmin) openAdminModal();
+  }
+});
+
+// ---- MODAL ----
+function openAdminModal() {
+  document.getElementById('adminModal').classList.remove('hidden');
+  document.getElementById('adminPasswordInput').value = '';
+  document.getElementById('adminPasswordInput').focus();
+}
+function closeAdminModal() {
+  document.getElementById('adminModal').classList.add('hidden');
+}
+document.getElementById('btnModalCancel').addEventListener('click', closeAdminModal);
+document.getElementById('adminPasswordInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') attemptAdminLogin();
+});
+document.getElementById('btnModalLogin').addEventListener('click', attemptAdminLogin);
+
+function attemptAdminLogin() {
+  const val = document.getElementById('adminPasswordInput').value;
+  if (val === ADMIN_PASSWORD) {
+    isAdmin = true;
+    closeAdminModal();
+    document.getElementById('adminBar').classList.remove('hidden');
+    renderFeed();
+    showToast('Admin logged in. Delete buttons are now visible.', 'success');
+  } else {
+    showToast('Incorrect password.', 'error');
+    document.getElementById('adminPasswordInput').value = '';
+    document.getElementById('adminPasswordInput').focus();
+  }
+}
+
+// ---- ADMIN LOGOUT ----
+document.getElementById('btnAdminLogout').addEventListener('click', () => {
+  isAdmin = false;
+  document.getElementById('adminBar').classList.add('hidden');
+  renderFeed();
+  showToast('Logged out of admin.', '');
+});
 
 // ---- TOAST ----
 function showToast(msg, type = '') {
@@ -355,7 +460,7 @@ function formatTime(ts) {
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-// ---- CATEGORY LABEL ----
+// ---- CATEGORY ----
 function getCatClass(cat) {
   const map = { announcement: 'cat-announcement', discussion: 'cat-discussion', opportunity: 'cat-opportunity', general: 'cat-general' };
   return map[cat] || 'cat-general';
@@ -365,18 +470,24 @@ function getCatLabel(cat) {
   return map[cat] || '💡 General';
 }
 
-// ---- LIKED POSTS (local storage) ----
+// ---- LIKED POSTS ----
 function getLiked() { try { return JSON.parse(localStorage.getItem('yan_liked') || '[]'); } catch { return []; } }
 function setLiked(arr) { localStorage.setItem('yan_liked', JSON.stringify(arr)); }
 function hasLiked(id) { return getLiked().includes(id); }
 function addLiked(id) { const a = getLiked(); a.push(id); setLiked(a); }
 
 // ---- RENDER REPLY ----
-function renderReply(r) {
-  return `<div class="reply-item">
+function renderReply(postId, replyId, r) {
+  const deleteBtn = isAdmin
+    ? `<button class="btn-delete-reply" data-post="${postId}" data-reply="${replyId}">🗑️ Delete</button>`
+    : '';
+  return `<div class="reply-item" id="reply-${replyId}">
     <div class="reply-avatar">${getInitials(r.name || 'A')}</div>
-    <div class="reply-bubble">
-      <div class="reply-author">${r.name} <span style="font-weight:400;color:var(--gray)">· ${r.country}</span></div>
+    <div class="reply-bubble" style="flex:1;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="reply-author">${r.name} <span style="font-weight:400;color:var(--gray)">· ${r.country}</span></div>
+        ${deleteBtn}
+      </div>
       <div class="reply-text">${r.text}</div>
       <div class="reply-time">${formatTime(r.createdAt)}</div>
     </div>
@@ -386,10 +497,13 @@ function renderReply(r) {
 // ---- RENDER POST ----
 function renderPost(id, data) {
   const liked = hasLiked(id);
+  const deleteBtn = isAdmin
+    ? `<button class="btn-delete" data-id="${id}">🗑️ Delete Post</button>`
+    : '';
   return `<div class="post-card" id="post-${id}">
     <div class="post-header">
       <div class="post-avatar">${getInitials(data.name || 'A')}</div>
-      <div class="post-meta">
+      <div class="post-meta" style="flex:1;">
         <div class="post-author">${data.name} <span style="font-weight:400;color:var(--gray)">· ${data.country}</span>
           <span class="post-category ${getCatClass(data.category)}">${getCatLabel(data.category)}</span>
         </div>
@@ -406,6 +520,7 @@ function renderPost(id, data) {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <span class="reply-count-${id}">${data.replyCount || 0}</span> Replies
       </button>
+      ${deleteBtn}
     </div>
     <div class="replies-section" id="replies-${id}">
       <div class="replies-list" id="replies-list-${id}">
@@ -482,16 +597,69 @@ function attachEventListeners() {
   document.querySelectorAll('.btn-reply-send').forEach(btn => {
     btn.addEventListener('click', () => submitReply(btn.dataset.id));
   });
+
+  // Admin — delete post buttons
+  document.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) return;
+      try {
+        // Delete all replies first
+        const repliesSnap = await getDocs(collection(db, 'posts', id, 'replies'));
+        for (const r of repliesSnap.docs) {
+          await deleteDoc(doc(db, 'posts', id, 'replies', r.id));
+        }
+        await deleteDoc(doc(db, 'posts', id));
+        showToast('Post deleted.', 'success');
+      } catch (e) {
+        showToast('Error deleting post. Try again.', 'error');
+      }
+    });
+  });
+
+  // Admin — delete reply buttons
+  document.querySelectorAll('.btn-delete-reply').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const postId = btn.dataset.post;
+      const replyId = btn.dataset.reply;
+      if (!confirm('Delete this reply?')) return;
+      try {
+        await deleteDoc(doc(db, 'posts', postId, 'replies', replyId));
+        await updateDoc(doc(db, 'posts', postId), { replyCount: increment(-1) });
+        showToast('Reply deleted.', 'success');
+      } catch (e) {
+        showToast('Error deleting reply. Try again.', 'error');
+      }
+    });
+  });
 }
 
 // ---- LOAD REPLIES ----
 async function loadReplies(postId) {
   const list = document.getElementById(`replies-list-${postId}`);
   const repliesRef = collection(db, 'posts', postId, 'replies');
-  const q = query(repliesRef, orderBy('createdAt', 'asc'));
-  onSnapshot(q, (snap) => {
-    if (snap.empty) { list.innerHTML = '<div style="font-size:0.8rem;color:var(--gray);padding:0.5rem 0;">No replies yet. Be the first!</div>'; return; }
-    list.innerHTML = snap.docs.map(d => renderReply(d.data())).join('');
+  const rq = query(repliesRef, orderBy('createdAt', 'asc'));
+  onSnapshot(rq, (snap) => {
+    if (snap.empty) {
+      list.innerHTML = '<div style="font-size:0.8rem;color:var(--gray);padding:0.5rem 0;">No replies yet. Be the first!</div>';
+      return;
+    }
+    list.innerHTML = snap.docs.map(d => renderReply(postId, d.id, d.data())).join('');
+    // Re-attach delete reply listeners
+    list.querySelectorAll('.btn-delete-reply').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const pId = btn.dataset.post;
+        const rId = btn.dataset.reply;
+        if (!confirm('Delete this reply?')) return;
+        try {
+          await deleteDoc(doc(db, 'posts', pId, 'replies', rId));
+          await updateDoc(doc(db, 'posts', pId), { replyCount: increment(-1) });
+          showToast('Reply deleted.', 'success');
+        } catch (e) {
+          showToast('Error deleting reply. Try again.', 'error');
+        }
+      });
+    });
   });
 }
 
