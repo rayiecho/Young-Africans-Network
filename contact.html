@@ -228,6 +228,11 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
   .social-grid{grid-template-columns:1fr 1fr;}
   .contact-form{padding:1.25rem 1rem;}
 }
+
+/* SOCIAL SVG ICONS */
+.social-icon{display:flex;align-items:center;justify-content:center;margin-bottom:0.75rem;}
+.social-icon svg{width:48px;height:48px;transition:transform 0.3s;}
+.social-card:hover .social-icon svg{transform:scale(1.1);}
 </style>
 </head>
 <body>
@@ -382,22 +387,59 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
     <p style="color:rgba(255,255,255,0.65);font-size:0.88rem;max-width:500px;margin:0 auto;">Stay connected with YAN across all platforms for updates, opportunities and community</p>
     <div class="social-grid">
       <a href="https://www.facebook.com/profile.php?id=61589163254586" target="_blank" class="social-card" aria-label="Young Africans Network on Facebook">
-        <div class="social-icon">📘</div>
+        <div class="social-icon">
+          <!-- Facebook SVG -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="24" fill="#1877F2"/>
+            <path d="M32 24h-5v16h-6V24h-3v-5h3v-3c0-4 2-6 6-6h4v5h-3c-1 0-1 .4-1 1v3h4l-1 5z" fill="#fff"/>
+          </svg>
+        </div>
         <div class="social-name">Facebook</div>
         <div class="social-handle">Young Africans Network</div>
       </a>
       <a href="https://www.instagram.com/youngafricansnetwork" target="_blank" class="social-card" aria-label="Young Africans Network on Instagram">
-        <div class="social-icon">📸</div>
+        <div class="social-icon">
+          <!-- Instagram SVG -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+            <defs>
+              <radialGradient id="ig-grad" cx="30%" cy="107%" r="150%">
+                <stop offset="0%" stop-color="#fdf497"/>
+                <stop offset="5%" stop-color="#fdf497"/>
+                <stop offset="45%" stop-color="#fd5949"/>
+                <stop offset="60%" stop-color="#d6249f"/>
+                <stop offset="90%" stop-color="#285AEB"/>
+              </radialGradient>
+            </defs>
+            <rect width="48" height="48" rx="12" fill="url(#ig-grad)"/>
+            <rect x="13" y="13" width="22" height="22" rx="6" stroke="#fff" stroke-width="2.5" fill="none"/>
+            <circle cx="24" cy="24" r="5.5" stroke="#fff" stroke-width="2.5" fill="none"/>
+            <circle cx="34" cy="14" r="1.5" fill="#fff"/>
+          </svg>
+        </div>
         <div class="social-name">Instagram</div>
         <div class="social-handle">@youngafricansnetwork</div>
       </a>
       <a href="https://x.com/YoungAfricanNet" target="_blank" class="social-card" aria-label="Young Africans Network on X / Twitter">
-        <div class="social-icon">🐦</div>
+        <div class="social-icon">
+          <!-- X (Twitter) SVG -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="24" fill="#000"/>
+            <path d="M26.37 22.27L33.8 13h-1.77l-6.45 7.5L20.4 13H14l7.8 11.35L14 35h1.77l6.82-7.93L27.6 35H34l-7.63-12.73zm-2.41 2.8l-.79-1.13L16.4 14.3h2.7l5.06 7.24.79 1.13 6.58 9.42h-2.7l-5.37-7.02z" fill="#fff"/>
+          </svg>
+        </div>
         <div class="social-name">Twitter / X</div>
         <div class="social-handle">@YoungAfricanNet</div>
       </a>
       <a href="https://www.linkedin.com/company/115838329" target="_blank" class="social-card" aria-label="Young Africans Network on LinkedIn">
-        <div class="social-icon">💼</div>
+        <div class="social-icon">
+          <!-- LinkedIn SVG -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+            <rect width="48" height="48" rx="8" fill="#0A66C2"/>
+            <rect x="12" y="19" width="5" height="17" fill="#fff"/>
+            <circle cx="14.5" cy="14.5" r="3" fill="#fff"/>
+            <path d="M22 19h5v2.3c.7-1.3 2.5-2.7 5-2.7 5 0 6 3.3 6 7.5V36h-5v-9c0-2.1-.4-4-2.5-4s-3 1.7-3 4v9h-5.5V19z" fill="#fff"/>
+          </svg>
+        </div>
         <div class="social-name">LinkedIn</div>
         <div class="social-handle">Young Africans Network</div>
       </a>
