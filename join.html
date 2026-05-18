@@ -3,13 +3,83 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Join Young Africans Network — Become a member and be part of the movement building Africa's future.">
-<title>Join YAN | Young Africans Network</title>
+<meta name="robots" content="index, follow">
+<meta name="description" content="Join Young Africans Network — Become a member and be part of the pan-African movement building Africa's future through education, leadership and opportunity.">
+<meta name="keywords" content="Join Young Africans Network, YAN Membership, African Youth Network, Join YAN, Pan-African Youth, African Leadership Program">
+<meta name="author" content="Young Africans Network">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Join Young Africans Network | Be Part of the Movement">
+<meta property="og:description" content="Become a member of Young Africans Network — a growing pan-African community of young leaders, changemakers and opportunity-seekers.">
+<meta property="og:url" content="https://youngafricansnetwork.org/join.html">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://youngafricansnetwork.org/images/logo.jpeg">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@YoungAfricanNet">
+<meta name="twitter:title" content="Join Young Africans Network | Be Part of the Movement">
+<meta name="twitter:description" content="Become a member of Young Africans Network — a growing pan-African community of young leaders and changemakers.">
+<meta name="twitter:image" content="https://youngafricansnetwork.org/images/logo.jpeg">
+
+<!-- Canonical -->
+<link rel="canonical" href="https://youngafricansnetwork.org/join.html">
+
+<!-- Favicon -->
+<link rel="icon" href="/images/logo.jpeg" type="image/jpeg">
+
+<!-- Sitemap -->
+<link rel="sitemap" type="application/xml" href="/sitemap.xml">
+
+<!-- Font Preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+
+<title>Join Young Africans Network | Be Part of the Movement</title>
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NGO",
+  "name": "Young Africans Network",
+  "alternateName": "YAN",
+  "description": "Young Africans Network (YAN) is a pan-African, youth-led volunteer organization founded in Kenya in April 2026, empowering African youth through education, leadership, mentorship and access to global opportunities.",
+  "url": "https://youngafricansnetwork.org",
+  "logo": "https://youngafricansnetwork.org/images/logo.jpeg",
+  "foundingDate": "2026",
+  "foundingLocation": {
+    "@type": "Place",
+    "name": "Kenya, Africa"
+  },
+  "areaServed": "Africa",
+  "email": "youngafricansn@gmail.com",
+  "telephone": "+254791887609",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+254791887609",
+    "email": "youngafricansn@gmail.com",
+    "contactType": "General Inquiry"
+  },
+  "sameAs": [
+    "https://www.linkedin.com/company/115838329",
+    "https://www.instagram.com/youngafricansnetwork",
+    "https://www.facebook.com/profile.php?id=61589163254586",
+    "https://x.com/YoungAfricanNet"
+  ]
+}
+</script>
+
 <style>
 :root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Poppins',sans-serif;background:var(--white);color:var(--navy);}
+html{scroll-behavior:smooth;}
+body{font-family:'Poppins',sans-serif;background:var(--white);color:var(--navy);overflow-x:hidden;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--navy);}
+
+/* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 2rem;height:75px;display:flex;align-items:center;justify-content:space-between;}
 .nav-logo{display:flex;align-items:center;gap:0.75rem;text-decoration:none;}
 .nav-logo img{height:48px;}
@@ -18,7 +88,24 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .nav-links{display:flex;gap:1.5rem;list-style:none;}
 .nav-links a{font-size:0.82rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;}
 .nav-links a:hover,.nav-links a.active{color:var(--red);}
-.nav-btn{background:var(--red);color:var(--white);padding:0.6rem 1.5rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:600;}
+.nav-btn{background:var(--red);color:var(--white);padding:0.6rem 1.5rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:600;transition:all 0.2s;}
+.nav-btn:hover{background:var(--navy);}
+
+/* HAMBURGER */
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none;}
+.hamburger span{display:block;width:24px;height:2px;background:var(--navy);border-radius:2px;transition:all 0.3s;}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+.mobile-menu{display:none;position:fixed;top:75px;left:0;right:0;background:var(--white);box-shadow:0 8px 24px rgba(27,42,107,0.12);z-index:99;padding:1.5rem 2rem;flex-direction:column;gap:0;}
+.mobile-menu.open{display:flex;}
+.mobile-menu li{list-style:none;border-bottom:1px solid rgba(27,42,107,0.07);}
+.mobile-menu li:last-child{border-bottom:none;}
+.mobile-menu a{display:block;padding:0.85rem 0;font-size:0.95rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;}
+.mobile-menu a:hover,.mobile-menu a.active{color:var(--red);}
+.mobile-menu .mobile-join{display:inline-block;margin-top:1rem;background:var(--red);color:var(--white);padding:0.75rem 2rem;border-radius:50px;font-weight:600;font-size:0.9rem;text-align:center;text-decoration:none;}
+
+/* PAGE HERO */
 .page-hero{background:linear-gradient(135deg,var(--navy),var(--dark));padding:8rem 2rem 4rem;text-align:center;}
 .page-hero-inner{max-width:800px;margin:0 auto;}
 .hero-tag{display:inline-block;background:rgba(245,166,35,0.15);color:var(--gold);padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:600;letter-spacing:1px;margin-bottom:1rem;border:1px solid rgba(245,166,35,0.3);}
@@ -28,6 +115,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .section-tag{display:inline-block;background:rgba(230,51,41,0.1);color:var(--red);padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;letter-spacing:1px;margin-bottom:0.75rem;}
 .section-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:var(--navy);margin-bottom:1rem;}
 .section-title span{color:var(--red);}
+
 /* BENEFITS */
 .benefits{padding:5rem 2rem;background:var(--light);}
 .benefits-inner{max-width:1200px;margin:0 auto;}
@@ -37,6 +125,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .benefit-icon{font-size:3rem;margin-bottom:1rem;}
 .benefit-title{font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;}
 .benefit-desc{font-size:0.82rem;color:var(--gray);line-height:1.7;}
+
 /* MEMBERSHIP TYPES */
 .membership{padding:5rem 2rem;max-width:1200px;margin:0 auto;}
 .membership-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem;}
@@ -50,6 +139,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .membership-card.featured .membership-age{color:var(--gold);opacity:0.8;}
 .membership-desc{font-size:0.82rem;color:var(--gray);line-height:1.7;}
 .membership-card.featured .membership-desc{color:rgba(255,255,255,0.75);}
+
 /* FORM */
 .join-form-section{background:var(--light);padding:5rem 2rem;}
 .join-form-inner{max-width:800px;margin:0 auto;}
@@ -66,6 +156,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .btn-submit:hover{background:var(--navy);transform:translateY(-2px);}
 .btn-submit:disabled{background:var(--gray);cursor:not-allowed;transform:none;}
 .success-msg{display:none;background:#d4edda;color:#155724;border:1px solid #c3e6cb;border-radius:12px;padding:1rem 1.5rem;margin-top:1rem;font-size:0.88rem;text-align:center;}
+
 /* EXPECTATIONS */
 .expectations{padding:5rem 2rem;max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;}
 .exp-card{background:var(--light);border-radius:20px;padding:2rem;}
@@ -73,48 +164,75 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .exp-list{list-style:none;display:flex;flex-direction:column;gap:0.75rem;}
 .exp-list li{display:flex;align-items:flex-start;gap:0.75rem;font-size:0.85rem;color:var(--gray);line-height:1.6;}
 .exp-list li span{flex-shrink:0;}
+
+/* FOOTER */
 footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255,0.1);}
 .footer-bottom{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
 .footer-copy{font-size:0.78rem;color:rgba(255,255,255,0.5);}
 .footer-copy a{color:var(--gold);text-decoration:none;}
-.footer-links-row{display:flex;gap:1.5rem;}
+.footer-links-row{display:flex;gap:1.5rem;flex-wrap:wrap;}
 .footer-links-row a{font-size:0.78rem;color:rgba(255,255,255,0.6);text-decoration:none;}
 .footer-links-row a:hover{color:var(--gold);}
-</style>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "Young Africans Network",
-  "alternateName": "YAN",
-  "description": "Young Africans Network (YAN) is a pan-African, youth-led, volunteer-driven organization empowering African youth through education, leadership, mentorship and access to global opportunities.",
-  "url": "https://youngafricansnetwork.org",
-  "logo": "https://youngafricansnetwork.org/images/logo.jpg",
-  "foundingDate": "2026",
-  "foundingLocation": {
-    "@type": "Place",
-    "name": "Kenya, Africa"
-  },
-  "areaServed": "Africa",
-  "sameAs": [
-    "https://www.facebook.com/youngafricansnetwork",
-    "https://www.instagram.com/youngafricansnetwork",
-    "https://twitter.com/YAN_Africa",
-    "https://www.linkedin.com/company/youngafricansnetwork"
-  ],
-  "contactPoint": {
-    "@type": "ContactPoint",
-    "telephone": "+254115889942",
-    "email": "youngafricansnetwork@gmail.com",
-    "contactType": "General Inquiry"
-  }
+
+/* ===================== RESPONSIVE ===================== */
+
+/* TABLET */
+@media(max-width:1024px){
+  .benefits-grid{grid-template-columns:repeat(2,1fr);}
+  .membership-grid{grid-template-columns:1fr;}
+  .expectations{grid-template-columns:1fr;gap:1.5rem;}
 }
-</script>
+
+/* MOBILE */
+@media(max-width:768px){
+  /* NAV */
+  .nav-links{display:none;}
+  .nav-btn{display:none;}
+  .hamburger{display:flex;}
+  nav{padding:0 1.25rem;}
+
+  /* PAGE HERO */
+  .page-hero{padding:6rem 1.25rem 3rem;}
+  .page-title{font-size:2rem;}
+  .page-sub{font-size:0.9rem;}
+
+  /* BENEFITS */
+  .benefits{padding:3rem 1.25rem;}
+  .benefits-grid{grid-template-columns:1fr;gap:1.25rem;}
+
+  /* MEMBERSHIP */
+  .membership{padding:3rem 1.25rem;}
+  .membership-grid{grid-template-columns:1fr;}
+
+  /* FORM */
+  .join-form-section{padding:3rem 1.25rem;}
+  .form-card{padding:1.75rem 1.25rem;}
+  .form-row{grid-template-columns:1fr;}
+
+  /* EXPECTATIONS */
+  .expectations{padding:3rem 1.25rem;grid-template-columns:1fr;gap:1.25rem;}
+
+  /* FOOTER */
+  footer{padding:2rem 1.25rem;}
+  .footer-bottom{flex-direction:column;text-align:center;gap:1rem;}
+  .footer-links-row{justify-content:center;}
+}
+
+/* SMALL MOBILE */
+@media(max-width:480px){
+  .page-title{font-size:1.8rem;}
+  .section-title{font-size:1.5rem;}
+  .form-card{padding:1.25rem 1rem;}
+  .benefits-grid{grid-template-columns:1fr;}
+}
+</style>
 </head>
 <body>
+
+<!-- NAV -->
 <nav>
   <a href="index.html" class="nav-logo">
-    <img src="images/logo.jpeg" alt="YAN Logo">
+    <img src="images/logo.jpeg" alt="Young Africans Network Logo">
     <div class="nav-logo-text">Young Africans Network<span>Building the Future, Together</span></div>
   </a>
   <ul class="nav-links">
@@ -125,11 +243,28 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
     <li><a href="events.html">Events</a></li>
     <li><a href="join.html" class="active">Join Us</a></li>
     <li><a href="contact.html">Contact</a></li>
-     <li><a href="Journey_Stories.html">Journey Stories</a></li>
+    <li><a href="Journey_Stories.html">Journey Stories</a></li>
   </ul>
   <a href="join.html" class="nav-btn">Join YAN</a>
+  <button class="hamburger" id="hamburger" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
+<!-- MOBILE MENU -->
+<ul class="mobile-menu" id="mobileMenu">
+  <li><a href="index.html">Home</a></li>
+  <li><a href="about.html">About</a></li>
+  <li><a href="programs.html">Programs</a></li>
+  <li><a href="team.html">Team</a></li>
+  <li><a href="events.html">Events</a></li>
+  <li><a href="join.html" class="active">Join Us</a></li>
+  <li><a href="contact.html">Contact</a></li>
+  <li><a href="Journey_Stories.html">Journey Stories</a></li>
+  <li><a href="join.html" class="mobile-join">Join YAN 🚀</a></li>
+</ul>
+
+<!-- PAGE HERO -->
 <div class="page-hero">
   <div class="page-hero-inner">
     <span class="hero-tag">Be Part of the Movement</span>
@@ -216,7 +351,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
       <h2 class="section-title">Join <span>YAN Today</span></h2>
     </div>
     <div class="form-card">
-      <div class="form-title">COMMUNICATION FORM</div>
+      <div class="form-title">Application Form</div>
       <div class="form-sub">Fill in this form to join the Young Africans Network. We will reach out within 48 hours to complete your onboarding and add you to our WhatsApp community.</div>
       <form id="joinForm" action="https://formspree.io/f/xdabqvpp" method="POST">
         <div class="form-row">
@@ -307,6 +442,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
   </div>
 </div>
 
+<!-- FOOTER -->
 <footer>
   <div class="footer-bottom">
     <p class="footer-copy">© 2026 Young Africans Network. All Rights Reserved. | Website by <a href="https://rayiecho.github.io" target="_blank">Regan Ayiecho</a></p>
@@ -316,31 +452,40 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
       <a href="programs.html">Programs</a>
       <a href="team.html">Team</a>
       <a href="contact.html">Contact</a>
-        <a href="join.html">Join Us</a>
-        <a href="Journey_Stories.html">Journey Stories</a>
+      <a href="join.html">Join Us</a>
+      <a href="Journey_Stories.html">Journey Stories</a>
     </div>
   </div>
 </footer>
 
 <script>
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('open');
+  mobileMenu.classList.toggle('open');
+});
+mobileMenu.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+  });
+});
+
 const form = document.getElementById('joinForm');
 const btn = document.getElementById('joinBtn');
 const successMsg = document.getElementById('successMsg');
-
 form.addEventListener('submit', async function(e) {
   e.preventDefault();
   btn.textContent = 'Submitting...';
   btn.disabled = true;
-
   const data = new FormData(form);
-
   try {
     const response = await fetch('https://formspree.io/f/xdabqvpp', {
       method: 'POST',
       body: data,
       headers: { 'Accept': 'application/json' }
     });
-
     if (response.ok) {
       successMsg.style.display = 'block';
       form.reset();
