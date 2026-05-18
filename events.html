@@ -3,13 +3,81 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="YAN Events — Action plan and upcoming activities from June to December 2026.">
-<title>Events | Young Africans Network</title>
+<meta name="robots" content="index, follow">
+<meta name="description" content="YAN Events & Activities 2026 — Action plan and upcoming activities from June to December 2026 for Young Africans Network members across Africa.">
+<meta name="keywords" content="Young Africans Network Events, YAN 2026 Calendar, African Youth Events, YAN Activities, Pan-African Youth Programs, YAN Launch 2026">
+<meta name="author" content="Young Africans Network">
+<meta name="google-site-verification" content="0Z3O9u77LV8jMvZ5xjj0SNwZonzcj173Sa9ooP5nzGE">
+
+<!-- Open Graph -->
+<meta property="og:title" content="YAN Events & Activities 2026 | Young Africans Network">
+<meta property="og:description" content="Explore the Young Africans Network 2026 event calendar — from the June continental launch to leadership summits, scholarship fairs and year-end celebrations.">
+<meta property="og:url" content="https://youngafricansnetwork.org/events.html">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://youngafricansnetwork.org/images/logo.jpeg">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@YoungAfricanNet">
+<meta name="twitter:title" content="YAN Events & Activities 2026 | Young Africans Network">
+<meta name="twitter:description" content="Explore the Young Africans Network 2026 event calendar — from the June continental launch to leadership summits, scholarship fairs and year-end celebrations.">
+<meta name="twitter:image" content="https://youngafricansnetwork.org/images/logo.jpeg">
+
+<!-- Canonical -->
+<link rel="canonical" href="https://youngafricansnetwork.org/events.html">
+
+<!-- Favicon -->
+<link rel="icon" href="/images/logo.jpeg" type="image/jpeg">
+
+<!-- Sitemap -->
+<link rel="sitemap" type="application/xml" href="/sitemap.xml">
+
+<!-- Font Preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+
+<title>YAN Events & Activities 2026 | Young Africans Network</title>
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NGO",
+  "name": "Young Africans Network",
+  "alternateName": "YAN",
+  "description": "Young Africans Network (YAN) is a pan-African, youth-led volunteer organization founded in Kenya in April 2026, empowering African youth through education, leadership, mentorship and access to global opportunities.",
+  "url": "https://youngafricansnetwork.org",
+  "logo": "https://youngafricansnetwork.org/images/logo.jpeg",
+  "foundingDate": "2026",
+  "foundingLocation": {
+    "@type": "Place",
+    "name": "Kenya, Africa"
+  },
+  "areaServed": "Africa",
+  "email": "youngafricansn@gmail.com",
+  "telephone": "+254791887609",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+254791887609",
+    "email": "youngafricansn@gmail.com",
+    "contactType": "General Inquiry"
+  },
+  "sameAs": [
+    "https://www.linkedin.com/company/115838329",
+    "https://www.instagram.com/youngafricansnetwork",
+    "https://www.facebook.com/profile.php?id=61589163254586",
+    "https://x.com/YoungAfricanNet"
+  ]
+}
+</script>
+
 <style>
 :root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Poppins',sans-serif;background:var(--white);color:var(--navy);}
+
+/* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 2rem;height:75px;display:flex;align-items:center;justify-content:space-between;}
 .nav-logo{display:flex;align-items:center;gap:0.75rem;text-decoration:none;}
 .nav-logo img{height:48px;}
@@ -19,6 +87,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .nav-links a{font-size:0.82rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;}
 .nav-links a:hover,.nav-links a.active{color:var(--red);}
 .nav-btn{background:var(--red);color:var(--white);padding:0.6rem 1.5rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:600;}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
+.hamburger span{display:block;width:24px;height:2px;background:var(--navy);border-radius:2px;transition:all 0.3s;}
+.mobile-menu{display:none;position:absolute;top:75px;left:0;right:0;background:var(--white);box-shadow:0 8px 24px rgba(27,42,107,0.12);padding:1.5rem 2rem;flex-direction:column;gap:1rem;z-index:99;}
+.mobile-menu.open{display:flex;}
+.mobile-menu a{font-size:0.9rem;font-weight:500;color:var(--navy);text-decoration:none;padding:0.5rem 0;border-bottom:1px solid rgba(27,42,107,0.07);}
+.mobile-menu a:hover,.mobile-menu a.active{color:var(--red);}
+.mobile-menu .nav-btn{background:var(--red);color:var(--white);padding:0.75rem 1.5rem;border-radius:50px;text-align:center;border:none;margin-top:0.5rem;}
+
+/* HERO */
 .page-hero{background:linear-gradient(135deg,var(--navy),var(--dark));padding:8rem 2rem 4rem;text-align:center;}
 .page-hero-inner{max-width:800px;margin:0 auto;}
 .hero-tag{display:inline-block;background:rgba(245,166,35,0.15);color:var(--gold);padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:600;letter-spacing:1px;margin-bottom:1rem;border:1px solid rgba(245,166,35,0.3);}
@@ -28,6 +105,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .section-tag{display:inline-block;background:rgba(230,51,41,0.1);color:var(--red);padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;letter-spacing:1px;margin-bottom:0.75rem;}
 .section-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:var(--navy);margin-bottom:1rem;}
 .section-title span{color:var(--red);}
+
 /* LAUNCH */
 .launch{background:linear-gradient(135deg,var(--red),#C0392B);padding:4rem 2rem;text-align:center;}
 .launch-inner{max-width:800px;margin:0 auto;}
@@ -36,10 +114,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .launch-desc{font-size:1rem;color:rgba(255,255,255,0.8);line-height:1.8;margin-bottom:2rem;}
 .btn-white{background:var(--white);color:var(--red);padding:0.85rem 2.5rem;border-radius:50px;text-decoration:none;font-weight:700;font-size:0.95rem;transition:all 0.3s;display:inline-block;}
 .btn-white:hover{background:var(--gold);color:var(--navy);}
+
 /* TIMELINE */
 .timeline{padding:5rem 2rem;max-width:1000px;margin:0 auto;}
 .month-block{margin-bottom:3rem;}
-.month-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid var(--light);}
+.month-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid var(--light);flex-wrap:wrap;}
 .month-name{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);}
 .month-theme{font-size:0.78rem;color:var(--red);font-weight:600;background:rgba(230,51,41,0.1);padding:0.3rem 0.75rem;border-radius:50px;}
 .events-list{display:flex;flex-direction:column;gap:1rem;}
@@ -48,10 +127,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .event-date-box{background:var(--navy);color:var(--white);border-radius:12px;padding:0.75rem 1rem;text-align:center;min-width:60px;flex-shrink:0;}
 .event-day{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;line-height:1;}
 .event-month{font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;opacity:0.8;}
-.event-content{};
+.event-content{flex:1;}
 .event-title{font-size:0.92rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;}
 .event-lead{font-size:0.75rem;color:var(--red);font-weight:600;margin-bottom:0.25rem;}
 .event-desc{font-size:0.78rem;color:var(--gray);line-height:1.6;}
+
 /* KPIs */
 .kpis{background:var(--navy);padding:5rem 2rem;}
 .kpi-inner{max-width:1200px;margin:0 auto;}
@@ -59,6 +139,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .kpi-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:1.5rem;text-align:center;}
 .kpi-num{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--gold);line-height:1;margin-bottom:0.5rem;}
 .kpi-label{font-size:0.78rem;color:rgba(255,255,255,0.65);line-height:1.5;}
+
 /* PRINCIPLES */
 .op-principles{padding:5rem 2rem;background:var(--light);}
 .op-inner{max-width:1200px;margin:0 auto;}
@@ -66,19 +147,58 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .op-card{background:var(--white);border-radius:16px;padding:1.5rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
 .op-icon{font-size:2rem;margin-bottom:0.75rem;}
 .op-text{font-size:0.82rem;color:var(--navy);font-weight:600;}
+
+/* FOOTER */
 footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255,0.1);}
 .footer-bottom{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
 .footer-copy{font-size:0.78rem;color:rgba(255,255,255,0.5);}
 .footer-copy a{color:var(--gold);text-decoration:none;}
-.footer-links-row{display:flex;gap:1.5rem;}
+.footer-links-row{display:flex;gap:1.5rem;flex-wrap:wrap;}
 .footer-links-row a{font-size:0.78rem;color:rgba(255,255,255,0.6);text-decoration:none;}
 .footer-links-row a:hover{color:var(--gold);}
+
+/* TABLET — 1024px */
+@media(max-width:1024px){
+  .nav-links,.nav-btn{display:none;}
+  .hamburger{display:flex;}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .op-grid{grid-template-columns:repeat(2,1fr);}
+}
+
+/* MOBILE — 768px */
+@media(max-width:768px){
+  .page-hero{padding:6rem 1.25rem 3rem;}
+  .launch{padding:3rem 1.25rem;}
+  .launch-label{letter-spacing:1px;font-size:0.88rem;}
+  .timeline{padding:3rem 1.25rem;}
+  .event-item{flex-direction:column;gap:0.75rem;}
+  .event-date-box{min-width:unset;width:fit-content;padding:0.5rem 1rem;display:flex;gap:0.5rem;align-items:center;border-radius:8px;}
+  .event-day{font-size:1.1rem;}
+  .event-month{font-size:0.65rem;opacity:0.8;}
+  .kpis{padding:3rem 1.25rem;}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .op-principles{padding:3rem 1.25rem;}
+  .op-grid{grid-template-columns:repeat(2,1fr);}
+  footer{padding:1.5rem 1.25rem;}
+  .footer-bottom{flex-direction:column;align-items:flex-start;gap:1rem;}
+  .footer-links-row{gap:1rem;}
+}
+
+/* SMALL MOBILE — 480px */
+@media(max-width:480px){
+  .kpi-grid{grid-template-columns:1fr;}
+  .op-grid{grid-template-columns:1fr;}
+  .btn-white{width:100%;text-align:center;}
+  .month-header{flex-direction:column;align-items:flex-start;gap:0.5rem;}
+}
 </style>
 </head>
 <body>
+
+<!-- NAV -->
 <nav>
   <a href="index.html" class="nav-logo">
-    <img src="images/logo.jpeg" alt="YAN Logo">
+    <img src="images/logo.jpeg" alt="Young Africans Network Logo">
     <div class="nav-logo-text">Young Africans Network<span>Building the Future, Together</span></div>
   </a>
   <ul class="nav-links">
@@ -89,11 +209,28 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
     <li><a href="events.html" class="active">Events</a></li>
     <li><a href="join.html">Join Us</a></li>
     <li><a href="contact.html">Contact</a></li>
-     <li><a href="Journey_Stories.html">Journey Stories</a></li>
+    <li><a href="Journey_Stories.html">Journey Stories</a></li>
   </ul>
   <a href="join.html" class="nav-btn">Join YAN</a>
+  <div class="hamburger" id="hamburger" aria-label="Open navigation menu" role="button" tabindex="0">
+    <span></span><span></span><span></span>
+  </div>
 </nav>
 
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="about.html">About</a>
+  <a href="programs.html">Programs</a>
+  <a href="team.html">Team</a>
+  <a href="events.html" class="active">Events</a>
+  <a href="join.html">Join Us</a>
+  <a href="contact.html">Contact</a>
+  <a href="Journey_Stories.html">Journey Stories</a>
+  <a href="join.html" class="nav-btn">Join YAN</a>
+</div>
+
+<!-- HERO -->
 <div class="page-hero">
   <div class="page-hero-inner">
     <span class="hero-tag">What's Happening</span>
@@ -389,6 +526,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
   </div>
 </div>
 
+<!-- FOOTER -->
 <footer>
   <div class="footer-bottom">
     <p class="footer-copy">© 2026 Young Africans Network. All Rights Reserved. | Website by <a href="https://rayiecho.github.io" target="_blank">Regan Ayiecho</a></p>
@@ -399,9 +537,23 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
       <a href="team.html">Team</a>
       <a href="contact.html">Contact</a>
       <a href="join.html">Join Us</a>
-       <a href="Journey_Stories.html">Journey Stories</a>
+      <a href="Journey_Stories.html">Journey Stories</a>
     </div>
   </div>
 </footer>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+  hamburger.addEventListener('click', () => {
+    mobileMenu.classList.toggle('open');
+  });
+  hamburger.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') mobileMenu.classList.toggle('open');
+  });
+  mobileMenu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => mobileMenu.classList.remove('open'));
+  });
+</script>
 </body>
 </html>
