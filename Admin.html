@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/images/logo.jpeg" type="image/jpeg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<title>Admin Dashboard | Young Africans Network</title>
+<style>
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);min-height:100vh;}
+
+/* LOGIN SCREEN */
+.login-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--navy),var(--dark));display:flex;align-items:center;justify-content:center;z-index:200;}
+.login-screen.hidden{display:none;}
+.login-box{background:var(--white);border-radius:24px;padding:2.5rem;width:90%;max-width:400px;text-align:center;}
+.login-logo{height:64px;margin-bottom:1.25rem;}
+.login-title{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--navy);margin-bottom:0.4rem;}
+.login-sub{font-size:0.82rem;color:var(--gray);margin-bottom:1.75rem;}
+.login-input{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.85rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.9rem;outline:none;margin-bottom:1rem;text-align:center;letter-spacing:2px;}
+.login-input:focus{border-color:var(--navy);}
+.login-error{font-size:0.8rem;color:var(--red);margin-bottom:0.75rem;display:none;}
+.btn-login{width:100%;padding:0.85rem;background:var(--red);color:var(--white);font-family:'Poppins',sans-serif;font-size:0.9rem;font-weight:700;border:none;border-radius:50px;cursor:pointer;transition:background 0.2s;}
+.btn-login:hover{background:var(--navy);}
+
+/* NAV */
+nav{background:var(--navy);padding:0 2rem;height:70px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.nav-left{display:flex;align-items:center;gap:0.75rem;}
+.nav-logo{height:42px;}
+.nav-title{font-size:0.95rem;font-weight:700;color:var(--white);}
+.nav-title span{display:block;font-size:0.7rem;font-weight:400;color:rgba(255,255,255,0.6);}
+.nav-right{display:flex;align-items:center;gap:1rem;}
+.admin-badge{background:rgba(245,166,35,0.2);color:var(--gold);padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;border:1px solid rgba(245,166,35,0.3);}
+.btn-nav-logout{background:rgba(255,255,255,0.1);color:var(--white);border:1px solid rgba(255,255,255,0.2);padding:0.4rem 1.25rem;border-radius:50px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:all 0.2s;}
+.btn-nav-logout:hover{background:var(--red);border-color:var(--red);}
+
+/* MAIN */
+.main{max-width:1300px;margin:0 auto;padding:2.5rem 2rem;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2.5rem;}
+.stat-card{background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,0.05);text-align:center;}
+.stat-icon{font-size:2rem;margin-bottom:0.5rem;}
+.stat-value{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--navy);}
+.stat-label{font-size:0.78rem;color:var(--gray);margin-top:0.25rem;}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.search-box{flex:1;min-width:200px;background:var(--white);border:1.5px solid rgba(27,42,107,0.12);color:var(--navy);padding:0.7rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.85rem;outline:none;}
+.search-box:focus{border-color:var(--navy);}
+.filter-select{background:var(--white);border:1.5px solid rgba(27,42,107,0.12);color:var(--navy);padding:0.7rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;outline:none;cursor:pointer;}
+.members-count{font-size:0.82rem;color:var(--gray);white-space:nowrap;}
+
+/* TABLE */
+.table-wrap{background:var(--white);border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.05);overflow:hidden;}
+.table-header{padding:1.25rem 1.75rem;border-bottom:2px solid var(--light);display:flex;align-items:center;justify-content:space-between;}
+.table-title{font-size:0.95rem;font-weight:700;color:var(--navy);}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--light);}
+th{padding:0.85rem 1rem;text-align:left;font-size:0.75rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--light);transition:background 0.15s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:rgba(27,42,107,0.02);}
+td{padding:0.85rem 1rem;font-size:0.82rem;color:var(--navy);vertical-align:middle;}
+.member-name{font-weight:700;}
+.member-email{font-size:0.75rem;color:var(--gray);margin-top:2px;}
+.role-badge{display:inline-block;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:600;}
+.role-member{background:rgba(27,42,107,0.08);color:var(--navy);}
+.role-executive{background:rgba(245,166,35,0.15);color:#B7791F;}
+.role-volunteer{background:rgba(39,174,96,0.1);color:#27AE60;}
+.role-associate{background:rgba(107,114,128,0.1);color:var(--gray);}
+.btn-delete-member{background:rgba(230,51,41,0.08);color:var(--red);border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:all 0.2s;white-space:nowrap;}
+.btn-delete-member:hover{background:var(--red);color:var(--white);}
+.btn-view-member{background:rgba(27,42,107,0.08);color:var(--navy);border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:all 0.2s;margin-right:0.5rem;white-space:nowrap;}
+.btn-view-member:hover{background:var(--navy);color:var(--white);}
+
+/* LOADING */
+.table-loading{text-align:center;padding:3rem;color:var(--gray);}
+.spinner{width:32px;height:32px;border:3px solid var(--light);border-top-color:var(--navy);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1rem;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-row td{text-align:center;padding:3rem;color:var(--gray);}
+
+/* MEMBER MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:1rem;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--white);border-radius:20px;padding:2rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--navy);margin-bottom:1.5rem;padding-bottom:0.75rem;border-bottom:2px solid var(--light);}
+.modal-row{display:flex;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid var(--light);font-size:0.85rem;}
+.modal-row:last-of-type{border-bottom:none;}
+.modal-label{color:var(--gray);font-weight:500;}
+.modal-value{font-weight:600;color:var(--navy);text-align:right;max-width:60%;}
+.modal-close{width:100%;margin-top:1.5rem;padding:0.75rem;background:var(--navy);color:var(--white);border:none;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;}
+.modal-bio{font-size:0.82rem;color:var(--gray);line-height:1.7;padding:0.75rem 0;}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);color:var(--white);padding:0.85rem 1.5rem;border-radius:12px;font-size:0.85rem;font-weight:500;z-index:999;opacity:0;transform:translateY(20px);transition:all 0.3s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.success{background:#27AE60;}
+.toast.error{background:var(--red);}
+
+/* FOOTER */
+footer{background:var(--navy);padding:1.5rem 2rem;text-align:center;margin-top:3rem;}
+.footer-copy{font-size:0.78rem;color:rgba(255,255,255,0.5);}
+.footer-copy a{color:var(--gold);text-decoration:none;}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:768px){
+  nav{padding:0 1.25rem;}
+  .main{padding:1.5rem 1.25rem;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .nav-title{display:none;}
+  table{display:block;overflow-x:auto;}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .admin-badge{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <img src="images/logo.jpeg" alt="YAN Logo" class="login-logo">
+    <div class="login-title">Admin Dashboard</div>
+    <div class="login-sub">Enter your admin password to access the member management panel.</div>
+    <input type="password" class="login-input" id="adminPassword" placeholder="Admin Password">
+    <div class="login-error" id="loginError">❌ Incorrect password. Try again.</div>
+    <button class="btn-login" id="btnAdminLogin">Access Dashboard</button>
+  </div>
+</div>
+
+<!-- MEMBER DETAIL MODAL -->
+<div class="modal-overlay hidden" id="memberModal">
+  <div class="modal-box">
+    <div class="modal-title" id="modalName">Member Details</div>
+    <div class="modal-row"><span class="modal-label">Email</span><span class="modal-value" id="modalEmail">—</span></div>
+    <div class="modal-row"><span class="modal-label">Country</span><span class="modal-value" id="modalCountry">—</span></div>
+    <div class="modal-row"><span class="modal-label">Role</span><span class="modal-value" id="modalRole">—</span></div>
+    <div class="modal-row"><span class="modal-label">Department</span><span class="modal-value" id="modalDept">—</span></div>
+    <div class="modal-row"><span class="modal-label">WhatsApp</span><span class="modal-value" id="modalWhatsapp">—</span></div>
+    <div class="modal-row"><span class="modal-label">Registered</span><span class="modal-value" id="modalSince">—</span></div>
+    <div style="margin-top:1rem;">
+      <div style="font-size:0.78rem;font-weight:600;color:var(--navy);margin-bottom:0.4rem;">Bio</div>
+      <div class="modal-bio" id="modalBio">No bio added.</div>
+    </div>
+    <button class="modal-close" id="modalClose">Close</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <img src="images/logo.jpeg" alt="YAN Logo" class="nav-logo">
+    <div class="nav-title">Young Africans Network<span>Admin Dashboard</span></div>
+  </div>
+  <div class="nav-right">
+    <span class="admin-badge">🛡️ Admin</span>
+    <button class="btn-nav-logout" id="btnLogout">Logout</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-value" id="statTotal">—</div>
+      <div class="stat-label">Total Members</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🌍</div>
+      <div class="stat-value" id="statCountries">—</div>
+      <div class="stat-label">Countries</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⭐</div>
+      <div class="stat-value" id="statExecutives">—</div>
+      <div class="stat-label">Executives</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📅</div>
+      <div class="stat-value" id="statNew">—</div>
+      <div class="stat-label">Joined This Month</div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search by name, email or country...">
+    <select class="filter-select" id="roleFilter">
+      <option value="">All Roles</option>
+      <option value="Member">Ordinary Member</option>
+      <option value="Volunteer">Volunteer</option>
+      <option value="Associate">Associate</option>
+      <option value="Executive">Executive</option>
+    </select>
+    <span class="members-count" id="membersCount">Loading...</span>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <div class="table-header">
+      <div class="table-title">👥 Registered Members</div>
+    </div>
+    <div id="tableLoading" class="table-loading">
+      <div class="spinner"></div>
+      Loading members...
+    </div>
+    <table id="membersTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Country</th>
+          <th>Role</th>
+          <th>Department</th>
+          <th>WhatsApp</th>
+          <th>Registered</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="membersBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-copy">© 2026 Young Africans Network. Admin Panel. | <a href="index.html">Back to Website</a></div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, getDocs, doc, deleteDoc, query, orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",
+  authDomain: "young-africans-network.firebaseapp.com",
+  projectId: "young-africans-network",
+  storageBucket: "young-africans-network.firebasestorage.app",
+  messagingSenderId: "224204618916",
+  appId: "1:224204618916:web:8ddfd36c6f112b4912fa31"
+};
+
+const ADMIN_PASSWORD = 'YAN@Admin2026';
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let allMembers = [];
+let isLoggedIn = false;
+
+// ---- TOAST ----
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+// ---- FORMAT DATE ----
+function formatDate(ts) {
+  if (!ts) return '—';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+// ---- ROLE BADGE ----
+function getRoleBadge(role) {
+  const map = {
+    'Executive': 'role-executive',
+    'Volunteer': 'role-volunteer',
+    'Associate': 'role-associate',
+    'Member': 'role-member'
+  };
+  return `<span class="role-badge ${map[role] || 'role-member'}">${role || 'Member'}</span>`;
+}
+
+// ---- ADMIN LOGIN ----
+document.getElementById('adminPassword').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('btnAdminLogin').click();
+});
+
+document.getElementById('btnAdminLogin').addEventListener('click', () => {
+  const val = document.getElementById('adminPassword').value;
+  if (val === ADMIN_PASSWORD) {
+    isLoggedIn = true;
+    document.getElementById('loginScreen').classList.add('hidden');
+    loadMembers();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('adminPassword').value = '';
+    document.getElementById('adminPassword').focus();
+  }
+});
+
+// ---- LOGOUT ----
+document.getElementById('btnLogout').addEventListener('click', () => {
+  isLoggedIn = false;
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('adminPassword').value = '';
+});
+
+// ---- LOAD MEMBERS ----
+async function loadMembers() {
+  try {
+    const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    allMembers = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+    updateStats();
+    renderTable(allMembers);
+  } catch (e) {
+    showToast('Error loading members. Check Firestore rules.', 'error');
+    document.getElementById('tableLoading').innerHTML = '<p style="color:var(--red);padding:2rem;text-align:center;">❌ Error loading members. Please check your Firestore rules.</p>';
+  }
+}
+
+// ---- STATS ----
+function updateStats() {
+  const countries = new Set(allMembers.map(m => m.country).filter(Boolean));
+  const executives = allMembers.filter(m => m.role === 'Executive').length;
+  const now = new Date();
+  const thisMonth = allMembers.filter(m => {
+    if (!m.createdAt) return false;
+    const d = m.createdAt.toDate ? m.createdAt.toDate() : new Date(m.createdAt);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length;
+  document.getElementById('statTotal').textContent = allMembers.length;
+  document.getElementById('statCountries').textContent = countries.size;
+  document.getElementById('statExecutives').textContent = executives;
+  document.getElementById('statNew').textContent = thisMonth;
+}
+
+// ---- RENDER TABLE ----
+function renderTable(members) {
+  const tbody = document.getElementById('membersBody');
+  document.getElementById('tableLoading').style.display = 'none';
+  document.getElementById('membersTable').style.display = 'table';
+  document.getElementById('membersCount').textContent = `Showing ${members.length} member${members.length !== 1 ? 's' : ''}`;
+
+  if (members.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No members found.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = members.map((m, i) => `
+    <tr id="row-${m.uid}">
+      <td style="color:var(--gray);font-size:0.75rem;">${i + 1}</td>
+      <td>
+        <div class="member-name">${m.firstName || ''} ${m.lastName || ''}</div>
+        <div class="member-email">${m.email || '—'}</div>
+      </td>
+      <td>${m.country || '—'}</td>
+      <td>${getRoleBadge(m.role)}</td>
+      <td style="font-size:0.78rem;color:var(--gray);max-width:160px;">${m.department || '—'}</td>
+      <td style="font-size:0.78rem;">${m.whatsapp || '—'}</td>
+      <td style="font-size:0.75rem;color:var(--gray);">${formatDate(m.createdAt)}</td>
+      <td>
+        <button class="btn-view-member" data-uid="${m.uid}">View</button>
+        <button class="btn-delete-member" data-uid="${m.uid}" data-name="${m.firstName || ''} ${m.lastName || ''}">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+
+  // View buttons
+  document.querySelectorAll('.btn-view-member').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const member = allMembers.find(m => m.uid === btn.dataset.uid);
+      if (!member) return;
+      document.getElementById('modalName').textContent = `${member.firstName || ''} ${member.lastName || ''}`;
+      document.getElementById('modalEmail').textContent = member.email || '—';
+      document.getElementById('modalCountry').textContent = member.country || '—';
+      document.getElementById('modalRole').textContent = member.role || '—';
+      document.getElementById('modalDept').textContent = member.department || '—';
+      document.getElementById('modalWhatsapp').textContent = member.whatsapp || '—';
+      document.getElementById('modalSince').textContent = formatDate(member.createdAt);
+      document.getElementById('modalBio').textContent = member.bio || 'No bio added.';
+      document.getElementById('memberModal').classList.remove('hidden');
+    });
+  });
+
+  // Delete buttons
+  document.querySelectorAll('.btn-delete-member').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const uid = btn.dataset.uid;
+      const name = btn.dataset.name;
+      if (!confirm(`Are you sure you want to delete ${name}? This will remove their profile data. This cannot be undone.`)) return;
+      try {
+        await deleteDoc(doc(db, 'users', uid));
+        allMembers = allMembers.filter(m => m.uid !== uid);
+        document.getElementById(`row-${uid}`).remove();
+        updateStats();
+        document.getElementById('membersCount').textContent = `Showing ${allMembers.length} member${allMembers.length !== 1 ? 's' : ''}`;
+        showToast(`${name} removed successfully.`, 'success');
+      } catch (e) {
+        showToast('Error deleting member. Try again.', 'error');
+      }
+    });
+  });
+}
+
+// ---- SEARCH & FILTER ----
+function applyFilters() {
+  const search = document.getElementById('searchBox').value.toLowerCase();
+  const role = document.getElementById('roleFilter').value;
+  const filtered = allMembers.filter(m => {
+    const name = `${m.firstName || ''} ${m.lastName || ''}`.toLowerCase();
+    const email = (m.email || '').toLowerCase();
+    const country = (m.country || '').toLowerCase();
+    const matchSearch = !search || name.includes(search) || email.includes(search) || country.includes(search);
+    const matchRole = !role || m.role === role;
+    return matchSearch && matchRole;
+  });
+  renderTable(filtered);
+}
+
+document.getElementById('searchBox').addEventListener('input', applyFilters);
+document.getElementById('roleFilter').addEventListener('change', applyFilters);
+
+// ---- MODAL CLOSE ----
+document.getElementById('modalClose').addEventListener('click', () => {
+  document.getElementById('memberModal').classList.add('hidden');
+});
+document.getElementById('memberModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('memberModal')) {
+    document.getElementById('memberModal').classList.add('hidden');
+  }
+});
+</script>
+</body>
+</html>
