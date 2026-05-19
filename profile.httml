@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/images/logo.jpeg" type="image/jpeg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<title>My Profile | Young Africans Network</title>
+<style>
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);min-height:100vh;}
+a{text-decoration:none;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 2rem;height:75px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:0.75rem;text-decoration:none;}
+.nav-logo img{height:48px;}
+.nav-logo-text{font-size:0.9rem;font-weight:700;color:var(--navy);line-height:1.2;}
+.nav-logo-text span{display:block;font-size:0.7rem;font-weight:400;color:var(--gray);}
+.nav-actions{display:flex;align-items:center;gap:1rem;}
+.nav-link{font-size:0.82rem;font-weight:500;color:var(--navy);}
+.nav-link:hover{color:var(--red);}
+.btn-logout{background:none;border:1.5px solid rgba(27,42,107,0.2);color:var(--navy);padding:0.5rem 1.25rem;border-radius:50px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:all 0.2s;}
+.btn-logout:hover{background:var(--red);color:var(--white);border-color:var(--red);}
+
+/* LOADING */
+.loading-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--white);display:flex;align-items:center;justify-content:center;z-index:200;flex-direction:column;gap:1rem;}
+.loading-spinner{width:40px;height:40px;border:3px solid var(--light);border-top-color:var(--navy);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* PROFILE HERO */
+.profile-hero{background:linear-gradient(135deg,var(--navy),var(--dark));padding:7rem 2rem 3rem;text-align:center;position:relative;}
+.profile-photo-wrap{position:relative;display:inline-block;margin-bottom:1rem;}
+.profile-photo{width:120px;height:120px;border-radius:50%;border:4px solid var(--gold);object-fit:cover;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;margin:0 auto;}
+.profile-photo-initials{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;color:var(--white);}
+.profile-photo-img{width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid var(--gold);display:none;}
+.photo-edit-btn{position:absolute;bottom:4px;right:4px;width:32px;height:32px;border-radius:50%;background:var(--gold);border:none;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;}
+.profile-name{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--white);margin-bottom:0.25rem;}
+.profile-role-badge{display:inline-block;background:rgba(245,166,35,0.2);color:var(--gold);padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;letter-spacing:1px;margin-bottom:0.5rem;border:1px solid rgba(245,166,35,0.3);}
+.executive-badge{background:rgba(245,166,35,0.3);color:var(--gold);}
+.profile-country{font-size:0.88rem;color:rgba(255,255,255,0.7);}
+#photoEditInput{display:none;}
+.uploading-text{font-size:0.75rem;color:var(--gold);margin-top:0.5rem;display:none;}
+
+/* MAIN */
+.profile-main{max-width:900px;margin:0 auto;padding:2.5rem 2rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
+
+/* CARDS */
+.profile-card{background:var(--white);border-radius:20px;padding:1.75rem;box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+.card-title{font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;display:flex;align-items:center;gap:0.5rem;padding-bottom:0.75rem;border-bottom:2px solid var(--light);}
+.info-row{display:flex;justify-content:space-between;align-items:flex-start;padding:0.6rem 0;border-bottom:1px solid var(--light);}
+.info-row:last-child{border-bottom:none;}
+.info-label{font-size:0.78rem;color:var(--gray);font-weight:500;}
+.info-value{font-size:0.85rem;font-weight:600;color:var(--navy);text-align:right;max-width:60%;}
+
+/* EDIT FORM */
+.edit-section{grid-column:1/-1;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.form-group{margin-bottom:1rem;}
+.form-group label{display:block;font-size:0.78rem;font-weight:600;color:var(--navy);margin-bottom:0.4rem;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.75rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.85rem;outline:none;transition:border-color 0.2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--navy);}
+.form-group textarea{resize:vertical;min-height:80px;}
+.btn-save{background:var(--red);color:var(--white);padding:0.8rem 2.5rem;border-radius:50px;border:none;font-family:'Poppins',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.btn-save:hover{background:var(--navy);}
+.btn-save:disabled{background:var(--gray);cursor:not-allowed;}
+.save-msg{font-size:0.82rem;margin-left:1rem;display:none;}
+.save-msg.success{color:#27AE60;}
+.save-msg.error{color:var(--red);}
+
+/* COMMUNITY LINK */
+.community-card{grid-column:1/-1;background:linear-gradient(135deg,var(--navy),var(--dark));border-radius:20px;padding:2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.community-card-text{color:var(--white);}
+.community-card-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;margin-bottom:0.4rem;}
+.community-card-sub{font-size:0.82rem;color:rgba(255,255,255,0.7);}
+.btn-community{background:var(--gold);color:var(--navy);padding:0.75rem 2rem;border-radius:50px;font-weight:700;font-size:0.88rem;text-decoration:none;transition:all 0.2s;white-space:nowrap;}
+.btn-community:hover{background:var(--white);}
+
+/* FOOTER */
+footer{background:var(--navy);padding:1.5rem 2rem;text-align:center;margin-top:2rem;}
+.footer-copy{font-size:0.78rem;color:rgba(255,255,255,0.5);}
+.footer-copy a{color:var(--gold);text-decoration:none;}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);color:var(--white);padding:0.85rem 1.5rem;border-radius:12px;font-size:0.85rem;font-weight:500;z-index:999;opacity:0;transform:translateY(20px);transition:all 0.3s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.success{background:#27AE60;}
+
+@media(max-width:768px){
+  nav{padding:0 1.25rem;}
+  .nav-logo-text{display:none;}
+  .profile-main{grid-template-columns:1fr;padding:1.5rem 1.25rem;}
+  .edit-section{grid-column:1;}
+  .community-card{grid-column:1;}
+  .form-row{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-spinner"></div>
+  <div style="font-size:0.88rem;color:var(--gray);">Loading your profile...</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="images/logo.jpeg" alt="Young Africans Network Logo">
+    <div class="nav-logo-text">Young Africans Network<span>Building the Future, Together</span></div>
+  </a>
+  <div class="nav-actions">
+    <a href="community.html" class="nav-link">🌍 Community</a>
+    <button class="btn-logout" id="logoutBtn">Logout</button>
+  </div>
+</nav>
+
+<!-- PROFILE HERO -->
+<div class="profile-hero">
+  <div class="profile-photo-wrap">
+    <div class="profile-photo" id="profilePhotoPlaceholder">
+      <span class="profile-photo-initials" id="profileInitials">YAN</span>
+    </div>
+    <img class="profile-photo-img" id="profilePhotoImg" src="" alt="Profile photo">
+    <button class="photo-edit-btn" onclick="document.getElementById('photoEditInput').click()" title="Change photo">✏️</button>
+    <input type="file" id="photoEditInput" accept="image/*">
+  </div>
+  <div class="uploading-text" id="uploadingText">⏳ Uploading...</div>
+  <div class="profile-name" id="profileName">Loading...</div>
+  <div class="profile-role-badge" id="profileRoleBadge">Member</div>
+  <div class="profile-country" id="profileCountry"></div>
+</div>
+
+<!-- MAIN -->
+<div class="profile-main">
+
+  <!-- INFO CARD -->
+  <div class="profile-card">
+    <div class="card-title">👤 Profile Info</div>
+    <div class="info-row"><span class="info-label">Email</span><span class="info-value" id="infoEmail">—</span></div>
+    <div class="info-row"><span class="info-label">Country</span><span class="info-value" id="infoCountry">—</span></div>
+    <div class="info-row"><span class="info-label">Role</span><span class="info-value" id="infoRole">—</span></div>
+    <div class="info-row"><span class="info-label">Department</span><span class="info-value" id="infoDept">—</span></div>
+    <div class="info-row"><span class="info-label">WhatsApp</span><span class="info-value" id="infoWhatsapp">—</span></div>
+    <div class="info-row"><span class="info-label">Member Since</span><span class="info-value" id="infoSince">—</span></div>
+  </div>
+
+  <!-- BIO CARD -->
+  <div class="profile-card">
+    <div class="card-title">💬 About Me</div>
+    <p id="infoBio" style="font-size:0.88rem;color:var(--gray);line-height:1.8;">No bio added yet.</p>
+  </div>
+
+  <!-- EDIT FORM -->
+  <div class="profile-card edit-section">
+    <div class="card-title">✏️ Edit Profile</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>First Name</label>
+        <input type="text" id="editFirstName" placeholder="First name">
+      </div>
+      <div class="form-group">
+        <label>Last Name</label>
+        <input type="text" id="editLastName" placeholder="Last name">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Country</label>
+        <input type="text" id="editCountry" placeholder="Your country">
+      </div>
+      <div class="form-group">
+        <label>WhatsApp Number</label>
+        <input type="tel" id="editWhatsapp" placeholder="+254 700 000 000">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Department</label>
+      <select id="editDepartment">
+        <option value="">Select a department...</option>
+        <option>Programs & Training</option>
+        <option>Scholarships & Global Opportunities</option>
+        <option>Career Development & Public Speaking</option>
+        <option>Community Impact & Volunteering</option>
+        <option>Mental Health & Wellbeing</option>
+        <option>Communications & Media</option>
+        <option>Partnerships & External Relations</option>
+        <option>Operations, Administration & Finance</option>
+        <option>General Member</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Bio</label>
+      <textarea id="editBio" placeholder="Tell the community about yourself..."></textarea>
+    </div>
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+      <button class="btn-save" id="saveBtn">Save Changes</button>
+      <span class="save-msg" id="saveMsg"></span>
+    </div>
+  </div>
+
+  <!-- COMMUNITY CARD -->
+  <div class="community-card">
+    <div class="community-card-text">
+      <div class="community-card-title">🌍 Go to Community</div>
+      <div class="community-card-sub">Share posts, reply to discussions and connect with young Africans</div>
+    </div>
+    <a href="community.html" class="btn-community">Open Community →</a>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-copy">© 2026 Young Africans Network. All Rights Reserved. | <a href="index.html">Back to Website</a></div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",
+  authDomain: "young-africans-network.firebaseapp.com",
+  projectId: "young-africans-network",
+  storageBucket: "young-africans-network.firebasestorage.app",
+  messagingSenderId: "224204618916",
+  appId: "1:224204618916:web:8ddfd36c6f112b4912fa31"
+};
+
+const CLOUDINARY_CLOUD = 'deigiiyq5';
+const CLOUDINARY_PRESET = 'yan_Profiles';
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+function getInitials(first, last) {
+  return ((first[0] || '') + (last[0] || '')).toUpperCase() || 'YAN';
+}
+
+function formatDate(ts) {
+  if (!ts) return '—';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+// ---- AUTH STATE ----
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = 'login.html'; return; }
+
+  const snap = await getDoc(doc(db, 'users', user.uid));
+  if (!snap.exists()) { window.location.href = 'login.html'; return; }
+
+  const data = snap.data();
+  document.getElementById('loadingScreen').style.display = 'none';
+
+  // Hero
+  const initials = getInitials(data.firstName || '', data.lastName || '');
+  document.getElementById('profileInitials').textContent = initials;
+  document.getElementById('profileName').textContent = `${data.firstName} ${data.lastName}`;
+  document.getElementById('profileCountry').textContent = `📍 ${data.country || ''}`;
+
+  const badge = document.getElementById('profileRoleBadge');
+  badge.textContent = data.role || 'Member';
+  if (data.role === 'Executive') badge.classList.add('executive-badge');
+
+  if (data.photoUrl) {
+    document.getElementById('profilePhotoPlaceholder').style.display = 'none';
+    const img = document.getElementById('profilePhotoImg');
+    img.src = data.photoUrl; img.style.display = 'block';
+  }
+
+  // Info
+  document.getElementById('infoEmail').textContent = data.email || '—';
+  document.getElementById('infoCountry').textContent = data.country || '—';
+  document.getElementById('infoRole').textContent = data.role || '—';
+  document.getElementById('infoDept').textContent = data.department || '—';
+  document.getElementById('infoWhatsapp').textContent = data.whatsapp || '—';
+  document.getElementById('infoSince').textContent = formatDate(data.createdAt);
+  document.getElementById('infoBio').textContent = data.bio || 'No bio added yet.';
+
+  // Edit form
+  document.getElementById('editFirstName').value = data.firstName || '';
+  document.getElementById('editLastName').value = data.lastName || '';
+  document.getElementById('editCountry').value = data.country || '';
+  document.getElementById('editWhatsapp').value = data.whatsapp || '';
+  document.getElementById('editDepartment').value = data.department || '';
+  document.getElementById('editBio').value = data.bio || '';
+
+  // ---- SAVE ----
+  document.getElementById('saveBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('saveBtn');
+    const msg = document.getElementById('saveMsg');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    msg.style.display = 'none';
+    try {
+      const updates = {
+        firstName: document.getElementById('editFirstName').value.trim(),
+        lastName: document.getElementById('editLastName').value.trim(),
+        country: document.getElementById('editCountry').value.trim(),
+        whatsapp: document.getElementById('editWhatsapp').value.trim(),
+        department: document.getElementById('editDepartment').value,
+        bio: document.getElementById('editBio').value.trim(),
+        updatedAt: serverTimestamp()
+      };
+      await updateDoc(doc(db, 'users', user.uid), updates);
+      document.getElementById('profileName').textContent = `${updates.firstName} ${updates.lastName}`;
+      document.getElementById('profileCountry').textContent = `📍 ${updates.country}`;
+      document.getElementById('infoCountry').textContent = updates.country || '—';
+      document.getElementById('infoDept').textContent = updates.department || '—';
+      document.getElementById('infoWhatsapp').textContent = updates.whatsapp || '—';
+      document.getElementById('infoBio').textContent = updates.bio || 'No bio added yet.';
+      document.getElementById('profileInitials').textContent = getInitials(updates.firstName, updates.lastName);
+      msg.textContent = '✅ Saved!'; msg.className = 'save-msg success'; msg.style.display = 'inline';
+      showToast('Profile updated! ✅', 'success');
+      setTimeout(() => msg.style.display = 'none', 3000);
+    } catch (e) {
+      msg.textContent = '❌ Save failed.'; msg.className = 'save-msg error'; msg.style.display = 'inline';
+    } finally { btn.disabled = false; btn.textContent = 'Save Changes'; }
+  });
+
+  // ---- PHOTO UPLOAD ----
+  document.getElementById('photoEditInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const uploadText = document.getElementById('uploadingText');
+    uploadText.style.display = 'block'; uploadText.textContent = '⏳ Uploading photo...';
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_PRESET);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+        method: 'POST', body: formData
+      });
+      const data = await res.json();
+      const photoUrl = data.secure_url;
+      await updateDoc(doc(db, 'users', user.uid), { photoUrl });
+      document.getElementById('profilePhotoPlaceholder').style.display = 'none';
+      const img = document.getElementById('profilePhotoImg');
+      img.src = photoUrl; img.style.display = 'block';
+      uploadText.textContent = '✅ Photo updated!';
+      showToast('Profile photo updated! 📸', 'success');
+      setTimeout(() => uploadText.style.display = 'none', 2000);
+    } catch (err) {
+      uploadText.textContent = '❌ Upload failed. Try again.';
+      setTimeout(() => uploadText.style.display = 'none', 3000);
+    }
+  });
+});
+
+// ---- LOGOUT ----
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await signOut(auth);
+  window.location.href = 'login.html';
+});
+</script>
+</body>
+</html>

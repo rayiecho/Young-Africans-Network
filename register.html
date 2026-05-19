@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="index, follow">
+<meta name="description" content="Create your Young Africans Network account — join the community and connect with young Africans across the continent.">
+<link rel="canonical" href="https://youngafricansnetwork.org/register.html">
+<link rel="icon" href="/images/logo.jpeg" type="image/jpeg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<title>Create Account | Young Africans Network</title>
+<style>
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;}
+a{text-decoration:none;}
+
+/* NAV */
+nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 2rem;height:75px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:0.75rem;text-decoration:none;}
+.nav-logo img{height:48px;}
+.nav-logo-text{font-size:0.9rem;font-weight:700;color:var(--navy);line-height:1.2;}
+.nav-logo-text span{display:block;font-size:0.7rem;font-weight:400;color:var(--gray);}
+
+/* MAIN */
+.auth-wrapper{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 1.25rem;}
+.auth-card{background:var(--white);border-radius:24px;padding:2.5rem;width:100%;max-width:520px;box-shadow:0 8px 40px rgba(0,0,0,0.08);}
+.auth-logo{text-align:center;margin-bottom:1.5rem;}
+.auth-logo img{height:64px;}
+.auth-title{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--navy);text-align:center;margin-bottom:0.4rem;}
+.auth-sub{font-size:0.85rem;color:var(--gray);text-align:center;margin-bottom:2rem;line-height:1.6;}
+
+/* PHOTO UPLOAD */
+.photo-upload{text-align:center;margin-bottom:1.5rem;}
+.photo-preview{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--white);margin:0 auto 0.75rem;cursor:pointer;overflow:hidden;border:3px solid var(--light);transition:all 0.2s;position:relative;}
+.photo-preview:hover{border-color:var(--navy);}
+.photo-preview img{width:100%;height:100%;object-fit:cover;display:none;}
+.photo-upload-label{font-size:0.78rem;color:var(--navy);font-weight:600;cursor:pointer;}
+.photo-upload-label span{color:var(--gray);font-weight:400;}
+#photoInput{display:none;}
+
+/* FORM */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.form-group{margin-bottom:1rem;}
+.form-group label{display:block;font-size:0.78rem;font-weight:600;color:var(--navy);margin-bottom:0.4rem;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.8rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.85rem;outline:none;transition:border-color 0.2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--navy);}
+.form-group textarea{resize:vertical;min-height:80px;}
+.btn-auth{width:100%;padding:0.9rem;background:var(--red);color:var(--white);font-family:'Poppins',sans-serif;font-size:0.95rem;font-weight:700;border:none;border-radius:50px;cursor:pointer;transition:all 0.3s;margin-top:0.5rem;}
+.btn-auth:hover{background:var(--navy);}
+.btn-auth:disabled{background:var(--gray);cursor:not-allowed;}
+.auth-link{text-align:center;margin-top:1.25rem;font-size:0.82rem;color:var(--gray);}
+.auth-link a{color:var(--navy);font-weight:600;}
+.auth-link a:hover{color:var(--red);}
+.error-msg{background:rgba(230,51,41,0.08);color:var(--red);border-radius:10px;padding:0.75rem 1rem;font-size:0.82rem;margin-bottom:1rem;display:none;}
+.success-msg{background:rgba(39,174,96,0.08);color:#27AE60;border-radius:10px;padding:0.75rem 1rem;font-size:0.82rem;margin-bottom:1rem;display:none;}
+.uploading-indicator{font-size:0.75rem;color:var(--gray);text-align:center;margin-top:0.4rem;display:none;}
+
+/* FOOTER */
+footer{background:var(--navy);padding:1.5rem 2rem;text-align:center;}
+.footer-copy{font-size:0.78rem;color:rgba(255,255,255,0.5);}
+.footer-copy a{color:var(--gold);}
+
+@media(max-width:480px){
+  .auth-card{padding:1.75rem 1.25rem;}
+  .form-row{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="images/logo.jpeg" alt="Young Africans Network Logo">
+    <div class="nav-logo-text">Young Africans Network<span>Building the Future, Together</span></div>
+  </a>
+  <a href="login.html" style="font-size:0.82rem;font-weight:600;color:var(--navy);">Already have an account? <span style="color:var(--red);">Login</span></a>
+</nav>
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo"><img src="images/logo.jpeg" alt="YAN Logo"></div>
+    <div class="auth-title">Create Your Account</div>
+    <div class="auth-sub">Join the Young Africans Network community and connect with young Africans across the continent 🌍</div>
+
+    <!-- PHOTO UPLOAD -->
+    <div class="photo-upload">
+      <div class="photo-preview" id="photoPreview" onclick="document.getElementById('photoInput').click()">
+        <span id="photoInitials">YAN</span>
+        <img id="photoImg" src="" alt="Profile photo">
+      </div>
+      <div class="photo-upload-label" onclick="document.getElementById('photoInput').click()">
+        Upload Profile Photo <span>(optional)</span>
+      </div>
+      <div class="uploading-indicator" id="uploadingIndicator">⏳ Uploading photo...</div>
+      <input type="file" id="photoInput" accept="image/*">
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="success-msg" id="successMsg"></div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>First Name *</label>
+        <input type="text" id="firstName" placeholder="e.g. Amara">
+      </div>
+      <div class="form-group">
+        <label>Last Name *</label>
+        <input type="text" id="lastName" placeholder="e.g. Diallo">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Email Address *</label>
+      <input type="email" id="email" placeholder="your@email.com">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Password *</label>
+        <input type="password" id="password" placeholder="Min. 6 characters">
+      </div>
+      <div class="form-group">
+        <label>Confirm Password *</label>
+        <input type="password" id="confirmPassword" placeholder="Repeat password">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Country *</label>
+        <input type="text" id="country" placeholder="e.g. Kenya">
+      </div>
+      <div class="form-group">
+        <label>WhatsApp Number</label>
+        <input type="tel" id="whatsapp" placeholder="+254 700 000 000">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Role / Membership Type *</label>
+      <select id="role">
+        <option value="">Select your role...</option>
+        <option value="Member">Ordinary Member</option>
+        <option value="Volunteer">Volunteer Member</option>
+        <option value="Associate">Associate Member</option>
+        <option value="Executive">Executive / Leadership</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Department (if applicable)</label>
+      <select id="department">
+        <option value="">Select a department...</option>
+        <option>Programs & Training</option>
+        <option>Scholarships & Global Opportunities</option>
+        <option>Career Development & Public Speaking</option>
+        <option>Community Impact & Volunteering</option>
+        <option>Mental Health & Wellbeing</option>
+        <option>Communications & Media</option>
+        <option>Partnerships & External Relations</option>
+        <option>Operations, Administration & Finance</option>
+        <option>General Member</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Bio (tell us about yourself)</label>
+      <textarea id="bio" placeholder="Share a little about yourself, your interests and why you joined YAN..."></textarea>
+    </div>
+
+    <button class="btn-auth" id="registerBtn">Create Account 🚀</button>
+    <div class="auth-link">Already have an account? <a href="login.html">Login here</a></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-copy">© 2026 Young Africans Network. All Rights Reserved. | <a href="index.html">Back to Website</a></div>
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",
+  authDomain: "young-africans-network.firebaseapp.com",
+  projectId: "young-africans-network",
+  storageBucket: "young-africans-network.firebasestorage.app",
+  messagingSenderId: "224204618916",
+  appId: "1:224204618916:web:8ddfd36c6f112b4912fa31"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const CLOUDINARY_CLOUD = 'deigiiyq5';
+const CLOUDINARY_PRESET = 'yan_Profiles';
+
+let uploadedPhotoUrl = '';
+
+// ---- PHOTO PREVIEW & UPLOAD ----
+document.getElementById('photoInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const indicator = document.getElementById('uploadingIndicator');
+  indicator.style.display = 'block';
+
+  // Preview
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    document.getElementById('photoImg').src = ev.target.result;
+    document.getElementById('photoImg').style.display = 'block';
+    document.getElementById('photoInitials').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+
+  // Upload to Cloudinary
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_PRESET);
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+      method: 'POST', body: formData
+    });
+    const data = await res.json();
+    uploadedPhotoUrl = data.secure_url;
+    indicator.textContent = '✅ Photo uploaded!';
+    setTimeout(() => indicator.style.display = 'none', 2000);
+  } catch (err) {
+    indicator.textContent = '❌ Photo upload failed. You can still register.';
+  }
+});
+
+// Update initials preview from name
+document.getElementById('firstName').addEventListener('input', updateInitials);
+document.getElementById('lastName').addEventListener('input', updateInitials);
+function updateInitials() {
+  const f = document.getElementById('firstName').value.trim();
+  const l = document.getElementById('lastName').value.trim();
+  const initials = ((f[0] || '') + (l[0] || '')).toUpperCase() || 'YAN';
+  document.getElementById('photoInitials').textContent = initials;
+}
+
+// ---- REGISTER ----
+document.getElementById('registerBtn').addEventListener('click', async () => {
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName = document.getElementById('lastName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  const country = document.getElementById('country').value.trim();
+  const whatsapp = document.getElementById('whatsapp').value.trim();
+  const role = document.getElementById('role').value;
+  const department = document.getElementById('department').value;
+  const bio = document.getElementById('bio').value.trim();
+
+  const errorEl = document.getElementById('errorMsg');
+  const successEl = document.getElementById('successMsg');
+  errorEl.style.display = 'none';
+  successEl.style.display = 'none';
+
+  if (!firstName || !lastName || !email || !password || !country || !role) {
+    errorEl.textContent = '❌ Please fill in all required fields.';
+    errorEl.style.display = 'block'; return;
+  }
+  if (password.length < 6) {
+    errorEl.textContent = '❌ Password must be at least 6 characters.';
+    errorEl.style.display = 'block'; return;
+  }
+  if (password !== confirmPassword) {
+    errorEl.textContent = '❌ Passwords do not match.';
+    errorEl.style.display = 'block'; return;
+  }
+
+  const btn = document.getElementById('registerBtn');
+  btn.disabled = true; btn.textContent = 'Creating account...';
+
+  try {
+    const userCred = await createUserWithEmailAndPassword(auth, email, password);
+    const uid = userCred.user.uid;
+    await setDoc(doc(db, 'users', uid), {
+      firstName, lastName, email, country, whatsapp, role, department, bio,
+      photoUrl: uploadedPhotoUrl || '',
+      createdAt: serverTimestamp(),
+      isAdmin: false
+    });
+    successEl.textContent = '✅ Account created successfully! Redirecting to your profile...';
+    successEl.style.display = 'block';
+    setTimeout(() => window.location.href = 'profile.html', 2000);
+  } catch (err) {
+    let msg = '❌ Registration failed. Please try again.';
+    if (err.code === 'auth/email-already-in-use') msg = '❌ This email is already registered. Try logging in.';
+    if (err.code === 'auth/invalid-email') msg = '❌ Please enter a valid email address.';
+    errorEl.textContent = msg;
+    errorEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Create Account 🚀';
+  }
+});
+</script>
+</body>
+</html>
