@@ -704,9 +704,13 @@ async function loadMembers(c) {
 }
 
 window.adminToggleRole = async function(userId, role, value) {
-  await updateDoc(doc(db, 'users', userId), { [role]: value });
-  showToast('Role updated ✅');
-  loadSection('members');
+  try {
+    await updateDoc(doc(db, 'users', userId), { [role]: value });
+    showToast('Role updated ✅');
+    loadSection('members');
+  } catch(e) {
+    showToast(e.message, 'error');
+  }
 };
 window.adminRemoveMember = async function(userId) {
   if (!confirm('Remove this member from the community?')) return;
