@@ -29,8 +29,8 @@ import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query
 // ============================================================
 // CONFIG — Update Daily.co domain after signing up at daily.co
 // ============================================================
-const DAILY_DOMAIN = 'youngafricansnetwork.daily.co'; // <-- CHANGE THIS
-
+const DAILY_DOMAIN = 'youngafricansnetwork.daily.co';
+const DAILY_API_KEY = '2e484de488713ded6e5cb999714cb9fcfb624378c2e9fc1c8efa02a4b4733a4e';
 const firebaseConfig = {
   apiKey: "AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",
   authDomain: "young-africans-network.firebaseapp.com",
@@ -697,19 +697,40 @@ async function createMeeting() {
   const topic = document.getElementById('mtg-topic').value.trim();
   const dateVal = document.getElementById('mtg-date').value;
   if (!title) return showToast('Enter a meeting title','error');
-  if (DAILY_DOMAIN === 'your-domain.daily.co') return showToast('Please configure your Daily.co domain first','error');
   const roomName = 'yan-' + Date.now();
-  const roomUrl = `https://${DAILY_DOMAIN}/${roomName}`;
-  await addDoc(collection(db, 'meetings'), {
-    title, topic, roomUrl,
-    scheduledAt: dateVal ? new Date(dateVal) : serverTimestamp(),
-    createdBy: currentUser.uid, createdByName: currentUserData.name,
-    createdAt: serverTimestamp(), isLive: false, recordingUrl: ''
-  });
-  document.getElementById('create-meeting-form').style.display = 'none';
-  document.getElementById('mtg-title').value = '';
-  document.getElementById('mtg-topic').value = '';
-  showToast('Meeting created! 🎥');
+  try {
+    showToast('Creating meeting room...');
+    const response = await fetch('https://api.daily.co/v1/rooms', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${DAILY_API_KEY}`
+      },
+      body: JSON.stringify({
+        name: roomName,
+        properties: {
+          enable_chat: true,
+          enable_knocking: false,
+          start_video_off: false,
+          start_audio_off: false
+        }
+      })
+    });
+    const room = await response.json();
+    const roomUrl = room.url || `https://${DAILY_DOMAIN}/${roomName}`;
+    await addDoc(collection(db, 'meetings'), {
+      title, topic, roomUrl,
+      scheduledAt: dateVal ? new Date(dateVal) : serverTimestamp(),
+      createdBy: currentUser.uid, createdByName: currentUserData.name,
+      createdAt: serverTimestamp(), isLive: false, recordingUrl: ''
+    });
+    document.getElementById('create-meeting-form').style.display = 'none';
+    document.getElementById('mtg-title').value = '';
+    document.getElementById('mtg-topic').value = '';
+    showToast('Meeting created! 🎥');
+  } catch(e) {
+    showToast('Error creating meeting. Try again.','error');
+  }
 }
 
 function loadMeetingsList() {
