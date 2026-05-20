@@ -39,7 +39,6 @@
 
 <title>Gallery | Young Africans Network</title>
 
-<!-- Structured Data -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -50,10 +49,7 @@
   "url": "https://youngafricansnetwork.org",
   "logo": "https://youngafricansnetwork.org/images/logo.jpeg",
   "foundingDate": "2026",
-  "foundingLocation": {
-    "@type": "Place",
-    "name": "Kenya, Africa"
-  },
+  "foundingLocation": {"@type": "Place","name": "Kenya, Africa"},
   "areaServed": "Africa",
   "email": "youngafricansn@gmail.com",
   "telephone": "+254791887609",
@@ -80,17 +76,27 @@ body{font-family:'Poppins',sans-serif;background:var(--white);color:var(--navy);
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:var(--navy);}
 
-/* NAV */
+/* ========== NAV ========== */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 2rem;height:75px;display:flex;align-items:center;justify-content:space-between;}
 .nav-logo{display:flex;align-items:center;gap:0.75rem;text-decoration:none;}
 .nav-logo img{height:48px;}
 .nav-logo-text{font-size:0.9rem;font-weight:700;color:var(--navy);line-height:1.2;}
 .nav-logo-text span{display:block;font-size:0.7rem;font-weight:400;color:var(--gray);}
-.nav-links{display:flex;gap:1.5rem;list-style:none;}
-.nav-links a{font-size:0.82rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;}
-.nav-links a:hover,.nav-links a.active{color:var(--red);}
-.nav-btn{background:var(--red);color:var(--white);padding:0.6rem 1.5rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:600;transition:all 0.2s;}
+.nav-links{display:flex;gap:0.25rem;list-style:none;align-items:center;}
+.nav-links > li{position:relative;}
+.nav-links > li > a{font-size:0.82rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;letter-spacing:0.3px;padding:0.5rem 0.75rem;display:flex;align-items:center;gap:0.3rem;border-radius:8px;white-space:nowrap;}
+.nav-links > li > a:hover,.nav-links > li > a.active{color:var(--red);}
+.arrow{font-size:0.55rem;transition:transform 0.2s;margin-top:1px;}
+.nav-links > li:hover > a .arrow{transform:rotate(180deg);}
+.nav-btn{background:var(--red);color:var(--white);padding:0.6rem 1.5rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:600;transition:all 0.2s;white-space:nowrap;}
 .nav-btn:hover{background:var(--navy);}
+
+/* DROPDOWN */
+.dropdown{display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--white);border-radius:14px;box-shadow:0 8px 30px rgba(27,42,107,0.15);padding:0.5rem;min-width:210px;z-index:200;border:1px solid rgba(27,42,107,0.08);}
+.nav-links > li:hover .dropdown{display:block;}
+.dropdown a{display:flex;align-items:center;gap:0.75rem;padding:0.65rem 1rem;border-radius:8px;font-size:0.82rem;font-weight:500;color:var(--navy);text-decoration:none;transition:background 0.2s;white-space:nowrap;}
+.dropdown a:hover{background:var(--light);color:var(--red);}
+.drop-icon{font-size:1rem;width:22px;text-align:center;}
 
 /* HAMBURGER */
 .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none;}
@@ -98,13 +104,22 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
 .hamburger.open span:nth-child(2){opacity:0;}
 .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
-.mobile-menu{display:none;position:fixed;top:75px;left:0;right:0;background:var(--white);box-shadow:0 8px 24px rgba(27,42,107,0.12);z-index:99;padding:1.5rem 2rem;flex-direction:column;gap:0;}
+
+/* MOBILE MENU */
+.mobile-menu{display:none;position:fixed;top:75px;left:0;right:0;background:var(--white);box-shadow:0 8px 24px rgba(27,42,107,0.12);z-index:99;padding:1rem 1.5rem 1.5rem;flex-direction:column;gap:0;max-height:calc(100vh - 75px);overflow-y:auto;}
 .mobile-menu.open{display:flex;}
-.mobile-menu li{list-style:none;border-bottom:1px solid rgba(27,42,107,0.07);}
-.mobile-menu li:last-child{border-bottom:none;}
-.mobile-menu a{display:block;padding:0.85rem 0;font-size:0.95rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;}
-.mobile-menu a:hover,.mobile-menu a.active{color:var(--red);}
-.mobile-menu .mobile-join{display:inline-block;margin-top:1rem;background:var(--red);color:var(--white);padding:0.75rem 2rem;border-radius:50px;font-weight:600;font-size:0.9rem;text-align:center;text-decoration:none;}
+.mobile-menu > li{list-style:none;}
+.mobile-menu > li > a{display:flex;align-items:center;justify-content:space-between;padding:0.85rem 0;font-size:0.95rem;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid rgba(27,42,107,0.07);}
+.mobile-menu > li > a:hover,.mobile-menu > li > a.active{color:var(--red);}
+.m-arrow{font-size:0.7rem;transition:transform 0.2s;}
+.mobile-menu > li.open > a .m-arrow{transform:rotate(180deg);}
+.mobile-submenu{display:none;flex-direction:column;background:var(--light);border-radius:10px;margin:0.4rem 0 0.5rem;overflow:hidden;}
+.mobile-menu > li.open .mobile-submenu{display:flex;}
+.mobile-submenu a{display:flex;align-items:center;gap:0.75rem;padding:0.7rem 1rem;font-size:0.88rem;font-weight:500;color:var(--navy);text-decoration:none;border-bottom:1px solid rgba(27,42,107,0.05);}
+.mobile-submenu a:last-child{border-bottom:none;}
+.mobile-submenu a:hover{color:var(--red);}
+.mobile-join{display:block;margin-top:1rem;background:var(--red);color:var(--white) !important;padding:0.85rem 2rem;border-radius:50px;font-weight:700 !important;font-size:0.9rem;text-align:center;text-decoration:none;border-bottom:none !important;}
+.mobile-join:hover{background:var(--navy) !important;}
 
 /* PAGE HERO */
 .page-hero{background:linear-gradient(135deg,var(--navy),var(--dark));padding:8rem 2rem 4rem;text-align:center;position:relative;overflow:hidden;}
@@ -171,15 +186,12 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
 .footer-links-row a{font-size:0.78rem;color:rgba(255,255,255,0.6);text-decoration:none;}
 .footer-links-row a:hover{color:var(--gold);}
 
-/* ===================== RESPONSIVE ===================== */
-
-/* TABLET */
+/* ========== RESPONSIVE ========== */
 @media(max-width:1024px){
   .team-grid{grid-template-columns:repeat(2,1fr);}
   .video-placeholder-grid{grid-template-columns:repeat(2,1fr);}
 }
 
-/* MOBILE */
 @media(max-width:768px){
   .nav-links{display:none;}
   .nav-btn{display:none;}
@@ -201,7 +213,6 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
   .lightbox{padding:1rem;}
 }
 
-/* SMALL MOBILE */
 @media(max-width:480px){
   .team-grid{grid-template-columns:1fr;}
   .page-title{font-size:1.8rem;}
@@ -220,18 +231,29 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
   </a>
   <ul class="nav-links">
     <li><a href="index.html">Home</a></li>
-    <li><a href="about.html">About</a></li>
-    <li><a href="programs.html">Programs</a></li>
-    <li><a href="team.html">Team</a></li>
-    <li><a href="events.html">Events</a></li>
-    <li><a href="join.html">Join Us</a></li>
-    <li><a href="contact.html">Contact</a></li>
-    <li><a href="Journey_Stories.html">Journey Stories</a></li>
-    <li><a href="gallery.html" class="active">Gallery</a></li>
+    <li>
+      <a href="about.html">About <span class="arrow">▼</span></a>
+      <div class="dropdown">
+        <a href="about.html"><span class="drop-icon">🌍</span> About YAN</a>
+        <a href="Journey_Stories.html"><span class="drop-icon">📖</span> Journey Stories</a>
+      </div>
+    </li>
+    <li>
+      <a href="programs.html">Programs <span class="arrow">▼</span></a>
+      <div class="dropdown">
+        <a href="programs.html"><span class="drop-icon">💻</span> Our Programs</a>
+        <a href="events.html"><span class="drop-icon">📅</span> Events</a>
+      </div>
+    </li>
+    <li>
+      <a href="team.html" class="active">Team <span class="arrow">▼</span></a>
+      <div class="dropdown">
+        <a href="team.html"><span class="drop-icon">👥</span> Our Team</a>
+        <a href="gallery.html"><span class="drop-icon">📸</span> Gallery</a>
+      </div>
+    </li>
     <li><a href="community.html">Community</a></li>
-    <li><a href="register.html">Register</a></li>
-    <li><a href="login.html">Login</a></li>
-    <li><a href="profile.html">Profile</a></li>
+    <li><a href="contact.html">Contact</a></li>
   </ul>
   <a href="join.html" class="nav-btn">Join YAN</a>
   <button class="hamburger" id="hamburger" aria-label="Open menu">
@@ -242,18 +264,29 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
 <!-- MOBILE MENU -->
 <ul class="mobile-menu" id="mobileMenu">
   <li><a href="index.html">Home</a></li>
-  <li><a href="about.html">About</a></li>
-  <li><a href="programs.html">Programs</a></li>
-  <li><a href="team.html">Team</a></li>
-  <li><a href="events.html">Events</a></li>
-  <li><a href="join.html">Join Us</a></li>
-  <li><a href="contact.html">Contact</a></li>
-  <li><a href="Journey_Stories.html">Journey Stories</a></li>
-  <li><a href="gallery.html" class="active">Gallery</a></li>
+  <li>
+    <a href="about.html">About <span class="m-arrow">▼</span></a>
+    <div class="mobile-submenu">
+      <a href="about.html"><span class="drop-icon">🌍</span> About YAN</a>
+      <a href="Journey_Stories.html"><span class="drop-icon">📖</span> Journey Stories</a>
+    </div>
+  </li>
+  <li>
+    <a href="programs.html">Programs <span class="m-arrow">▼</span></a>
+    <div class="mobile-submenu">
+      <a href="programs.html"><span class="drop-icon">💻</span> Our Programs</a>
+      <a href="events.html"><span class="drop-icon">📅</span> Events</a>
+    </div>
+  </li>
+  <li>
+    <a href="team.html" class="active">Team <span class="m-arrow">▼</span></a>
+    <div class="mobile-submenu">
+      <a href="team.html"><span class="drop-icon">👥</span> Our Team</a>
+      <a href="gallery.html"><span class="drop-icon">📸</span> Gallery</a>
+    </div>
+  </li>
   <li><a href="community.html">Community</a></li>
-  <li><a href="register.html">Register</a></li>
-  <li><a href="login.html">Login</a></li>
-  <li><a href="profile.html">Profile</a></li>
+  <li><a href="contact.html">Contact</a></li>
   <li><a href="join.html" class="mobile-join">Join YAN 🚀</a></li>
 </ul>
 
@@ -276,7 +309,6 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
     </div>
     <div class="team-grid">
 
-      <!-- Logo -->
       <div class="gallery-card logo-card" onclick="openLightbox('images/logo.jpeg','Young Africans Network','Est. April 2026 · Kenya')">
         <img src="images/logo.jpeg" alt="Young Africans Network Logo">
         <div class="card-overlay">
@@ -286,7 +318,6 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
         </div>
       </div>
 
-      <!-- Emmanuel -->
       <div class="gallery-card" onclick="openLightbox('images/Emmanuel.jpeg','Mr. Emmanuel Ikumilu Mwori','Founder & Executive Director · 📍 Kenya')">
         <img src="images/Emmanuel.jpeg" alt="Emmanuel Ikumilu Mwori — Founder and Executive Director of Young Africans Network">
         <div class="card-overlay">
@@ -296,7 +327,6 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
         </div>
       </div>
 
-      <!-- Merlyne -->
       <div class="gallery-card" onclick="openLightbox('images/Merlyne.jpeg','Ms. Merlyne Kamanda','Co-Founder · 📍 Kenya')">
         <img src="images/Merlyne.jpeg" alt="Merlyne Kamanda — Co-Founder of Young Africans Network">
         <div class="card-overlay">
@@ -306,7 +336,6 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
         </div>
       </div>
 
-      <!-- Regan -->
       <div class="gallery-card" onclick="openLightbox('images/Regan.jpeg','Mr. Regan Ayiecho','Co-Founder · 📍 Kenya')">
         <img src="images/Regan.jpeg" alt="Regan Ayiecho — Co-Founder of Young Africans Network">
         <div class="card-overlay">
@@ -316,7 +345,6 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
         </div>
       </div>
 
-      <!-- Innocent -->
       <div class="gallery-card" onclick="openLightbox('images/Innocent.jpeg','Mr. Innocent Onesmo Nnko','Administrator · 📍 Tanzania')">
         <img src="images/Innocent.jpeg" alt="Innocent Onesmo Nnko — Administrator at Young Africans Network">
         <div class="card-overlay">
@@ -326,7 +354,6 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
         </div>
       </div>
 
-      <!-- Debra -->
       <div class="gallery-card" onclick="openLightbox('images/Debra.jpeg','Ms. Debra Chepkorir','Head of Community Impact & Volunteering · 📍 Kenya')">
         <img src="images/Debra.jpeg" alt="Debra Chepkorir — Head of Community Impact and Volunteering at Young Africans Network">
         <div class="card-overlay">
@@ -396,10 +423,9 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
       <a href="about.html">About</a>
       <a href="programs.html">Programs</a>
       <a href="team.html">Team</a>
-      <a href="contact.html">Contact</a>
-      <a href="Journey_Stories.html">Journey Stories</a>
       <a href="gallery.html">Gallery</a>
       <a href="community.html">Community</a>
+      <a href="contact.html">Contact</a>
       <a href="join.html">Join Us</a>
     </div>
   </div>
@@ -408,11 +434,23 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
 <script>
 const hamburger = document.getElementById('hamburger');
 const mobileMenu = document.getElementById('mobileMenu');
+
 hamburger.addEventListener('click', () => {
   hamburger.classList.toggle('open');
   mobileMenu.classList.toggle('open');
 });
-mobileMenu.querySelectorAll('a').forEach(link => {
+
+mobileMenu.querySelectorAll('.mobile-menu > li > a').forEach(link => {
+  const submenu = link.nextElementSibling;
+  if (submenu && submenu.classList.contains('mobile-submenu')) {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      link.parentElement.classList.toggle('open');
+    });
+  }
+});
+
+mobileMenu.querySelectorAll('.mobile-submenu a, .mobile-join').forEach(link => {
   link.addEventListener('click', () => {
     hamburger.classList.remove('open');
     mobileMenu.classList.remove('open');
