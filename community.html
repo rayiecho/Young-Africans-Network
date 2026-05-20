@@ -661,6 +661,50 @@ async function loadMeetings() {
   container.innerHTML = `
     <div class="meetings-header">
       <h2>🎥 YAN Meetings</h2>
+    </div>
+    <p style="color:var(--gray);font-size:0.88rem;margin-bottom:1.5rem;">Click any room to join instantly — available 24/7.</p>
+    <div class="rooms-grid">
+      <div class="room-card"><div class="room-icon">🌍</div><div class="room-info"><h4>General Forum</h4><p>Open discussions and community meetings</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_GENERAL_FORUM','General Forum')">Join</button></div>
+      <div class="room-card"><div class="room-icon">💻</div><div class="room-info"><h4>Training Forum</h4><p>Training sessions and program discussions</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_TRAINING_FORUM','Training Forum')">Join</button></div>
+      <div class="room-card"><div class="room-icon">🏆</div><div class="room-info"><h4>Scholarship Revision</h4><p>Scholarship information and opportunity sessions</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_SCHOLARSHIP_REVISION','Scholarship Revision')">Join</button></div>
+      <div class="room-card"><div class="room-icon">🎤</div><div class="room-info"><h4>Career Room</h4><p>Career guidance and public speaking sessions</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_CAREER_ROOM','Career Room')">Join</button></div>
+      <div class="room-card"><div class="room-icon">🤝</div><div class="room-info"><h4>Any Business</h4><p>Community impact and volunteering meetings</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_ANY_BUSINESS','Any Business')">Join</button></div>
+      <div class="room-card"><div class="room-icon">💚</div><div class="room-info"><h4>Mental Health Discussion</h4><p>Wellness sessions and peer support</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_MENTAL_DISCUSSION','Mental Health Discussion')">Join</button></div>
+    </div>
+    <div class="meetings-header" style="margin-top:2rem;">
+      <h3>📅 Scheduled Sessions</h3>
+      <button class="btn-primary" onclick="showCreateMeeting()">➕ Schedule Session</button>
+    </div>
+    <div id="create-meeting-form" style="display:none;" class="meeting-form-card">
+      <h3>Schedule a Session</h3>
+      <input type="text" id="mtg-title" placeholder="Session title *">
+      <input type="text" id="mtg-topic" placeholder="Topic / Department">
+      <input type="datetime-local" id="mtg-date">
+      <select id="mtg-room">
+        <option value="https://youngafricansnetwork.daily.co/YAN_GENERAL_FORUM">General Forum</option>
+        <option value="https://youngafricansnetwork.daily.co/YAN_TRAINING_FORUM">Training Forum</option>
+        <option value="https://youngafricansnetwork.daily.co/YAN_SCHOLARSHIP_REVISION">Scholarship Revision</option>
+        <option value="https://youngafricansnetwork.daily.co/YAN_CAREER_ROOM">Career Room</option>
+        <option value="https://youngafricansnetwork.daily.co/YAN_ANY_BUSINESS">Any Business</option>
+        <option value="https://youngafricansnetwork.daily.co/YAN_MENTAL_DISCUSSION">Mental Health Discussion</option>
+      </select>
+      <button class="btn-primary" onclick="createMeeting()">Schedule Session</button>
+      <button class="btn-outline" onclick="document.getElementById('create-meeting-form').style.display='none'">Cancel</button>
+    </div>
+    <div id="meetings-list" style="margin-top:1rem;"></div>
+    <div id="meeting-room-container" style="display:none;" class="meeting-room-wrapper">
+      <div class="meeting-room-header">
+        <span id="meeting-room-title"></span>
+        <button onclick="leaveMeeting()">✕ Leave Meeting</button>
+      </div>
+      <iframe id="meeting-iframe" allow="camera; microphone; fullscreen; display-capture" style="width:100%;height:600px;border:none;border-radius:12px;"></iframe>
+    </div>`;
+  loadMeetingsList();
+}
+  const container = document.getElementById('meetings-container');
+  container.innerHTML = `
+    <div class="meetings-header">
+      <h2>🎥 YAN Meetings</h2>
       <button class="btn-primary" onclick="showCreateMeeting()">➕ Create Meeting</button>
     </div>
     <div id="create-meeting-form" style="display:none;" class="meeting-form-card">
