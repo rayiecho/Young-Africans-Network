@@ -757,9 +757,13 @@ window.adminDeletePost = async function(postId) {
 // ===== SHARED DELETE =====
 window.deleteItem = async function(collectionName, docId, reloadFn) {
   if (!confirm('Delete this item?')) return;
-  await deleteDoc(doc(db, collectionName, docId));
-  showToast('Deleted ✅');
-  if (reloadFn) reloadFn();
+  try {
+    await deleteDoc(doc(db, collectionName, docId));
+    showToast('Deleted ✅');
+    if (reloadFn) reloadFn();
+  } catch(e) {
+    showToast(e.message, 'error');
+  }
 };
 
 checkAuth();
