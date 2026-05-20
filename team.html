@@ -307,7 +307,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
     <h2 class="section-title">Founding <span>Leadership</span></h2>
     <p style="color:var(--gray);font-size:0.92rem;max-width:600px;margin:0.5rem auto 0;line-height:1.8;">The founding team providing strategic direction, oversight and institutional continuity for YAN.</p>
   </div>
-  <div class="leadership-grid">
+  <div class="leadership-grid" id="leadership-grid">
 
     <div class="leader-card">
       <img src="images/Emmanuel.jpeg" alt="Emmanuel Ikumilu Mwori — Founder and Executive Director of Young Africans Network" class="leader-image">
@@ -388,7 +388,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
       <h2 class="section-title">Department <span>Coordinators</span></h2>
       <p style="color:var(--gray);font-size:0.92rem;max-width:600px;margin:0.5rem auto 0;line-height:1.8;">Eight volunteer-driven departments each led by passionate young Africans from across the continent.</p>
     </div>
-    <div class="dept-grid">
+    <div class="dept-grid" id="dept-grid">
 
       <div class="dept-card">
         <div class="dept-header">
@@ -661,6 +661,31 @@ mobileMenu.querySelectorAll('.mobile-submenu a, .mobile-join').forEach(link => {
     mobileMenu.classList.remove('open');
   });
 });
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const app = initializeApp({apiKey:"AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",authDomain:"young-africans-network.firebaseapp.com",projectId:"young-africans-network",storageBucket:"young-africans-network.firebasestorage.app",messagingSenderId:"224204618916",appId:"1:224204618916:web:8ddfd36c6f112b4912fa31"});
+const db = getFirestore(app);
+
+async function loadTeam() {
+  const snap = await getDocs(query(collection(db, 'team'), orderBy('order', 'asc')));
+  if (snap.empty) return;
+  const leaderGrid = document.getElementById('leadership-grid');
+  const deptGrid = document.getElementById('dept-grid');
+  snap.docs.forEach(d => {
+    const t = d.data();
+    const photo = t.photoUrl ? `<img src="${t.photoUrl}" alt="${t.name}" class="leader-image" loading="lazy">` : `<div class="leader-image" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1B2A6B,#E63329);font-size:2rem;font-weight:900;color:#fff;">${(t.name||'?')[0]}</div>`;
+    const card = `<div class="leader-card">${photo}<div class="leader-name">${t.name}</div><div class="leader-role">${t.role}</div><div class="leader-country">📍 ${t.country}</div>${t.email?`<a href="mailto:${t.email}" class="leader-email">${t.email}</a>`:''}</div>`;
+    if (t.department === 'Leadership' || !t.department) {
+      leaderGrid.insertAdjacentHTML('beforeend', card);
+    } else {
+      if (deptGrid) deptGrid.insertAdjacentHTML('beforeend', card.replace('leader-card','dept-card').replace('leader-image','dept-image').replace('leader-name','dept-name').replace('leader-role','dept-role').replace('leader-country','dept-country').replace('leader-email','dept-email'));
+    }
+  });
+}
+loadTeam();
 </script>
 </body>
 </html>

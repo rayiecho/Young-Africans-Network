@@ -580,5 +580,59 @@ mobileMenu.querySelectorAll('.mobile-submenu a, .mobile-join').forEach(link => {
   });
 });
 </script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const app = initializeApp({apiKey:"AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",authDomain:"young-africans-network.firebaseapp.com",projectId:"young-africans-network",storageBucket:"young-africans-network.firebasestorage.app",messagingSenderId:"224204618916",appId:"1:224204618916:web:8ddfd36c6f112b4912fa31"});
+const db = getFirestore(app);
+
+async function loadStories() {
+  const snap = await getDocs(query(collection(db, 'stories'), orderBy('createdAt', 'desc')));
+  if (snap.empty) return;
+  // Find stories container and append new stories
+  const storiesContainer = document.querySelector('.stories-section') || document.querySelector('main') || document.querySelector('.timeline') || document.body;
+  const newSection = document.createElement('section');
+  newSection.style.cssText = 'padding:5rem 2rem;max-width:900px;margin:0 auto;';
+  newSection.innerHTML = `<div style="text-align:center;margin-bottom:3rem;"><span style="background:rgba(230,51,41,0.1);color:#E63329;padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;letter-spacing:1px;">MORE STORIES</span><h2 style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:#1B2A6B;margin-top:0.75rem;">New <span style="color:#E63329;">Journey Stories</span></h2></div><div id="firebase-stories"></div>`;
+  // Insert before footer
+  const footer = document.querySelector('footer');
+  if (footer) footer.parentNode.insertBefore(newSection, footer);
+  else document.body.appendChild(newSection);
+
+  const container = document.getElementById('firebase-stories');
+  snap.docs.forEach((d, i) => {
+    const s = d.data();
+    const isReverse = i % 2 !== 0;
+    container.insertAdjacentHTML('beforeend', `
+      <div style="display:grid;grid-template-columns:${isReverse?'2fr 1fr':'1fr 2fr'};gap:3rem;align-items:start;margin-bottom:4rem;padding-bottom:4rem;border-bottom:1px solid rgba(27,42,107,0.1);">
+        ${isReverse ? `
+          <div style="background:#F8F9FF;border-radius:16px;padding:2rem;">
+            <blockquote style="font-size:1.1rem;font-style:italic;color:#1B2A6B;line-height:1.8;margin-bottom:1.5rem;">"${s.quote||''}"</blockquote>
+            <p style="font-size:0.88rem;color:#6B7280;line-height:1.8;">${s.message||''}</p>
+          </div>
+          <div style="text-align:center;">
+            ${s.photoUrl ? `<img src="${s.photoUrl}" alt="${s.name}" style="width:100%;max-width:220px;height:280px;object-fit:cover;border-radius:20px;margin-bottom:1rem;">` : `<div style="width:180px;height:220px;border-radius:20px;background:linear-gradient(135deg,#1B2A6B,#E63329);display:flex;align-items:center;justify-content:center;font-size:4rem;font-weight:900;color:#fff;margin:0 auto 1rem;">${(s.name||'?')[0]}</div>`}
+            ${s.tag ? `<div style="background:rgba(245,166,35,0.15);color:#b37800;padding:0.3rem 1rem;border-radius:50px;font-size:0.72rem;font-weight:700;display:inline-block;margin-bottom:0.5rem;">${s.tag}</div>` : ''}
+            <div style="font-size:1rem;font-weight:700;color:#1B2A6B;">${s.name||''}</div>
+            <div style="font-size:0.82rem;color:#E63329;">${s.role||''}</div>
+            <div style="font-size:0.78rem;color:#6B7280;">📍 ${s.country||''}</div>
+          </div>` :
+          `<div style="text-align:center;">
+            ${s.photoUrl ? `<img src="${s.photoUrl}" alt="${s.name}" style="width:100%;max-width:220px;height:280px;object-fit:cover;border-radius:20px;margin-bottom:1rem;">` : `<div style="width:180px;height:220px;border-radius:20px;background:linear-gradient(135deg,#1B2A6B,#E63329);display:flex;align-items:center;justify-content:center;font-size:4rem;font-weight:900;color:#fff;margin:0 auto 1rem;">${(s.name||'?')[0]}</div>`}
+            ${s.tag ? `<div style="background:rgba(245,166,35,0.15);color:#b37800;padding:0.3rem 1rem;border-radius:50px;font-size:0.72rem;font-weight:700;display:inline-block;margin-bottom:0.5rem;">${s.tag}</div>` : ''}
+            <div style="font-size:1rem;font-weight:700;color:#1B2A6B;">${s.name||''}</div>
+            <div style="font-size:0.82rem;color:#E63329;">${s.role||''}</div>
+            <div style="font-size:0.78rem;color:#6B7280;">📍 ${s.country||''}</div>
+          </div>
+          <div style="background:#F8F9FF;border-radius:16px;padding:2rem;">
+            <blockquote style="font-size:1.1rem;font-style:italic;color:#1B2A6B;line-height:1.8;margin-bottom:1.5rem;">"${s.quote||''}"</blockquote>
+            <p style="font-size:0.88rem;color:#6B7280;line-height:1.8;">${s.message||''}</p>
+          </div>`}
+      </div>`);
+  });
+}
+loadStories();
+</script>
 </body>
 </html>

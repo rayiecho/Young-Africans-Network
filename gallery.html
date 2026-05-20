@@ -307,7 +307,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
       <h2 class="section-title">Meet the <span>People</span></h2>
       <p style="color:var(--gray);font-size:0.92rem;max-width:500px;margin:0.5rem auto 0;line-height:1.8;">The faces of Young Africans Network — united by one vision, one mission, one Africa.</p>
     </div>
-    <div class="team-grid">
+    <div class="team-grid" id="gallery-grid">
 
       <div class="gallery-card logo-card" onclick="openLightbox('images/logo.jpeg','Young Africans Network','Est. April 2026 · Kenya')">
         <img src="images/logo.jpeg" alt="Young Africans Network Logo">
@@ -387,7 +387,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
       <h2 class="section-title">YAN <span>Videos</span></h2>
       <p style="color:var(--gray);font-size:0.92rem;max-width:500px;margin:0.5rem auto 0;line-height:1.8;">Video content from our sessions, events and team will be added here soon. Stay tuned!</p>
     </div>
-    <div class="video-placeholder-grid">
+    <div class="video-placeholder-grid" id="video-grid">
       <div class="video-placeholder">
         <div class="video-placeholder-icon">🎬</div>
         <div class="video-placeholder-label">Launch Event</div>
@@ -475,6 +475,42 @@ function closeLightbox(event) {
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeLightbox();
 });
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const app = initializeApp({apiKey:"AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",authDomain:"young-africans-network.firebaseapp.com",projectId:"young-africans-network",storageBucket:"young-africans-network.firebasestorage.app",messagingSenderId:"224204618916",appId:"1:224204618916:web:8ddfd36c6f112b4912fa31"});
+const db = getFirestore(app);
+
+async function loadGallery() {
+  const snap = await getDocs(query(collection(db, 'gallery'), orderBy('createdAt', 'desc')));
+  if (snap.empty) return;
+  const grid = document.getElementById('gallery-grid');
+  snap.docs.forEach(d => {
+    const g = d.data();
+    if (g.type === 'photo' && g.url) {
+      const div = document.createElement('div');
+      div.className = 'gallery-card';
+      div.onclick = () => openLightbox(g.url, g.caption || '', g.category || '');
+      div.innerHTML = `<img src="${g.url}" alt="${g.caption || 'Gallery photo'}" loading="lazy"><div class="card-overlay"><div class="card-name">${g.caption || ''}</div><div class="card-role">${g.category || ''}</div></div>`;
+      grid.appendChild(div);
+    } else if (g.type === 'video' && g.url) {
+      const videoGrid = document.getElementById('video-grid');
+      if (videoGrid) {
+        const ytId = g.url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=))([\w-]{11})/)?.[1];
+        if (ytId) {
+          const div = document.createElement('div');
+          div.className = 'video-placeholder';
+          div.style.cssText = 'padding:0;overflow:hidden;border:none;';
+          div.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}" style="width:100%;height:220px;border:none;border-radius:16px;" allowfullscreen></iframe><p style="padding:0.75rem;font-size:0.82rem;font-weight:600;color:var(--navy);">${g.caption || ''}</p>`;
+          videoGrid.appendChild(div);
+        }
+      }
+    }
+  });
+}
+loadGallery();
 </script>
 </body>
 </html>
