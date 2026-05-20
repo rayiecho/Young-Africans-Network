@@ -229,7 +229,8 @@ function loadFeed() {
 
 function renderPost(post) {
   const canDelete = post.authorId === currentUser?.uid || currentUserData?.isAdmin;
-  const liked = (post.likes || []).includes(currentUser?.uid);
+  const likesArr = Array.isArray(post.likes) ? post.likes : Object.keys(post.likes || {});
+const liked = likesArr.includes(currentUser?.uid);
   return `
   <div class="post-card">
     <div class="post-header">
@@ -243,7 +244,7 @@ function renderPost(post) {
     <div class="post-content">${sanitize(post.content)}</div>
     ${post.link ? `<a href="${sanitize(post.link)}" target="_blank" class="post-link">🔗 ${sanitize(post.link)}</a>` : ''}
     <div class="post-actions">
-      <button class="post-action ${liked?'liked':''}" onclick="toggleLike('${post.id}')">❤️ ${(post.likes||[]).length}</button>
+      <button class="post-action ${liked?'liked':''}" onclick="toggleLike('${post.id}')">❤️ ${Array.isArray(post.likes) ? post.likes.length : Object.keys(post.likes||{}).length}</button>
       <button class="post-action" onclick="toggleReplies('${post.id}')">💬 Reply</button>
     </div>
     <div class="reply-box" id="reply-box-${post.id}" style="display:none;">
@@ -1233,7 +1234,9 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <div class="form-group"><label>Password * (min 6 characters)</label><input type="password" id="reg-pass" placeholder="Create a password"></div>
     <div class="form-group"><label>WhatsApp Number *</label><input type="tel" id="reg-whatsapp" placeholder="+254 700 000 000"></div>
     <div class="form-row-2">
-      <div class="form-group"><label>Role *</label><select id="reg-role"><option value="">Select role...</option><option value="Member">Member</option><option value="Volunteer">Volunteer</option><option value="Associate">Associate</option></select></div>
+      <div class="form-group"><label>Role *</label><select id="reg-role"><option value="">Select role...</option><option value="Member">Member</option><option value="Volunteer">Volunteer</option><option value="Associate">Associate</option>
+<option value="Executive">Executive</option>
+<option value="Executive">Executive</option></select></div>
       <div class="form-group"><label>Department *</label><select id="reg-dept"><option value="">Select department...</option><option value="programs">Programs & Training</option><option value="scholarships">Scholarships & Global Opportunities</option><option value="career">Career Development & Public Speaking</option><option value="community">Community Impact & Volunteering</option><option value="mental">Mental Health & Wellbeing</option></select></div>
     </div>
     <div class="form-group"><label>Profile Photo (optional)</label><input type="file" id="reg-photo" accept="image/*"></div>
