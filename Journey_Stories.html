@@ -38,7 +38,6 @@
 
 <title>Journey & Stories | Young Africans Network</title>
 
-<!-- Structured Data -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -49,10 +48,7 @@
   "url": "https://youngafricansnetwork.org",
   "logo": "https://youngafricansnetwork.org/images/logo.jpeg",
   "foundingDate": "2026",
-  "foundingLocation": {
-    "@type": "Place",
-    "name": "Kenya, Africa"
-  },
+  "foundingLocation": {"@type": "Place","name": "Kenya, Africa"},
   "areaServed": "Africa",
   "email": "youngafricansn@gmail.com",
   "telephone": "+254791887609",
@@ -79,17 +75,27 @@ body{font-family:'Poppins',sans-serif;background:var(--white);color:var(--navy);
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:var(--navy);}
 
-/* NAV */
+/* ========== NAV ========== */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 2rem;height:75px;display:flex;align-items:center;justify-content:space-between;}
 .nav-logo{display:flex;align-items:center;gap:0.75rem;text-decoration:none;}
 .nav-logo img{height:48px;}
 .nav-logo-text{font-size:0.9rem;font-weight:700;color:var(--navy);line-height:1.2;}
 .nav-logo-text span{display:block;font-size:0.7rem;font-weight:400;color:var(--gray);}
-.nav-links{display:flex;gap:1.5rem;list-style:none;}
-.nav-links a{font-size:0.82rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;}
-.nav-links a:hover,.nav-links a.active{color:var(--red);}
-.nav-btn{background:var(--red);color:var(--white);padding:0.6rem 1.5rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:600;transition:all 0.2s;}
+.nav-links{display:flex;gap:0.25rem;list-style:none;align-items:center;}
+.nav-links > li{position:relative;}
+.nav-links > li > a{font-size:0.82rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;letter-spacing:0.3px;padding:0.5rem 0.75rem;display:flex;align-items:center;gap:0.3rem;border-radius:8px;white-space:nowrap;}
+.nav-links > li > a:hover,.nav-links > li > a.active{color:var(--red);}
+.arrow{font-size:0.55rem;transition:transform 0.2s;margin-top:1px;}
+.nav-links > li:hover > a .arrow{transform:rotate(180deg);}
+.nav-btn{background:var(--red);color:var(--white);padding:0.6rem 1.5rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:600;transition:all 0.2s;white-space:nowrap;}
 .nav-btn:hover{background:var(--navy);}
+
+/* DROPDOWN */
+.dropdown{display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--white);border-radius:14px;box-shadow:0 8px 30px rgba(27,42,107,0.15);padding:0.5rem;min-width:210px;z-index:200;border:1px solid rgba(27,42,107,0.08);}
+.nav-links > li:hover .dropdown{display:block;}
+.dropdown a{display:flex;align-items:center;gap:0.75rem;padding:0.65rem 1rem;border-radius:8px;font-size:0.82rem;font-weight:500;color:var(--navy);text-decoration:none;transition:background 0.2s;white-space:nowrap;}
+.dropdown a:hover{background:var(--light);color:var(--red);}
+.drop-icon{font-size:1rem;width:22px;text-align:center;}
 
 /* HAMBURGER */
 .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none;}
@@ -97,13 +103,22 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
 .hamburger.open span:nth-child(2){opacity:0;}
 .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
-.mobile-menu{display:none;position:fixed;top:75px;left:0;right:0;background:var(--white);box-shadow:0 8px 24px rgba(27,42,107,0.12);z-index:99;padding:1.5rem 2rem;flex-direction:column;gap:0;}
+
+/* MOBILE MENU */
+.mobile-menu{display:none;position:fixed;top:75px;left:0;right:0;background:var(--white);box-shadow:0 8px 24px rgba(27,42,107,0.12);z-index:99;padding:1rem 1.5rem 1.5rem;flex-direction:column;gap:0;max-height:calc(100vh - 75px);overflow-y:auto;}
 .mobile-menu.open{display:flex;}
-.mobile-menu li{list-style:none;border-bottom:1px solid rgba(27,42,107,0.07);}
-.mobile-menu li:last-child{border-bottom:none;}
-.mobile-menu a{display:block;padding:0.85rem 0;font-size:0.95rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;}
-.mobile-menu a:hover,.mobile-menu a.active{color:var(--red);}
-.mobile-menu .mobile-join{display:inline-block;margin-top:1rem;background:var(--red);color:var(--white);padding:0.75rem 2rem;border-radius:50px;font-weight:600;font-size:0.9rem;text-align:center;text-decoration:none;}
+.mobile-menu > li{list-style:none;}
+.mobile-menu > li > a{display:flex;align-items:center;justify-content:space-between;padding:0.85rem 0;font-size:0.95rem;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:1px solid rgba(27,42,107,0.07);}
+.mobile-menu > li > a:hover,.mobile-menu > li > a.active{color:var(--red);}
+.m-arrow{font-size:0.7rem;transition:transform 0.2s;}
+.mobile-menu > li.open > a .m-arrow{transform:rotate(180deg);}
+.mobile-submenu{display:none;flex-direction:column;background:var(--light);border-radius:10px;margin:0.4rem 0 0.5rem;overflow:hidden;}
+.mobile-menu > li.open .mobile-submenu{display:flex;}
+.mobile-submenu a{display:flex;align-items:center;gap:0.75rem;padding:0.7rem 1rem;font-size:0.88rem;font-weight:500;color:var(--navy);text-decoration:none;border-bottom:1px solid rgba(27,42,107,0.05);}
+.mobile-submenu a:last-child{border-bottom:none;}
+.mobile-submenu a:hover{color:var(--red);}
+.mobile-join{display:block;margin-top:1rem;background:var(--red);color:var(--white) !important;padding:0.85rem 2rem;border-radius:50px;font-weight:700 !important;font-size:0.9rem;text-align:center;text-decoration:none;border-bottom:none !important;}
+.mobile-join:hover{background:var(--navy) !important;}
 
 /* PAGE HERO */
 .page-hero{background:linear-gradient(135deg,var(--navy),var(--dark));padding:8rem 2rem 5rem;text-align:center;position:relative;overflow:hidden;}
@@ -122,7 +137,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .intro blockquote::before{content:'"';font-size:6rem;color:var(--gold);opacity:0.3;position:absolute;top:-2rem;left:-1rem;font-family:'Playfair Display',serif;line-height:1;}
 .intro-attr{font-size:0.85rem;color:var(--red);font-weight:600;letter-spacing:1px;text-transform:uppercase;}
 
-/* SECTION TAGS */
+/* SECTION */
 .section-tag{display:inline-block;background:rgba(230,51,41,0.1);color:var(--red);padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;letter-spacing:1px;margin-bottom:0.75rem;}
 .section-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:var(--navy);margin-bottom:1rem;}
 .section-title span{color:var(--red);}
@@ -136,7 +151,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .founder-story.reverse .founder-words{order:1;}
 .founder-profile{background:var(--light);border-radius:24px;padding:2rem;text-align:center;position:sticky;top:100px;}
 .founder-img{width:120px;height:120px;border-radius:50%;object-fit:cover;object-position:top;margin:0 auto 1rem;display:block;border:4px solid var(--white);box-shadow:0 4px 20px rgba(27,42,107,0.2);}
-.founder-avatar{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;color:var(--white);margin:0 auto 1rem;}
 .founder-name{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;}
 .founder-role{font-size:0.75rem;color:var(--red);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem;}
 .founder-country{font-size:0.78rem;color:var(--gray);}
@@ -197,47 +211,31 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
 .footer-links-row a{font-size:0.78rem;color:rgba(255,255,255,0.6);text-decoration:none;}
 .footer-links-row a:hover{color:var(--gold);}
 
-/* ===================== RESPONSIVE ===================== */
-
-/* TABLET */
+/* ========== RESPONSIVE ========== */
 @media(max-width:1024px){
   .founder-story,.founder-story.reverse{grid-template-columns:1fr 1fr;}
   .wise-grid{grid-template-columns:repeat(2,1fr);}
 }
 
-/* MOBILE */
 @media(max-width:768px){
-  /* NAV */
   .nav-links{display:none;}
   .nav-btn{display:none;}
   .hamburger{display:flex;}
   nav{padding:0 1.25rem;}
-
-  /* PAGE HERO */
   .page-hero{padding:6rem 1.25rem 3rem;}
   .page-title{font-size:2rem;}
   .page-sub{font-size:0.9rem;}
-
-  /* INTRO */
   .intro{padding:3rem 1.25rem;}
   .intro blockquote{padding:0 0.5rem;font-size:1.2rem;}
-
-  /* FOUNDERS */
   .founders{padding:3rem 1.25rem;}
   .founder-story,.founder-story.reverse{grid-template-columns:1fr;gap:1.5rem;}
   .founder-story.reverse .founder-profile,.founder-story.reverse .founder-words{order:unset;}
   .founder-profile{position:static;}
   .founder-quote{font-size:1.1rem;}
-
-  /* WISE WORDS */
   .wise-words{padding:3rem 1.25rem;}
   .wise-grid{grid-template-columns:1fr;}
-
-  /* VISION */
   .vision{padding:3rem 1.25rem;}
   .vision-text{font-size:1.2rem;}
-
-  /* TIMELINE */
   .timeline-section{padding:3rem 1.25rem;}
   .timeline::before{left:20px;}
   .timeline-item{grid-template-columns:1fr;padding-left:3rem;gap:0.75rem;}
@@ -246,23 +244,17 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
   .timeline-item:nth-child(odd) .timeline-date,
   .timeline-item:nth-child(even) .timeline-date{grid-column:1;text-align:left;justify-content:flex-start;padding-top:0;}
   .timeline-dot{left:20px;}
-
-  /* CTA */
   .cta{padding:3.5rem 1.25rem;}
   .cta h2{font-size:1.8rem;}
-
-  /* FOOTER */
   footer{padding:2rem 1.25rem;}
   .footer-bottom{flex-direction:column;text-align:center;gap:1rem;}
   .footer-links-row{justify-content:center;}
 }
 
-/* SMALL MOBILE */
 @media(max-width:480px){
   .page-title{font-size:1.8rem;}
   .section-title{font-size:1.5rem;}
-  .founder-img,.founder-avatar{width:90px;height:90px;}
-  .founder-avatar{font-size:1.8rem;}
+  .founder-img{width:90px;height:90px;}
 }
 </style>
 </head>
@@ -276,18 +268,29 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
   </a>
   <ul class="nav-links">
     <li><a href="index.html">Home</a></li>
-    <li><a href="about.html">About</a></li>
-    <li><a href="programs.html">Programs</a></li>
-    <li><a href="team.html">Team</a></li>
-    <li><a href="events.html">Events</a></li>
-    <li><a href="join.html">Join Us</a></li>
+    <li>
+      <a href="about.html" class="active">About <span class="arrow">▼</span></a>
+      <div class="dropdown">
+        <a href="about.html"><span class="drop-icon">🌍</span> About YAN</a>
+        <a href="Journey_Stories.html"><span class="drop-icon">📖</span> Journey Stories</a>
+      </div>
+    </li>
+    <li>
+      <a href="programs.html">Programs <span class="arrow">▼</span></a>
+      <div class="dropdown">
+        <a href="programs.html"><span class="drop-icon">💻</span> Our Programs</a>
+        <a href="events.html"><span class="drop-icon">📅</span> Events</a>
+      </div>
+    </li>
+    <li>
+      <a href="team.html">Team <span class="arrow">▼</span></a>
+      <div class="dropdown">
+        <a href="team.html"><span class="drop-icon">👥</span> Our Team</a>
+        <a href="gallery.html"><span class="drop-icon">📸</span> Gallery</a>
+      </div>
+    </li>
+    <li><a href="community.html">Community</a></li>
     <li><a href="contact.html">Contact</a></li>
-    <li><a href="Journey_Stories.html" class="active">Journey Stories</a></li>
-    <li><a href="gallery.html" class="nav-btn">Gallery</a></li>
-    <li><a href="community.html" class="nav-btn">Community</a></li>
-    <li><a href="register.html" class="nav-btn">Register</a></li>
-    <li><a href="login.html" class="nav-btn">Login</a></li>
-    <li><a href="profile.html" class="nav-btn">Profile</a></li>
   </ul>
   <a href="join.html" class="nav-btn">Join YAN</a>
   <button class="hamburger" id="hamburger" aria-label="Open menu">
@@ -298,18 +301,29 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
 <!-- MOBILE MENU -->
 <ul class="mobile-menu" id="mobileMenu">
   <li><a href="index.html">Home</a></li>
-  <li><a href="about.html">About</a></li>
-  <li><a href="programs.html">Programs</a></li>
-  <li><a href="team.html">Team</a></li>
-  <li><a href="events.html">Events</a></li>
-  <li><a href="join.html">Join Us</a></li>
-  <li><a href="contact.html">Contact</a></li>
-  <li><a href="Journey_Stories.html" class="active">Journey Stories</a></li>
-  <li><a href="gallery.html">Gallery</a></li>
+  <li>
+    <a href="about.html" class="active">About <span class="m-arrow">▼</span></a>
+    <div class="mobile-submenu">
+      <a href="about.html"><span class="drop-icon">🌍</span> About YAN</a>
+      <a href="Journey_Stories.html"><span class="drop-icon">📖</span> Journey Stories</a>
+    </div>
+  </li>
+  <li>
+    <a href="programs.html">Programs <span class="m-arrow">▼</span></a>
+    <div class="mobile-submenu">
+      <a href="programs.html"><span class="drop-icon">💻</span> Our Programs</a>
+      <a href="events.html"><span class="drop-icon">📅</span> Events</a>
+    </div>
+  </li>
+  <li>
+    <a href="team.html">Team <span class="m-arrow">▼</span></a>
+    <div class="mobile-submenu">
+      <a href="team.html"><span class="drop-icon">👥</span> Our Team</a>
+      <a href="gallery.html"><span class="drop-icon">📸</span> Gallery</a>
+    </div>
+  </li>
   <li><a href="community.html">Community</a></li>
-  <li><a href="register.html">Register</a></li>
-  <li><a href="login.html">Login</a></li>
-  <li><a href="profile.html">Profile</a></li>
+  <li><a href="contact.html">Contact</a></li>
   <li><a href="join.html" class="mobile-join">Join YAN 🚀</a></li>
 </ul>
 
@@ -454,42 +468,15 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
       <p style="color:rgba(255,255,255,0.65);font-size:0.88rem;max-width:500px;margin:0 auto;">Principles and wisdom that shape how we think, lead and serve at Young Africans Network.</p>
     </div>
     <div class="wise-grid">
-      <div class="wise-card">
-        <div class="wise-text">"Service is the rent we pay for the privilege of living on this earth."</div>
-        <div class="wise-author">— YAN Leadership Principle</div>
-      </div>
-      <div class="wise-card">
-        <div class="wise-text">"Unity is strength. When there is teamwork and collaboration, wonderful things can be achieved."</div>
-        <div class="wise-author">— Mattie Stepanek</div>
-      </div>
-      <div class="wise-card">
-        <div class="wise-text">"Education is the most powerful weapon which you can use to change the world."</div>
-        <div class="wise-author">— Nelson Mandela</div>
-      </div>
-      <div class="wise-card">
-        <div class="wise-text">"The African child is not a problem to be solved. The African child is a solution waiting to be unleashed."</div>
-        <div class="wise-author">— YAN Founding Belief</div>
-      </div>
-      <div class="wise-card">
-        <div class="wise-text">"If you want to go fast, go alone. If you want to go far, go together."</div>
-        <div class="wise-author">— African Proverb</div>
-      </div>
-      <div class="wise-card">
-        <div class="wise-text">"It always seems impossible until it is done. Start where you are. Use what you have. Do what you can."</div>
-        <div class="wise-author">— Nelson Mandela</div>
-      </div>
-      <div class="wise-card">
-        <div class="wise-text">"Leadership is not about titles or positions. It is about impact, influence and inspiration."</div>
-        <div class="wise-author">— Robin Sharma</div>
-      </div>
-      <div class="wise-card">
-        <div class="wise-text">"We may encounter many defeats but we must not be defeated. It may even be necessary to encounter the defeat, so that we can know who we are."</div>
-        <div class="wise-author">— Maya Angelou</div>
-      </div>
-      <div class="wise-card">
-        <div class="wise-text">"The time is always right to do what is right. And the right thing for Africa is for its youth to rise — together."</div>
-        <div class="wise-author">— YAN Mission Statement</div>
-      </div>
+      <div class="wise-card"><div class="wise-text">"Service is the rent we pay for the privilege of living on this earth."</div><div class="wise-author">— YAN Leadership Principle</div></div>
+      <div class="wise-card"><div class="wise-text">"Unity is strength. When there is teamwork and collaboration, wonderful things can be achieved."</div><div class="wise-author">— Mattie Stepanek</div></div>
+      <div class="wise-card"><div class="wise-text">"Education is the most powerful weapon which you can use to change the world."</div><div class="wise-author">— Nelson Mandela</div></div>
+      <div class="wise-card"><div class="wise-text">"The African child is not a problem to be solved. The African child is a solution waiting to be unleashed."</div><div class="wise-author">— YAN Founding Belief</div></div>
+      <div class="wise-card"><div class="wise-text">"If you want to go fast, go alone. If you want to go far, go together."</div><div class="wise-author">— African Proverb</div></div>
+      <div class="wise-card"><div class="wise-text">"It always seems impossible until it is done. Start where you are. Use what you have. Do what you can."</div><div class="wise-author">— Nelson Mandela</div></div>
+      <div class="wise-card"><div class="wise-text">"Leadership is not about titles or positions. It is about impact, influence and inspiration."</div><div class="wise-author">— Robin Sharma</div></div>
+      <div class="wise-card"><div class="wise-text">"We may encounter many defeats but we must not be defeated. It may even be necessary to encounter the defeat, so that we can know who we are."</div><div class="wise-author">— Maya Angelou</div></div>
+      <div class="wise-card"><div class="wise-text">"The time is always right to do what is right. And the right thing for Africa is for its youth to rise — together."</div><div class="wise-author">— YAN Mission Statement</div></div>
     </div>
   </div>
 </div>
@@ -512,50 +499,32 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
   </div>
   <div class="timeline">
     <div class="timeline-item">
-      <div class="timeline-content">
-        <div class="timeline-title">🌱 The Idea is Born</div>
-        <div class="timeline-desc">Emmanuel Ikumilu Mwori envisions a pan-African network that connects, equips and empowers young Africans across the continent and diaspora.</div>
-      </div>
+      <div class="timeline-content"><div class="timeline-title">🌱 The Idea is Born</div><div class="timeline-desc">Emmanuel Ikumilu Mwori envisions a pan-African network that connects, equips and empowers young Africans across the continent and diaspora.</div></div>
       <div class="timeline-date"><span class="date-badge">Early 2026</span></div>
       <div class="timeline-dot"></div>
     </div>
     <div class="timeline-item">
-      <div class="timeline-content">
-        <div class="timeline-title">🤝 The Founding Team Forms</div>
-        <div class="timeline-desc">Emmanuel, Merlene and Regan come together as co-founders, united by a shared vision and a commitment to serve African youth.</div>
-      </div>
+      <div class="timeline-content"><div class="timeline-title">🤝 The Founding Team Forms</div><div class="timeline-desc">Emmanuel, Merlene and Regan come together as co-founders, united by a shared vision and a commitment to serve African youth.</div></div>
       <div class="timeline-date"><span class="date-badge">March 2026</span></div>
       <div class="timeline-dot"></div>
     </div>
     <div class="timeline-item">
-      <div class="timeline-content">
-        <div class="timeline-title">🏗️ Building the Foundation</div>
-        <div class="timeline-desc">8 departments are established, department leads recruited from across Africa, and the organizational structure is set in place.</div>
-      </div>
+      <div class="timeline-content"><div class="timeline-title">🏗️ Building the Foundation</div><div class="timeline-desc">8 departments are established, department leads recruited from across Africa, and the organizational structure is set in place.</div></div>
       <div class="timeline-date"><span class="date-badge">April 2026</span></div>
       <div class="timeline-dot"></div>
     </div>
     <div class="timeline-item">
-      <div class="timeline-content">
-        <div class="timeline-title">🌍 Members Join from Across Africa</div>
-        <div class="timeline-desc">Young Africans from Kenya, Cameroon, Rwanda, Tanzania, South Sudan, Ghana, Nigeria and beyond begin joining the network.</div>
-      </div>
+      <div class="timeline-content"><div class="timeline-title">🌍 Members Join from Across Africa</div><div class="timeline-desc">Young Africans from Kenya, Cameroon, Rwanda, Tanzania, South Sudan, Ghana, Nigeria and beyond begin joining the network.</div></div>
       <div class="timeline-date"><span class="date-badge">May 2026</span></div>
       <div class="timeline-dot"></div>
     </div>
     <div class="timeline-item">
-      <div class="timeline-content">
-        <div class="timeline-title">🚀 Official Continental Launch</div>
-        <div class="timeline-desc">YAN officially launches to the world on 1st June 2026 — marking the beginning of a new era for African youth empowerment.</div>
-      </div>
+      <div class="timeline-content"><div class="timeline-title">🚀 Official Continental Launch</div><div class="timeline-desc">YAN officially launches to the world on 1st June 2026 — marking the beginning of a new era for African youth empowerment.</div></div>
       <div class="timeline-date"><span class="date-badge">1 June 2026</span></div>
       <div class="timeline-dot"></div>
     </div>
     <div class="timeline-item">
-      <div class="timeline-content">
-        <div class="timeline-title">✨ The Journey Continues...</div>
-        <div class="timeline-desc">Programs, training, scholarships, leadership summits and continental events — the best chapters of the YAN story are still being written.</div>
-      </div>
+      <div class="timeline-content"><div class="timeline-title">✨ The Journey Continues...</div><div class="timeline-desc">Programs, training, scholarships, leadership summits and continental events — the best chapters of the YAN story are still being written.</div></div>
       <div class="timeline-date"><span class="date-badge">2026 & Beyond</span></div>
       <div class="timeline-dot"></div>
     </div>
@@ -578,8 +547,9 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
       <a href="about.html">About</a>
       <a href="programs.html">Programs</a>
       <a href="team.html">Team</a>
+      <a href="community.html">Community</a>
       <a href="contact.html">Contact</a>
-      <a href="Journey_Stories.html">Journey Stories</a>
+      <a href="join.html">Join Us</a>
     </div>
   </div>
 </footer>
@@ -587,11 +557,23 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
 <script>
 const hamburger = document.getElementById('hamburger');
 const mobileMenu = document.getElementById('mobileMenu');
+
 hamburger.addEventListener('click', () => {
   hamburger.classList.toggle('open');
   mobileMenu.classList.toggle('open');
 });
-mobileMenu.querySelectorAll('a').forEach(link => {
+
+mobileMenu.querySelectorAll('.mobile-menu > li > a').forEach(link => {
+  const submenu = link.nextElementSibling;
+  if (submenu && submenu.classList.contains('mobile-submenu')) {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      link.parentElement.classList.toggle('open');
+    });
+  }
+});
+
+mobileMenu.querySelectorAll('.mobile-submenu a, .mobile-join').forEach(link => {
   link.addEventListener('click', () => {
     hamburger.classList.remove('open');
     mobileMenu.classList.remove('open');
