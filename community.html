@@ -1307,7 +1307,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .toast.success{background:var(--green);}
 
 /* ===== SCREENS ===== */
-.screen{display:none;}
+.screen{display:none;position:relative;z-index:1;}
 .screen.active{display:block;}
 
 /* ===== LANDING ===== */
@@ -1348,7 +1348,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .auth-switch a:hover{text-decoration:underline;}
 
 /* ===== PLATFORM ===== */
-#screen-platform{display:flex;min-height:100vh;}
+#screen-platform{display:flex;min-height:100vh;position:relative;z-index:10;}
 
 /* SIDEBAR */
 .sidebar{width:var(--sidebar);background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;overflow-y:auto;}
