@@ -101,10 +101,14 @@ onAuthStateChanged(auth, async user => {
     if (snap.exists()) {
       currentUserData = snap.data();
       if (!currentUserData.profileComplete) {
-        await updateDoc(doc(db, 'users', user.uid), { profileComplete: true });
-        currentUserData.profileComplete = true;
-      }
+      await updateDoc(doc(db, 'users', user.uid), { 
+        profileComplete: true 
+      });
+      currentUserData.profileComplete = true;
       enterPlatform();
+    } else {
+      enterPlatform();
+    }
     } else {
       showScreen('screen-register');
     }
