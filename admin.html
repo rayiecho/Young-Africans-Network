@@ -38,6 +38,8 @@ const DEPARTMENTS = [
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+signInAnonymously(auth).then(() => console.log('Admin auth ready ✅')).catch(e => console.log('Auth error:', e));
 
 // ===== AUTH =====
 function checkAuth() {
