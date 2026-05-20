@@ -1556,6 +1556,14 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .chat-input-row button{background:var(--navy);color:var(--white);border:none;padding:0.75rem 1.5rem;border-radius:50px;cursor:pointer;font-size:0.85rem;font-weight:600;white-space:nowrap;}
 
 /* MEETINGS */
+.rooms-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1.5rem;}
+.room-card{background:var(--white);border-radius:16px;padding:1.25rem;display:flex;align-items:center;gap:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);transition:transform 0.2s;}
+.room-card:hover{transform:translateY(-2px);}
+.room-icon{font-size:2rem;flex-shrink:0;}
+.room-info{flex:1;}
+.room-info h4{font-size:0.92rem;font-weight:700;color:var(--navy);margin-bottom:0.2rem;}
+.room-info p{font-size:0.75rem;color:var(--gray);}
+@media(max-width:768px){.rooms-grid{grid-template-columns:1fr;}}
 .meetings-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
 .meetings-header h2{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);}
 .meeting-form-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);display:flex;flex-direction:column;gap:0.75rem;}
