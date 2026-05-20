@@ -1313,8 +1313,8 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .toast.success{background:var(--green);}
 
 /* ===== SCREENS ===== */
-.screen{display:none !important;}
-.screen.active{display:block !important;}
+.screen{display:none !important;visibility:hidden !important;opacity:0 !important;pointer-events:none !important;position:fixed !important;top:-9999px !important;}
+.screen.active{display:block !important;visibility:visible !important;opacity:1 !important;pointer-events:all !important;position:relative !important;top:0 !important;}
 .screen.active{display:block;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;overflow-y:auto;}
 
 /* ===== LANDING ===== */
