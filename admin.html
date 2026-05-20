@@ -322,7 +322,7 @@ window.addTeamMember = async function() {
   loadTeamMembers();
 };
 
-async function loadTeamMembers() {
+window.loadTeamMembers = async function() {
   const container = document.getElementById('team-list');
   if (!container) return;
   const snap = await getDocs(query(collection(db, 'team'), orderBy('order', 'asc')));
