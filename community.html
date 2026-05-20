@@ -851,7 +851,7 @@ function downloadCertificate(certId) {
       link.download = `YAN_Certificate_${u.name.replace(/ /g,'_')}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
-      showToast('Certificate downloading! 🏆');
+      
     };
     qrImg.onerror = function() {
       // Download without QR if it fails
@@ -861,7 +861,7 @@ function downloadCertificate(certId) {
       link.click();
       showToast('Certificate downloading! 🏆');
     };
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://youngafricansnetwork.org/verify/${verifyCode}`;
+    qrImg.src = `hshowToast('Certificate downloading! 🏆');ttps://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://youngafricansnetwork.org/verify/${verifyCode}`;
   };
   logo.onerror = function() {
     showToast('Certificate generating...', 'success');
@@ -887,8 +887,9 @@ function downloadCertificate(certId) {
   ctx.font = '16px Georgia'; ctx.fillStyle = '#6B7280'; ctx.fillText('Founder & CEO, Young Africans Network', 150, 705);
   ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(100, 720); ctx.lineTo(500, 720); ctx.stroke();
   ctx.textAlign = 'center'; ctx.fillStyle = '#6B7280'; ctx.font = '14px Georgia'; ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com', 600, 780);
-  const link = document.createElement('a'); link.download = `YAN_Certificate_${u.name.replace(/ /g,'_')}.png`; link.href = canvas.toDataURL('image/png'); link.click();
-  showToast('Certificate downloading! 🏆');
+  const link = document.createEle
+  showToast('Certificate downloading! 🏆');ment('a'); link.download = `YAN_Certificate_${u.name.replace(/ /g,'_')}.png`; link.href = canvas.toDataURL('image/png'); link.click();
+  
 }
 
 // HEAD PANEL
