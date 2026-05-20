@@ -185,6 +185,7 @@ async function doLogout() {
   unsubscribers.forEach(u => u());
   unsubscribers = [];
   await signOut(auth);
+  showScreen('screen-landing');
 }
 
 async function doForgotPassword() {
@@ -1308,7 +1309,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 
 /* ===== SCREENS ===== */
 .screen{display:none;position:relative;z-index:1;}
-.screen.active{display:block;}
+.screen.active{display:block;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;overflow-y:auto;}
 
 /* ===== LANDING ===== */
 #screen-landing{min-height:100vh;background:linear-gradient(135deg,var(--navy),var(--dark));display:flex;align-items:center;justify-content:center;padding:2rem;}
@@ -1348,7 +1349,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .auth-switch a:hover{text-decoration:underline;}
 
 /* ===== PLATFORM ===== */
-#screen-platform{display:flex;min-height:100vh;position:relative;z-index:10;}
+#screen-platform{display:flex;min-height:100vh;}
 
 /* SIDEBAR */
 .sidebar{width:var(--sidebar);background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;overflow-y:auto;}
