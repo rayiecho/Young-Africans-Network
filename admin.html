@@ -36,8 +36,8 @@ const DEPARTMENTS = [
   { id: 'mental', name: 'Mental Health & Wellbeing', icon: '💚' }
 ];
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const auth = getAuth(app);
+signInAnonymously(auth);
 const auth = getAuth(app);
 signInAnonymously(auth).then(() => console.log('Admin auth ready ✅')).catch(e => console.log('Auth error:', e));
 
