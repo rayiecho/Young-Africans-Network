@@ -4,249 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
+<title>YAN Admin Dashboard | Young Africans Network</title>
 <link rel="icon" href="/images/logo.jpeg" type="image/jpeg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
-<title>Admin Dashboard | Young Africans Network</title>
-<style>
-:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;}
-*{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;}
-body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);min-height:100vh;}
 
-/* LOGIN SCREEN */
-.login-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--navy),var(--dark));display:flex;align-items:center;justify-content:center;z-index:200;}
-.login-screen.hidden{display:none;}
-.login-box{background:var(--white);border-radius:24px;padding:2.5rem;width:90%;max-width:400px;text-align:center;}
-.login-logo{height:64px;margin-bottom:1.25rem;}
-.login-title{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--navy);margin-bottom:0.4rem;}
-.login-sub{font-size:0.82rem;color:var(--gray);margin-bottom:1.75rem;}
-.login-input{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.85rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.9rem;outline:none;margin-bottom:1rem;text-align:center;letter-spacing:2px;}
-.login-input:focus{border-color:var(--navy);}
-.login-error{font-size:0.8rem;color:var(--red);margin-bottom:0.75rem;display:none;}
-.btn-login{width:100%;padding:0.85rem;background:var(--red);color:var(--white);font-family:'Poppins',sans-serif;font-size:0.9rem;font-weight:700;border:none;border-radius:50px;cursor:pointer;transition:background 0.2s;}
-.btn-login:hover{background:var(--navy);}
-
-/* NAV */
-nav{background:var(--navy);padding:0 2rem;height:70px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-.nav-left{display:flex;align-items:center;gap:0.75rem;}
-.nav-logo{height:42px;}
-.nav-title{font-size:0.95rem;font-weight:700;color:var(--white);}
-.nav-title span{display:block;font-size:0.7rem;font-weight:400;color:rgba(255,255,255,0.6);}
-.nav-right{display:flex;align-items:center;gap:1rem;}
-.admin-badge{background:rgba(245,166,35,0.2);color:var(--gold);padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;border:1px solid rgba(245,166,35,0.3);}
-.btn-nav-logout{background:rgba(255,255,255,0.1);color:var(--white);border:1px solid rgba(255,255,255,0.2);padding:0.4rem 1.25rem;border-radius:50px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:all 0.2s;}
-.btn-nav-logout:hover{background:var(--red);border-color:var(--red);}
-
-/* MAIN */
-.main{max-width:1300px;margin:0 auto;padding:2.5rem 2rem;}
-
-/* STATS */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2.5rem;}
-.stat-card{background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,0.05);text-align:center;}
-.stat-icon{font-size:2rem;margin-bottom:0.5rem;}
-.stat-value{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--navy);}
-.stat-label{font-size:0.78rem;color:var(--gray);margin-top:0.25rem;}
-
-/* TOOLBAR */
-.toolbar{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;}
-.search-box{flex:1;min-width:200px;background:var(--white);border:1.5px solid rgba(27,42,107,0.12);color:var(--navy);padding:0.7rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.85rem;outline:none;}
-.search-box:focus{border-color:var(--navy);}
-.filter-select{background:var(--white);border:1.5px solid rgba(27,42,107,0.12);color:var(--navy);padding:0.7rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;outline:none;cursor:pointer;}
-.members-count{font-size:0.82rem;color:var(--gray);white-space:nowrap;}
-
-/* TABLE */
-.table-wrap{background:var(--white);border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.05);overflow:hidden;}
-.table-header{padding:1.25rem 1.75rem;border-bottom:2px solid var(--light);display:flex;align-items:center;justify-content:space-between;}
-.table-title{font-size:0.95rem;font-weight:700;color:var(--navy);}
-table{width:100%;border-collapse:collapse;}
-thead tr{background:var(--light);}
-th{padding:0.85rem 1rem;text-align:left;font-size:0.75rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;}
-tbody tr{border-bottom:1px solid var(--light);transition:background 0.15s;}
-tbody tr:last-child{border-bottom:none;}
-tbody tr:hover{background:rgba(27,42,107,0.02);}
-td{padding:0.85rem 1rem;font-size:0.82rem;color:var(--navy);vertical-align:middle;}
-.member-name{font-weight:700;}
-.member-email{font-size:0.75rem;color:var(--gray);margin-top:2px;}
-.role-badge{display:inline-block;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:600;}
-.role-member{background:rgba(27,42,107,0.08);color:var(--navy);}
-.role-executive{background:rgba(245,166,35,0.15);color:#B7791F;}
-.role-volunteer{background:rgba(39,174,96,0.1);color:#27AE60;}
-.role-associate{background:rgba(107,114,128,0.1);color:var(--gray);}
-.btn-delete-member{background:rgba(230,51,41,0.08);color:var(--red);border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:all 0.2s;white-space:nowrap;}
-.btn-delete-member:hover{background:var(--red);color:var(--white);}
-.btn-view-member{background:rgba(27,42,107,0.08);color:var(--navy);border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:all 0.2s;margin-right:0.5rem;white-space:nowrap;}
-.btn-view-member:hover{background:var(--navy);color:var(--white);}
-
-/* LOADING */
-.table-loading{text-align:center;padding:3rem;color:var(--gray);}
-.spinner{width:32px;height:32px;border:3px solid var(--light);border-top-color:var(--navy);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1rem;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.empty-row td{text-align:center;padding:3rem;color:var(--gray);}
-
-/* MEMBER MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:1rem;}
-.modal-overlay.hidden{display:none;}
-.modal-box{background:var(--white);border-radius:20px;padding:2rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;}
-.modal-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--navy);margin-bottom:1.5rem;padding-bottom:0.75rem;border-bottom:2px solid var(--light);}
-.modal-row{display:flex;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid var(--light);font-size:0.85rem;}
-.modal-row:last-of-type{border-bottom:none;}
-.modal-label{color:var(--gray);font-weight:500;}
-.modal-value{font-weight:600;color:var(--navy);text-align:right;max-width:60%;}
-.modal-close{width:100%;margin-top:1.5rem;padding:0.75rem;background:var(--navy);color:var(--white);border:none;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;}
-.modal-bio{font-size:0.82rem;color:var(--gray);line-height:1.7;padding:0.75rem 0;}
-
-/* TOAST */
-.toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);color:var(--white);padding:0.85rem 1.5rem;border-radius:12px;font-size:0.85rem;font-weight:500;z-index:999;opacity:0;transform:translateY(20px);transition:all 0.3s;pointer-events:none;}
-.toast.show{opacity:1;transform:translateY(0);}
-.toast.success{background:#27AE60;}
-.toast.error{background:var(--red);}
-
-/* FOOTER */
-footer{background:var(--navy);padding:1.5rem 2rem;text-align:center;margin-top:3rem;}
-.footer-copy{font-size:0.78rem;color:rgba(255,255,255,0.5);}
-.footer-copy a{color:var(--gold);text-decoration:none;}
-
-/* RESPONSIVE */
-@media(max-width:1024px){
-  .stats-grid{grid-template-columns:repeat(2,1fr);}
-}
-@media(max-width:768px){
-  nav{padding:0 1.25rem;}
-  .main{padding:1.5rem 1.25rem;}
-  .stats-grid{grid-template-columns:repeat(2,1fr);}
-  .nav-title{display:none;}
-  table{display:block;overflow-x:auto;}
-}
-@media(max-width:480px){
-  .stats-grid{grid-template-columns:1fr 1fr;}
-  .admin-badge{display:none;}
-}
-</style>
-</head>
-<body>
-
-<!-- LOGIN SCREEN -->
-<div class="login-screen" id="loginScreen">
-  <div class="login-box">
-    <img src="images/logo.jpeg" alt="YAN Logo" class="login-logo">
-    <div class="login-title">Admin Dashboard</div>
-    <div class="login-sub">Enter your admin password to access the member management panel.</div>
-    <input type="password" class="login-input" id="adminPassword" placeholder="Admin Password">
-    <div class="login-error" id="loginError">❌ Incorrect password. Try again.</div>
-    <button class="btn-login" id="btnAdminLogin">Access Dashboard</button>
-  </div>
-</div>
-
-<!-- MEMBER DETAIL MODAL -->
-<div class="modal-overlay hidden" id="memberModal">
-  <div class="modal-box">
-    <div class="modal-title" id="modalName">Member Details</div>
-    <div class="modal-row"><span class="modal-label">Email</span><span class="modal-value" id="modalEmail">—</span></div>
-    <div class="modal-row"><span class="modal-label">Country</span><span class="modal-value" id="modalCountry">—</span></div>
-    <div class="modal-row"><span class="modal-label">Role</span><span class="modal-value" id="modalRole">—</span></div>
-    <div class="modal-row"><span class="modal-label">Department</span><span class="modal-value" id="modalDept">—</span></div>
-    <div class="modal-row"><span class="modal-label">WhatsApp</span><span class="modal-value" id="modalWhatsapp">—</span></div>
-    <div class="modal-row"><span class="modal-label">Registered</span><span class="modal-value" id="modalSince">—</span></div>
-    <div style="margin-top:1rem;">
-      <div style="font-size:0.78rem;font-weight:600;color:var(--navy);margin-bottom:0.4rem;">Bio</div>
-      <div class="modal-bio" id="modalBio">No bio added.</div>
-    </div>
-    <button class="modal-close" id="modalClose">Close</button>
-  </div>
-</div>
-
-<!-- NAV -->
-<nav>
-  <div class="nav-left">
-    <img src="images/logo.jpeg" alt="YAN Logo" class="nav-logo">
-    <div class="nav-title">Young Africans Network<span>Admin Dashboard</span></div>
-  </div>
-  <div class="nav-right">
-    <span class="admin-badge">🛡️ Admin</span>
-    <button class="btn-nav-logout" id="btnLogout">Logout</button>
-  </div>
-</nav>
-
-<!-- MAIN -->
-<div class="main">
-
-  <!-- STATS -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon">👥</div>
-      <div class="stat-value" id="statTotal">—</div>
-      <div class="stat-label">Total Members</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">🌍</div>
-      <div class="stat-value" id="statCountries">—</div>
-      <div class="stat-label">Countries</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">⭐</div>
-      <div class="stat-value" id="statExecutives">—</div>
-      <div class="stat-label">Executives</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">📅</div>
-      <div class="stat-value" id="statNew">—</div>
-      <div class="stat-label">Joined This Month</div>
-    </div>
-  </div>
-
-  <!-- TOOLBAR -->
-  <div class="toolbar">
-    <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search by name, email or country...">
-    <select class="filter-select" id="roleFilter">
-      <option value="">All Roles</option>
-      <option value="Member">Ordinary Member</option>
-      <option value="Volunteer">Volunteer</option>
-      <option value="Associate">Associate</option>
-      <option value="Executive">Executive</option>
-    </select>
-    <span class="members-count" id="membersCount">Loading...</span>
-  </div>
-
-  <!-- TABLE -->
-  <div class="table-wrap">
-    <div class="table-header">
-      <div class="table-title">👥 Registered Members</div>
-    </div>
-    <div id="tableLoading" class="table-loading">
-      <div class="spinner"></div>
-      Loading members...
-    </div>
-    <table id="membersTable" style="display:none;">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Name</th>
-          <th>Country</th>
-          <th>Role</th>
-          <th>Department</th>
-          <th>WhatsApp</th>
-          <th>Registered</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="membersBody"></tbody>
-    </table>
-  </div>
-</div>
-
-<footer>
-  <div class="footer-copy">© 2026 Young Africans Network. Admin Panel. | <a href="index.html">Back to Website</a></div>
-</footer>
-
-<div class="toast" id="toast"></div>
-
+<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore, collection, getDocs, doc, deleteDoc, query, orderBy
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",
@@ -256,187 +23,961 @@ const firebaseConfig = {
   messagingSenderId: "224204618916",
   appId: "1:224204618916:web:8ddfd36c6f112b4912fa31"
 };
-
+const CLOUDINARY_CLOUD = 'deigiiyq5';
+const CLOUDINARY_PRESET = 'yan_Profiles';
 const ADMIN_PASSWORD = 'YAN@Admin2026';
+
+const DEPARTMENTS = [
+  { id: 'programs', name: 'Programs & Training', icon: '💻' },
+  { id: 'scholarships', name: 'Scholarships & Global Opportunities', icon: '🏆' },
+  { id: 'career', name: 'Career Development & Public Speaking', icon: '🎤' },
+  { id: 'community', name: 'Community Impact & Volunteering', icon: '🌍' },
+  { id: 'mental', name: 'Mental Health & Wellbeing', icon: '💚' }
+];
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let allMembers = [];
-let isLoggedIn = false;
+// ===== AUTH =====
+function checkAuth() {
+  const auth = sessionStorage.getItem('yan_admin');
+  if (auth !== 'true') {
+    document.getElementById('screen-login').style.display = 'flex';
+    document.getElementById('screen-dashboard').style.display = 'none';
+  } else {
+    document.getElementById('screen-login').style.display = 'none';
+    document.getElementById('screen-dashboard').style.display = 'flex';
+    loadSection('overview');
+  }
+}
 
-// ---- TOAST ----
-function showToast(msg, type = '') {
+window.doAdminLogin = function() {
+  const pass = document.getElementById('admin-pass').value;
+  if (pass === ADMIN_PASSWORD) {
+    sessionStorage.setItem('yan_admin', 'true');
+    checkAuth();
+  } else {
+    showToast('Incorrect password', 'error');
+  }
+};
+
+window.doAdminLogout = function() {
+  sessionStorage.removeItem('yan_admin');
+  checkAuth();
+};
+
+// ===== UTILS =====
+function showToast(msg, type='success') {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast show ' + type;
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
   setTimeout(() => t.className = 'toast', 3000);
 }
-
-// ---- FORMAT DATE ----
-function formatDate(ts) {
-  if (!ts) return '—';
-  const d = ts.toDate ? ts.toDate() : new Date(ts);
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+function timeAgo(ts) {
+  if (!ts) return '';
+  const t = ts.toMillis ? ts.toMillis() : (ts.seconds ? ts.seconds*1000 : ts);
+  const diff = Math.floor((Date.now() - t) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  return Math.floor(diff/86400) + 'd ago';
+}
+function sanitize(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
 }
 
-// ---- ROLE BADGE ----
-function getRoleBadge(role) {
-  const map = {
-    'Executive': 'role-executive',
-    'Volunteer': 'role-volunteer',
-    'Associate': 'role-associate',
-    'Member': 'role-member'
-  };
-  return `<span class="role-badge ${map[role] || 'role-member'}">${role || 'Member'}</span>`;
+async function uploadToCloudinary(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY_PRESET);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: fd });
+  const data = await res.json();
+  return data.secure_url || '';
 }
 
-// ---- ADMIN LOGIN ----
-document.getElementById('adminPassword').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') document.getElementById('btnAdminLogin').click();
-});
+// ===== NAVIGATION =====
+window.loadSection = async function(section) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const btn = document.querySelector(`[data-section="${section}"]`);
+  if (btn) btn.classList.add('active');
+  document.getElementById('section-title').textContent = {
+    overview: '📊 Dashboard Overview',
+    gallery: '📸 Gallery Manager',
+    team: '👥 Team Manager',
+    stories: '📖 Journey Stories Manager',
+    events: '📅 Events Manager',
+    materials: '📚 Training Materials',
+    certificates: '🏆 Certificate Manager',
+    members: '👥 Members Manager',
+    moderation: '🛡️ Community Moderation'
+  }[section] || section;
+  const container = document.getElementById('content-area');
+  container.innerHTML = '<div class="loading">Loading...</div>';
+  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration };
+  if (fns[section]) await fns[section](container);
+};
 
-document.getElementById('btnAdminLogin').addEventListener('click', () => {
-  const val = document.getElementById('adminPassword').value;
-  if (val === ADMIN_PASSWORD) {
-    isLoggedIn = true;
-    document.getElementById('loginScreen').classList.add('hidden');
-    loadMembers();
+// ===== OVERVIEW =====
+async function loadOverview(c) {
+  const [usersSnap, gallerySnap, teamSnap, eventsSnap, storiesSnap, matsSnap, certsSnap] = await Promise.all([
+    getDocs(collection(db, 'users')),
+    getDocs(collection(db, 'gallery')),
+    getDocs(collection(db, 'team')),
+    getDocs(collection(db, 'events')),
+    getDocs(collection(db, 'stories')),
+    getDocs(collection(db, 'departments', 'programs', 'materials')),
+    getDocs(query(collection(db, 'certificates'), where('status', '==', 'pending')))
+  ]);
+  c.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card navy"><div class="stat-num">${usersSnap.size}</div><div class="stat-label">Community Members</div></div>
+      <div class="stat-card red"><div class="stat-num">${certsSnap.size}</div><div class="stat-label">Pending Certificates</div></div>
+      <div class="stat-card gold"><div class="stat-num">${gallerySnap.size}</div><div class="stat-label">Gallery Items</div></div>
+      <div class="stat-card navy"><div class="stat-num">${teamSnap.size}</div><div class="stat-label">Team Members</div></div>
+      <div class="stat-card gold"><div class="stat-num">${eventsSnap.size}</div><div class="stat-label">Events</div></div>
+      <div class="stat-card red"><div class="stat-num">${storiesSnap.size}</div><div class="stat-label">Journey Stories</div></div>
+    </div>
+    <div class="overview-grid">
+      <div class="overview-card">
+        <h3>🚀 Quick Actions</h3>
+        <div class="quick-actions">
+          <button class="btn-quick" onclick="loadSection('gallery')">📸 Add Photo</button>
+          <button class="btn-quick" onclick="loadSection('team')">👤 Add Team Member</button>
+          <button class="btn-quick" onclick="loadSection('events')">📅 Add Event</button>
+          <button class="btn-quick" onclick="loadSection('stories')">📖 Add Story</button>
+          <button class="btn-quick" onclick="loadSection('materials')">📚 Add Training Material</button>
+          <button class="btn-quick" onclick="loadSection('certificates')">🏆 Review Certificates</button>
+        </div>
+      </div>
+      <div class="overview-card">
+        <h3>📋 Admin Info</h3>
+        <p style="color:var(--gray);font-size:0.85rem;line-height:1.8;">
+          ✅ All content added here appears live on the website<br>
+          ✅ Team, Gallery, Events, Stories load dynamically<br>
+          ✅ Training materials managed per department<br>
+          ✅ Certificate approvals handled here<br>
+          ✅ Community moderation available<br><br>
+          <strong>Website:</strong> youngafricansnetwork.org
+        </p>
+      </div>
+    </div>`;
+}
+
+// ===== GALLERY =====
+async function loadGallery(c) {
+  c.innerHTML = `
+    <div class="section-card">
+      <h3>➕ Add Gallery Item</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Type</label>
+          <select id="gal-type" onchange="toggleGalleryFields()">
+            <option value="photo">📸 Photo</option>
+            <option value="video">🎬 Video (YouTube)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Caption</label>
+          <input type="text" id="gal-caption" placeholder="Photo/video caption">
+        </div>
+        <div class="form-group" id="gal-photo-field">
+          <label>Upload Photo</label>
+          <input type="file" id="gal-photo" accept="image/*">
+        </div>
+        <div class="form-group" id="gal-video-field" style="display:none;">
+          <label>YouTube URL</label>
+          <input type="text" id="gal-video-url" placeholder="https://youtube.com/watch?v=...">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="gal-category">
+            <option value="Team">Team</option>
+            <option value="Events">Events</option>
+            <option value="Training">Training</option>
+            <option value="General">General</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="addGalleryItem()">Add to Gallery</button>
+    </div>
+    <div class="section-card">
+      <h3>📸 Current Gallery</h3>
+      <div id="gallery-list" class="gallery-grid"></div>
+    </div>`;
+  loadGalleryItems();
+}
+
+window.toggleGalleryFields = function() {
+  const type = document.getElementById('gal-type').value;
+  document.getElementById('gal-photo-field').style.display = type === 'photo' ? 'block' : 'none';
+  document.getElementById('gal-video-field').style.display = type === 'video' ? 'block' : 'none';
+};
+
+window.addGalleryItem = async function() {
+  const type = document.getElementById('gal-type').value;
+  const caption = document.getElementById('gal-caption').value.trim();
+  const category = document.getElementById('gal-category').value;
+  let url = '';
+  if (type === 'photo') {
+    const file = document.getElementById('gal-photo').files[0];
+    if (!file) return showToast('Select a photo', 'error');
+    showToast('Uploading...');
+    url = await uploadToCloudinary(file);
   } else {
-    document.getElementById('loginError').style.display = 'block';
-    document.getElementById('adminPassword').value = '';
-    document.getElementById('adminPassword').focus();
+    url = document.getElementById('gal-video-url').value.trim();
+    if (!url) return showToast('Enter YouTube URL', 'error');
   }
-});
+  await addDoc(collection(db, 'gallery'), { type, url, caption, category, createdAt: serverTimestamp() });
+  showToast('Gallery item added ✅');
+  loadGalleryItems();
+};
 
-// ---- LOGOUT ----
-document.getElementById('btnLogout').addEventListener('click', () => {
-  isLoggedIn = false;
-  document.getElementById('loginScreen').classList.remove('hidden');
-  document.getElementById('adminPassword').value = '';
-});
-
-// ---- LOAD MEMBERS ----
-async function loadMembers() {
-  try {
-    const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
-    const snap = await getDocs(q);
-    allMembers = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
-    updateStats();
-    renderTable(allMembers);
-  } catch (e) {
-    showToast('Error loading members. Check Firestore rules.', 'error');
-    document.getElementById('tableLoading').innerHTML = '<p style="color:var(--red);padding:2rem;text-align:center;">❌ Error loading members. Please check your Firestore rules.</p>';
-  }
+async function loadGalleryItems() {
+  const container = document.getElementById('gallery-list');
+  if (!container) return;
+  const snap = await getDocs(query(collection(db, 'gallery'), orderBy('createdAt', 'desc')));
+  if (snap.empty) { container.innerHTML = '<p style="color:var(--gray);">No gallery items yet.</p>'; return; }
+  container.innerHTML = snap.docs.map(d => {
+    const g = d.data();
+    const preview = g.type === 'photo'
+      ? `<img src="${sanitize(g.url)}" alt="${sanitize(g.caption)}">`
+      : `<div class="video-thumb">🎬 ${sanitize(g.caption||'Video')}</div>`;
+    return `
+    <div class="gallery-item-card">
+      ${preview}
+      <div class="gallery-item-info">
+        <p>${sanitize(g.caption||'')}</p>
+        <span>${sanitize(g.category||'')} · ${sanitize(g.type)}</span>
+      </div>
+      <button class="btn-delete" onclick="deleteItem('gallery','${d.id}',loadGalleryItems)">🗑️</button>
+    </div>`;
+  }).join('');
 }
 
-// ---- STATS ----
-function updateStats() {
-  const countries = new Set(allMembers.map(m => m.country).filter(Boolean));
-  const executives = allMembers.filter(m => m.role === 'Executive').length;
-  const now = new Date();
-  const thisMonth = allMembers.filter(m => {
-    if (!m.createdAt) return false;
-    const d = m.createdAt.toDate ? m.createdAt.toDate() : new Date(m.createdAt);
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-  }).length;
-  document.getElementById('statTotal').textContent = allMembers.length;
-  document.getElementById('statCountries').textContent = countries.size;
-  document.getElementById('statExecutives').textContent = executives;
-  document.getElementById('statNew').textContent = thisMonth;
+// ===== TEAM =====
+async function loadTeam(c) {
+  c.innerHTML = `
+    <div class="section-card">
+      <h3>➕ Add Team Member</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="team-name" placeholder="Mr/Ms Full Name">
+        </div>
+        <div class="form-group">
+          <label>Role *</label>
+          <input type="text" id="team-role" placeholder="e.g. Department Lead">
+        </div>
+        <div class="form-group">
+          <label>Country *</label>
+          <input type="text" id="team-country" placeholder="e.g. Kenya">
+        </div>
+        <div class="form-group">
+          <label>Department</label>
+          <select id="team-dept">
+            <option value="Leadership">Leadership Core</option>
+            ${DEPARTMENTS.map(d => `<option value="${d.id}">${d.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="team-email" placeholder="email@example.com">
+        </div>
+        <div class="form-group">
+          <label>Photo</label>
+          <input type="file" id="team-photo" accept="image/*">
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label>Display Order (lower = first)</label>
+          <input type="number" id="team-order" value="10" min="1">
+        </div>
+      </div>
+      <button class="btn-primary" onclick="addTeamMember()">Add Team Member</button>
+    </div>
+    <div class="section-card">
+      <h3>👥 Current Team</h3>
+      <div id="team-list"></div>
+    </div>`;
+  loadTeamMembers();
 }
 
-// ---- RENDER TABLE ----
-function renderTable(members) {
-  const tbody = document.getElementById('membersBody');
-  document.getElementById('tableLoading').style.display = 'none';
-  document.getElementById('membersTable').style.display = 'table';
-  document.getElementById('membersCount').textContent = `Showing ${members.length} member${members.length !== 1 ? 's' : ''}`;
+window.addTeamMember = async function() {
+  const name = document.getElementById('team-name').value.trim();
+  const role = document.getElementById('team-role').value.trim();
+  const country = document.getElementById('team-country').value.trim();
+  const dept = document.getElementById('team-dept').value;
+  const email = document.getElementById('team-email').value.trim();
+  const order = parseInt(document.getElementById('team-order').value) || 10;
+  const file = document.getElementById('team-photo').files[0];
+  if (!name || !role || !country) return showToast('Fill required fields', 'error');
+  let photoUrl = '';
+  if (file) { showToast('Uploading photo...'); photoUrl = await uploadToCloudinary(file); }
+  await addDoc(collection(db, 'team'), { name, role, country, department: dept, email, photoUrl, order, createdAt: serverTimestamp() });
+  showToast('Team member added ✅');
+  loadTeamMembers();
+};
 
-  if (members.length === 0) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No members found.</td></tr>';
-    return;
-  }
+async function loadTeamMembers() {
+  const container = document.getElementById('team-list');
+  if (!container) return;
+  const snap = await getDocs(query(collection(db, 'team'), orderBy('order', 'asc')));
+  if (snap.empty) { container.innerHTML = '<p style="color:var(--gray);">No team members yet.</p>'; return; }
+  container.innerHTML = `<div class="list-table">
+    <div class="list-header"><span>Photo</span><span>Name</span><span>Role</span><span>Country</span><span>Action</span></div>
+    ${snap.docs.map(d => {
+      const t = d.data();
+      return `<div class="list-row">
+        <span>${t.photoUrl ? `<img src="${sanitize(t.photoUrl)}" class="list-avatar">` : `<div class="list-avatar-placeholder">${(t.name||'?')[0]}</div>`}</span>
+        <span><strong>${sanitize(t.name)}</strong></span>
+        <span>${sanitize(t.role)}</span>
+        <span>📍 ${sanitize(t.country)}</span>
+        <span><button class="btn-delete" onclick="deleteItem('team','${d.id}',loadTeamMembers)">🗑️ Delete</button></span>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
 
-  tbody.innerHTML = members.map((m, i) => `
-    <tr id="row-${m.uid}">
-      <td style="color:var(--gray);font-size:0.75rem;">${i + 1}</td>
-      <td>
-        <div class="member-name">${m.firstName || ''} ${m.lastName || ''}</div>
-        <div class="member-email">${m.email || '—'}</div>
-      </td>
-      <td>${m.country || '—'}</td>
-      <td>${getRoleBadge(m.role)}</td>
-      <td style="font-size:0.78rem;color:var(--gray);max-width:160px;">${m.department || '—'}</td>
-      <td style="font-size:0.78rem;">${m.whatsapp || '—'}</td>
-      <td style="font-size:0.75rem;color:var(--gray);">${formatDate(m.createdAt)}</td>
-      <td>
-        <button class="btn-view-member" data-uid="${m.uid}">View</button>
-        <button class="btn-delete-member" data-uid="${m.uid}" data-name="${m.firstName || ''} ${m.lastName || ''}">Delete</button>
-      </td>
-    </tr>
-  `).join('');
+// ===== JOURNEY STORIES =====
+async function loadStories(c) {
+  c.innerHTML = `
+    <div class="section-card">
+      <h3>➕ Add Journey Story</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Author Name *</label>
+          <input type="text" id="story-name" placeholder="Mr/Ms Full Name">
+        </div>
+        <div class="form-group">
+          <label>Role/Title *</label>
+          <input type="text" id="story-role" placeholder="e.g. Co-Founder">
+        </div>
+        <div class="form-group">
+          <label>Country</label>
+          <input type="text" id="story-country" placeholder="e.g. Kenya">
+        </div>
+        <div class="form-group">
+          <label>Tag (e.g. Visionary & Builder)</label>
+          <input type="text" id="story-tag" placeholder="e.g. Visionary & Builder">
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label>Opening Quote *</label>
+          <input type="text" id="story-quote" placeholder="Inspiring quote from this person...">
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label>Full Story (paragraphs — separate with new line)</label>
+          <textarea id="story-message" rows="6" placeholder="Write the full story here..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Photo</label>
+          <input type="file" id="story-photo" accept="image/*">
+        </div>
+      </div>
+      <button class="btn-primary" onclick="addStory()">Add Story</button>
+    </div>
+    <div class="section-card">
+      <h3>📖 Current Stories</h3>
+      <div id="stories-list"></div>
+    </div>`;
+  loadStoriesList();
+}
 
-  // View buttons
-  document.querySelectorAll('.btn-view-member').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const member = allMembers.find(m => m.uid === btn.dataset.uid);
-      if (!member) return;
-      document.getElementById('modalName').textContent = `${member.firstName || ''} ${member.lastName || ''}`;
-      document.getElementById('modalEmail').textContent = member.email || '—';
-      document.getElementById('modalCountry').textContent = member.country || '—';
-      document.getElementById('modalRole').textContent = member.role || '—';
-      document.getElementById('modalDept').textContent = member.department || '—';
-      document.getElementById('modalWhatsapp').textContent = member.whatsapp || '—';
-      document.getElementById('modalSince').textContent = formatDate(member.createdAt);
-      document.getElementById('modalBio').textContent = member.bio || 'No bio added.';
-      document.getElementById('memberModal').classList.remove('hidden');
-    });
+window.addStory = async function() {
+  const name = document.getElementById('story-name').value.trim();
+  const role = document.getElementById('story-role').value.trim();
+  const country = document.getElementById('story-country').value.trim();
+  const tag = document.getElementById('story-tag').value.trim();
+  const quote = document.getElementById('story-quote').value.trim();
+  const message = document.getElementById('story-message').value.trim();
+  const file = document.getElementById('story-photo').files[0];
+  if (!name || !quote) return showToast('Fill required fields', 'error');
+  let photoUrl = '';
+  if (file) { showToast('Uploading photo...'); photoUrl = await uploadToCloudinary(file); }
+  await addDoc(collection(db, 'stories'), { name, role, country, tag, quote, message, photoUrl, createdAt: serverTimestamp() });
+  showToast('Story added ✅');
+  loadStoriesList();
+};
+
+async function loadStoriesList() {
+  const container = document.getElementById('stories-list');
+  if (!container) return;
+  const snap = await getDocs(query(collection(db, 'stories'), orderBy('createdAt', 'desc')));
+  if (snap.empty) { container.innerHTML = '<p style="color:var(--gray);">No stories yet.</p>'; return; }
+  container.innerHTML = snap.docs.map(d => {
+    const s = d.data();
+    return `
+    <div class="list-item-card">
+      <div class="list-item-info">
+        ${s.photoUrl ? `<img src="${sanitize(s.photoUrl)}" class="list-avatar">` : `<div class="list-avatar-placeholder">${(s.name||'?')[0]}</div>`}
+        <div>
+          <strong>${sanitize(s.name)}</strong>
+          <p>${sanitize(s.role)} · 📍${sanitize(s.country)}</p>
+          <p style="font-style:italic;color:var(--gray);">"${sanitize(s.quote?.substring(0,80))}..."</p>
+        </div>
+      </div>
+      <button class="btn-delete" onclick="deleteItem('stories','${d.id}',loadStoriesList)">🗑️ Delete</button>
+    </div>`;
+  }).join('');
+}
+
+// ===== EVENTS =====
+async function loadEvents(c) {
+  c.innerHTML = `
+    <div class="section-card">
+      <h3>➕ Add Event</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Event Title *</label>
+          <input type="text" id="evt-title" placeholder="Event name">
+        </div>
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="date" id="evt-date">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="evt-status">
+            <option value="upcoming">📅 Upcoming</option>
+            <option value="past">✅ Past</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Lead Department</label>
+          <input type="text" id="evt-lead" placeholder="e.g. All Departments">
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label>Description *</label>
+          <textarea id="evt-desc" rows="3" placeholder="Describe the event..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Event Photo</label>
+          <input type="file" id="evt-photo" accept="image/*">
+        </div>
+        <div class="form-group">
+          <label>YouTube Video (optional)</label>
+          <input type="text" id="evt-video" placeholder="https://youtube.com/watch?v=...">
+        </div>
+      </div>
+      <button class="btn-primary" onclick="addEvent()">Add Event</button>
+    </div>
+    <div class="section-card">
+      <h3>📅 Current Events</h3>
+      <div id="events-list"></div>
+    </div>`;
+  loadEventsList();
+}
+
+window.addEvent = async function() {
+  const title = document.getElementById('evt-title').value.trim();
+  const date = document.getElementById('evt-date').value;
+  const status = document.getElementById('evt-status').value;
+  const lead = document.getElementById('evt-lead').value.trim();
+  const desc = document.getElementById('evt-desc').value.trim();
+  const videoUrl = document.getElementById('evt-video').value.trim();
+  const file = document.getElementById('evt-photo').files[0];
+  if (!title || !desc) return showToast('Fill required fields', 'error');
+  let photoUrl = '';
+  if (file) { showToast('Uploading photo...'); photoUrl = await uploadToCloudinary(file); }
+  await addDoc(collection(db, 'events'), { title, date, status, lead, description: desc, photoUrl, videoUrl, createdAt: serverTimestamp() });
+  showToast('Event added ✅');
+  loadEventsList();
+};
+
+async function loadEventsList() {
+  const container = document.getElementById('events-list');
+  if (!container) return;
+  const snap = await getDocs(query(collection(db, 'events'), orderBy('createdAt', 'desc')));
+  if (snap.empty) { container.innerHTML = '<p style="color:var(--gray);">No events yet.</p>'; return; }
+  container.innerHTML = snap.docs.map(d => {
+    const e = d.data();
+    return `
+    <div class="list-item-card">
+      <div class="list-item-info">
+        ${e.photoUrl ? `<img src="${sanitize(e.photoUrl)}" class="list-avatar" style="border-radius:8px;">` : `<div class="list-avatar-placeholder">📅</div>`}
+        <div>
+          <strong>${sanitize(e.title)}</strong>
+          <p>${sanitize(e.date||'')} · <span class="status-badge ${e.status}">${e.status}</span></p>
+          <p style="color:var(--gray);font-size:0.78rem;">${sanitize(e.description?.substring(0,80))}...</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-direction:column;">
+        <select onchange="updateEventStatus('${d.id}',this.value)" class="status-select">
+          <option value="upcoming" ${e.status==='upcoming'?'selected':''}>Upcoming</option>
+          <option value="past" ${e.status==='past'?'selected':''}>Past</option>
+        </select>
+        <button class="btn-delete" onclick="deleteItem('events','${d.id}',loadEventsList)">🗑️ Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.updateEventStatus = async function(eventId, status) {
+  await updateDoc(doc(db, 'events', eventId), { status });
+  showToast('Status updated ✅');
+};
+
+// ===== TRAINING MATERIALS =====
+async function loadMaterials(c) {
+  c.innerHTML = `
+    <div class="section-card">
+      <h3>➕ Post Training Material</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Department *</label>
+          <select id="mat-dept">
+            ${DEPARTMENTS.map(d => `<option value="${d.id}">${d.icon} ${d.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Title *</label>
+          <input type="text" id="mat-title" placeholder="Material title">
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select id="mat-type" onchange="toggleMatFields()">
+            <option value="video">📹 Video (YouTube)</option>
+            <option value="article">📄 Article</option>
+          </select>
+        </div>
+        <div class="form-group" id="mat-url-field">
+          <label>YouTube URL *</label>
+          <input type="text" id="mat-url" placeholder="https://youtube.com/watch?v=...">
+        </div>
+        <div class="form-group" id="mat-link-field" style="display:none;">
+          <label>Article Link (optional)</label>
+          <input type="text" id="mat-link" placeholder="https://...">
+        </div>
+        <div class="form-group" id="mat-text-field" style="display:none;grid-column:1/-1;">
+          <label>Article Text (optional)</label>
+          <textarea id="mat-text" rows="4" placeholder="Paste article content..."></textarea>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="addMaterial()">Post Material</button>
+    </div>
+    <div class="section-card">
+      <h3>📚 All Training Materials</h3>
+      <div class="dept-filter">
+        ${DEPARTMENTS.map(d => `<button class="dept-filter-btn" onclick="filterMaterials('${d.id}')">${d.icon} ${d.name.split('&')[0].trim()}</button>`).join('')}
+      </div>
+      <div id="materials-list"></div>
+    </div>`;
+  filterMaterials(DEPARTMENTS[0].id);
+}
+
+window.toggleMatFields = function() {
+  const type = document.getElementById('mat-type').value;
+  document.getElementById('mat-url-field').style.display = type === 'video' ? 'block' : 'none';
+  document.getElementById('mat-link-field').style.display = type === 'article' ? 'block' : 'none';
+  document.getElementById('mat-text-field').style.display = type === 'article' ? 'block' : 'none';
+};
+
+window.addMaterial = async function() {
+  const dept = document.getElementById('mat-dept').value;
+  const title = document.getElementById('mat-title').value.trim();
+  const type = document.getElementById('mat-type').value;
+  const url = document.getElementById('mat-url')?.value.trim() || '';
+  const link = document.getElementById('mat-link')?.value.trim() || '';
+  const text = document.getElementById('mat-text')?.value.trim() || '';
+  if (!title) return showToast('Enter a title', 'error');
+  await addDoc(collection(db, 'departments', dept, 'materials'), {
+    title, type, url: url||link, text, postedBy: 'admin', postedByName: 'Admin',
+    createdAt: serverTimestamp(), viewers: {}
   });
+  showToast('Material posted ✅');
+  filterMaterials(dept);
+};
 
-  // Delete buttons
-  document.querySelectorAll('.btn-delete-member').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const uid = btn.dataset.uid;
-      const name = btn.dataset.name;
-      if (!confirm(`Are you sure you want to delete ${name}? This will remove their profile data. This cannot be undone.`)) return;
-      try {
-        await deleteDoc(doc(db, 'users', uid));
-        allMembers = allMembers.filter(m => m.uid !== uid);
-        document.getElementById(`row-${uid}`).remove();
-        updateStats();
-        document.getElementById('membersCount').textContent = `Showing ${allMembers.length} member${allMembers.length !== 1 ? 's' : ''}`;
-        showToast(`${name} removed successfully.`, 'success');
-      } catch (e) {
-        showToast('Error deleting member. Try again.', 'error');
-      }
-    });
-  });
+window.filterMaterials = async function(dept) {
+  document.querySelectorAll('.dept-filter-btn').forEach(b => b.classList.remove('active'));
+  const btn = [...document.querySelectorAll('.dept-filter-btn')].find(b => b.onclick?.toString().includes(dept));
+  if (btn) btn.classList.add('active');
+  const container = document.getElementById('materials-list');
+  if (!container) return;
+  const snap = await getDocs(query(collection(db, 'departments', dept, 'materials'), orderBy('createdAt', 'desc')));
+  if (snap.empty) { container.innerHTML = '<p style="color:var(--gray);padding:1rem;">No materials for this department yet.</p>'; return; }
+  container.innerHTML = snap.docs.map(d => {
+    const m = d.data();
+    const viewers = Object.keys(m.viewers||{}).length;
+    return `
+    <div class="list-item-card">
+      <div class="list-item-info">
+        <div class="list-avatar-placeholder">${m.type==='video'?'📹':'📄'}</div>
+        <div>
+          <strong>${sanitize(m.title)}</strong>
+          <p>${sanitize(m.type)} · 👁️ ${viewers} viewed · ${timeAgo(m.createdAt)}</p>
+          ${m.url ? `<a href="${sanitize(m.url)}" target="_blank" style="color:var(--red);font-size:0.78rem;">View →</a>` : ''}
+        </div>
+      </div>
+      <button class="btn-delete" onclick="deleteDeptMaterial('${dept}','${d.id}')">🗑️ Delete</button>
+    </div>`;
+  }).join('');
+};
+
+window.deleteDeptMaterial = async function(dept, matId) {
+  if (!confirm('Delete this material?')) return;
+  await deleteDoc(doc(db, 'departments', dept, 'materials', matId));
+  showToast('Deleted ✅');
+  filterMaterials(dept);
+};
+
+// ===== CERTIFICATES =====
+async function loadCertificates(c) {
+  const snap = await getDocs(query(collection(db, 'certificates'), orderBy('requestedAt', 'desc')));
+  c.innerHTML = `
+    <div class="section-card">
+      <h3>🏆 Certificate Requests</h3>
+      ${snap.empty ? '<p style="color:var(--gray);">No certificate requests yet.</p>' :
+        snap.docs.map(d => {
+          const cert = d.data();
+          const dept = DEPARTMENTS.find(x => x.id === cert.department);
+          return `
+          <div class="list-item-card">
+            <div class="list-item-info">
+              <div class="list-avatar-placeholder">${dept?.icon||'🏆'}</div>
+              <div>
+                <strong>${sanitize(cert.userName)}</strong>
+                <p>${sanitize(dept?.name||cert.department)}</p>
+                <p>Status: <span class="cert-status ${cert.status}">${cert.status}</span> · ${timeAgo(cert.requestedAt)}</p>
+                ${cert.approvedBy ? `<p style="font-size:0.75rem;color:var(--gray);">Approved by: ${sanitize(cert.approvedBy)}</p>` : ''}
+              </div>
+            </div>
+            <div style="display:flex;gap:0.5rem;flex-direction:column;">
+              ${cert.status==='pending' ? `
+                <button class="btn-approve" onclick="adminApproveCert('${d.id}')">✅ Approve</button>
+                <button class="btn-delete" onclick="adminRejectCert('${d.id}')">❌ Reject</button>` :
+                `<span class="cert-status ${cert.status}" style="font-size:0.82rem;font-weight:600;">${cert.status.toUpperCase()}</span>`}
+            </div>
+          </div>`;
+        }).join('')}
+    </div>`;
 }
 
-// ---- SEARCH & FILTER ----
-function applyFilters() {
-  const search = document.getElementById('searchBox').value.toLowerCase();
-  const role = document.getElementById('roleFilter').value;
-  const filtered = allMembers.filter(m => {
-    const name = `${m.firstName || ''} ${m.lastName || ''}`.toLowerCase();
-    const email = (m.email || '').toLowerCase();
-    const country = (m.country || '').toLowerCase();
-    const matchSearch = !search || name.includes(search) || email.includes(search) || country.includes(search);
-    const matchRole = !role || m.role === role;
-    return matchSearch && matchRole;
-  });
-  renderTable(filtered);
+window.adminApproveCert = async function(certId) {
+  await updateDoc(doc(db, 'certificates', certId), { status: 'approved', approvedBy: 'Admin', approvedAt: serverTimestamp() });
+  showToast('Certificate approved! 🏆');
+  loadSection('certificates');
+};
+window.adminRejectCert = async function(certId) {
+  await updateDoc(doc(db, 'certificates', certId), { status: 'rejected' });
+  showToast('Certificate rejected');
+  loadSection('certificates');
+};
+
+// ===== MEMBERS =====
+async function loadMembers(c) {
+  const snap = await getDocs(collection(db, 'users'));
+  c.innerHTML = `
+    <div class="section-card">
+      <h3>👥 All Members (${snap.size})</h3>
+      <div class="list-table">
+        <div class="list-header"><span>Member</span><span>Department</span><span>Country</span><span>Role</span><span>Actions</span></div>
+        ${snap.docs.map(d => {
+          const u = d.data();
+          const dept = DEPARTMENTS.find(x => x.id === u.department);
+          return `
+          <div class="list-row">
+            <span>
+              ${u.photoUrl ? `<img src="${sanitize(u.photoUrl)}" class="list-avatar">` : `<div class="list-avatar-placeholder">${(u.name||'?')[0]}</div>`}
+              <div style="display:inline-block;vertical-align:middle;margin-left:0.5rem;">
+                <strong style="font-size:0.85rem;">${sanitize(u.name)}</strong><br>
+                <small style="color:var(--gray);">${sanitize(u.email)}</small>
+              </div>
+            </span>
+            <span>${sanitize(dept?.name||u.department||'')}</span>
+            <span>📍 ${sanitize(u.country||'')}</span>
+            <span>
+              ${u.isAdmin?'🛡️ Admin ':''} 
+              ${u.isDeptHead?'👑 Head ':''} 
+              ${u.isExec?'⭐ Exec ':''} 
+              ${!u.isAdmin&&!u.isDeptHead&&!u.isExec?sanitize(u.role||'Member'):''}
+            </span>
+            <span style="display:flex;gap:0.35rem;flex-wrap:wrap;">
+              <button class="btn-sm-action" onclick="adminToggleRole('${d.id}','isDeptHead',${!u.isDeptHead})">${u.isDeptHead?'Remove Head':'Make Head'}</button>
+              <button class="btn-sm-action" onclick="adminToggleRole('${d.id}','isAdmin',${!u.isAdmin})">${u.isAdmin?'Remove Admin':'Make Admin'}</button>
+              <button class="btn-delete" onclick="adminRemoveMember('${d.id}')">Remove</button>
+            </span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
 }
 
-document.getElementById('searchBox').addEventListener('input', applyFilters);
-document.getElementById('roleFilter').addEventListener('change', applyFilters);
+window.adminToggleRole = async function(userId, role, value) {
+  await updateDoc(doc(db, 'users', userId), { [role]: value });
+  showToast('Role updated ✅');
+  loadSection('members');
+};
+window.adminRemoveMember = async function(userId) {
+  if (!confirm('Remove this member from the community?')) return;
+  await deleteDoc(doc(db, 'users', userId));
+  showToast('Member removed');
+  loadSection('members');
+};
 
-// ---- MODAL CLOSE ----
-document.getElementById('modalClose').addEventListener('click', () => {
-  document.getElementById('memberModal').classList.add('hidden');
-});
-document.getElementById('memberModal').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('memberModal')) {
-    document.getElementById('memberModal').classList.add('hidden');
+// ===== MODERATION =====
+async function loadModeration(c) {
+  const postsSnap = await getDocs(query(collection(db, 'posts'), orderBy('createdAt', 'desc')));
+  c.innerHTML = `
+    <div class="section-card">
+      <h3>💬 Recent Community Posts (${postsSnap.size} total)</h3>
+      ${postsSnap.empty ? '<p style="color:var(--gray);">No posts yet.</p>' :
+        postsSnap.docs.map(d => {
+          const p = d.data();
+          return `
+          <div class="list-item-card">
+            <div class="list-item-info">
+              <div class="list-avatar-placeholder">${(p.authorName||'?')[0]}</div>
+              <div>
+                <strong>${sanitize(p.authorName)}</strong>
+                <p>${sanitize(p.content?.substring(0,120))}${p.content?.length>120?'...':''}</p>
+                <p style="font-size:0.72rem;color:var(--gray);">${sanitize(p.category||'General')} · ${timeAgo(p.createdAt)} · ❤️ ${(p.likes||[]).length}</p>
+              </div>
+            </div>
+            <button class="btn-delete" onclick="adminDeletePost('${d.id}')">🗑️ Delete</button>
+          </div>`;
+        }).join('')}
+    </div>`;
+}
+
+window.adminDeletePost = async function(postId) {
+  if (!confirm('Delete this post?')) return;
+  await deleteDoc(doc(db, 'posts', postId));
+  showToast('Post deleted');
+  loadSection('moderation');
+};
+
+// ===== SHARED DELETE =====
+window.deleteItem = async function(collectionName, docId, reloadFn) {
+  if (!confirm('Delete this item?')) return;
+  await deleteDoc(doc(db, collectionName, docId));
+  showToast('Deleted ✅');
+  if (reloadFn) reloadFn();
+};
+
+checkAuth();
+</script>
+
+<style>
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;--green:#27AE60;--sidebar:240px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);overflow-x:hidden;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--navy);}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);color:var(--white);padding:0.85rem 1.5rem;border-radius:12px;font-size:0.88rem;font-weight:500;z-index:9999;transform:translateY(100px);opacity:0;transition:all 0.3s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.error{background:var(--red);}
+.toast.success{background:var(--green);}
+
+/* LOGIN */
+#screen-login{min-height:100vh;background:linear-gradient(135deg,var(--navy),var(--dark));display:none;align-items:center;justify-content:center;padding:2rem;}
+.login-card{background:var(--white);border-radius:24px;padding:3rem;width:100%;max-width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+.login-card img{height:70px;margin-bottom:1.5rem;border-radius:50%;}
+.login-card h2{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;}
+.login-card p{color:var(--gray);font-size:0.85rem;margin-bottom:2rem;}
+.login-card input{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.85rem 1rem;border-radius:12px;font-family:'Poppins',sans-serif;font-size:0.9rem;outline:none;text-align:center;letter-spacing:2px;margin-bottom:1rem;}
+.btn-login{width:100%;background:var(--red);color:var(--white);padding:0.9rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:1rem;font-weight:700;border:none;cursor:pointer;}
+.btn-login:hover{background:var(--navy);}
+.login-back{display:block;margin-top:1rem;color:var(--gray);font-size:0.82rem;text-decoration:none;}
+
+/* DASHBOARD */
+#screen-dashboard{display:none;min-height:100vh;}
+
+/* SIDEBAR */
+.admin-sidebar{width:var(--sidebar);background:var(--dark);position:fixed;top:0;left:0;bottom:0;z-index:50;overflow-y:auto;display:flex;flex-direction:column;}
+.admin-sidebar-logo{padding:1.5rem 1.25rem;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:0.75rem;}
+.admin-sidebar-logo img{height:40px;border-radius:8px;}
+.admin-sidebar-logo div{font-size:0.82rem;font-weight:700;color:var(--white);line-height:1.3;}
+.admin-sidebar-logo span{display:block;font-size:0.68rem;color:var(--gold);font-weight:400;}
+.admin-nav{padding:1rem 0;flex:1;}
+.nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1.25rem;color:rgba(255,255,255,0.6);font-size:0.82rem;font-weight:500;cursor:pointer;transition:all 0.2s;border:none;background:none;width:100%;text-align:left;}
+.nav-item:hover{color:var(--white);background:rgba(255,255,255,0.06);}
+.nav-item.active{color:var(--white);background:rgba(255,255,255,0.12);border-left:3px solid var(--gold);}
+.nav-item .nav-icon{font-size:1rem;width:22px;text-align:center;}
+.admin-sidebar-footer{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,0.08);}
+.btn-logout-admin{display:flex;align-items:center;gap:0.5rem;color:rgba(255,255,255,0.5);font-size:0.82rem;background:none;border:none;cursor:pointer;padding:0.5rem;transition:color 0.2s;}
+.btn-logout-admin:hover{color:var(--red);}
+
+/* MAIN */
+.admin-main{margin-left:var(--sidebar);display:flex;flex-direction:column;min-height:100vh;}
+.admin-topbar{background:var(--white);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(27,42,107,0.08);position:sticky;top:0;z-index:40;}
+.admin-topbar-left{display:flex;align-items:center;gap:1rem;}
+.admin-topbar-left h1{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:900;color:var(--navy);}
+#section-title{font-size:0.88rem;color:var(--gray);}
+.admin-topbar-right a{font-size:0.82rem;color:var(--navy);text-decoration:none;padding:0.5rem 1rem;border-radius:8px;border:1px solid rgba(27,42,107,0.15);}
+.admin-topbar-right a:hover{background:var(--light);}
+#content-area{padding:2rem;max-width:1100px;}
+
+/* SECTION CARDS */
+.section-card{background:var(--white);border-radius:16px;padding:1.75rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.section-card h3{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;}
+.form-group label{display:block;font-size:0.78rem;font-weight:600;color:var(--navy);margin-bottom:0.4rem;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.7rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.85rem;outline:none;transition:border-color 0.2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--navy);}
+.btn-primary{background:var(--red);color:var(--white);padding:0.75rem 2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.9rem;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;}
+.btn-primary:hover{background:var(--navy);}
+.btn-delete{background:rgba(230,51,41,0.1);color:var(--red);border:none;padding:0.4rem 0.85rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.btn-delete:hover{background:var(--red);color:var(--white);}
+.btn-approve{background:rgba(39,174,96,0.1);color:var(--green);border:none;padding:0.4rem 0.85rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn-approve:hover{background:var(--green);color:var(--white);}
+.btn-sm-action{background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.35rem 0.75rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.72rem;cursor:pointer;white-space:nowrap;}
+.btn-sm-action:hover{background:var(--navy);color:var(--white);}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:1.5rem;}
+.stat-card{border-radius:16px;padding:1.5rem;text-align:center;}
+.stat-card.navy{background:var(--navy);}
+.stat-card.red{background:var(--red);}
+.stat-card.gold{background:var(--gold);}
+.stat-num{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;color:var(--white);line-height:1;}
+.stat-label{font-size:0.75rem;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:0.5px;margin-top:0.25rem;}
+.overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+.overview-card{background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.overview-card h3{font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;}
+.quick-actions{display:flex;flex-wrap:wrap;gap:0.5rem;}
+.btn-quick{background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);padding:0.5rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn-quick:hover{background:var(--navy);color:var(--white);border-color:var(--navy);}
+
+/* GALLERY GRID */
+.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1rem;}
+.gallery-item-card{border-radius:12px;overflow:hidden;background:var(--light);position:relative;}
+.gallery-item-card img{width:100%;height:140px;object-fit:cover;display:block;}
+.video-thumb{height:140px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--navy),var(--dark));color:var(--white);font-size:0.85rem;font-weight:600;}
+.gallery-item-info{padding:0.5rem 0.75rem;}
+.gallery-item-info p{font-size:0.78rem;color:var(--navy);font-weight:500;}
+.gallery-item-info span{font-size:0.7rem;color:var(--gray);}
+.gallery-item-card .btn-delete{position:absolute;top:0.5rem;right:0.5rem;font-size:0.75rem;padding:0.25rem 0.5rem;}
+
+/* LIST TABLE */
+.list-table{border-radius:12px;overflow:hidden;border:1px solid rgba(27,42,107,0.08);}
+.list-header{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 2fr;background:var(--navy);padding:0.75rem 1rem;gap:0.5rem;}
+.list-header span{font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.5px;}
+.list-row{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 2fr;padding:0.85rem 1rem;gap:0.5rem;border-bottom:1px solid rgba(27,42,107,0.06);align-items:center;}
+.list-row:last-child{border-bottom:none;}
+.list-row:hover{background:var(--light);}
+.list-row span{font-size:0.82rem;color:var(--navy);}
+.list-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;vertical-align:middle;}
+.list-avatar-placeholder{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:var(--white);font-size:0.85rem;}
+
+/* LIST ITEM CARD */
+.list-item-card{display:flex;align-items:center;justify-content:space-between;background:var(--light);border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.75rem;gap:1rem;flex-wrap:wrap;}
+.list-item-info{display:flex;align-items:center;gap:0.75rem;flex:1;min-width:200px;}
+.list-item-info strong{font-size:0.88rem;color:var(--navy);}
+.list-item-info p{font-size:0.75rem;color:var(--gray);}
+
+/* DEPT FILTER */
+.dept-filter{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;}
+.dept-filter-btn{background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.dept-filter-btn.active,.dept-filter-btn:hover{background:var(--navy);color:var(--white);border-color:var(--navy);}
+
+/* STATUS */
+.status-badge{font-size:0.72rem;font-weight:600;padding:0.2rem 0.6rem;border-radius:50px;}
+.status-badge.upcoming,.cert-status.pending{background:rgba(245,166,35,0.15);color:#b37800;}
+.status-badge.past,.cert-status.approved{background:rgba(39,174,96,0.15);color:var(--green);}
+.cert-status.rejected{background:rgba(230,51,41,0.1);color:var(--red);}
+.status-select{background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.35rem 0.5rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.78rem;outline:none;}
+
+/* LOADING */
+.loading{text-align:center;padding:3rem;color:var(--gray);}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .overview-grid{grid-template-columns:1fr;}
+  .gallery-grid{grid-template-columns:repeat(3,1fr);}
+  .list-header,.list-row{grid-template-columns:2fr 1.5fr 1fr 2fr;}
+  .list-header span:nth-child(3),.list-row span:nth-child(3){display:none;}
+}
+@media(max-width:768px){
+  :root{--sidebar:0px;}
+  .admin-sidebar{transform:translateX(-100%);transition:transform 0.3s;width:240px;}
+  .admin-sidebar.open{transform:translateX(0);}
+  .admin-main{margin-left:0;}
+  .form-grid{grid-template-columns:1fr;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .gallery-grid{grid-template-columns:repeat(2,1fr);}
+  #content-area{padding:1.25rem;}
+  .list-header,.list-row{grid-template-columns:2fr 1fr 2fr;font-size:0.75rem;}
+  .list-header span:nth-child(2),.list-header span:nth-child(3),.list-row span:nth-child(2),.list-row span:nth-child(3){display:none;}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr;}
+  .gallery-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<!-- LOGIN -->
+<div id="screen-login">
+  <div class="login-card">
+    <img src="images/logo.jpeg" alt="YAN Logo">
+    <h2>Admin Dashboard</h2>
+    <p>Young Africans Network — Content Management System</p>
+    <input type="password" id="admin-pass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doAdminLogin()">
+    <button class="btn-login" onclick="doAdminLogin()">Access Dashboard 🛡️</button>
+    <a href="index.html" class="login-back">← Back to website</a>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="screen-dashboard">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-sidebar-logo">
+      <img src="images/logo.jpeg" alt="YAN">
+      <div>Young Africans Network <span>Admin CMS</span></div>
+    </div>
+    <nav class="admin-nav">
+      <button class="nav-item" data-section="overview" onclick="loadSection('overview')"><span class="nav-icon">📊</span> Overview</button>
+      <button class="nav-item" data-section="gallery" onclick="loadSection('gallery')"><span class="nav-icon">📸</span> Gallery</button>
+      <button class="nav-item" data-section="team" onclick="loadSection('team')"><span class="nav-icon">👥</span> Team</button>
+      <button class="nav-item" data-section="stories" onclick="loadSection('stories')"><span class="nav-icon">📖</span> Journey Stories</button>
+      <button class="nav-item" data-section="events" onclick="loadSection('events')"><span class="nav-icon">📅</span> Events</button>
+      <button class="nav-item" data-section="materials" onclick="loadSection('materials')"><span class="nav-icon">📚</span> Training Materials</button>
+      <button class="nav-item" data-section="certificates" onclick="loadSection('certificates')"><span class="nav-icon">🏆</span> Certificates</button>
+      <button class="nav-item" data-section="members" onclick="loadSection('members')"><span class="nav-icon">🌍</span> Members</button>
+      <button class="nav-item" data-section="moderation" onclick="loadSection('moderation')"><span class="nav-icon">🛡️</span> Moderation</button>
+    </nav>
+    <div class="admin-sidebar-footer">
+      <button class="btn-logout-admin" onclick="doAdminLogout()">🚪 Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-topbar-left">
+        <button style="background:none;border:none;cursor:pointer;padding:4px;display:flex;flex-direction:column;gap:4px;" onclick="document.getElementById('admin-sidebar').classList.toggle('open')">
+          <span style="display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;"></span>
+          <span style="display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;"></span>
+          <span style="display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;"></span>
+        </button>
+        <h1>YAN Admin</h1>
+        <span id="section-title">📊 Dashboard Overview</span>
+      </div>
+      <div class="admin-topbar-right">
+        <a href="index.html">← Main Site</a>
+      </div>
+    </div>
+    <div id="content-area">
+      <div class="loading">Loading dashboard...</div>
+    </div>
+  </main>
+</div>
+
+<script>
+document.addEventListener('click', function(e) {
+  const sidebar = document.getElementById('admin-sidebar');
+  if (sidebar && !sidebar.contains(e.target) && !e.target.closest('button[onclick*="classList.toggle"]')) {
+    sidebar.classList.remove('open');
   }
 });
 </script>

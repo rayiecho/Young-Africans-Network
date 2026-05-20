@@ -4,376 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="index, follow">
-<meta name="description" content="YAN Community — Post announcements, share ideas and connect with Young Africans Network members across Africa and beyond.">
-<meta name="keywords" content="Young Africans Network Community, YAN Forum, African Youth Community, YAN Announcements">
+<meta name="description" content="Young Africans Network Community Platform — Join, learn, connect and grow with pan-African youth leaders across Africa and beyond.">
+<meta name="keywords" content="Young Africans Network Community, YAN Platform, African Youth Network, Pan-African Community">
 <meta name="author" content="Young Africans Network">
-<meta property="og:title" content="YAN Community | Young Africans Network">
-<meta property="og:description" content="Connect, post and engage with Young Africans Network members across Africa and beyond.">
+<meta property="og:title" content="YAN Community Platform | Young Africans Network">
+<meta property="og:description" content="Join the YAN Community — learn, connect and grow with pan-African youth leaders.">
 <meta property="og:url" content="https://youngafricansnetwork.org/community.html">
-<meta property="og:type" content="website">
 <meta property="og:image" content="https://youngafricansnetwork.org/images/logo.jpeg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@YoungAfricanNet">
 <link rel="canonical" href="https://youngafricansnetwork.org/community.html">
 <link rel="icon" href="/images/logo.jpeg" type="image/jpeg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
-<title>YAN Community | Young Africans Network</title>
-<style>
-:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;}
-*{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;}
-body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);overflow-x:hidden;}
-::-webkit-scrollbar{width:4px;}
-::-webkit-scrollbar-thumb{background:var(--navy);}
+<title>YAN Community Platform | Young Africans Network</title>
 
-/* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 2rem;height:75px;display:flex;align-items:center;justify-content:space-between;}
-.nav-logo{display:flex;align-items:center;gap:0.75rem;text-decoration:none;}
-.nav-logo img{height:48px;}
-.nav-logo-text{font-size:0.9rem;font-weight:700;color:var(--navy);line-height:1.2;}
-.nav-logo-text span{display:block;font-size:0.7rem;font-weight:400;color:var(--gray);}
-.nav-links{display:flex;gap:1.5rem;list-style:none;}
-.nav-links a{font-size:0.82rem;font-weight:500;color:var(--navy);text-decoration:none;transition:color 0.2s;}
-.nav-links a:hover,.nav-links a.active{color:var(--red);}
-.nav-btn{background:var(--red);color:var(--white);padding:0.6rem 1.5rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:600;transition:all 0.2s;}
-.nav-btn:hover{background:var(--navy);}
-
-/* HAMBURGER */
-.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none;}
-.hamburger span{display:block;width:24px;height:2px;background:var(--navy);border-radius:2px;transition:all 0.3s;}
-.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
-.hamburger.open span:nth-child(2){opacity:0;}
-.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
-.mobile-menu{display:none;position:fixed;top:75px;left:0;right:0;background:var(--white);box-shadow:0 8px 24px rgba(27,42,107,0.12);z-index:99;padding:1.5rem 2rem;flex-direction:column;gap:0;}
-.mobile-menu.open{display:flex;}
-.mobile-menu li{list-style:none;border-bottom:1px solid rgba(27,42,107,0.07);}
-.mobile-menu li:last-child{border-bottom:none;}
-.mobile-menu a{display:block;padding:0.85rem 0;font-size:0.95rem;font-weight:500;color:var(--navy);text-decoration:none;}
-.mobile-menu a:hover,.mobile-menu a.active{color:var(--red);}
-.mobile-menu .mobile-join{display:inline-block;margin-top:1rem;background:var(--red);color:var(--white);padding:0.75rem 2rem;border-radius:50px;font-weight:600;font-size:0.9rem;text-align:center;text-decoration:none;}
-
-/* PAGE HERO */
-.page-hero{background:linear-gradient(135deg,var(--navy),var(--dark));padding:8rem 2rem 4rem;text-align:center;position:relative;overflow:hidden;}
-.page-hero::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,0.1) 0%,transparent 70%);}
-.page-hero-inner{max-width:800px;margin:0 auto;position:relative;z-index:2;}
-.hero-tag{display:inline-block;background:rgba(245,166,35,0.15);color:var(--gold);padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:600;letter-spacing:1px;margin-bottom:1rem;border:1px solid rgba(245,166,35,0.3);}
-.page-title{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:var(--white);margin-bottom:1rem;}
-.page-title span{color:var(--gold);}
-.page-sub{font-size:1rem;color:rgba(255,255,255,0.75);line-height:1.8;}
-
-/* MAIN LAYOUT */
-.community-layout{max-width:1200px;margin:0 auto;padding:3rem 2rem;display:grid;grid-template-columns:1fr 320px;gap:2rem;align-items:start;}
-
-/* POST COMPOSER */
-.composer{background:var(--white);border-radius:20px;padding:1.75rem;box-shadow:0 4px 20px rgba(0,0,0,0.06);margin-bottom:1.5rem;}
-.composer-title{font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;}
-.composer-fields{display:flex;flex-direction:column;gap:0.75rem;}
-.composer-row{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;}
-.composer input,.composer select,.composer textarea{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.12);color:var(--navy);padding:0.75rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.85rem;outline:none;transition:border-color 0.2s;}
-.composer input:focus,.composer select:focus,.composer textarea:focus{border-color:var(--navy);}
-.composer textarea{resize:vertical;min-height:100px;}
-.composer-actions{display:flex;justify-content:flex-end;margin-top:0.75rem;}
-.btn-post{background:var(--red);color:var(--white);padding:0.7rem 2rem;border-radius:50px;border:none;font-family:'Poppins',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
-.btn-post:hover{background:var(--navy);}
-.btn-post:disabled{background:var(--gray);cursor:not-allowed;}
-
-/* FILTER BAR */
-.filter-bar{display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;}
-.filter-btn{background:var(--white);border:1.5px solid rgba(27,42,107,0.12);color:var(--navy);padding:0.5rem 1.25rem;border-radius:50px;font-size:0.8rem;font-weight:500;cursor:pointer;transition:all 0.2s;font-family:'Poppins',sans-serif;}
-.filter-btn:hover,.filter-btn.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
-
-/* POSTS FEED */
-.posts-feed{display:flex;flex-direction:column;gap:1.25rem;}
-.post-card{background:var(--white);border-radius:20px;padding:1.75rem;box-shadow:0 4px 20px rgba(0,0,0,0.05);transition:transform 0.2s;}
-.post-card:hover{transform:translateY(-2px);}
-.post-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;}
-.post-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1rem;font-weight:900;color:var(--white);flex-shrink:0;}
-.post-meta{flex:1;}
-.post-author{font-size:0.88rem;font-weight:700;color:var(--navy);}
-.post-info{font-size:0.75rem;color:var(--gray);margin-top:2px;}
-.post-category{display:inline-block;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:600;margin-left:0.5rem;}
-.cat-announcement{background:rgba(230,51,41,0.1);color:var(--red);}
-.cat-discussion{background:rgba(27,42,107,0.1);color:var(--navy);}
-.cat-opportunity{background:rgba(245,166,35,0.15);color:#B7791F;}
-.cat-general{background:rgba(107,114,128,0.1);color:var(--gray);}
-.post-content{font-size:0.9rem;color:#374151;line-height:1.8;margin-bottom:1.25rem;}
-.post-actions{display:flex;align-items:center;gap:1rem;padding-top:1rem;border-top:1px solid rgba(27,42,107,0.07);}
-.action-btn{display:flex;align-items:center;gap:0.4rem;background:none;border:none;font-family:'Poppins',sans-serif;font-size:0.8rem;color:var(--gray);cursor:pointer;padding:0.4rem 0.75rem;border-radius:50px;transition:all 0.2s;}
-.action-btn:hover{background:var(--light);color:var(--navy);}
-.action-btn.liked{color:var(--red);}
-.action-btn.liked svg path{fill:var(--red);}
-
-/* ADMIN DELETE BUTTON */
-.btn-delete{display:flex;align-items:center;gap:0.4rem;background:none;border:none;font-family:'Poppins',sans-serif;font-size:0.8rem;color:#cc0000;cursor:pointer;padding:0.4rem 0.75rem;border-radius:50px;transition:all 0.2s;margin-left:auto;}
-.btn-delete:hover{background:rgba(204,0,0,0.08);}
-.btn-delete-reply{background:none;border:none;font-size:0.72rem;color:#cc0000;cursor:pointer;font-family:'Poppins',sans-serif;padding:0.2rem 0.5rem;border-radius:6px;transition:background 0.2s;margin-left:auto;}
-.btn-delete-reply:hover{background:rgba(204,0,0,0.08);}
-
-/* ADMIN BAR */
-.admin-bar{background:#1a1a2e;color:#fff;padding:0.6rem 2rem;display:flex;align-items:center;justify-content:space-between;font-size:0.8rem;position:sticky;top:75px;z-index:90;}
-.admin-bar.hidden{display:none;}
-.admin-bar span{color:var(--gold);font-weight:600;}
-.btn-admin-logout{background:var(--red);color:#fff;border:none;padding:0.35rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;}
-
-/* ADMIN LOGIN MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:center;justify-content:center;}
-.modal-overlay.hidden{display:none;}
-.modal-box{background:var(--white);border-radius:20px;padding:2rem;width:90%;max-width:380px;text-align:center;}
-.modal-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;}
-.modal-sub{font-size:0.82rem;color:var(--gray);margin-bottom:1.25rem;}
-.modal-input{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.75rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.9rem;outline:none;margin-bottom:1rem;text-align:center;letter-spacing:2px;}
-.modal-input:focus{border-color:var(--navy);}
-.modal-actions{display:flex;gap:0.75rem;justify-content:center;}
-.btn-modal-login{background:var(--navy);color:#fff;border:none;padding:0.7rem 2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;}
-.btn-modal-cancel{background:var(--light);color:var(--navy);border:none;padding:0.7rem 1.5rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;}
-
-/* REPLIES */
-.replies-section{margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(27,42,107,0.07);display:none;}
-.replies-section.open{display:block;}
-.reply-item{display:flex;gap:0.75rem;margin-bottom:0.75rem;align-items:flex-start;}
-.reply-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--red));display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--white);flex-shrink:0;}
-.reply-bubble{background:var(--light);border-radius:12px;padding:0.75rem 1rem;flex:1;}
-.reply-author{font-size:0.78rem;font-weight:700;color:var(--navy);}
-.reply-text{font-size:0.82rem;color:var(--gray);line-height:1.6;margin-top:0.2rem;}
-.reply-time{font-size:0.7rem;color:var(--gray);margin-top:0.25rem;}
-.reply-composer{display:flex;gap:0.75rem;margin-top:0.75rem;flex-wrap:wrap;}
-.reply-composer input{flex:1;min-width:80px;background:var(--light);border:1.5px solid rgba(27,42,107,0.12);color:var(--navy);padding:0.6rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;outline:none;}
-.reply-composer input:focus{border-color:var(--navy);}
-.btn-reply-send{background:var(--navy);color:var(--white);border:none;padding:0.6rem 1.25rem;border-radius:50px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:background 0.2s;}
-.btn-reply-send:hover{background:var(--red);}
-
-/* LOADING & EMPTY */
-.loading{text-align:center;padding:3rem;color:var(--gray);font-size:0.9rem;}
-.loading-spinner{width:36px;height:36px;border:3px solid var(--light);border-top-color:var(--navy);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1rem;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.empty-state{text-align:center;padding:3rem;background:var(--white);border-radius:20px;}
-.empty-icon{font-size:3rem;margin-bottom:1rem;}
-.empty-text{font-size:0.9rem;color:var(--gray);}
-
-/* SIDEBAR */
-.sidebar{}
-.sidebar-card{background:var(--white);border-radius:20px;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,0.05);margin-bottom:1.5rem;}
-.sidebar-title{font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:2px solid var(--light);}
-.stat-row{display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid var(--light);}
-.stat-row:last-child{border-bottom:none;}
-.stat-label{font-size:0.8rem;color:var(--gray);}
-.stat-value{font-size:0.88rem;font-weight:700;color:var(--navy);}
-.guideline-item{display:flex;gap:0.75rem;margin-bottom:0.75rem;font-size:0.8rem;color:var(--gray);line-height:1.5;}
-.guideline-item:last-child{margin-bottom:0;}
-
-/* ADMIN TRIGGER — hidden small link at bottom of sidebar */
-.admin-trigger{font-size:0.65rem;color:rgba(107,114,128,0.3);text-align:center;cursor:pointer;margin-top:0.5rem;user-select:none;}
-.admin-trigger:hover{color:var(--gray);}
-
-/* FOOTER */
-footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255,0.1);}
-.footer-bottom{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
-.footer-copy{font-size:0.78rem;color:rgba(255,255,255,0.5);}
-.footer-copy a{color:var(--gold);text-decoration:none;}
-.footer-links-row{display:flex;gap:1.5rem;flex-wrap:wrap;}
-.footer-links-row a{font-size:0.78rem;color:rgba(255,255,255,0.6);text-decoration:none;}
-.footer-links-row a:hover{color:var(--gold);}
-
-/* TOAST */
-.toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);color:var(--white);padding:0.85rem 1.5rem;border-radius:12px;font-size:0.85rem;font-weight:500;z-index:999;opacity:0;transform:translateY(20px);transition:all 0.3s;pointer-events:none;}
-.toast.show{opacity:1;transform:translateY(0);}
-.toast.success{background:#27AE60;}
-.toast.error{background:var(--red);}
-
-/* RESPONSIVE */
-@media(max-width:1024px){
-  .community-layout{grid-template-columns:1fr;}
-  .sidebar{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
-}
-@media(max-width:768px){
-  .nav-links{display:none;}
-  .nav-btn{display:none;}
-  .hamburger{display:flex;}
-  nav{padding:0 1.25rem;}
-  .page-hero{padding:6rem 1.25rem 3rem;}
-  .community-layout{padding:2rem 1.25rem;}
-  .composer-row{grid-template-columns:1fr;}
-  .sidebar{display:block;}
-  .filter-bar{gap:0.5rem;}
-  footer{padding:2rem 1.25rem;}
-  .footer-bottom{flex-direction:column;text-align:center;}
-  .footer-links-row{justify-content:center;}
-  .admin-bar{padding:0.6rem 1.25rem;}
-}
-@media(max-width:480px){
-  .page-title{font-size:2rem;}
-  .post-actions{flex-wrap:wrap;gap:0.5rem;}
-}
-</style>
-</head>
-<body>
-
-<!-- ADMIN LOGIN MODAL -->
-<div class="modal-overlay hidden" id="adminModal">
-  <div class="modal-box">
-    <div class="modal-title">🔐 Admin Login</div>
-    <div class="modal-sub">Enter the admin password to manage community posts.</div>
-    <input type="password" class="modal-input" id="adminPasswordInput" placeholder="Password">
-    <div class="modal-actions">
-      <button class="btn-modal-cancel" id="btnModalCancel">Cancel</button>
-      <button class="btn-modal-login" id="btnModalLogin">Login</button>
-    </div>
-  </div>
-</div>
-
-<!-- ADMIN BAR (shown when logged in) -->
-<div class="admin-bar hidden" id="adminBar">
-  <div>🛡️ Logged in as <span>Admin</span> — delete buttons are now visible on all posts and replies.</div>
-  <button class="btn-admin-logout" id="btnAdminLogout">Logout</button>
-</div>
-
-<!-- NAV -->
-<nav>
-  <a href="index.html" class="nav-logo">
-    <img src="images/logo.jpeg" alt="Young Africans Network Logo">
-    <div class="nav-logo-text">Young Africans Network<span>Building the Future, Together</span></div>
-  </a>
-  <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="about.html">About</a></li>
-    <li><a href="programs.html">Programs</a></li>
-    <li><a href="team.html">Team</a></li>
-    <li><a href="events.html">Events</a></li>
-    <li><a href="join.html">Join Us</a></li>
-    <li><a href="contact.html">Contact</a></li>
-    <li><a href="community.html" class="active">Community</a></li>
-    <li><a href="register.html">Register</a></li>
-    <li><a href="login.html">Login</a></li>
-    <li><a href="profile.html">Profile</a></li>
-  </ul>
-  <a href="join.html" class="nav-btn">Join YAN</a>
-  <button class="hamburger" id="hamburger" aria-label="Open menu">
-    <span></span><span></span><span></span>
-  </button>
-</nav>
-
-<!-- MOBILE MENU -->
-<ul class="mobile-menu" id="mobileMenu">
-  <li><a href="index.html">Home</a></li>
-  <li><a href="about.html">About</a></li>
-  <li><a href="programs.html">Programs</a></li>
-  <li><a href="team.html">Team</a></li>
-  <li><a href="events.html">Events</a></li>
-  <li><a href="join.html">Join Us</a></li>
-  <li><a href="contact.html">Contact</a></li>
-  <li><a href="community.html" class="active">Community</a></li>
-  <li><a href="register.html">Register</a></li>
-  <li><a href="login.html">Login</a></li>
-  <li><a href="profile.html">Profile</a></li>
-  <li><a href="join.html" class="mobile-join">Join YAN 🚀</a></li>
-</ul>
-
-<!-- HERO -->
-<div class="page-hero">
-  <div class="page-hero-inner">
-    <span class="hero-tag">🌍 Pan-African Community</span>
-    <h1 class="page-title">YAN <span>Community</span></h1>
-    <p class="page-sub">Post announcements, share opportunities, start discussions and connect with young Africans from across the continent and beyond.</p>
-  </div>
-</div>
-
-<!-- MAIN -->
-<div class="community-layout">
-  <div class="main-feed">
-
-    <!-- COMPOSER -->
-    <div class="composer">
-      <div class="composer-title">✍️ Share something with the community</div>
-      <div class="composer-fields">
-        <div class="composer-row">
-          <input type="text" id="postName" placeholder="Your name *" maxlength="60">
-          <input type="text" id="postCountry" placeholder="Your country *" maxlength="60">
-        </div>
-        <select id="postCategory">
-          <option value="">Select category *</option>
-          <option value="announcement">📢 Announcement</option>
-          <option value="discussion">💬 Discussion</option>
-          <option value="opportunity">🏆 Opportunity</option>
-          <option value="general">💡 General</option>
-        </select>
-        <textarea id="postContent" placeholder="What's on your mind? Share an idea, announcement, opportunity or message with the YAN community... *" maxlength="1000"></textarea>
-        <div class="composer-actions">
-          <button class="btn-post" id="submitPost">Post to Community 🚀</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- FILTER -->
-    <div class="filter-bar">
-      <button class="filter-btn active" data-filter="all">All Posts</button>
-      <button class="filter-btn" data-filter="announcement">📢 Announcements</button>
-      <button class="filter-btn" data-filter="discussion">💬 Discussions</button>
-      <button class="filter-btn" data-filter="opportunity">🏆 Opportunities</button>
-      <button class="filter-btn" data-filter="general">💡 General</button>
-    </div>
-
-    <!-- FEED -->
-    <div class="posts-feed" id="postsFeed">
-      <div class="loading">
-        <div class="loading-spinner"></div>
-        Loading community posts...
-      </div>
-    </div>
-  </div>
-
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="sidebar-card">
-      <div class="sidebar-title">📊 Community Stats</div>
-      <div class="stat-row"><span class="stat-label">Total Posts</span><span class="stat-value" id="statPosts">—</span></div>
-      <div class="stat-row"><span class="stat-label">Countries</span><span class="stat-value" id="statCountries">—</span></div>
-      <div class="stat-row"><span class="stat-label">Total Replies</span><span class="stat-value" id="statReplies">—</span></div>
-      <div class="stat-row"><span class="stat-label">Total Likes</span><span class="stat-value" id="statLikes">—</span></div>
-      <!-- Hidden admin trigger — triple click to activate -->
-      <div class="admin-trigger" id="adminTrigger" title="">· · ·</div>
-    </div>
-    <div class="sidebar-card">
-      <div class="sidebar-title">📋 Community Guidelines</div>
-      <div class="guideline-item"><span>✅</span> Be respectful and kind to all members</div>
-      <div class="guideline-item"><span>✅</span> Share verified opportunities only</div>
-      <div class="guideline-item"><span>✅</span> No spam or self-promotion without value</div>
-      <div class="guideline-item"><span>✅</span> Support and uplift fellow Africans</div>
-      <div class="guideline-item"><span>✅</span> Keep discussions constructive and positive</div>
-      <div class="guideline-item"><span>🚫</span> No hate speech or discrimination</div>
-    </div>
-    <div class="sidebar-card">
-      <div class="sidebar-title">🌍 Join Our WhatsApp</div>
-      <p style="font-size:0.82rem;color:var(--gray);line-height:1.7;margin-bottom:1rem;">Connect with the full YAN community on WhatsApp for real-time updates and discussions.</p>
-      <a href="https://chat.whatsapp.com/BlvxC0j6sUUBfWjbIW9dH9" target="_blank" style="display:block;background:var(--navy);color:var(--white);text-align:center;padding:0.75rem;border-radius:50px;font-size:0.82rem;font-weight:600;text-decoration:none;">Join WhatsApp Community</a>
-    </div>
-  </div>
-</div>
-
-<!-- FOOTER -->
-<footer>
-  <div class="footer-bottom">
-    <p class="footer-copy">© 2026 Young Africans Network. All Rights Reserved. | Website by <a href="https://rayiecho.github.io" target="_blank">Regan Ayiecho</a></p>
-    <div class="footer-links-row">
-      <a href="index.html">Home</a>
-      <a href="about.html">About</a>
-      <a href="programs.html">Programs</a>
-      <a href="community.html">Community</a>
-      <a href="contact.html">Contact</a>
-      <a href="join.html">Join Us</a>
-    </div>
-  </div>
-</footer>
-
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
-<!-- FIREBASE -->
+<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore, collection, addDoc, getDocs, deleteDoc,
-  doc, updateDoc, increment, query, orderBy, onSnapshot, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut, onAuthStateChanged, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, getDocs, deleteDoc, increment, arrayUnion, arrayRemove, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ============================================================
+// CONFIG — Update Daily.co domain after signing up at daily.co
+// ============================================================
+const DAILY_DOMAIN = 'youngafricansnetwork.daily.co'; // <-- CHANGE THIS
 
 const firebaseConfig = {
   apiKey: "AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",
@@ -383,362 +39,1810 @@ const firebaseConfig = {
   messagingSenderId: "224204618916",
   appId: "1:224204618916:web:8ddfd36c6f112b4912fa31"
 };
+const CLOUDINARY_CLOUD = 'deigiiyq5';
+const CLOUDINARY_PRESET = 'yan_Profiles';
+const ADMIN_PASSWORD = 'YAN@Admin2026';
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ---- ADMIN STATE ----
-const ADMIN_PASSWORD = 'YAN@Admin2026';
-let isAdmin = false;
+const DEPARTMENTS = [
+  { id: 'programs', name: 'Programs & Training', icon: '💻' },
+  { id: 'scholarships', name: 'Scholarships & Global Opportunities', icon: '🏆' },
+  { id: 'career', name: 'Career Development & Public Speaking', icon: '🎤' },
+  { id: 'community', name: 'Community Impact & Volunteering', icon: '🌍' },
+  { id: 'mental', name: 'Mental Health & Wellbeing', icon: '💚' }
+];
 
-// ---- ADMIN TRIGGER (triple click on "· · ·") ----
-let triggerClicks = 0;
-let triggerTimer = null;
-document.getElementById('adminTrigger').addEventListener('click', () => {
-  triggerClicks++;
-  clearTimeout(triggerTimer);
-  triggerTimer = setTimeout(() => { triggerClicks = 0; }, 800);
-  if (triggerClicks >= 3) {
-    triggerClicks = 0;
-    if (!isAdmin) openAdminModal();
-  }
-});
+let currentUser = null;
+let currentUserData = null;
+let activeTab = 'feed';
+let unsubscribers = [];
 
-// ---- MODAL ----
-function openAdminModal() {
-  document.getElementById('adminModal').classList.remove('hidden');
-  document.getElementById('adminPasswordInput').value = '';
-  document.getElementById('adminPasswordInput').focus();
+// ============================================================
+// UTILS
+// ============================================================
+function sanitize(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
 }
-function closeAdminModal() {
-  document.getElementById('adminModal').classList.add('hidden');
+function timeAgo(ts) {
+  if (!ts) return '';
+  const now = Date.now();
+  const t = ts.toMillis ? ts.toMillis() : ts;
+  const diff = Math.floor((now - t) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  return Math.floor(diff/86400) + 'd ago';
 }
-document.getElementById('btnModalCancel').addEventListener('click', closeAdminModal);
-document.getElementById('adminPasswordInput').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') attemptAdminLogin();
-});
-document.getElementById('btnModalLogin').addEventListener('click', attemptAdminLogin);
-
-function attemptAdminLogin() {
-  const val = document.getElementById('adminPasswordInput').value;
-  if (val === ADMIN_PASSWORD) {
-    isAdmin = true;
-    closeAdminModal();
-    document.getElementById('adminBar').classList.remove('hidden');
-    renderFeed();
-    showToast('Admin logged in. Delete buttons are now visible.', 'success');
-  } else {
-    showToast('Incorrect password.', 'error');
-    document.getElementById('adminPasswordInput').value = '';
-    document.getElementById('adminPasswordInput').focus();
-  }
-}
-
-// ---- ADMIN LOGOUT ----
-document.getElementById('btnAdminLogout').addEventListener('click', () => {
-  isAdmin = false;
-  document.getElementById('adminBar').classList.add('hidden');
-  renderFeed();
-  showToast('Logged out of admin.', '');
-});
-
-// ---- TOAST ----
-function showToast(msg, type = '') {
+function showToast(msg, type='success') {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'toast show ' + type;
   setTimeout(() => t.className = 'toast', 3000);
 }
-
-// ---- AVATAR INITIALS ----
-function getInitials(name) {
-  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const btn = document.querySelector(`[data-tab="${tab}"]`);
+  const panel = document.getElementById(`tab-${tab}`);
+  if (btn) btn.classList.add('active');
+  if (panel) panel.classList.add('active');
+  loadTabContent(tab);
 }
 
-// ---- FORMAT TIME ----
-function formatTime(ts) {
-  if (!ts) return 'Just now';
-  const d = ts.toDate ? ts.toDate() : new Date(ts);
-  const diff = Math.floor((Date.now() - d) / 1000);
-  if (diff < 60) return 'Just now';
-  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
-  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
-// ---- CATEGORY ----
-function getCatClass(cat) {
-  const map = { announcement: 'cat-announcement', discussion: 'cat-discussion', opportunity: 'cat-opportunity', general: 'cat-general' };
-  return map[cat] || 'cat-general';
-}
-function getCatLabel(cat) {
-  const map = { announcement: '📢 Announcement', discussion: '💬 Discussion', opportunity: '🏆 Opportunity', general: '💡 General' };
-  return map[cat] || '💡 General';
-}
-
-// ---- LIKED POSTS ----
-function getLiked() { try { return JSON.parse(localStorage.getItem('yan_liked') || '[]'); } catch { return []; } }
-function setLiked(arr) { localStorage.setItem('yan_liked', JSON.stringify(arr)); }
-function hasLiked(id) { return getLiked().includes(id); }
-function addLiked(id) { const a = getLiked(); a.push(id); setLiked(a); }
-
-// ---- RENDER REPLY ----
-function renderReply(postId, replyId, r) {
-  const deleteBtn = isAdmin
-    ? `<button class="btn-delete-reply" data-post="${postId}" data-reply="${replyId}">🗑️ Delete</button>`
-    : '';
-  return `<div class="reply-item" id="reply-${replyId}">
-    <div class="reply-avatar">${getInitials(r.name || 'A')}</div>
-    <div class="reply-bubble" style="flex:1;">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div class="reply-author">${r.name} <span style="font-weight:400;color:var(--gray)">· ${r.country}</span></div>
-        ${deleteBtn}
-      </div>
-      <div class="reply-text">${r.text}</div>
-      <div class="reply-time">${formatTime(r.createdAt)}</div>
-    </div>
-  </div>`;
-}
-
-// ---- RENDER POST ----
-function renderPost(id, data) {
-  const liked = hasLiked(id);
-  const deleteBtn = isAdmin
-    ? `<button class="btn-delete" data-id="${id}">🗑️ Delete Post</button>`
-    : '';
-  return `<div class="post-card" id="post-${id}">
-    <div class="post-header">
-      <div class="post-avatar">${getInitials(data.name || 'A')}</div>
-      <div class="post-meta" style="flex:1;">
-        <div class="post-author">${data.name} <span style="font-weight:400;color:var(--gray)">· ${data.country}</span>
-          <span class="post-category ${getCatClass(data.category)}">${getCatLabel(data.category)}</span>
-        </div>
-        <div class="post-info">${formatTime(data.createdAt)}</div>
-      </div>
-    </div>
-    <div class="post-content">${data.content.replace(/\n/g, '<br>')}</div>
-    <div class="post-actions">
-      <button class="action-btn like-btn ${liked ? 'liked' : ''}" data-id="${id}">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="${liked ? '#E63329' : 'none'}" stroke="${liked ? '#E63329' : 'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        <span class="like-count-${id}">${data.likes || 0}</span>
-      </button>
-      <button class="action-btn reply-toggle-btn" data-id="${id}">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <span class="reply-count-${id}">${data.replyCount || 0}</span> Replies
-      </button>
-      ${deleteBtn}
-    </div>
-    <div class="replies-section" id="replies-${id}">
-      <div class="replies-list" id="replies-list-${id}">
-        <div style="font-size:0.8rem;color:var(--gray);padding:0.5rem 0;">Loading replies...</div>
-      </div>
-      <div class="reply-composer">
-        <input type="text" id="reply-name-${id}" placeholder="Your name">
-        <input type="text" id="reply-country-${id}" placeholder="Country">
-        <input type="text" id="reply-text-${id}" placeholder="Write a reply...">
-        <button class="btn-reply-send" data-id="${id}">Send</button>
-      </div>
-    </div>
-  </div>`;
-}
-
-// ---- STATS ----
-let allPosts = [];
-function updateStats() {
-  const countries = new Set(allPosts.map(p => p.country).filter(Boolean));
-  const totalLikes = allPosts.reduce((s, p) => s + (p.likes || 0), 0);
-  const totalReplies = allPosts.reduce((s, p) => s + (p.replyCount || 0), 0);
-  document.getElementById('statPosts').textContent = allPosts.length;
-  document.getElementById('statCountries').textContent = countries.size;
-  document.getElementById('statLikes').textContent = totalLikes;
-  document.getElementById('statReplies').textContent = totalReplies;
-}
-
-// ---- LOAD POSTS (real-time) ----
-let currentFilter = 'all';
-const postsRef = collection(db, 'posts');
-const q = query(postsRef, orderBy('createdAt', 'desc'));
-
-onSnapshot(q, (snapshot) => {
-  allPosts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-  renderFeed();
-  updateStats();
+// ============================================================
+// AUTH
+// ============================================================
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    currentUser = user;
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (snap.exists()) {
+      currentUserData = snap.data();
+      if (!currentUserData.profileComplete) {
+        showScreen('screen-profile-setup');
+      } else {
+        enterPlatform();
+      }
+    } else {
+      showScreen('screen-register');
+    }
+  } else {
+    currentUser = null;
+    currentUserData = null;
+    showScreen('screen-landing');
+  }
 });
 
-function renderFeed() {
-  const feed = document.getElementById('postsFeed');
-  const filtered = currentFilter === 'all' ? allPosts : allPosts.filter(p => p.category === currentFilter);
-  if (filtered.length === 0) {
-    feed.innerHTML = `<div class="empty-state"><div class="empty-icon">🌍</div><div class="empty-text">No posts yet. Be the first to share something with the community!</div></div>`;
-    return;
+async function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  const country = document.getElementById('reg-country').value.trim();
+  const whatsapp = document.getElementById('reg-whatsapp').value.trim();
+  const role = document.getElementById('reg-role').value;
+  const dept = document.getElementById('reg-dept').value;
+  const photoFile = document.getElementById('reg-photo').files[0];
+  if (!name||!email||!pass||!country||!whatsapp||!role||!dept) return showToast('Please fill all required fields','error');
+  if (pass.length < 6) return showToast('Password must be at least 6 characters','error');
+  const btn = document.getElementById('reg-btn');
+  btn.disabled = true; btn.textContent = 'Creating account...';
+  try {
+    let photoUrl = '';
+    if (photoFile) {
+      const fd = new FormData();
+      fd.append('file', photoFile);
+      fd.append('upload_preset', CLOUDINARY_PRESET);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {method:'POST',body:fd});
+      const data = await res.json();
+      photoUrl = data.secure_url || '';
+    }
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await sendEmailVerification(cred.user);
+    await setDoc(doc(db, 'users', cred.user.uid), {
+      name, email, country, whatsapp, role, department: dept,
+      photoUrl, bio: '', joinedAt: serverTimestamp(),
+      isAdmin: false, isDeptHead: false, isExec: false,
+      profileComplete: false
+    });
+    showToast('Account created! Please verify your email.');
+  } catch(e) {
+    showToast(e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create Account 🚀';
   }
-  feed.innerHTML = filtered.map(p => renderPost(p.id, p)).join('');
-  attachEventListeners();
 }
 
-// ---- ATTACH EVENTS ----
-function attachEventListeners() {
-  // Like buttons
-  document.querySelectorAll('.like-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.dataset.id;
-      if (hasLiked(id)) { showToast('You already liked this post!', ''); return; }
-      addLiked(id);
-      btn.classList.add('liked');
-      await updateDoc(doc(db, 'posts', id), { likes: increment(1) });
-    });
-  });
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  if (!email||!pass) return showToast('Enter email and password','error');
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    showToast('Invalid email or password','error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
+}
 
-  // Reply toggles
-  document.querySelectorAll('.reply-toggle-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.dataset.id;
-      const section = document.getElementById(`replies-${id}`);
-      section.classList.toggle('open');
-      if (section.classList.contains('open')) loadReplies(id);
-    });
-  });
+async function doLogout() {
+  unsubscribers.forEach(u => u());
+  unsubscribers = [];
+  await signOut(auth);
+}
 
-  // Reply send buttons
-  document.querySelectorAll('.btn-reply-send').forEach(btn => {
-    btn.addEventListener('click', () => submitReply(btn.dataset.id));
-  });
+async function doForgotPassword() {
+  const email = document.getElementById('login-email').value.trim();
+  if (!email) return showToast('Enter your email first','error');
+  await sendPasswordResetEmail(auth, email);
+  showToast('Password reset email sent!');
+}
 
-  // Admin — delete post buttons
-  document.querySelectorAll('.btn-delete').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.dataset.id;
-      if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) return;
-      try {
-        // Delete all replies first
-        const repliesSnap = await getDocs(collection(db, 'posts', id, 'replies'));
-        for (const r of repliesSnap.docs) {
-          await deleteDoc(doc(db, 'posts', id, 'replies', r.id));
-        }
-        await deleteDoc(doc(db, 'posts', id));
-        showToast('Post deleted.', 'success');
-      } catch (e) {
-        showToast('Error deleting post. Try again.', 'error');
-      }
-    });
-  });
+// ============================================================
+// PROFILE SETUP
+// ============================================================
+async function doProfileSetup() {
+  const bio = document.getElementById('setup-bio').value.trim();
+  const photoFile = document.getElementById('setup-photo').files[0];
+  const btn = document.getElementById('setup-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    let photoUrl = currentUserData.photoUrl || '';
+    if (photoFile) {
+      const fd = new FormData();
+      fd.append('file', photoFile);
+      fd.append('upload_preset', CLOUDINARY_PRESET);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {method:'POST',body:fd});
+      const data = await res.json();
+      photoUrl = data.secure_url || photoUrl;
+    }
+    await updateDoc(doc(db, 'users', currentUser.uid), { bio, photoUrl, profileComplete: true });
+    currentUserData = { ...currentUserData, bio, photoUrl, profileComplete: true };
+    enterPlatform();
+  } catch(e) {
+    showToast(e.message,'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Enter Community 🚀';
+  }
+}
 
-  // Admin — delete reply buttons
-  document.querySelectorAll('.btn-delete-reply').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const postId = btn.dataset.post;
-      const replyId = btn.dataset.reply;
-      if (!confirm('Delete this reply?')) return;
-      try {
-        await deleteDoc(doc(db, 'posts', postId, 'replies', replyId));
-        await updateDoc(doc(db, 'posts', postId), { replyCount: increment(-1) });
-        showToast('Reply deleted.', 'success');
-      } catch (e) {
-        showToast('Error deleting reply. Try again.', 'error');
-      }
-    });
+// ============================================================
+// PLATFORM ENTRY
+// ============================================================
+function enterPlatform() {
+  showScreen('screen-platform');
+  // Set user info in sidebar
+  document.getElementById('sidebar-name').textContent = currentUserData.name || '';
+  document.getElementById('sidebar-role').textContent = currentUserData.role || 'Member';
+  document.getElementById('sidebar-dept').textContent = DEPARTMENTS.find(d=>d.id===currentUserData.department)?.name || '';
+  const photo = currentUserData.photoUrl;
+  document.getElementById('sidebar-avatar').innerHTML = photo
+    ? `<img src="${photo}" alt="Profile photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+    : `<span>${(currentUserData.name||'?')[0].toUpperCase()}</span>`;
+
+  // Show/hide tabs based on role
+  const headTab = document.getElementById('tab-btn-head');
+  const adminTab = document.getElementById('tab-btn-admin');
+  if (headTab) headTab.style.display = (currentUserData.isDeptHead||currentUserData.isAdmin) ? 'flex' : 'none';
+  if (adminTab) adminTab.style.display = currentUserData.isAdmin ? 'flex' : 'none';
+
+  showTab('feed');
+}
+
+// ============================================================
+// LOAD TAB CONTENT
+// ============================================================
+function loadTabContent(tab) {
+  unsubscribers.forEach(u => u());
+  unsubscribers = [];
+  if (tab === 'feed') loadFeed();
+  if (tab === 'department') loadDepartment();
+  if (tab === 'meetings') loadMeetings();
+  if (tab === 'profile') loadProfile();
+  if (tab === 'head') loadHeadPanel();
+  if (tab === 'admin') loadAdminPanel();
+}
+
+// ============================================================
+// MAIN FEED
+// ============================================================
+function loadFeed() {
+  const container = document.getElementById('feed-posts');
+  container.innerHTML = '<div class="loading">Loading posts...</div>';
+  const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(30));
+  const unsub = onSnapshot(q, snap => {
+    if (snap.empty) { container.innerHTML = '<div class="empty-state">No posts yet. Be the first to post! 🌍</div>'; return; }
+    container.innerHTML = snap.docs.map(d => renderPost({ id: d.id, ...d.data() })).join('');
+  });
+  unsubscribers.push(unsub);
+}
+
+function renderPost(post) {
+  const isOwn = post.authorId === currentUser?.uid;
+  const canDelete = isOwn || currentUserData?.isAdmin;
+  const liked = (post.likes || []).includes(currentUser?.uid);
+  return `
+  <div class="post-card" id="post-${sanitize(post.id)}">
+    <div class="post-header">
+      <div class="post-avatar">${(post.authorName||'?')[0].toUpperCase()}</div>
+      <div class="post-meta">
+        <div class="post-author">${sanitize(post.authorName)}</div>
+        <div class="post-time">${timeAgo(post.createdAt)} · ${sanitize(post.category||'General')}</div>
+      </div>
+      ${canDelete ? `<button class="post-delete" onclick="deletePost('${sanitize(post.id)}')">🗑️</button>` : ''}
+    </div>
+    <div class="post-content">${sanitize(post.content)}</div>
+    ${post.link ? `<a href="${sanitize(post.link)}" target="_blank" class="post-link">🔗 ${sanitize(post.link)}</a>` : ''}
+    <div class="post-actions">
+      <button class="post-action ${liked?'liked':''}" onclick="toggleLike('${sanitize(post.id)}')">
+        ❤️ ${(post.likes||[]).length}
+      </button>
+      <button class="post-action" onclick="toggleReplies('${sanitize(post.id)}')">💬 Reply</button>
+    </div>
+    <div class="reply-box" id="reply-box-${sanitize(post.id)}" style="display:none;">
+      <input type="text" placeholder="Write a reply... use @name to tag" id="reply-input-${sanitize(post.id)}">
+      <button onclick="submitReply('${sanitize(post.id)}')">Send</button>
+    </div>
+    <div class="replies-container" id="replies-${sanitize(post.id)}"></div>
+  </div>`;
+}
+
+async function submitPost() {
+  const content = document.getElementById('post-input').value.trim();
+  const category = document.getElementById('post-category').value;
+  const link = document.getElementById('post-link').value.trim();
+  if (!content) return showToast('Write something first','error');
+  const tags = (content.match(/@\w+/g)||[]);
+  await addDoc(collection(db, 'posts'), {
+    content, category, link, tags,
+    authorId: currentUser.uid,
+    authorName: currentUserData.name,
+    authorPhoto: currentUserData.photoUrl || '',
+    likes: [], createdAt: serverTimestamp()
+  });
+  document.getElementById('post-input').value = '';
+  document.getElementById('post-link').value = '';
+  showToast('Post shared! 🌍');
+}
+
+async function deletePost(postId) {
+  if (!confirm('Delete this post?')) return;
+  await deleteDoc(doc(db, 'posts', postId));
+  showToast('Post deleted');
+}
+
+async function toggleLike(postId) {
+  const ref = doc(db, 'posts', postId);
+  const snap = await getDoc(ref);
+  const likes = snap.data().likes || [];
+  if (likes.includes(currentUser.uid)) {
+    await updateDoc(ref, { likes: arrayRemove(currentUser.uid) });
+  } else {
+    await updateDoc(ref, { likes: arrayUnion(currentUser.uid) });
+  }
+}
+
+function toggleReplies(postId) {
+  const box = document.getElementById(`reply-box-${postId}`);
+  box.style.display = box.style.display === 'none' ? 'flex' : 'none';
+  // Load replies
+  const container = document.getElementById(`replies-${postId}`);
+  if (container.dataset.loaded) return;
+  container.dataset.loaded = '1';
+  const q = query(collection(db, 'posts', postId, 'replies'), orderBy('createdAt', 'asc'));
+  const unsub = onSnapshot(q, snap => {
+    container.innerHTML = snap.docs.map(d => `
+      <div class="reply-item">
+        <strong>${sanitize(d.data().authorName)}</strong>
+        <span>${sanitize(d.data().content)}</span>
+        <small>${timeAgo(d.data().createdAt)}</small>
+      </div>`).join('');
+  });
+  unsubscribers.push(unsub);
+}
+
+async function submitReply(postId) {
+  const input = document.getElementById(`reply-input-${postId}`);
+  const content = input.value.trim();
+  if (!content) return;
+  await addDoc(collection(db, 'posts', postId, 'replies'), {
+    content, authorId: currentUser.uid,
+    authorName: currentUserData.name,
+    createdAt: serverTimestamp()
+  });
+  input.value = '';
+}
+
+// ============================================================
+// DEPARTMENT TAB
+// ============================================================
+function loadDepartment() {
+  const dept = currentUserData.department;
+  const deptInfo = DEPARTMENTS.find(d => d.id === dept);
+  const container = document.getElementById('dept-container');
+  container.innerHTML = `
+    <div class="dept-header-bar">
+      <span class="dept-icon-big">${deptInfo?.icon||'📚'}</span>
+      <div>
+        <h2>${deptInfo?.name||'My Department'}</h2>
+        <p>Your learning space — videos, articles, quizzes and discussions</p>
+      </div>
+    </div>
+    <div class="dept-tabs">
+      <button class="dept-tab-btn active" onclick="showDeptSection('materials')">📹 Materials</button>
+      <button class="dept-tab-btn" onclick="showDeptSection('progress')">📊 My Progress</button>
+      <button class="dept-tab-btn" onclick="showDeptSection('chat')">💬 Dept Chat</button>
+    </div>
+    <div id="dept-section-materials" class="dept-section active"></div>
+    <div id="dept-section-progress" class="dept-section" style="display:none;"></div>
+    <div id="dept-section-chat" class="dept-section" style="display:none;"></div>`;
+  loadDeptMaterials(dept);
+  loadDeptProgress(dept);
+  loadDeptChat(dept);
+}
+
+function showDeptSection(section) {
+  document.querySelectorAll('.dept-tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['materials','progress','chat'][i] === section);
+  });
+  ['materials','progress','chat'].forEach(s => {
+    const el = document.getElementById(`dept-section-${s}`);
+    if (el) el.style.display = s === section ? 'block' : 'none';
   });
 }
 
-// ---- LOAD REPLIES ----
-async function loadReplies(postId) {
-  const list = document.getElementById(`replies-list-${postId}`);
-  const repliesRef = collection(db, 'posts', postId, 'replies');
-  const rq = query(repliesRef, orderBy('createdAt', 'asc'));
-  onSnapshot(rq, (snap) => {
+async function loadDeptMaterials(dept) {
+  const container = document.getElementById('dept-section-materials');
+  container.innerHTML = '<div class="loading">Loading materials...</div>';
+  const q = query(collection(db, 'departments', dept, 'materials'), orderBy('createdAt', 'asc'));
+  const unsub = onSnapshot(q, snap => {
     if (snap.empty) {
-      list.innerHTML = '<div style="font-size:0.8rem;color:var(--gray);padding:0.5rem 0;">No replies yet. Be the first!</div>';
+      container.innerHTML = '<div class="empty-state">No materials posted yet. Check back soon! 📚</div>';
       return;
     }
-    list.innerHTML = snap.docs.map(d => renderReply(postId, d.id, d.data())).join('');
-    // Re-attach delete reply listeners
-    list.querySelectorAll('.btn-delete-reply').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const pId = btn.dataset.post;
-        const rId = btn.dataset.reply;
-        if (!confirm('Delete this reply?')) return;
-        try {
-          await deleteDoc(doc(db, 'posts', pId, 'replies', rId));
-          await updateDoc(doc(db, 'posts', pId), { replyCount: increment(-1) });
-          showToast('Reply deleted.', 'success');
-        } catch (e) {
-          showToast('Error deleting reply. Try again.', 'error');
-        }
-      });
-    });
+    container.innerHTML = snap.docs.map(d => renderMaterial({ id: d.id, ...d.data() }, dept)).join('');
+  });
+  unsubscribers.push(unsub);
+}
+
+function renderMaterial(mat, dept) {
+  const videoEmbed = mat.type === 'video' && mat.url
+    ? `<div class="video-wrap"><iframe src="https://www.youtube.com/embed/${getYoutubeId(mat.url)}" allowfullscreen></iframe></div>` : '';
+  const articleContent = mat.type === 'article'
+    ? `<div class="article-content">${mat.url ? `<a href="${sanitize(mat.url)}" target="_blank" class="article-link">🔗 Read Article</a>` : ''}
+       ${mat.text ? `<p>${sanitize(mat.text)}</p>` : ''}</div>` : '';
+  return `
+  <div class="material-card" id="material-${sanitize(mat.id)}">
+    <div class="material-header">
+      <span class="material-type-badge">${mat.type === 'video' ? '📹 Video' : '📄 Article'}</span>
+      <h3>${sanitize(mat.title)}</h3>
+      <span class="material-date">${timeAgo(mat.createdAt)}</span>
+    </div>
+    ${videoEmbed}${articleContent}
+    <div class="material-actions">
+      <button class="btn-sm btn-navy" onclick="markWatched('${sanitize(mat.id)}','${dept}')">✅ Mark as Done</button>
+      <button class="btn-sm btn-outline" onclick="toggleDiscussion('${sanitize(mat.id)}','${dept}')">💬 Discussion</button>
+      <button class="btn-sm btn-gold" onclick="openQuiz('${sanitize(mat.id)}','${dept}')">📝 Take Quiz</button>
+    </div>
+    <div id="discussion-${sanitize(mat.id)}" style="display:none;" class="discussion-box"></div>
+    <div id="quiz-${sanitize(mat.id)}" style="display:none;" class="quiz-box"></div>
+  </div>`;
+}
+
+function getYoutubeId(url) {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  return match ? match[1] : '';
+}
+
+async function markWatched(materialId, dept) {
+  await setDoc(doc(db, 'results', currentUser.uid, 'materials', materialId), {
+    watched: true, watchedAt: serverTimestamp(), department: dept
+  }, { merge: true });
+  showToast('Marked as done ✅');
+  // Track engagement for dept head
+  await updateDoc(doc(db, 'departments', dept, 'materials', materialId), {
+    [`viewers.${currentUser.uid}`]: true
+  }).catch(() => {});
+}
+
+function toggleDiscussion(materialId, dept) {
+  const box = document.getElementById(`discussion-${materialId}`);
+  if (box.dataset.loaded) { box.style.display = box.style.display==='none'?'block':'none'; return; }
+  box.style.display = 'block';
+  box.dataset.loaded = '1';
+  box.innerHTML = `
+    <div id="disc-posts-${materialId}"></div>
+    <div class="disc-input">
+      <input type="text" placeholder="Share your thoughts... @tag members" id="disc-input-${materialId}">
+      <button onclick="submitDiscussion('${materialId}','${dept}')">Post</button>
+    </div>`;
+  const q = query(collection(db, 'departments', dept, 'materials', materialId, 'discussions'), orderBy('createdAt', 'asc'));
+  const unsub = onSnapshot(q, snap => {
+    document.getElementById(`disc-posts-${materialId}`).innerHTML = snap.docs.map(d => `
+      <div class="disc-item">
+        <strong>${sanitize(d.data().authorName)}</strong>
+        <span>${sanitize(d.data().content)}</span>
+        <small>${timeAgo(d.data().createdAt)}</small>
+      </div>`).join('') || '<p style="color:var(--gray);font-size:0.82rem;">No discussion yet. Start the conversation!</p>';
+  });
+  unsubscribers.push(unsub);
+}
+
+async function submitDiscussion(materialId, dept) {
+  const input = document.getElementById(`disc-input-${materialId}`);
+  const content = input.value.trim();
+  if (!content) return;
+  await addDoc(collection(db, 'departments', dept, 'materials', materialId, 'discussions'), {
+    content, authorId: currentUser.uid, authorName: currentUserData.name, createdAt: serverTimestamp()
+  });
+  input.value = '';
+}
+
+async function openQuiz(materialId, dept) {
+  const box = document.getElementById(`quiz-${materialId}`);
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  if (box.dataset.loaded) return;
+  box.dataset.loaded = '1';
+  // Check if already passed
+  const resultSnap = await getDoc(doc(db, 'results', currentUser.uid, 'materials', materialId));
+  if (resultSnap.exists() && resultSnap.data().quizPassed) {
+    box.innerHTML = `<div class="quiz-passed">✅ Quiz already passed with ${resultSnap.data().quizScore}%!</div>`;
+    return;
+  }
+  const quizSnap = await getDoc(doc(db, 'departments', dept, 'materials', materialId, 'quiz', 'questions'));
+  if (!quizSnap.exists()) {
+    box.innerHTML = '<div class="empty-state">Quiz not yet available for this material.</div>';
+    return;
+  }
+  const questions = quizSnap.data().questions || [];
+  box.innerHTML = renderQuiz(questions, materialId, dept);
+}
+
+function renderQuiz(questions, materialId, dept) {
+  if (!questions.length) return '<div class="empty-state">No questions yet.</div>';
+  return `
+  <div class="quiz-container">
+    <h4>📝 Quiz — Answer all questions (70% pass mark)</h4>
+    <form id="quiz-form-${materialId}">
+      ${questions.map((q, i) => `
+        <div class="quiz-question">
+          <p><strong>Q${i+1}.</strong> ${sanitize(q.question)}</p>
+          ${q.type === 'mcq'
+            ? q.options.map((opt, j) => `
+              <label class="quiz-option">
+                <input type="radio" name="q${i}" value="${j}"> ${sanitize(opt)}
+              </label>`).join('')
+            : `<textarea class="quiz-answer" name="q${i}" placeholder="Your answer..." rows="2"></textarea>`}
+        </div>`).join('')}
+      <button type="button" class="btn-submit-quiz" onclick="submitQuiz('${materialId}','${dept}',${JSON.stringify(questions).replace(/'/g,"&#39;")})">Submit Quiz</button>
+    </form>
+  </div>`;
+}
+
+async function submitQuiz(materialId, dept, questions) {
+  const form = document.getElementById(`quiz-form-${materialId}`);
+  let correct = 0; let total = questions.length;
+  questions.forEach((q, i) => {
+    if (q.type === 'mcq') {
+      const sel = form.querySelector(`input[name="q${i}"]:checked`);
+      if (sel && parseInt(sel.value) === q.correctIndex) correct++;
+    } else {
+      const ans = form.querySelector(`textarea[name="q${i}"]`).value.trim();
+      if (ans.length > 5) correct += 0.7; // partial credit for short answers
+    }
+  });
+  const score = Math.round((correct / total) * 100);
+  const passed = score >= 70;
+  await setDoc(doc(db, 'results', currentUser.uid, 'materials', materialId), {
+    quizScore: score, quizPassed: passed,
+    quizAttemptedAt: serverTimestamp(), department: dept
+  }, { merge: true });
+  const box = document.getElementById(`quiz-${materialId}`);
+  box.innerHTML = passed
+    ? `<div class="quiz-passed">🎉 Passed with ${score}%! Great work!</div>`
+    : `<div class="quiz-failed">❌ Score: ${score}%. Need 70% to pass. Review the material and try again. <button onclick="document.getElementById('quiz-${materialId}').dataset.loaded='';openQuiz('${materialId}','${dept}')">Retry</button></div>`;
+  showToast(passed ? `🎉 Quiz passed with ${score}%!` : `Score: ${score}%. Keep trying!`, passed ? 'success' : 'error');
+}
+
+async function loadDeptProgress(dept) {
+  const container = document.getElementById('dept-section-progress');
+  // Get all materials
+  const matsSnap = await getDocs(collection(db, 'departments', dept, 'materials'));
+  const total = matsSnap.size;
+  // Get results
+  const resultsSnap = await getDocs(collection(db, 'results', currentUser.uid, 'materials'));
+  let watched = 0, quizPassed = 0;
+  resultsSnap.forEach(d => { if (d.data().watched) watched++; if (d.data().quizPassed) quizPassed++; });
+  const joinedAt = currentUserData.joinedAt?.toMillis() || Date.now();
+  const monthsActive = Math.floor((Date.now() - joinedAt) / (1000*60*60*24*30));
+  const eligible = monthsActive >= 3 && quizPassed >= total && total > 0;
+  container.innerHTML = `
+    <div class="progress-cards">
+      <div class="progress-card">
+        <div class="progress-num">${watched}/${total}</div>
+        <div class="progress-label">Materials Completed</div>
+        <div class="progress-bar"><div style="width:${total?Math.round(watched/total*100):0}%"></div></div>
+      </div>
+      <div class="progress-card">
+        <div class="progress-num">${quizPassed}/${total}</div>
+        <div class="progress-label">Quizzes Passed</div>
+        <div class="progress-bar"><div style="width:${total?Math.round(quizPassed/total*100):0}%"></div></div>
+      </div>
+      <div class="progress-card">
+        <div class="progress-num">${monthsActive}</div>
+        <div class="progress-label">Months Active</div>
+      </div>
+      <div class="progress-card ${eligible?'eligible':''}">
+        <div class="progress-num">${eligible?'✅':'⏳'}</div>
+        <div class="progress-label">Certificate ${eligible?'Eligible!':'Not Yet Eligible'}</div>
+        <p style="font-size:0.75rem;color:var(--gray);margin-top:0.5rem;">
+          Need: 3+ months active, all quizzes passed (70%), admin approval
+        </p>
+        ${eligible ? `<button class="btn-sm btn-gold" onclick="requestCertificate()">Request Certificate</button>` : ''}
+      </div>
+    </div>`;
+}
+
+async function requestCertificate() {
+  const dept = currentUserData.department;
+  const existing = await getDoc(doc(db, 'certificates', `${currentUser.uid}_${dept}`));
+  if (existing.exists()) return showToast('Certificate request already submitted','error');
+  await setDoc(doc(db, 'certificates', `${currentUser.uid}_${dept}`), {
+    userId: currentUser.uid, userName: currentUserData.name,
+    department: dept, status: 'pending',
+    requestedAt: serverTimestamp(), approvedBy: ''
+  });
+  showToast('Certificate request submitted! Admin will review. 🏆');
+}
+
+async function loadDeptChat(dept) {
+  const container = document.getElementById('dept-section-chat');
+  container.innerHTML = `
+    <div id="dept-chat-messages" class="chat-messages"></div>
+    <div class="chat-input-row">
+      <input type="text" id="dept-chat-input" placeholder="Message your department... @tag members">
+      <button onclick="sendDeptChat('${dept}')">Send</button>
+    </div>`;
+  const q = query(collection(db, 'chat', dept, 'messages'), orderBy('createdAt', 'asc'), limit(50));
+  const unsub = onSnapshot(q, snap => {
+    const msgs = document.getElementById('dept-chat-messages');
+    msgs.innerHTML = snap.docs.map(d => `
+      <div class="chat-msg ${d.data().authorId===currentUser.uid?'own':''}">
+        <div class="chat-bubble">
+          <strong>${sanitize(d.data().authorName)}</strong>
+          <p>${sanitize(d.data().content)}</p>
+          <small>${timeAgo(d.data().createdAt)}</small>
+        </div>
+      </div>`).join('');
+    msgs.scrollTop = msgs.scrollHeight;
+  });
+  unsubscribers.push(unsub);
+}
+
+async function sendDeptChat(dept) {
+  const input = document.getElementById('dept-chat-input');
+  const content = input.value.trim();
+  if (!content) return;
+  await addDoc(collection(db, 'chat', dept, 'messages'), {
+    content, authorId: currentUser.uid,
+    authorName: currentUserData.name,
+    createdAt: serverTimestamp()
+  });
+  input.value = '';
+}
+
+// ============================================================
+// MEETINGS TAB
+// ============================================================
+async function loadMeetings() {
+  const container = document.getElementById('meetings-container');
+  container.innerHTML = `
+    <div class="meetings-header">
+      <h2>🎥 YAN Meetings</h2>
+      <button class="btn-primary" onclick="showCreateMeeting()">➕ Create Meeting</button>
+    </div>
+    <div id="create-meeting-form" style="display:none;" class="meeting-form-card">
+      <h3>Schedule a Meeting</h3>
+      <input type="text" id="mtg-title" placeholder="Meeting title *">
+      <input type="text" id="mtg-topic" placeholder="Topic / Department">
+      <input type="datetime-local" id="mtg-date">
+      <button class="btn-primary" onclick="createMeeting()">Create Meeting Room</button>
+      <button class="btn-outline" onclick="document.getElementById('create-meeting-form').style.display='none'">Cancel</button>
+    </div>
+    <div id="live-now" style="display:none;" class="live-banner">
+      🔴 <strong>LIVE NOW</strong> — <span id="live-title"></span>
+      <button class="btn-red" onclick="joinMeeting(window._liveRoomUrl)">Join Live</button>
+    </div>
+    <h3 style="margin:1.5rem 0 1rem;">📅 Upcoming & Recent Sessions</h3>
+    <div id="meetings-list"></div>
+    <div id="meeting-room-container" style="display:none;" class="meeting-room-wrapper">
+      <div class="meeting-room-header">
+        <span id="meeting-room-title"></span>
+        <button onclick="leaveMeeting()">✕ Leave Meeting</button>
+      </div>
+      <iframe id="meeting-iframe" allow="camera; microphone; fullscreen; display-capture" style="width:100%;height:600px;border:none;border-radius:12px;"></iframe>
+    </div>`;
+  loadMeetingsList();
+}
+
+function showCreateMeeting() {
+  const form = document.getElementById('create-meeting-form');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function createMeeting() {
+  const title = document.getElementById('mtg-title').value.trim();
+  const topic = document.getElementById('mtg-topic').value.trim();
+  const dateVal = document.getElementById('mtg-date').value;
+  if (!title) return showToast('Enter a meeting title','error');
+  if (DAILY_DOMAIN === 'your-domain.daily.co') return showToast('Please configure your Daily.co domain first','error');
+  const roomName = 'yan-' + Date.now();
+  const roomUrl = `https://${DAILY_DOMAIN}/${roomName}`;
+  await addDoc(collection(db, 'meetings'), {
+    title, topic, roomUrl,
+    scheduledAt: dateVal ? new Date(dateVal) : serverTimestamp(),
+    createdBy: currentUser.uid, createdByName: currentUserData.name,
+    createdAt: serverTimestamp(), isLive: false, recordingUrl: ''
+  });
+  document.getElementById('create-meeting-form').style.display = 'none';
+  document.getElementById('mtg-title').value = '';
+  document.getElementById('mtg-topic').value = '';
+  showToast('Meeting created! 🎥');
+}
+
+function loadMeetingsList() {
+  const list = document.getElementById('meetings-list');
+  const q = query(collection(db, 'meetings'), orderBy('createdAt', 'desc'), limit(20));
+  const unsub = onSnapshot(q, snap => {
+    if (snap.empty) { list.innerHTML = '<div class="empty-state">No meetings yet. Create one! 🎥</div>'; return; }
+    let liveFound = false;
+    list.innerHTML = snap.docs.map(d => {
+      const m = { id: d.id, ...d.data() };
+      if (m.isLive && !liveFound) {
+        liveFound = true;
+        document.getElementById('live-now').style.display = 'flex';
+        document.getElementById('live-title').textContent = m.title;
+        window._liveRoomUrl = m.roomUrl;
+      }
+      const canDelete = m.createdBy === currentUser?.uid || currentUserData?.isAdmin;
+      return `
+      <div class="meeting-card ${m.isLive?'live':''}">
+        <div class="meeting-info">
+          ${m.isLive ? '<span class="live-dot">🔴 LIVE</span>' : ''}
+          <h4>${sanitize(m.title)}</h4>
+          <p>${sanitize(m.topic||'')} · By ${sanitize(m.createdByName)}</p>
+          ${m.recordingUrl ? `<a href="${sanitize(m.recordingUrl)}" target="_blank" class="recording-link">📼 Watch Recording</a>` : ''}
+        </div>
+        <div class="meeting-btns">
+          <button class="btn-sm btn-navy" onclick="joinMeeting('${sanitize(m.roomUrl)}','${sanitize(m.title)}')">Join</button>
+          ${currentUserData?.isAdmin ? `<button class="btn-sm ${m.isLive?'btn-outline':'btn-gold'}" onclick="toggleLive('${m.id}',${!m.isLive})">${m.isLive?'End Live':'Go Live'}</button>` : ''}
+          ${currentUserData?.isAdmin ? `<button class="btn-sm btn-outline" onclick="addRecording('${m.id}')">+ Recording</button>` : ''}
+          ${canDelete ? `<button class="btn-sm btn-red" onclick="deleteMeeting('${m.id}')">Delete</button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+    if (!liveFound) document.getElementById('live-now').style.display = 'none';
+  });
+  unsubscribers.push(unsub);
+}
+
+function joinMeeting(roomUrl, title) {
+  if (!roomUrl || roomUrl.includes('your-domain')) return showToast('Configure Daily.co domain first','error');
+  document.getElementById('meeting-room-container').style.display = 'block';
+  document.getElementById('meeting-room-title').textContent = title || 'Meeting';
+  document.getElementById('meeting-iframe').src = roomUrl;
+  document.getElementById('meeting-room-container').scrollIntoView({ behavior: 'smooth' });
+}
+
+function leaveMeeting() {
+  document.getElementById('meeting-iframe').src = '';
+  document.getElementById('meeting-room-container').style.display = 'none';
+}
+
+async function toggleLive(meetingId, isLive) {
+  await updateDoc(doc(db, 'meetings', meetingId), { isLive });
+  showToast(isLive ? '🔴 Meeting is now LIVE!' : 'Meeting ended');
+}
+
+async function addRecording(meetingId) {
+  const url = prompt('Paste YouTube recording URL:');
+  if (!url) return;
+  await updateDoc(doc(db, 'meetings', meetingId), { recordingUrl: url });
+  showToast('Recording added ✅');
+}
+
+async function deleteMeeting(meetingId) {
+  if (!confirm('Delete this meeting?')) return;
+  await deleteDoc(doc(db, 'meetings', meetingId));
+  showToast('Meeting deleted');
+}
+
+// ============================================================
+// MY PROFILE TAB
+// ============================================================
+function loadProfile() {
+  const u = currentUserData;
+  const dept = DEPARTMENTS.find(d => d.id === u.department);
+  document.getElementById('profile-container').innerHTML = `
+    <div class="profile-card">
+      <div class="profile-photo-wrap">
+        ${u.photoUrl ? `<img src="${u.photoUrl}" alt="Profile">` : `<div class="profile-avatar-big">${(u.name||'?')[0]}</div>`}
+        <label class="profile-photo-change">
+          📷 Change Photo
+          <input type="file" accept="image/*" onchange="changeProfilePhoto(this)">
+        </label>
+      </div>
+      <div class="profile-info">
+        <h2>${sanitize(u.name)}</h2>
+        <p class="profile-role">${sanitize(u.role)} · ${dept?.name||''}</p>
+        <p class="profile-country">📍 ${sanitize(u.country)}</p>
+        ${u.isAdmin?'<span class="badge-admin">🛡️ Admin</span>':''}
+        ${u.isDeptHead?'<span class="badge-head">👑 Dept Head</span>':''}
+        ${u.isExec?'<span class="badge-exec">⭐ Executive</span>':''}
+      </div>
+    </div>
+    <div class="profile-edit-form">
+      <h3>Edit Profile</h3>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="edit-name" value="${sanitize(u.name)}">
+        </div>
+        <div class="form-group">
+          <label>Country</label>
+          <input type="text" id="edit-country" value="${sanitize(u.country)}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>WhatsApp</label>
+        <input type="text" id="edit-whatsapp" value="${sanitize(u.whatsapp||'')}">
+      </div>
+      <div class="form-group">
+        <label>Bio</label>
+        <textarea id="edit-bio" rows="3">${sanitize(u.bio||'')}</textarea>
+      </div>
+      <button class="btn-primary" onclick="saveProfile()">Save Changes</button>
+    </div>
+    <div id="cert-section" class="cert-section"></div>`;
+  loadProfileCerts();
+}
+
+async function saveProfile() {
+  const name = document.getElementById('edit-name').value.trim();
+  const country = document.getElementById('edit-country').value.trim();
+  const whatsapp = document.getElementById('edit-whatsapp').value.trim();
+  const bio = document.getElementById('edit-bio').value.trim();
+  await updateDoc(doc(db, 'users', currentUser.uid), { name, country, whatsapp, bio });
+  currentUserData = { ...currentUserData, name, country, whatsapp, bio };
+  document.getElementById('sidebar-name').textContent = name;
+  showToast('Profile updated ✅');
+}
+
+async function changeProfilePhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  showToast('Uploading photo...');
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY_PRESET);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {method:'POST',body:fd});
+  const data = await res.json();
+  const photoUrl = data.secure_url;
+  await updateDoc(doc(db, 'users', currentUser.uid), { photoUrl });
+  currentUserData.photoUrl = photoUrl;
+  showToast('Photo updated ✅');
+  loadProfile();
+}
+
+async function loadProfileCerts() {
+  const container = document.getElementById('cert-section');
+  const q = query(collection(db, 'certificates'), where('userId','==',currentUser.uid));
+  const snap = await getDocs(q);
+  if (snap.empty) { container.innerHTML = '<p style="color:var(--gray);font-size:0.85rem;">No certificates yet. Complete your department training to become eligible!</p>'; return; }
+  container.innerHTML = '<h3>🏆 My Certificates</h3>' + snap.docs.map(d => {
+    const c = d.data();
+    const dept = DEPARTMENTS.find(x => x.id === c.department);
+    return `
+    <div class="cert-card">
+      <div class="cert-info">
+        <span>${dept?.icon||'🏆'}</span>
+        <div>
+          <strong>${dept?.name||c.department}</strong>
+          <p>Status: <span class="cert-status ${c.status}">${c.status}</span></p>
+        </div>
+      </div>
+      ${c.status === 'approved' ? `<button class="btn-sm btn-gold" onclick="downloadCertificate('${d.id}')">⬇️ Download</button>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function downloadCertificate(certId) {
+  // Generate PDF certificate using canvas
+  const u = currentUserData;
+  const dept = DEPARTMENTS.find(d => d.id === u.department);
+  const canvas = document.createElement('canvas');
+  canvas.width = 1200; canvas.height = 850;
+  const ctx = canvas.getContext('2d');
+  // Background
+  ctx.fillStyle = '#F8F9FF'; ctx.fillRect(0, 0, 1200, 850);
+  // Border
+  ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 8;
+  ctx.strokeRect(20, 20, 1160, 810);
+  ctx.strokeStyle = '#F5A623'; ctx.lineWidth = 3;
+  ctx.strokeRect(32, 32, 1136, 786);
+  // Header
+  ctx.fillStyle = '#1B2A6B'; ctx.font = 'bold 48px Georgia';
+  ctx.textAlign = 'center'; ctx.fillText('YOUNG AFRICANS NETWORK', 600, 120);
+  ctx.fillStyle = '#E63329'; ctx.font = '24px Georgia';
+  ctx.fillText('Building the Future, Together', 600, 160);
+  // Certificate title
+  ctx.fillStyle = '#F5A623'; ctx.font = 'bold 36px Georgia';
+  ctx.fillText('CERTIFICATE OF COMPLETION', 600, 240);
+  // Body
+  ctx.fillStyle = '#1B2A6B'; ctx.font = '22px Georgia';
+  ctx.fillText('This is to certify that', 600, 310);
+  ctx.font = 'bold 44px Georgia';
+  ctx.fillStyle = '#E63329'; ctx.fillText(u.name, 600, 370);
+  ctx.fillStyle = '#1B2A6B'; ctx.font = '22px Georgia';
+  ctx.fillText('has successfully completed the', 600, 420);
+  ctx.font = 'bold 28px Georgia';
+  ctx.fillStyle = '#1B2A6B'; ctx.fillText(dept?.name || u.department, 600, 465);
+  ctx.font = '20px Georgia';
+  ctx.fillStyle = '#6B7280';
+  ctx.fillText('training program with distinction at the Young Africans Network', 600, 510);
+  // Date
+  ctx.fillStyle = '#1B2A6B'; ctx.font = '18px Georgia';
+  ctx.fillText(`Date: ${new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'})}`, 600, 570);
+  // Signatures
+  ctx.font = 'italic bold 22px Georgia';
+  ctx.fillStyle = '#1B2A6B';
+  ctx.textAlign = 'left'; ctx.fillText('Emmanuel Ikumilu Mwori', 150, 680);
+  ctx.font = '16px Georgia'; ctx.fillStyle = '#6B7280';
+  ctx.fillText('Founder & CEO, Young Africans Network', 150, 705);
+  ctx.fillStyle = '#1B2A6B'; ctx.font = 'italic bold 22px Georgia';
+  ctx.textAlign = 'right'; ctx.fillText('Department Head', 1050, 680);
+  ctx.font = '16px Georgia'; ctx.fillStyle = '#6B7280';
+  ctx.fillText(dept?.name || 'Department', 1050, 705);
+  // Dividers
+  ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(100, 720); ctx.lineTo(500, 720); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(700, 720); ctx.lineTo(1100, 720); ctx.stroke();
+  // Footer
+  ctx.textAlign = 'center'; ctx.fillStyle = '#6B7280'; ctx.font = '14px Georgia';
+  ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com', 600, 780);
+  // Download
+  const link = document.createElement('a');
+  link.download = `YAN_Certificate_${u.name.replace(/ /g,'_')}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showToast('Certificate downloading! 🏆');
+}
+
+// ============================================================
+// DEPARTMENT HEAD PANEL
+// ============================================================
+async function loadHeadPanel() {
+  const dept = currentUserData.department;
+  const container = document.getElementById('head-container');
+  container.innerHTML = `
+    <h2>👑 Department Head Panel</h2>
+    <p style="color:var(--gray);margin-bottom:1.5rem;">Manage training materials and monitor your members for <strong>${DEPARTMENTS.find(d=>d.id===dept)?.name||dept}</strong></p>
+    <div class="head-sections">
+      <div class="head-section">
+        <h3>➕ Post Training Material</h3>
+        <div class="form-group">
+          <label>Title *</label>
+          <input type="text" id="head-mat-title" placeholder="Material title">
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select id="head-mat-type" onchange="toggleMaterialFields()">
+            <option value="video">📹 Video (YouTube)</option>
+            <option value="article">📄 Article</option>
+          </select>
+        </div>
+        <div id="head-video-field" class="form-group">
+          <label>YouTube URL *</label>
+          <input type="text" id="head-mat-url" placeholder="https://youtube.com/watch?v=...">
+        </div>
+        <div id="head-article-fields" style="display:none;">
+          <div class="form-group">
+            <label>Article Link (optional)</label>
+            <input type="text" id="head-mat-link" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Article Text (optional)</label>
+            <textarea id="head-mat-text" rows="4" placeholder="Paste article content here..."></textarea>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="postMaterial('${dept}')">Post Material</button>
+      </div>
+      <div class="head-section">
+        <h3>📝 Create Quiz for Material</h3>
+        <div class="form-group">
+          <label>Select Material</label>
+          <select id="head-quiz-material"></select>
+        </div>
+        <div id="head-quiz-questions">
+          <p style="color:var(--gray);font-size:0.85rem;">Quiz builder — Add 5 short answer + 5 MCQ questions</p>
+          <div id="quiz-questions-list"></div>
+          <button class="btn-sm btn-outline" onclick="addQuizQuestion('short')">+ Short Answer</button>
+          <button class="btn-sm btn-outline" onclick="addQuizQuestion('mcq')">+ Multiple Choice</button>
+        </div>
+        <button class="btn-primary" onclick="saveQuiz('${dept}')">Save Quiz</button>
+      </div>
+    </div>
+    <div class="head-section">
+      <h3>📊 Member Engagement</h3>
+      <div id="head-engagement"></div>
+    </div>`;
+  loadHeadMaterials(dept);
+  loadHeadEngagement(dept);
+}
+
+function toggleMaterialFields() {
+  const type = document.getElementById('head-mat-type').value;
+  document.getElementById('head-video-field').style.display = type === 'video' ? 'block' : 'none';
+  document.getElementById('head-article-fields').style.display = type === 'article' ? 'block' : 'none';
+}
+
+async function postMaterial(dept) {
+  const title = document.getElementById('head-mat-title').value.trim();
+  const type = document.getElementById('head-mat-type').value;
+  const url = document.getElementById('head-mat-url')?.value.trim();
+  const link = document.getElementById('head-mat-link')?.value.trim();
+  const text = document.getElementById('head-mat-text')?.value.trim();
+  if (!title) return showToast('Enter a title','error');
+  await addDoc(collection(db, 'departments', dept, 'materials'), {
+    title, type, url: url||link||'', text: text||'',
+    postedBy: currentUser.uid, postedByName: currentUserData.name,
+    createdAt: serverTimestamp(), viewers: {}
+  });
+  document.getElementById('head-mat-title').value = '';
+  document.getElementById('head-mat-url').value = '';
+  showToast('Material posted! 📚');
+  loadHeadMaterials(dept);
+}
+
+async function loadHeadMaterials(dept) {
+  const sel = document.getElementById('head-quiz-material');
+  if (!sel) return;
+  const snap = await getDocs(collection(db, 'departments', dept, 'materials'));
+  sel.innerHTML = snap.docs.map(d => `<option value="${d.id}">${d.data().title}</option>`).join('') || '<option>No materials yet</option>';
+}
+
+let quizQuestionsData = [];
+function addQuizQuestion(type) {
+  const idx = quizQuestionsData.length;
+  quizQuestionsData.push({ type, question: '', options: ['','','',''], correctIndex: 0 });
+  renderQuizBuilder();
+}
+function renderQuizBuilder() {
+  const container = document.getElementById('quiz-questions-list');
+  container.innerHTML = quizQuestionsData.map((q, i) => `
+    <div class="quiz-builder-item">
+      <input type="text" placeholder="Question ${i+1}" value="${sanitize(q.question)}" oninput="quizQuestionsData[${i}].question=this.value">
+      ${q.type === 'mcq' ? q.options.map((opt, j) => `
+        <div class="mcq-option">
+          <input type="radio" name="correct-${i}" ${q.correctIndex===j?'checked':''} onchange="quizQuestionsData[${i}].correctIndex=${j}">
+          <input type="text" placeholder="Option ${j+1}" value="${sanitize(opt)}" oninput="quizQuestionsData[${i}].options[${j}]=this.value">
+        </div>`).join('') : '<small style="color:var(--gray)">Short answer — graded on length</small>'}
+      <button class="btn-sm btn-red" onclick="quizQuestionsData.splice(${i},1);renderQuizBuilder()">Remove</button>
+    </div>`).join('');
+}
+
+async function saveQuiz(dept) {
+  const materialId = document.getElementById('head-quiz-material').value;
+  if (!materialId || !quizQuestionsData.length) return showToast('Add questions first','error');
+  await setDoc(doc(db, 'departments', dept, 'materials', materialId, 'quiz', 'questions'), {
+    questions: quizQuestionsData, updatedAt: serverTimestamp()
+  });
+  quizQuestionsData = [];
+  renderQuizBuilder();
+  showToast('Quiz saved! ✅');
+}
+
+async function loadHeadEngagement(dept) {
+  const container = document.getElementById('head-engagement');
+  const matsSnap = await getDocs(collection(db, 'departments', dept, 'materials'));
+  if (matsSnap.empty) { container.innerHTML = '<div class="empty-state">No materials posted yet.</div>'; return; }
+  container.innerHTML = matsSnap.docs.map(d => {
+    const mat = d.data();
+    const viewers = Object.keys(mat.viewers || {}).length;
+    return `
+    <div class="engagement-row">
+      <div class="engagement-mat">${sanitize(mat.title)}</div>
+      <div class="engagement-stat">👁️ ${viewers} viewed</div>
+      <button class="btn-sm btn-outline" onclick="deleteMaterial('${dept}','${d.id}')">Delete</button>
+    </div>`;
+  }).join('');
+}
+
+async function deleteMaterial(dept, materialId) {
+  if (!confirm('Delete this material?')) return;
+  await deleteDoc(doc(db, 'departments', dept, 'materials', materialId));
+  showToast('Material deleted');
+  loadHeadEngagement(dept);
+}
+
+// ============================================================
+// ADMIN PANEL
+// ============================================================
+async function loadAdminPanel() {
+  const container = document.getElementById('admin-container');
+  container.innerHTML = `
+    <h2>🛡️ Admin Dashboard</h2>
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" onclick="showAdminSection('overview')">📊 Overview</button>
+      <button class="admin-tab-btn" onclick="showAdminSection('members')">👥 Members</button>
+      <button class="admin-tab-btn" onclick="showAdminSection('certificates')">🏆 Certificates</button>
+      <button class="admin-tab-btn" onclick="showAdminSection('moderation')">🛡️ Moderation</button>
+    </div>
+    <div id="admin-section-overview" class="admin-section active"></div>
+    <div id="admin-section-members" class="admin-section" style="display:none;"></div>
+    <div id="admin-section-certificates" class="admin-section" style="display:none;"></div>
+    <div id="admin-section-moderation" class="admin-section" style="display:none;"></div>`;
+  loadAdminOverview();
+  loadAdminMembers();
+  loadAdminCertificates();
+  loadAdminModeration();
+}
+
+function showAdminSection(section) {
+  document.querySelectorAll('.admin-tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['overview','members','certificates','moderation'][i] === section);
+  });
+  ['overview','members','certificates','moderation'].forEach(s => {
+    const el = document.getElementById(`admin-section-${s}`);
+    if (el) el.style.display = s === section ? 'block' : 'none';
   });
 }
 
-// ---- SUBMIT REPLY ----
-async function submitReply(postId) {
-  const name = document.getElementById(`reply-name-${postId}`).value.trim();
-  const country = document.getElementById(`reply-country-${postId}`).value.trim();
-  const text = document.getElementById(`reply-text-${postId}`).value.trim();
-  if (!name || !text) { showToast('Please enter your name and reply.', 'error'); return; }
-  try {
-    await addDoc(collection(db, 'posts', postId, 'replies'), {
-      name, country: country || 'Africa', text, createdAt: serverTimestamp()
-    });
-    await updateDoc(doc(db, 'posts', postId), { replyCount: increment(1) });
-    document.getElementById(`reply-name-${postId}`).value = '';
-    document.getElementById(`reply-country-${postId}`).value = '';
-    document.getElementById(`reply-text-${postId}`).value = '';
-    showToast('Reply posted!', 'success');
-  } catch (e) {
-    showToast('Error posting reply. Try again.', 'error');
-  }
+async function loadAdminOverview() {
+  const container = document.getElementById('admin-section-overview');
+  const usersSnap = await getDocs(collection(db, 'users'));
+  const postsSnap = await getDocs(collection(db, 'posts'));
+  const certsSnap = await getDocs(query(collection(db, 'certificates'), where('status','==','approved')));
+  const pendingSnap = await getDocs(query(collection(db, 'certificates'), where('status','==','pending')));
+  container.innerHTML = `
+    <div class="admin-stats-grid">
+      <div class="admin-stat-card">
+        <div class="admin-stat-num">${usersSnap.size}</div>
+        <div class="admin-stat-label">Total Members</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-num">${postsSnap.size}</div>
+        <div class="admin-stat-label">Total Posts</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-num">${certsSnap.size}</div>
+        <div class="admin-stat-label">Certificates Issued</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-num">${pendingSnap.size}</div>
+        <div class="admin-stat-label">Pending Cert Requests</div>
+      </div>
+    </div>`;
 }
 
-// ---- SUBMIT POST ----
-document.getElementById('submitPost').addEventListener('click', async () => {
-  const name = document.getElementById('postName').value.trim();
-  const country = document.getElementById('postCountry').value.trim();
-  const category = document.getElementById('postCategory').value;
-  const content = document.getElementById('postContent').value.trim();
-  if (!name || !country || !category || !content) {
-    showToast('Please fill in all required fields.', 'error'); return;
-  }
-  const btn = document.getElementById('submitPost');
-  btn.disabled = true; btn.textContent = 'Posting...';
-  try {
-    await addDoc(collection(db, 'posts'), {
-      name, country, category, content,
-      likes: 0, replyCount: 0, createdAt: serverTimestamp()
-    });
-    document.getElementById('postName').value = '';
-    document.getElementById('postCountry').value = '';
-    document.getElementById('postCategory').value = '';
-    document.getElementById('postContent').value = '';
-    showToast('Post shared with the community! 🎉', 'success');
-  } catch (e) {
-    showToast('Error posting. Please try again.', 'error');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Post to Community 🚀';
-  }
-});
+async function loadAdminMembers() {
+  const container = document.getElementById('admin-section-members');
+  container.innerHTML = '<div class="loading">Loading members...</div>';
+  const snap = await getDocs(collection(db, 'users'));
+  container.innerHTML = `
+    <div class="admin-members-list">
+      ${snap.docs.map(d => {
+        const u = d.data();
+        const dept = DEPARTMENTS.find(x => x.id === u.department);
+        return `
+        <div class="admin-member-row">
+          <div class="admin-member-info">
+            ${u.photoUrl ? `<img src="${u.photoUrl}" alt="${sanitize(u.name)}">` : `<div class="admin-avatar">${(u.name||'?')[0]}</div>`}
+            <div>
+              <strong>${sanitize(u.name)}</strong>
+              <p>${sanitize(u.email)} · ${sanitize(u.country)} · ${dept?.name||u.department}</p>
+              <p>${u.isAdmin?'🛡️ Admin ':''} ${u.isDeptHead?'👑 Head ':''} ${u.isExec?'⭐ Exec ':''}</p>
+            </div>
+          </div>
+          <div class="admin-member-actions">
+            <button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isDeptHead',${!u.isDeptHead})">${u.isDeptHead?'Remove Head':'Make Head'}</button>
+            <button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isExec',${!u.isExec})">${u.isExec?'Remove Exec':'Make Exec'}</button>
+            <button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isAdmin',${!u.isAdmin})">${u.isAdmin?'Remove Admin':'Make Admin'}</button>
+            <button class="btn-sm btn-red" onclick="removeMember('${d.id}')">Remove</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
 
-// ---- FILTERS ----
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentFilter = btn.dataset.filter;
-    renderFeed();
-  });
-});
+async function toggleRole(userId, role, value) {
+  await updateDoc(doc(db, 'users', userId), { [role]: value });
+  showToast('Role updated ✅');
+  loadAdminMembers();
+}
 
-// ---- HAMBURGER ----
-const hamburger = document.getElementById('hamburger');
-const mobileMenu = document.getElementById('mobileMenu');
-hamburger.addEventListener('click', () => {
-  hamburger.classList.toggle('open');
-  mobileMenu.classList.toggle('open');
-});
-mobileMenu.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', () => {
-    hamburger.classList.remove('open');
-    mobileMenu.classList.remove('open');
+async function removeMember(userId) {
+  if (!confirm('Remove this member?')) return;
+  await deleteDoc(doc(db, 'users', userId));
+  showToast('Member removed');
+  loadAdminMembers();
+}
+
+async function loadAdminCertificates() {
+  const container = document.getElementById('admin-section-certificates');
+  const q = query(collection(db, 'certificates'), orderBy('requestedAt', 'desc'));
+  const snap = await getDocs(q);
+  if (snap.empty) { container.innerHTML = '<div class="empty-state">No certificate requests yet.</div>'; return; }
+  container.innerHTML = snap.docs.map(d => {
+    const c = d.data();
+    const dept = DEPARTMENTS.find(x => x.id === c.department);
+    return `
+    <div class="cert-admin-row">
+      <div>
+        <strong>${sanitize(c.userName)}</strong>
+        <p>${dept?.name||c.department} · Status: <span class="cert-status ${c.status}">${c.status}</span></p>
+      </div>
+      ${c.status === 'pending' ? `
+        <div>
+          <button class="btn-sm btn-gold" onclick="approveCert('${d.id}')">✅ Approve</button>
+          <button class="btn-sm btn-red" onclick="rejectCert('${d.id}')">❌ Reject</button>
+        </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function approveCert(certId) {
+  await updateDoc(doc(db, 'certificates', certId), {
+    status: 'approved', approvedBy: currentUserData.name, approvedAt: serverTimestamp()
   });
+  showToast('Certificate approved! 🏆');
+  loadAdminCertificates();
+}
+
+async function rejectCert(certId) {
+  await updateDoc(doc(db, 'certificates', certId), { status: 'rejected' });
+  showToast('Certificate rejected');
+  loadAdminCertificates();
+}
+
+async function loadAdminModeration() {
+  const container = document.getElementById('admin-section-moderation');
+  const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(20));
+  const snap = await getDocs(q);
+  container.innerHTML = `
+    <h3>Recent Posts</h3>
+    ${snap.docs.map(d => {
+      const p = d.data();
+      return `
+      <div class="moderation-row">
+        <div>
+          <strong>${sanitize(p.authorName)}</strong>
+          <p>${sanitize(p.content?.substring(0,100))}...</p>
+          <small>${timeAgo(p.createdAt)}</small>
+        </div>
+        <button class="btn-sm btn-red" onclick="deletePost('${d.id}')">Delete</button>
+      </div>`;
+    }).join('')}`;
+}
+
+// ============================================================
+// EXPOSE FUNCTIONS TO WINDOW
+// ============================================================
+window.doRegister = doRegister;
+window.doLogin = doLogin;
+window.doLogout = doLogout;
+window.doForgotPassword = doForgotPassword;
+window.doProfileSetup = doProfileSetup;
+window.showTab = showTab;
+window.showScreen = showScreen;
+window.submitPost = submitPost;
+window.deletePost = deletePost;
+window.toggleLike = toggleLike;
+window.toggleReplies = toggleReplies;
+window.submitReply = submitReply;
+window.showDeptSection = showDeptSection;
+window.markWatched = markWatched;
+window.toggleDiscussion = toggleDiscussion;
+window.submitDiscussion = submitDiscussion;
+window.openQuiz = openQuiz;
+window.submitQuiz = submitQuiz;
+window.requestCertificate = requestCertificate;
+window.sendDeptChat = sendDeptChat;
+window.loadMeetings = loadMeetings;
+window.showCreateMeeting = showCreateMeeting;
+window.createMeeting = createMeeting;
+window.joinMeeting = joinMeeting;
+window.leaveMeeting = leaveMeeting;
+window.toggleLive = toggleLive;
+window.addRecording = addRecording;
+window.deleteMeeting = deleteMeeting;
+window.saveProfile = saveProfile;
+window.changeProfilePhoto = changeProfilePhoto;
+window.downloadCertificate = downloadCertificate;
+window.postMaterial = postMaterial;
+window.toggleMaterialFields = toggleMaterialFields;
+window.addQuizQuestion = addQuizQuestion;
+window.saveQuiz = saveQuiz;
+window.deleteMaterial = deleteMaterial;
+window.showAdminSection = showAdminSection;
+window.toggleRole = toggleRole;
+window.removeMember = removeMember;
+window.approveCert = approveCert;
+window.rejectCert = rejectCert;
+window.showAdminSection = showAdminSection;
+</script>
+
+<style>
+:root{
+  --navy:#1B2A6B;--red:#E63329;--gold:#F5A623;
+  --white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;
+  --green:#27AE60;--sidebar:260px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);overflow-x:hidden;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--navy);}
+
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);color:var(--white);padding:0.85rem 1.5rem;border-radius:12px;font-size:0.88rem;font-weight:500;z-index:9999;transform:translateY(100px);opacity:0;transition:all 0.3s;pointer-events:none;max-width:320px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.error{background:var(--red);}
+.toast.success{background:var(--green);}
+
+/* ===== SCREENS ===== */
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* ===== LANDING ===== */
+#screen-landing{min-height:100vh;background:linear-gradient(135deg,var(--navy),var(--dark));display:flex;align-items:center;justify-content:center;padding:2rem;}
+.landing-inner{text-align:center;max-width:600px;}
+.landing-logo{width:100px;height:100px;margin:0 auto 1.5rem;border-radius:50%;overflow:hidden;border:4px solid rgba(255,255,255,0.2);}
+.landing-logo img{width:100%;height:100%;object-fit:cover;}
+.landing-inner h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:900;color:var(--white);margin-bottom:0.75rem;}
+.landing-inner h1 span{color:var(--gold);}
+.landing-inner p{color:rgba(255,255,255,0.75);font-size:1rem;line-height:1.8;margin-bottom:2.5rem;}
+.landing-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+.btn-land-register{background:var(--red);color:var(--white);padding:0.9rem 2.5rem;border-radius:50px;font-weight:700;font-size:1rem;border:none;cursor:pointer;transition:all 0.3s;}
+.btn-land-register:hover{background:var(--gold);color:var(--navy);}
+.btn-land-login{background:transparent;color:var(--white);padding:0.9rem 2.5rem;border-radius:50px;font-weight:600;font-size:1rem;border:2px solid rgba(255,255,255,0.4);cursor:pointer;transition:all 0.3s;}
+.btn-land-login:hover{border-color:var(--gold);color:var(--gold);}
+.landing-features{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:3rem;}
+.landing-feature{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:1.25rem;text-align:center;}
+.landing-feature .lf-icon{font-size:2rem;margin-bottom:0.5rem;}
+.landing-feature p{color:rgba(255,255,255,0.75);font-size:0.8rem;line-height:1.6;}
+
+/* ===== AUTH SCREENS ===== */
+#screen-register,#screen-login,#screen-profile-setup{min-height:100vh;background:linear-gradient(135deg,var(--navy),var(--dark));display:flex;align-items:center;justify-content:center;padding:2rem;}
+.auth-card{background:var(--white);border-radius:24px;padding:2.5rem;width:100%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+.auth-card-header{text-align:center;margin-bottom:2rem;}
+.auth-card-header img{height:60px;width:auto;margin-bottom:1rem;}
+.auth-card-header h2{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--navy);}
+.auth-card-header p{color:var(--gray);font-size:0.85rem;margin-top:0.25rem;}
+.form-group{margin-bottom:1rem;}
+.form-group label{display:block;font-size:0.78rem;font-weight:600;color:var(--navy);margin-bottom:0.4rem;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.75rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--navy);}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.btn-primary{background:var(--red);color:var(--white);padding:0.85rem 2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.95rem;font-weight:700;border:none;cursor:pointer;transition:all 0.3s;width:100%;}
+.btn-primary:hover{background:var(--navy);}
+.btn-primary:disabled{background:var(--gray);cursor:not-allowed;}
+.auth-switch{text-align:center;margin-top:1rem;font-size:0.85rem;color:var(--gray);}
+.auth-switch a{color:var(--red);font-weight:600;cursor:pointer;text-decoration:none;}
+.auth-switch a:hover{text-decoration:underline;}
+
+/* ===== PLATFORM ===== */
+#screen-platform{display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;overflow-y:auto;}
+.sidebar-logo{padding:1.5rem 1.25rem;border-bottom:1px solid rgba(255,255,255,0.08);}
+.sidebar-logo a{display:flex;align-items:center;gap:0.75rem;text-decoration:none;}
+.sidebar-logo img{height:40px;border-radius:8px;}
+.sidebar-logo-text{font-size:0.82rem;font-weight:700;color:var(--white);line-height:1.3;}
+.sidebar-user{padding:1.25rem;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:0.75rem;}
+.sidebar-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--white);font-size:1.1rem;flex-shrink:0;overflow:hidden;}
+.sidebar-user-info{flex:1;min-width:0;}
+#sidebar-name{font-size:0.85rem;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#sidebar-role{font-size:0.7rem;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.5px;}
+#sidebar-dept{font-size:0.68rem;color:var(--gold);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sidebar-nav{padding:1rem 0;flex:1;}
+.tab-btn{display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1.25rem;color:rgba(255,255,255,0.6);font-size:0.85rem;font-weight:500;cursor:pointer;transition:all 0.2s;border:none;background:none;width:100%;text-align:left;}
+.tab-btn:hover{color:var(--white);background:rgba(255,255,255,0.06);}
+.tab-btn.active{color:var(--white);background:rgba(255,255,255,0.12);border-left:3px solid var(--gold);}
+.tab-btn .tab-icon{font-size:1.1rem;width:24px;text-align:center;}
+.sidebar-logout{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,0.08);}
+.btn-logout{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;color:rgba(255,255,255,0.6);font-size:0.85rem;cursor:pointer;border:none;background:rgba(255,255,255,0.05);border-radius:10px;width:100%;transition:all 0.2s;}
+.btn-logout:hover{color:var(--white);background:rgba(230,51,41,0.2);}
+
+/* MAIN CONTENT */
+.main-content{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--white);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(27,42,107,0.08);position:sticky;top:0;z-index:40;}
+.topbar-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--navy);}
+.topbar-right{display:flex;align-items:center;gap:1rem;}
+.topbar-back{font-size:0.82rem;color:var(--navy);text-decoration:none;padding:0.5rem 1rem;border-radius:8px;border:1px solid rgba(27,42,107,0.15);transition:all 0.2s;}
+.topbar-back:hover{background:var(--light);}
+.hamburger-mobile{display:none;background:none;border:none;cursor:pointer;padding:4px;flex-direction:column;gap:5px;}
+.hamburger-mobile span{display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;}
+
+/* TAB PANELS */
+.tab-panel{display:none;padding:2rem;max-width:900px;margin:0 auto;width:100%;}
+.tab-panel.active{display:block;}
+
+/* FEED */
+.post-composer{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.post-composer textarea{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.1);color:var(--navy);padding:1rem;border-radius:12px;font-family:'Poppins',sans-serif;font-size:0.9rem;resize:none;outline:none;min-height:80px;}
+.post-composer-row{display:flex;gap:0.75rem;margin-top:0.75rem;flex-wrap:wrap;align-items:center;}
+.post-composer-row select,.post-composer-row input{background:var(--light);border:1.5px solid rgba(27,42,107,0.1);color:var(--navy);padding:0.5rem 0.75rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.82rem;outline:none;flex:1;min-width:120px;}
+.btn-post{background:var(--red);color:var(--white);padding:0.6rem 1.5rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.85rem;font-weight:600;border:none;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.btn-post:hover{background:var(--navy);}
+.post-card{background:var(--white);border-radius:16px;padding:1.25rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);transition:box-shadow 0.2s;}
+.post-card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.1);}
+.post-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;}
+.post-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--white);font-size:0.9rem;flex-shrink:0;}
+.post-author{font-size:0.88rem;font-weight:700;color:var(--navy);}
+.post-time{font-size:0.72rem;color:var(--gray);}
+.post-delete{margin-left:auto;background:none;border:none;cursor:pointer;font-size:1rem;opacity:0.5;transition:opacity 0.2s;}
+.post-delete:hover{opacity:1;}
+.post-content{font-size:0.9rem;color:var(--navy);line-height:1.7;margin-bottom:0.75rem;}
+.post-link{display:block;color:var(--red);font-size:0.82rem;margin-bottom:0.75rem;word-break:break-all;}
+.post-actions{display:flex;gap:0.75rem;}
+.post-action{background:var(--light);border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.8rem;cursor:pointer;transition:all 0.2s;font-family:'Poppins',sans-serif;}
+.post-action:hover{background:rgba(27,42,107,0.1);}
+.post-action.liked{background:rgba(230,51,41,0.1);color:var(--red);}
+.reply-box{display:flex;gap:0.5rem;margin-top:0.75rem;}
+.reply-box input{flex:1;background:var(--light);border:1.5px solid rgba(27,42,107,0.1);color:var(--navy);padding:0.5rem 0.75rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;outline:none;}
+.reply-box button{background:var(--navy);color:var(--white);border:none;padding:0.5rem 1rem;border-radius:50px;cursor:pointer;font-size:0.8rem;white-space:nowrap;}
+.replies-container{margin-top:0.5rem;}
+.reply-item{display:flex;gap:0.5rem;padding:0.5rem 0;border-top:1px solid var(--light);font-size:0.82rem;flex-wrap:wrap;}
+.reply-item strong{color:var(--navy);}
+.reply-item span{color:var(--gray);}
+.reply-item small{color:var(--gray);font-size:0.7rem;margin-left:auto;}
+
+/* DEPARTMENT */
+.dept-header-bar{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.dept-icon-big{font-size:2.5rem;}
+.dept-header-bar h2{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);}
+.dept-header-bar p{color:var(--gray);font-size:0.85rem;}
+.dept-tabs{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.dept-tab-btn{background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.6rem 1.25rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.dept-tab-btn.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
+.material-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.material-header{display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;}
+.material-type-badge{background:rgba(27,42,107,0.08);color:var(--navy);padding:0.25rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;white-space:nowrap;}
+.material-header h3{font-size:1rem;font-weight:700;color:var(--navy);flex:1;}
+.material-date{font-size:0.72rem;color:var(--gray);}
+.video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;margin-bottom:1rem;}
+.video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;}
+.article-content{background:var(--light);border-radius:10px;padding:1rem;margin-bottom:1rem;}
+.article-link{display:inline-block;color:var(--red);font-weight:600;font-size:0.85rem;text-decoration:none;}
+.article-link:hover{text-decoration:underline;}
+.material-actions{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;}
+.btn-sm{padding:0.45rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:600;border:none;cursor:pointer;transition:all 0.2s;}
+.btn-navy{background:var(--navy);color:var(--white);}
+.btn-navy:hover{background:var(--dark);}
+.btn-gold{background:var(--gold);color:var(--navy);}
+.btn-gold:hover{opacity:0.9;}
+.btn-outline{background:transparent;color:var(--navy);border:1.5px solid rgba(27,42,107,0.2);}
+.btn-outline:hover{background:var(--light);}
+.btn-red{background:var(--red);color:var(--white);}
+.btn-red:hover{background:#c0392b;}
+.discussion-box{background:var(--light);border-radius:12px;padding:1rem;margin-top:0.75rem;}
+.disc-item{padding:0.5rem 0;border-bottom:1px solid rgba(27,42,107,0.07);font-size:0.82rem;display:flex;flex-direction:column;gap:0.2rem;}
+.disc-item strong{color:var(--navy);}
+.disc-item span{color:var(--gray);}
+.disc-item small{color:var(--gray);font-size:0.7rem;}
+.disc-input{display:flex;gap:0.5rem;margin-top:0.75rem;}
+.disc-input input{flex:1;background:var(--white);border:1.5px solid rgba(27,42,107,0.1);color:var(--navy);padding:0.5rem 0.75rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;outline:none;}
+.disc-input button{background:var(--navy);color:var(--white);border:none;padding:0.5rem 1rem;border-radius:50px;cursor:pointer;font-size:0.8rem;}
+.quiz-container{background:var(--light);border-radius:12px;padding:1.25rem;margin-top:0.75rem;}
+.quiz-container h4{font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:1rem;}
+.quiz-question{margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid rgba(27,42,107,0.07);}
+.quiz-question p{font-size:0.85rem;color:var(--navy);margin-bottom:0.5rem;}
+.quiz-option{display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0;font-size:0.82rem;color:var(--gray);cursor:pointer;}
+.quiz-answer{width:100%;background:var(--white);border:1.5px solid rgba(27,42,107,0.1);border-radius:8px;padding:0.5rem 0.75rem;font-family:'Poppins',sans-serif;font-size:0.82rem;outline:none;}
+.btn-submit-quiz{background:var(--red);color:var(--white);padding:0.75rem 2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.88rem;font-weight:700;border:none;cursor:pointer;width:100%;margin-top:1rem;}
+.quiz-passed{background:#d4edda;color:#155724;border-radius:10px;padding:1rem;text-align:center;font-weight:600;}
+.quiz-failed{background:#f8d7da;color:#721c24;border-radius:10px;padding:1rem;text-align:center;font-size:0.85rem;}
+.quiz-failed button{background:var(--navy);color:var(--white);border:none;padding:0.4rem 1rem;border-radius:50px;margin-top:0.5rem;cursor:pointer;font-size:0.8rem;}
+.progress-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;}
+.progress-card{background:var(--white);border-radius:16px;padding:1.5rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.progress-card.eligible{border:2px solid var(--gold);}
+.progress-num{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--navy);}
+.progress-label{font-size:0.78rem;color:var(--gray);margin-top:0.25rem;}
+.progress-bar{height:6px;background:var(--light);border-radius:50px;margin-top:0.75rem;overflow:hidden;}
+.progress-bar div{height:100%;background:var(--gold);border-radius:50px;transition:width 0.5s;}
+.chat-messages{background:var(--white);border-radius:12px;height:320px;overflow-y:auto;padding:1rem;margin-bottom:0.75rem;display:flex;flex-direction:column;gap:0.5rem;}
+.chat-msg{display:flex;flex-direction:column;align-items:flex-start;}
+.chat-msg.own{align-items:flex-end;}
+.chat-bubble{background:var(--light);border-radius:12px;padding:0.6rem 1rem;max-width:75%;}
+.chat-msg.own .chat-bubble{background:var(--navy);}
+.chat-bubble strong{font-size:0.72rem;color:var(--gray);display:block;margin-bottom:0.2rem;}
+.chat-msg.own .chat-bubble strong{color:rgba(255,255,255,0.6);}
+.chat-bubble p{font-size:0.85rem;color:var(--navy);}
+.chat-msg.own .chat-bubble p{color:var(--white);}
+.chat-bubble small{font-size:0.68rem;color:var(--gray);display:block;margin-top:0.2rem;}
+.chat-msg.own .chat-bubble small{color:rgba(255,255,255,0.5);}
+.chat-input-row{display:flex;gap:0.5rem;}
+.chat-input-row input{flex:1;background:var(--white);border:1.5px solid rgba(27,42,107,0.1);color:var(--navy);padding:0.75rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.88rem;outline:none;}
+.chat-input-row button{background:var(--navy);color:var(--white);border:none;padding:0.75rem 1.5rem;border-radius:50px;cursor:pointer;font-size:0.85rem;font-weight:600;white-space:nowrap;}
+
+/* MEETINGS */
+.meetings-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+.meetings-header h2{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);}
+.meeting-form-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);display:flex;flex-direction:column;gap:0.75rem;}
+.meeting-form-card h3{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;}
+.meeting-form-card input,.meeting-form-card select{background:var(--light);border:1.5px solid rgba(27,42,107,0.1);color:var(--navy);padding:0.7rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.85rem;outline:none;width:100%;}
+.live-banner{background:linear-gradient(135deg,var(--red),#c0392b);border-radius:14px;padding:1rem 1.5rem;display:flex;align-items:center;gap:1rem;color:var(--white);margin-bottom:1rem;flex-wrap:wrap;}
+.live-banner strong{font-size:0.9rem;}
+.btn-red{background:var(--red);color:var(--white);padding:0.5rem 1.25rem;border-radius:50px;border:none;font-family:'Poppins',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;}
+.meeting-card{background:var(--white);border-radius:14px;padding:1.25rem;margin-bottom:0.75rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.meeting-card.live{border-left:4px solid var(--red);}
+.live-dot{color:var(--red);font-size:0.75rem;font-weight:700;display:block;margin-bottom:0.25rem;}
+.meeting-info h4{font-size:0.95rem;font-weight:700;color:var(--navy);}
+.meeting-info p{font-size:0.78rem;color:var(--gray);}
+.meeting-btns{display:flex;gap:0.5rem;flex-wrap:wrap;}
+.recording-link{display:inline-block;color:var(--red);font-size:0.78rem;font-weight:600;text-decoration:none;margin-top:0.25rem;}
+.meeting-room-wrapper{background:var(--white);border-radius:16px;padding:1rem;margin-top:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.1);}
+.meeting-room-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;}
+.meeting-room-header span{font-weight:700;color:var(--navy);}
+.meeting-room-header button{background:var(--red);color:var(--white);border:none;padding:0.5rem 1rem;border-radius:50px;cursor:pointer;font-size:0.82rem;}
+
+/* PROFILE */
+.profile-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);flex-wrap:wrap;}
+.profile-photo-wrap{text-align:center;}
+.profile-photo-wrap img{width:100px;height:100px;border-radius:50%;object-fit:cover;border:4px solid var(--light);box-shadow:0 4px 16px rgba(0,0,0,0.1);}
+.profile-avatar-big{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:900;color:var(--white);}
+.profile-photo-change{display:block;font-size:0.72rem;color:var(--red);font-weight:600;cursor:pointer;margin-top:0.5rem;}
+.profile-photo-change input{display:none;}
+.profile-info h2{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--navy);}
+.profile-role{color:var(--red);font-size:0.82rem;font-weight:600;margin:0.25rem 0;}
+.profile-country{color:var(--gray);font-size:0.82rem;}
+.badge-admin,.badge-head,.badge-exec{display:inline-block;font-size:0.72rem;font-weight:600;padding:0.2rem 0.6rem;border-radius:50px;margin:0.25rem 0.25rem 0 0;}
+.badge-admin{background:rgba(230,51,41,0.1);color:var(--red);}
+.badge-head{background:rgba(245,166,35,0.15);color:#b37800;}
+.badge-exec{background:rgba(27,42,107,0.1);color:var(--navy);}
+.profile-edit-form{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.profile-edit-form h3{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;}
+.cert-section{background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.cert-section h3{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;}
+.cert-card{display:flex;align-items:center;justify-content:space-between;background:var(--light);border-radius:10px;padding:0.85rem 1rem;margin-bottom:0.5rem;}
+.cert-info{display:flex;align-items:center;gap:0.75rem;}
+.cert-info strong{font-size:0.88rem;color:var(--navy);}
+.cert-info p{font-size:0.75rem;color:var(--gray);}
+.cert-status{font-weight:700;}
+.cert-status.approved{color:var(--green);}
+.cert-status.pending{color:var(--gold);}
+.cert-status.rejected{color:var(--red);}
+
+/* HEAD PANEL */
+.head-sections{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
+.head-section{background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.head-section h3{font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;}
+.quiz-builder-item{background:var(--light);border-radius:10px;padding:1rem;margin-bottom:0.75rem;}
+.quiz-builder-item input[type="text"]{width:100%;background:var(--white);border:1.5px solid rgba(27,42,107,0.1);border-radius:8px;padding:0.5rem 0.75rem;font-family:'Poppins',sans-serif;font-size:0.82rem;outline:none;margin-bottom:0.5rem;}
+.mcq-option{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;}
+.mcq-option input[type="text"]{margin-bottom:0;}
+.engagement-row{display:flex;align-items:center;justify-content:space-between;background:var(--light);border-radius:10px;padding:0.85rem 1rem;margin-bottom:0.5rem;gap:1rem;flex-wrap:wrap;}
+.engagement-mat{font-size:0.85rem;font-weight:600;color:var(--navy);flex:1;}
+.engagement-stat{font-size:0.78rem;color:var(--gray);}
+
+/* ADMIN PANEL */
+.admin-tabs{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.admin-tab-btn{background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.6rem 1.25rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.admin-tab-btn.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
+.admin-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;}
+.admin-stat-card{background:var(--white);border-radius:14px;padding:1.5rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.admin-stat-num{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;color:var(--navy);}
+.admin-stat-label{font-size:0.75rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-top:0.25rem;}
+.admin-members-list{display:flex;flex-direction:column;gap:0.75rem;}
+.admin-member-row{background:var(--white);border-radius:14px;padding:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);flex-wrap:wrap;}
+.admin-member-info{display:flex;align-items:center;gap:0.75rem;flex:1;min-width:200px;}
+.admin-member-info img{width:44px;height:44px;border-radius:50%;object-fit:cover;}
+.admin-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--white);}
+.admin-member-info strong{font-size:0.88rem;color:var(--navy);}
+.admin-member-info p{font-size:0.72rem;color:var(--gray);}
+.admin-member-actions{display:flex;gap:0.4rem;flex-wrap:wrap;}
+.cert-admin-row{display:flex;align-items:center;justify-content:space-between;background:var(--white);border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);flex-wrap:wrap;gap:0.75rem;}
+.cert-admin-row strong{font-size:0.88rem;color:var(--navy);}
+.cert-admin-row p{font-size:0.75rem;color:var(--gray);}
+.moderation-row{display:flex;align-items:center;justify-content:space-between;background:var(--white);border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);flex-wrap:wrap;gap:0.75rem;}
+.moderation-row strong{font-size:0.88rem;color:var(--navy);}
+.moderation-row p{font-size:0.78rem;color:var(--gray);}
+.moderation-row small{font-size:0.7rem;color:var(--gray);}
+
+/* UTILITIES */
+.loading{text-align:center;padding:2rem;color:var(--gray);font-size:0.88rem;}
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--gray);font-size:0.9rem;}
+.btn-outline-full{background:transparent;color:var(--navy);padding:0.75rem 2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.9rem;font-weight:600;border:1.5px solid rgba(27,42,107,0.2);cursor:pointer;width:100%;transition:all 0.2s;}
+.btn-outline-full:hover{background:var(--light);}
+
+/* MOBILE SIDEBAR */
+@media(max-width:768px){
+  :root{--sidebar:0px;}
+  .sidebar{transform:translateX(-100%);transition:transform 0.3s;width:260px;}
+  .sidebar.open{transform:translateX(0);}
+  .main-content{margin-left:0;}
+  .hamburger-mobile{display:flex;}
+  .tab-panel{padding:1.25rem;}
+  .form-row-2{grid-template-columns:1fr;}
+  .progress-cards{grid-template-columns:1fr;}
+  .head-sections{grid-template-columns:1fr;}
+  .admin-stats-grid{grid-template-columns:repeat(2,1fr);}
+  .landing-features{grid-template-columns:1fr;}
+  .post-composer-row{flex-direction:column;}
+  .post-composer-row select,.post-composer-row input{width:100%;}
+}
+@media(max-width:480px){
+  .auth-card{padding:1.5rem 1.25rem;}
+  .admin-stats-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<!-- ===== SCREEN: LANDING ===== -->
+<div id="screen-landing" class="screen active">
+  <div class="landing-inner">
+    <div class="landing-logo">
+      <img src="images/logo.jpeg" alt="Young Africans Network">
+    </div>
+    <h1>YAN <span>Community</span></h1>
+    <p>The home of Young Africans Network — learn, connect, grow and earn certificates with pan-African youth leaders from across Africa and beyond.</p>
+    <div class="landing-btns">
+      <button class="btn-land-register" onclick="showScreen('screen-register')">Join the Community 🚀</button>
+      <button class="btn-land-login" onclick="showScreen('screen-login')">Sign In</button>
+    </div>
+    <div class="landing-features">
+      <div class="landing-feature">
+        <div class="lf-icon">📚</div>
+        <p>Department training materials, videos & articles</p>
+      </div>
+      <div class="landing-feature">
+        <div class="lf-icon">🎥</div>
+        <p>Live meetings with Daily.co video conferencing</p>
+      </div>
+      <div class="landing-feature">
+        <div class="lf-icon">🏆</div>
+        <p>Earn certificates after completing your training</p>
+      </div>
+    </div>
+    <p style="margin-top:2rem;"><a href="index.html" style="color:rgba(255,255,255,0.5);font-size:0.82rem;text-decoration:none;">← Back to main website</a></p>
+  </div>
+</div>
+
+<!-- ===== SCREEN: REGISTER ===== -->
+<div id="screen-register" class="screen">
+  <div class="auth-card">
+    <div class="auth-card-header">
+      <img src="images/logo.jpeg" alt="YAN Logo">
+      <h2>Create Account</h2>
+      <p>Join the Young Africans Network Community</p>
+    </div>
+    <div class="form-row-2">
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="reg-name" placeholder="Your full name">
+      </div>
+      <div class="form-group">
+        <label>Country *</label>
+        <input type="text" id="reg-country" placeholder="e.g. Kenya">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Email Address *</label>
+      <input type="email" id="reg-email" placeholder="your@email.com">
+    </div>
+    <div class="form-group">
+      <label>Password * (min 6 characters)</label>
+      <input type="password" id="reg-pass" placeholder="Create a password">
+    </div>
+    <div class="form-group">
+      <label>WhatsApp Number *</label>
+      <input type="tel" id="reg-whatsapp" placeholder="+254 700 000 000">
+    </div>
+    <div class="form-row-2">
+      <div class="form-group">
+        <label>Role *</label>
+        <select id="reg-role">
+          <option value="">Select role...</option>
+          <option value="Member">Member</option>
+          <option value="Volunteer">Volunteer</option>
+          <option value="Associate">Associate</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Department *</label>
+        <select id="reg-dept">
+          <option value="">Select department...</option>
+          <option value="programs">Programs & Training</option>
+          <option value="scholarships">Scholarships & Global Opportunities</option>
+          <option value="career">Career Development & Public Speaking</option>
+          <option value="community">Community Impact & Volunteering</option>
+          <option value="mental">Mental Health & Wellbeing</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Profile Photo (optional)</label>
+      <input type="file" id="reg-photo" accept="image/*">
+    </div>
+    <button class="btn-primary" id="reg-btn" onclick="doRegister()">Create Account 🚀</button>
+    <p class="auth-switch">Already have an account? <a onclick="showScreen('screen-login')">Sign In</a></p>
+    <p style="text-align:center;margin-top:0.75rem;"><a href="index.html" style="color:var(--gray);font-size:0.8rem;text-decoration:none;">← Back to website</a></p>
+  </div>
+</div>
+
+<!-- ===== SCREEN: LOGIN ===== -->
+<div id="screen-login" class="screen">
+  <div class="auth-card">
+    <div class="auth-card-header">
+      <img src="images/logo.jpeg" alt="YAN Logo">
+      <h2>Welcome Back</h2>
+      <p>Sign in to your YAN Community account</p>
+    </div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="login-email" placeholder="your@email.com">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-pass" placeholder="Your password">
+    </div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">Sign In</button>
+    <p class="auth-switch"><a onclick="doForgotPassword()" style="color:var(--gray);">Forgot password?</a></p>
+    <p class="auth-switch">Don't have an account? <a onclick="showScreen('screen-register')">Create one</a></p>
+    <p style="text-align:center;margin-top:0.75rem;"><a href="index.html" style="color:var(--gray);font-size:0.8rem;text-decoration:none;">← Back to website</a></p>
+  </div>
+</div>
+
+<!-- ===== SCREEN: PROFILE SETUP ===== -->
+<div id="screen-profile-setup" class="screen">
+  <div class="auth-card">
+    <div class="auth-card-header">
+      <img src="images/logo.jpeg" alt="YAN Logo">
+      <h2>Complete Your Profile</h2>
+      <p>Just a few more details to get you started</p>
+    </div>
+    <div class="form-group">
+      <label>Profile Photo (optional)</label>
+      <input type="file" id="setup-photo" accept="image/*">
+    </div>
+    <div class="form-group">
+      <label>Bio (tell us about yourself)</label>
+      <textarea id="setup-bio" rows="3" placeholder="I am a young African passionate about..."></textarea>
+    </div>
+    <button class="btn-primary" id="setup-btn" onclick="doProfileSetup()">Enter Community 🚀</button>
+  </div>
+</div>
+
+<!-- ===== SCREEN: PLATFORM ===== -->
+<div id="screen-platform" class="screen">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <a href="index.html">
+        <img src="images/logo.jpeg" alt="YAN Logo">
+        <div class="sidebar-logo-text">Young Africans<br>Network</div>
+      </a>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+      <div class="sidebar-user-info">
+        <div id="sidebar-name">Loading...</div>
+        <div id="sidebar-role">Member</div>
+        <div id="sidebar-dept"></div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="tab-btn active" data-tab="feed" onclick="showTab('feed')">
+        <span class="tab-icon">🌍</span> Main Feed
+      </button>
+      <button class="tab-btn" data-tab="department" onclick="showTab('department')">
+        <span class="tab-icon">📚</span> My Department
+      </button>
+      <button class="tab-btn" data-tab="meetings" onclick="showTab('meetings')">
+        <span class="tab-icon">🎥</span> Meetings
+      </button>
+      <button class="tab-btn" data-tab="profile" onclick="showTab('profile')">
+        <span class="tab-icon">👤</span> My Profile
+      </button>
+      <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;">
+        <span class="tab-icon">👑</span> Head Panel
+      </button>
+      <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;">
+        <span class="tab-icon">🛡️</span> Admin Panel
+      </button>
+    </nav>
+    <div class="sidebar-logout">
+      <button class="btn-logout" onclick="doLogout()">
+        <span>🚪</span> Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="topbar">
+      <button class="hamburger-mobile" id="hamburger-mobile" onclick="document.getElementById('sidebar').classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="topbar-title">YAN Community</div>
+      <div class="topbar-right">
+        <a href="index.html" class="topbar-back">← Main Site</a>
+      </div>
+    </div>
+
+    <!-- TAB: MAIN FEED -->
+    <div class="tab-panel active" id="tab-feed">
+      <div class="post-composer">
+        <textarea id="post-input" placeholder="Share something with the community... use @name to tag members 🌍" rows="3"></textarea>
+        <div class="post-composer-row">
+          <select id="post-category">
+            <option value="General">💬 General</option>
+            <option value="Announcement">📢 Announcement</option>
+            <option value="Opportunity">🏆 Opportunity</option>
+            <option value="Question">❓ Question</option>
+            <option value="Motivation">🌟 Motivation</option>
+          </select>
+          <input type="text" id="post-link" placeholder="🔗 Add a link (optional)">
+          <button class="btn-post" onclick="submitPost()">Post 🚀</button>
+        </div>
+      </div>
+      <div id="feed-posts"></div>
+    </div>
+
+    <!-- TAB: DEPARTMENT -->
+    <div class="tab-panel" id="tab-department">
+      <div id="dept-container"></div>
+    </div>
+
+    <!-- TAB: MEETINGS -->
+    <div class="tab-panel" id="tab-meetings">
+      <div id="meetings-container"></div>
+    </div>
+
+    <!-- TAB: PROFILE -->
+    <div class="tab-panel" id="tab-profile">
+      <div id="profile-container"></div>
+    </div>
+
+    <!-- TAB: HEAD PANEL -->
+    <div class="tab-panel" id="tab-head">
+      <div id="head-container"></div>
+    </div>
+
+    <!-- TAB: ADMIN PANEL -->
+    <div class="tab-panel" id="tab-admin">
+      <div id="admin-container"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// Close sidebar on mobile when clicking outside
+document.addEventListener('click', function(e) {
+  const sidebar = document.getElementById('sidebar');
+  const hamburger = document.getElementById('hamburger-mobile');
+  if (sidebar && hamburger && !sidebar.contains(e.target) && !hamburger.contains(e.target)) {
+    sidebar.classList.remove('open');
+  }
 });
 </script>
 </body>
