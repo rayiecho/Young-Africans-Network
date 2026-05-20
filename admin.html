@@ -402,7 +402,7 @@ window.addStory = async function() {
   loadStoriesList();
 };
 
-async function loadStoriesList() {
+window.loadStoriesList = async function() {
   const container = document.getElementById('stories-list');
   if (!container) return;
   const snap = await getDocs(query(collection(db, 'stories'), orderBy('createdAt', 'desc')));
