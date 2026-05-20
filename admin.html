@@ -237,7 +237,7 @@ window.addGalleryItem = async function() {
   loadGalleryItems();
 };
 
-async function loadGalleryItems() {
+window.loadGalleryItems = async function loadGalleryItems() {
   const container = document.getElementById('gallery-list');
   if (!container) return;
   const snap = await getDocs(query(collection(db, 'gallery'), orderBy('createdAt', 'desc')));
@@ -254,7 +254,7 @@ async function loadGalleryItems() {
         <p>${sanitize(g.caption||'')}</p>
         <span>${sanitize(g.category||'')} · ${sanitize(g.type)}</span>
       </div>
-      <button class="btn-delete" onclick="deleteItem('gallery','${d.id}',loadGalleryItems)">🗑️</button>
+      <button class="btn-delete" onclick="deleteItem('gallery','${d.id}',loadGalleryItems_)"">🗑️</button>
     </div>`;
   }).join('');
 }
