@@ -127,6 +127,8 @@ async function doRegister() {
   const whatsapp = document.getElementById('reg-whatsapp').value.trim();
   const role = document.getElementById('reg-role').value;
   const dept = document.getElementById('reg-dept').value;
+const extraDepts = [...document.querySelectorAll('.reg-extra-dept:checked')].map(c => c.value).filter(d => d !== dept).slice(0, 2);
+const allDepts = [dept, ...extraDepts];
   const photoFile = document.getElementById('reg-photo').files[0];
   if (!name||!email||!pass||!country||!whatsapp||!role||!dept) return showToast('Please fill all required fields','error');
   if (pass.length < 6) return showToast('Password must be at least 6 characters','error');
@@ -145,7 +147,7 @@ async function doRegister() {
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     await sendEmailVerification(cred.user);
     await setDoc(doc(db, 'users', cred.user.uid), {
-      name, email, country, whatsapp, role, department: dept,
+      name, email, country, whatsapp, role, department: dept, departments: allDepts,
       photoUrl, bio: '', joinedAt: serverTimestamp(),
       isAdmin: false, isDeptHead: false, isExec: false,
       profileComplete: true
@@ -317,13 +319,24 @@ async function submitReply(postId) {
 
 // DEPARTMENT
 function loadDepartment() {
-  const dept = currentUserData.department;
+  const allDepts = currentUserData.departments || [currentUserData.department];
+  const dept = window._activeDept || currentUserData.department;
+  window._activeDept = dept;
   const deptInfo = DEPARTMENTS.find(d => d.id === dept);
   const container = document.getElementById('dept-container');
   container.innerHTML = `
     <div class="dept-header-bar">
       <span class="dept-icon-big">${deptInfo?.icon||'📚'}</span>
-      <div><h2>${deptInfo?.name||'My Department'}</h2><p>Your learning space — videos, articles, quizzes and discussions</p></div>
+      <div>
+        <h2>${deptInfo?.name||'My Department'}</h2>
+        <p>Your learning space — videos, articles, quizzes and discussions</p>
+        ${allDepts.length > 1 ? `<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.75rem;">
+          ${allDepts.map(d => {
+            const info = DEPARTMENTS.find(x => x.id === d);
+            return `<button onclick="switchDept('${d}')" style="background:${d===dept?'var(--navy)':'var(--light)'};color:${d===dept?'var(--white)':'var(--navy)'};border:1.5px solid ${d===dept?'var(--navy)':'rgba(27,42,107,0.15)'};padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">${info?.icon||''} ${info?.name||d}</button>`;
+          }).join('')}
+        </div>` : ''}
+      </div>
     </div>
     <div class="dept-tabs">
       <button class="dept-tab-btn active" onclick="showDeptSection('materials')">📹 Materials</button>
@@ -1011,7 +1024,8 @@ async function loadAdminModeration() {
 window.doRegister=doRegister; window.doLogin=doLogin; window.doLogout=doLogout; window.doForgotPassword=doForgotPassword;
 window.showTab=showTab; window.showScreen=showScreen; window.submitPost=submitPost; window.deletePost=deletePost;
 window.toggleLike=toggleLike; window.toggleReplies=toggleReplies; window.submitReply=submitReply;
-window.showDeptSection=showDeptSection; window.markWatched=markWatched; window.toggleDiscussion=toggleDiscussion;
+window.showDeptSection=showDeptSection;
+window.switchDept = function(dept) { window._activeDept = dept; loadDepartment(); }; window.markWatched=markWatched; window.toggleDiscussion=toggleDiscussion;
 window.submitDiscussion=submitDiscussion; window.openQuiz=openQuiz; window.submitQuiz=submitQuiz;
 window.requestCertificate=requestCertificate; window.sendDeptChat=sendDeptChat;
 window.loadMeetings=loadMeetings; window.showCreateMeeting=showCreateMeeting; window.createMeeting=createMeeting;
@@ -1358,7 +1372,14 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <div class="form-group"><label>Role *</label><select id="reg-role"><option value="">Select role...</option><option value="Member">Member</option><option value="Volunteer">Volunteer</option><option value="Associate">Associate</option>
 <option value="Executive">Executive</option>
 <option value="Executive">Executive</option></select></div>
-      <div class="form-group"><label>Department *</label><select id="reg-dept"><option value="">Select department...</option><option value="programs">Programs & Training</option><option value="scholarships">Scholarships & Global Opportunities</option><option value="career">Career Development & Public Speaking</option><option value="community">Community Impact & Volunteering</option><option value="mental">Mental Health & Wellbeing</option></select></div>
+      <div class="form-group" style="grid-column:1/-1;"><label>Primary Department * <small style="color:var(--gray);font-weight:400;">(main department)</small></label><select id="reg-dept"><option value="">Select primary department...</option><option value="programs">💻 Programs & Training</option><option value="scholarships">🏆 Scholarships & Global Opportunities</option><option value="career">🎤 Career Development & Public Speaking</option><option value="community">🌍 Community Impact & Volunteering</option><option value="mental">💚 Mental Health & Wellbeing</option></select></div>
+<div class="form-group" style="grid-column:1/-1;"><label>Additional Departments <small style="color:var(--gray);font-weight:400;">(optional — select up to 2 more)</small></label><div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem;">
+<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;font-weight:400;cursor:pointer;background:var(--light);padding:0.5rem 0.75rem;border-radius:8px;"><input type="checkbox" value="programs" class="reg-extra-dept"> 💻 Programs & Training</label>
+<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;font-weight:400;cursor:pointer;background:var(--light);padding:0.5rem 0.75rem;border-radius:8px;"><input type="checkbox" value="scholarships" class="reg-extra-dept"> 🏆 Scholarships</label>
+<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;font-weight:400;cursor:pointer;background:var(--light);padding:0.5rem 0.75rem;border-radius:8px;"><input type="checkbox" value="career" class="reg-extra-dept"> 🎤 Career Development</label>
+<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;font-weight:400;cursor:pointer;background:var(--light);padding:0.5rem 0.75rem;border-radius:8px;"><input type="checkbox" value="community" class="reg-extra-dept"> 🌍 Community Impact</label>
+<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;font-weight:400;cursor:pointer;background:var(--light);padding:0.5rem 0.75rem;border-radius:8px;"><input type="checkbox" value="mental" class="reg-extra-dept"> 💚 Mental Health</label>
+</div></div>
     </div>
     <div class="form-group"><label>Profile Photo (optional)</label><input type="file" id="reg-photo" accept="image/*"></div>
     <button class="btn-primary" id="reg-btn" onclick="doRegister()">Create Account 🚀</button>
