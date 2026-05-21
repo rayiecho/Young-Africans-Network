@@ -795,6 +795,7 @@ async function loadHeadPanel() {
           <button class="btn-sm btn-outline" onclick="addQuizQuestion('mcq')">+ MCQ</button>
         </div>
         <button class="btn-primary" onclick="saveQuiz('${dept}')">Save Quiz</button>
+<button class="btn-sm btn-red" style="margin-top:0.5rem;width:100%;" onclick="deleteQuiz('${dept}')">🗑️ Delete Quiz</button>
       </div>
     </div>
     <div class="head-section"><h3>📊 Engagement</h3><div id="head-engagement"></div></div>`;
@@ -835,6 +836,13 @@ function renderQuizBuilder() {
       ${q.type === 'mcq' ? q.options.map((opt, j) => `<div class="mcq-option"><input type="radio" name="correct-${i}" ${q.correctIndex===j?'checked':''} onchange="window.quizQuestionsData[${i}].correctIndex=${j}"><input type="text" placeholder="Option ${j+1}" value="${sanitize(opt)}" oninput="window.quizQuestionsData[${i}].options[${j}]=this.value"></div>`).join('') : '<small style="color:var(--gray)">Short answer</small>'}
       <button class="btn-sm btn-red" onclick="window.quizQuestionsData.splice(${i},1);renderQuizBuilder()">Remove</button>
     </div>`).join('');
+}
+async function deleteQuiz(dept) {
+  const materialId = document.getElementById('head-quiz-material').value;
+  if (!materialId) return showToast('Select a material first','error');
+  if (!confirm('Delete this quiz?')) return;
+  await deleteDoc(doc(db, 'departments', dept, 'materials', materialId, 'quiz', 'questions'));
+  showToast('Quiz deleted ✅');
 }
 async function saveQuiz(dept) {
   const materialId = document.getElementById('head-quiz-material').value;
@@ -921,7 +929,7 @@ window.saveProfile=saveProfile; window.changeProfilePhoto=changeProfilePhoto; wi
 window.postMaterial=postMaterial; window.toggleMaterialFields=toggleMaterialFields; window.addQuizQuestion=addQuizQuestion;
 window.renderQuizBuilder=renderQuizBuilder; window.saveQuiz=saveQuiz; window.deleteMaterial=deleteMaterial;
 window.showAdminSection=showAdminSection; window.toggleRole=toggleRole; window.removeMember=removeMember;
-window.approveCert=approveCert; window.rejectCert=rejectCert;
+window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteQuiz=deleteQuiz;
 </script>
 
 <style>
