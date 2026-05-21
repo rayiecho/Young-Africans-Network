@@ -698,6 +698,14 @@ async function loadMembers(c) {
             <span style="display:flex;gap:0.35rem;flex-wrap:wrap;">
               <button class="btn-sm-action" onclick="adminToggleRole('${d.id}','isDeptHead',${!u.isDeptHead})">${u.isDeptHead?'Remove Head':'Make Head'}</button>
               <button class="btn-sm-action" onclick="adminToggleRole('${d.id}','isAdmin',${!u.isAdmin})">${u.isAdmin?'Remove Admin':'Make Admin'}</button>
+              <select onchange="adminChangeDept('${d.id}',this.value)" class="btn-sm-action" style="cursor:pointer;">
+                <option value="">Move Dept...</option>
+                <option value="programs" ${u.department==='programs'?'selected':''}>💻 Programs</option>
+                <option value="scholarships" ${u.department==='scholarships'?'selected':''}>🏆 Scholarships</option>
+                <option value="career" ${u.department==='career'?'selected':''}>🎤 Career</option>
+                <option value="community" ${u.department==='community'?'selected':''}>🌍 Community</option>
+                <option value="mental" ${u.department==='mental'?'selected':''}>💚 Mental Health</option>
+              </select>
               <button class="btn-delete" onclick="adminRemoveMember('${d.id}')">Remove</button>
             </span>
           </div>`;
