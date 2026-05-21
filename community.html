@@ -938,9 +938,9 @@ async function loadHeadMaterials(dept) {
   const snap = await getDocs(collection(db, 'departments', dept, 'materials'));
   sel.innerHTML = snap.docs.map(d => `<option value="${d.id}">${d.data().title}</option>`).join('') || '<option>No materials yet</option>';
 }
-let quizQuestionsData = [];
+window.quizQuestionsData = [];
 function addQuizQuestion(type) {
-  quizQuestionsData.push({ type, question: '', options: ['','','',''], correctIndex: 0 });
+  window.quizQuestionsData.push({ type, question: '', options: ['','','',''], correctIndex: 0 });
   renderQuizBuilder();
 }
 function renderQuizBuilder() {
@@ -956,7 +956,7 @@ async function saveQuiz(dept) {
   const materialId = document.getElementById('head-quiz-material').value;
   if (!materialId || !quizQuestionsData.length) return showToast('Add questions first','error');
   await setDoc(doc(db, 'departments', dept, 'materials', materialId, 'quiz', 'questions'), { questions: quizQuestionsData, updatedAt: serverTimestamp() });
-  quizQuestionsData = []; renderQuizBuilder(); showToast('Quiz saved! ✅');
+  window.quizQuestionsData = []; renderQuizBuilder(); showToast('Quiz saved! ✅');
 }
 async function loadHeadEngagement(dept) {
   const container = document.getElementById('head-engagement'); if (!container) return;
