@@ -40,11 +40,14 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const DEPARTMENTS = [
-  { id: 'programs', name: 'Programs & Training', icon: '💻' },
-  { id: 'scholarships', name: 'Scholarships & Global Opportunities', icon: '🏆' },
-  { id: 'career', name: 'Career Development & Public Speaking', icon: '🎤' },
-  { id: 'community', name: 'Community Impact & Volunteering', icon: '🌍' },
-  { id: 'mental', name: 'Mental Health & Wellbeing', icon: '💚' }
+  { id: 'programs', name: 'Programs & Training', icon: '💻', certification: true },
+  { id: 'scholarships', name: 'Scholarships & Global Opportunities', icon: '🏆', certification: true },
+  { id: 'career', name: 'Career Development & Public Speaking', icon: '🎤', certification: true },
+  { id: 'community', name: 'Community Impact & Volunteering', icon: '🌍', certification: true },
+  { id: 'mental', name: 'Mental Health & Wellbeing', icon: '💚', certification: true },
+  { id: 'communications', name: 'Communications & Media', icon: '📢', certification: false },
+  { id: 'finance', name: 'Finance & Administration', icon: '💰', certification: false },
+  { id: 'partnerships', name: 'Partnership & External Relations', icon: '🤝', certification: false }
 ];
 
 let currentUser = null;
@@ -476,18 +479,24 @@ async function loadDeptProgress(dept) {
   resultsSnap.forEach(d => { if (d.data().watched) watched++; if (d.data().quizPassed) quizPassed++; });
   const joinedAt = currentUserData.joinedAt?.toMillis() || Date.now();
   const monthsActive = Math.floor((Date.now() - joinedAt) / (1000*60*60*24*30));
-  const eligible = monthsActive >= 3 && quizPassed >= total && total > 0;
+  const deptInfo = DEPARTMENTS.find(d => d.id === dept);
+const hasCertification = deptInfo?.certification !== false;
+const eligible = hasCertification && monthsActive >= 3 && quizPassed >= total && total > 0;
   container.innerHTML = `
     <div class="progress-cards">
       <div class="progress-card"><div class="progress-num">${watched}/${total}</div><div class="progress-label">Materials Completed</div><div class="progress-bar"><div style="width:${total?Math.round(watched/total*100):0}%"></div></div></div>
       <div class="progress-card"><div class="progress-num">${quizPassed}/${total}</div><div class="progress-label">Quizzes Passed</div><div class="progress-bar"><div style="width:${total?Math.round(quizPassed/total*100):0}%"></div></div></div>
       <div class="progress-card"><div class="progress-num">${monthsActive}</div><div class="progress-label">Months Active</div></div>
-      <div class="progress-card ${eligible?'eligible':''}">
+      ${hasCertification ? `<div class="progress-card ${eligible?'eligible':''}">
         <div class="progress-num">${eligible?'✅':'⏳'}</div>
         <div class="progress-label">Certificate ${eligible?'Eligible!':'Not Yet'}</div>
         <p style="font-size:0.75rem;color:var(--gray);margin-top:0.5rem;">Need: 3+ months, all quizzes passed, admin approval</p>
         ${eligible ? `<button class="btn-sm btn-gold" onclick="requestCertificate()">Request Certificate</button>` : ''}
-      </div>
+      </div>` : `<div class="progress-card">
+        <div class="progress-num">🤝</div>
+        <div class="progress-label">Support Department</div>
+        <p style="font-size:0.75rem;color:var(--gray);margin-top:0.5rem;">This department supports YAN operations. Keep contributing!</p>
+      </div>`}
     </div>`;
 }
 
@@ -543,12 +552,15 @@ async function loadMeetings() {
     <div class="meetings-header"><h2>🎥 YAN Meetings</h2></div>
     <p style="color:var(--gray);font-size:0.88rem;margin-bottom:1.5rem;">Click any room to join instantly — available 24/7.</p>
     <div class="rooms-grid">
-      <div class="room-card"><div class="room-icon">🌍</div><div class="room-info"><h4>General Forum</h4><p>Open discussions and community meetings</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_GENERAL_FORUM','General Forum')">Join</button></div>
+      <div class="room-card"><div class="room-icon">🌍</div><div class="room-info"><h4>General Forum</h4><p>Open to all members</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_GENERAL_FORUM','General Forum')">Join</button></div>
       <div class="room-card"><div class="room-icon">💻</div><div class="room-info"><h4>Training Forum</h4><p>Training sessions and program discussions</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_TRAINING_FORUM','Training Forum')">Join</button></div>
       <div class="room-card"><div class="room-icon">🏆</div><div class="room-info"><h4>Scholarship Revision</h4><p>Scholarship and opportunity sessions</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_SCHOLARSHIP_REVISION','Scholarship Revision')">Join</button></div>
       <div class="room-card"><div class="room-icon">🎤</div><div class="room-info"><h4>Career Room</h4><p>Career guidance and public speaking</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_CAREER_ROOM','Career Room')">Join</button></div>
       <div class="room-card"><div class="room-icon">🤝</div><div class="room-info"><h4>Any Business</h4><p>Community impact meetings</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_ANY_BUSINESS','Any Business')">Join</button></div>
       <div class="room-card"><div class="room-icon">💚</div><div class="room-info"><h4>Mental Health Discussion</h4><p>Wellness and peer support</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_MENTAL_DISCUSSION','Mental Health')">Join</button></div>
+      ${currentUserData?.role === 'Volunteer' || currentUserData?.role === 'Executive' || currentUserData?.isAdmin || currentUserData?.isDeptHead ? `<div class="room-card"><div class="room-icon">🤝</div><div class="room-info"><h4>Volunteers Room</h4><p>Volunteers only</p></div><button class="btn-sm btn-gold" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_VOLUNTEERS_ROOM','Volunteers Room')">Join</button></div>` : ''}
+      ${currentUserData?.role === 'Executive' || currentUserData?.isAdmin || currentUserData?.isDeptHead ? `<div class="room-card"><div class="room-icon">⭐</div><div class="room-info"><h4>Executive Room</h4><p>Executive committee only</p></div><button class="btn-sm btn-gold" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_EXECUTIVE_ROOM','Executive Room')">Join</button></div>` : ''}
+      ${currentUserData?.isAdmin || currentUserData?.isDeptHead ? `<div class="room-card"><div class="room-icon">👑</div><div class="room-info"><h4>Head & Admin Room</h4><p>Department heads and admins only</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_HEAD_ADMIN_ROOM','Head & Admin Room')">Join</button></div>` : ''}
     </div>
     <div class="meetings-header" style="margin-top:2rem;">
       <h3>📅 Scheduled Sessions</h3>
@@ -634,10 +646,21 @@ function loadMeetingsList() {
 
 function joinMeeting(roomUrl, title) {
   if (!roomUrl) return showToast('No room URL','error');
-  document.getElementById('meeting-room-container').style.display = 'block';
-  document.getElementById('meeting-room-title').textContent = title || 'Meeting';
-  document.getElementById('meeting-iframe').src = roomUrl;
-  document.getElementById('meeting-room-container').scrollIntoView({ behavior: 'smooth' });
+  const floater = document.getElementById('floating-meeting');
+  const iframe = document.getElementById('floating-meeting-iframe');
+  const titleEl = document.getElementById('floating-meeting-title');
+  floater.style.display = 'flex';
+  titleEl.textContent = title || 'Meeting';
+  iframe.src = roomUrl;
+  showToast('Meeting joined! You can now browse freely 🎥');
+}
+function leaveMeeting() {
+  document.getElementById('floating-meeting-iframe').src = '';
+  document.getElementById('floating-meeting').style.display = 'none';
+}
+function toggleMeetingSize() {
+  const floater = document.getElementById('floating-meeting');
+  floater.classList.toggle('expanded');
 }
 function leaveMeeting() {
   document.getElementById('meeting-iframe').src = '';
@@ -792,14 +815,14 @@ function downloadCertificate(certId) {
     const signImg = new Image();
     signImg.crossOrigin = 'anonymous';
     signImg.onload = function() {
-      ctx.drawImage(signImg, 80, 620, 200, 75);
+      ctx.drawImage(signImg, 80, 600, 180, 60);
     };
     signImg.src = '/images/emmanuel_signature.png';
     ctx.textAlign = 'left';
     ctx.fillStyle = '#1B2A6B'; ctx.font = 'italic bold 20px Georgia';
-    ctx.fillText('Emmanuel Ikumilu Mwori', 100, 690);
+    ctx.fillText('Emmanuel Ikumilu Mwori', 100, 700);
     ctx.fillStyle = '#6B7280'; ctx.font = '14px Georgia';
-    ctx.fillText('Founder & CEO, Young Africans Network', 100, 710);
+    ctx.fillText('Founder & CEO, Young Africans Network', 100, 718);
     ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(100, 725); ctx.lineTo(450, 725); ctx.stroke();
 
@@ -838,7 +861,7 @@ function downloadCertificate(certId) {
       link.click();
       showToast('Certificate downloading! 🏆');
     };
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=https://youngafricansnetwork.org/verify/${verifyCode}`;
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=https://youngafricansnetwork.org/verify.html?id=${verifyCode}`;
   };
   logo.onerror = function() {
     const link = document.createElement('a');
@@ -958,6 +981,7 @@ async function loadAdminPanel() {
       <button class="admin-tab-btn" onclick="showAdminSection('members')">👥 Members</button>
       <button class="admin-tab-btn" onclick="showAdminSection('certificates')">🏆 Certificates</button>
       <button class="admin-tab-btn" onclick="showAdminSection('moderation')">🛡️ Moderation</button>
+      <button class="admin-tab-btn" onclick="showAdminSection('team')">👤 Team</button>
     </div>
     <div id="admin-section-overview" class="admin-section"></div>
 <div class="head-section" style="margin-bottom:1.5rem;">
@@ -968,12 +992,13 @@ async function loadAdminPanel() {
 </div>
     <div id="admin-section-members" class="admin-section" style="display:none;"></div>
     <div id="admin-section-certificates" class="admin-section" style="display:none;"></div>
-    <div id="admin-section-moderation" class="admin-section" style="display:none;"></div>`;
-  loadAdminOverview(); loadAdminMembers(); loadAdminCertificates(); loadAdminModeration();
+    <div id="admin-section-moderation" class="admin-section" style="display:none;"></div>
+    <div id="admin-section-team" class="admin-section" style="display:none;"></div>`;
+  loadAdminOverview(); loadAdminMembers(); loadAdminCertificates(); loadAdminModeration(); loadAdminTeam();
 }
 function showAdminSection(section) {
-  document.querySelectorAll('.admin-tab-btn').forEach((b,i) => b.classList.toggle('active', ['overview','members','certificates','moderation'][i]===section));
-  ['overview','members','certificates','moderation'].forEach(s => { const el = document.getElementById(`admin-section-${s}`); if (el) el.style.display = s===section?'block':'none'; });
+  document.querySelectorAll('.admin-tab-btn').forEach((b,i) => b.classList.toggle('active', ['overview','members','certificates','moderation','team'][i]===section));
+  ['overview','members','certificates','moderation','team'].forEach(s => { const el = document.getElementById(`admin-section-${s}`); if (el) el.style.display = s===section?'block':'none'; });
 }
 async function sendBulkEmail() {
   const subject = document.getElementById('bulk-subject').value.trim();
@@ -1049,6 +1074,81 @@ async function loadAdminCertificates() {
 }
 async function approveCert(id) { await updateDoc(doc(db,'certificates',id),{status:'approved',approvedBy:currentUserData.name,approvedAt:serverTimestamp()}); showToast('Approved! 🏆'); loadAdminCertificates(); }
 async function rejectCert(id) { await updateDoc(doc(db,'certificates',id),{status:'rejected'}); showToast('Rejected'); loadAdminCertificates(); }
+async function loadAdminTeam() {
+  const c = document.getElementById('admin-section-team');
+  c.innerHTML = `
+    <div class="head-section" style="margin-bottom:1.5rem;">
+      <h3>➕ Add Team Member</h3>
+      <div class="form-row-2">
+        <div class="form-group"><label>Full Name *</label><input type="text" id="team-name" placeholder="e.g. Mr. John Doe"></div>
+        <div class="form-group"><label>Role *</label><input type="text" id="team-role" placeholder="e.g. Department Lead"></div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group"><label>Country *</label><input type="text" id="team-country" placeholder="e.g. Kenya"></div>
+        <div class="form-group"><label>Department</label><input type="text" id="team-dept" placeholder="e.g. Programs & Training"></div>
+      </div>
+      <div class="form-group"><label>Email</label><input type="text" id="team-email" placeholder="email@example.com"></div>
+      <div class="form-group"><label>Category</label>
+        <select id="team-category">
+          <option value="Leadership">Leadership Core</option>
+          <option value="Department">Department Coordinator</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Photo URL</label><input type="text" id="team-photo" placeholder="https://..."></div>
+      <div class="form-group"><label>Order (display order number)</label><input type="number" id="team-order" placeholder="1" value="1"></div>
+      <button class="btn-primary" onclick="addTeamMember()">Add Team Member</button>
+    </div>
+    <h3 style="margin-bottom:1rem;">👥 Current Team Members</h3>
+    <div id="team-list"><div class="loading">Loading...</div></div>`;
+  loadTeamList();
+}
+async function addTeamMember() {
+  const name = document.getElementById('team-name').value.trim();
+  const role = document.getElementById('team-role').value.trim();
+  const country = document.getElementById('team-country').value.trim();
+  const dept = document.getElementById('team-dept').value.trim();
+  const email = document.getElementById('team-email').value.trim();
+  const category = document.getElementById('team-category').value;
+  const photoUrl = document.getElementById('team-photo').value.trim();
+  const order = parseInt(document.getElementById('team-order').value) || 1;
+  if (!name || !role || !country) return showToast('Name, role and country are required','error');
+  await addDoc(collection(db, 'team'), { name, role, country, department: dept, email, category, photoUrl, order, createdAt: serverTimestamp() });
+  showToast('Team member added ✅');
+  document.getElementById('team-name').value = '';
+  document.getElementById('team-role').value = '';
+  document.getElementById('team-country').value = '';
+  document.getElementById('team-dept').value = '';
+  document.getElementById('team-email').value = '';
+  document.getElementById('team-photo').value = '';
+  loadTeamList();
+}
+async function loadTeamList() {
+  const c = document.getElementById('team-list');
+  const snap = await getDocs(query(collection(db, 'team'), orderBy('order', 'asc')));
+  if (snap.empty) { c.innerHTML = '<div class="empty-state">No team members added yet.</div>'; return; }
+  c.innerHTML = `<div class="admin-members-list">${snap.docs.map(d => {
+    const t = d.data();
+    return `<div class="admin-member-row">
+      <div class="admin-member-info">
+        ${t.photoUrl ? `<img src="${t.photoUrl}" alt="${t.name}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;">` : `<div class="admin-avatar">${(t.name||'?')[0]}</div>`}
+        <div>
+          <strong>${sanitize(t.name)}</strong>
+          <p>${sanitize(t.role)} · 📍 ${sanitize(t.country)}</p>
+          <p style="color:var(--gold);font-size:0.7rem;">${sanitize(t.category||'')} ${t.department?'· '+sanitize(t.department):''}</p>
+        </div>
+      </div>
+      <div class="admin-member-actions">
+        <button class="btn-sm btn-red" onclick="deleteTeamMember('${d.id}')">🗑️ Delete</button>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+async function deleteTeamMember(id) {
+  if (!confirm('Delete this team member?')) return;
+  await deleteDoc(doc(db, 'team', id));
+  showToast('Deleted ✅');
+  loadTeamList();
+}
 async function loadAdminModeration() {
   const c = document.getElementById('admin-section-moderation');
   const snap = await getDocs(query(collection(db,'posts'),orderBy('createdAt','desc'),limit(20)));
@@ -1072,7 +1172,7 @@ window.saveProfile=saveProfile; window.changeProfilePhoto=changeProfilePhoto; wi
 window.postMaterial=postMaterial; window.toggleMaterialFields=toggleMaterialFields; window.addQuizQuestion=addQuizQuestion;
 window.renderQuizBuilder=renderQuizBuilder; window.saveQuiz=saveQuiz; window.deleteMaterial=deleteMaterial;
 window.showAdminSection=showAdminSection; window.toggleRole=toggleRole; window.removeMember=removeMember;
-window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteQuiz=deleteQuiz; window.viewMemberProgress=viewMemberProgress; window.issueCertificate=issueCertificate; window.sendBulkEmail=sendBulkEmail;
+window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteTeamMember=deleteTeamMember; window.addTeamMember=addTeamMember; window.deleteQuiz=deleteQuiz; window.viewMemberProgress=viewMemberProgress; window.issueCertificate=issueCertificate; window.sendBulkEmail=sendBulkEmail; window.deleteTeamMember=deleteTeamMember; window.showTeamSection=showTeamSection;
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>emailjs.init('NyhRgF1xCbrxy7XEG');</script>
@@ -1321,6 +1421,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .moderation-row p{font-size:0.78rem;color:var(--gray);}
 .moderation-row small{font-size:0.7rem;color:var(--gray);}
 .loading{text-align:center;padding:2rem;color:var(--gray);font-size:0.88rem;}
+#floating-meeting.expanded{width:700px;height:450px;}
 .empty-state{text-align:center;padding:3rem 1rem;color:var(--gray);font-size:0.9rem;}
 @media(max-width:768px){
   :root{--sidebar:0px;}
@@ -1344,6 +1445,18 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 <body>
 
 <div id="toast" class="toast"></div>
+
+<!-- FLOATING MEETING WINDOW -->
+<div id="floating-meeting" style="display:none;position:fixed;bottom:1.5rem;right:1.5rem;width:380px;height:240px;background:var(--navy);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.4);z-index:9999;flex-direction:column;overflow:hidden;transition:all 0.3s;">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;background:rgba(0,0,0,0.3);">
+    <span id="floating-meeting-title" style="color:#fff;font-size:0.78rem;font-weight:600;"></span>
+    <div style="display:flex;gap:0.5rem;">
+      <button onclick="toggleMeetingSize()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:0.7rem;">⤢</button>
+      <button onclick="leaveMeeting()" style="background:var(--red);border:none;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:0.7rem;">✕</button>
+    </div>
+  </div>
+  <iframe id="floating-meeting-iframe" allow="camera; microphone; fullscreen; display-capture" style="flex:1;width:100%;border:none;"></iframe>
+</div>
 
 <!-- LANDING -->
 <div id="screen-landing" class="screen active">
@@ -1381,7 +1494,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <div class="form-group"><label>WhatsApp Number *</label><input type="tel" id="reg-whatsapp" placeholder="+254 700 000 000"></div>
     <div class="form-row-2">
       <div class="form-group"><label>Role *</label><select id="reg-role"><option value="">Select role...</option><option value="Member">Member</option><option value="Volunteer">Volunteer</option><option value="Associate">Associate</option><option value="Executive">Executive</option></select></div>
-      <div class="form-group"><label>Department *</label><select id="reg-dept"><option value="">Select department...</option><option value="programs">💻 Programs & Training</option><option value="scholarships">🏆 Scholarships & Global Opportunities</option><option value="career">🎤 Career Development & Public Speaking</option><option value="community">🌍 Community Impact & Volunteering</option><option value="mental">💚 Mental Health & Wellbeing</option></select></div>
+      <div class="form-group"><label>Department *</label><select id="reg-dept"><option value="">Select department...</option><optgroup label="── Training & Certification Departments ──"><option value="programs">💻 Programs & Training</option><option value="scholarships">🏆 Scholarships & Global Opportunities</option><option value="career">🎤 Career Development & Public Speaking</option><option value="community">🌍 Community Impact & Volunteering</option><option value="mental">💚 Mental Health & Wellbeing</option></optgroup><optgroup label="── Other Departments ──"><option value="communications">📢 Communications & Media</option><option value="finance">💰 Finance & Administration</option><option value="partnerships">🤝 Partnership & External Relations</option></optgroup></select></div>
     </div>
     <div class="form-group"><label>Profile Photo (optional)</label><input type="file" id="reg-photo" accept="image/*"></div>
     <button class="btn-primary" id="reg-btn" onclick="doRegister()">Create Account 🚀</button>

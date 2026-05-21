@@ -77,8 +77,8 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // Auto-verify if ID is in URL e.g. /verify/YAN-XXXXXXXX
-const pathParts = window.location.pathname.split('/');
-const urlCertId = pathParts[pathParts.length - 1];
+const urlParams = new URLSearchParams(window.location.search);
+const urlCertId = urlParams.get('id');
 if (urlCertId && urlCertId.startsWith('YAN-')) {
   document.getElementById('cert-input').value = urlCertId;
   verifyCertId(urlCertId);
@@ -129,7 +129,7 @@ async function verifyCertId(certId) {
           <div class="detail-row"><span class="detail-label">Member Name</span><span class="detail-value">${found.userName}</span></div>
           <div class="detail-row"><span class="detail-label">Department</span><span class="detail-value">${dept?.icon||''} ${dept?.name||found.department}</span></div>
           <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value" style="color:var(--green);">✅ Approved</span></div>
-          <div class="detail-row"><span class="detail-label">Issued By</span><span class="detail-value">${found.approvedBy||'YAN Admin'}</span></div>
+          <div class="detail-row"><span class="detail-label">Issued By</span><span class="detail-value">YAN Administration</span></div>
           <div class="detail-row"><span class="detail-label">Date Issued</span><span class="detail-value">${issuedDate}</span></div>
         </div>
         <div class="cert-id">Certificate ID: ${certId}</div>
