@@ -225,7 +225,8 @@ function loadFeed() {
 
 function renderPost(post) {
   const canDelete = post.authorId === currentUser?.uid || currentUserData?.isAdmin;
-  const liked = (post.likes || []).includes(currentUser?.uid);
+  const likesArr = Array.isArray(post.likes) ? post.likes : Object.keys(post.likes || {});
+const liked = likesArr.includes(currentUser?.uid);
   return `
   <div class="post-card">
     <div class="post-header">
@@ -239,7 +240,7 @@ function renderPost(post) {
     <div class="post-content">${sanitize(post.content)}</div>
     ${post.link ? `<a href="${sanitize(post.link)}" target="_blank" class="post-link">🔗 ${sanitize(post.link)}</a>` : ''}
     <div class="post-actions">
-      <button class="post-action ${liked?'liked':''}" onclick="toggleLike('${post.id}')">❤️ ${(post.likes||[]).length}</button>
+      <button class="post-action ${liked?'liked':''}" onclick="toggleLike('${post.id}')">❤️ ${Array.isArray(post.likes) ? post.likes.length : Object.keys(post.likes||{}).length}</button>
       <button class="post-action" onclick="toggleReplies('${post.id}')">💬 Reply</button>
     </div>
     <div class="reply-box" id="reply-box-${post.id}" style="display:none;">
@@ -799,7 +800,7 @@ async function loadHeadMaterials(dept) {
   const snap = await getDocs(collection(db, 'departments', dept, 'materials'));
   sel.innerHTML = snap.docs.map(d => `<option value="${d.id}">${d.data().title}</option>`).join('') || '<option>No materials yet</option>';
 }
-let quizQuestionsData = [];
+window.quizQuestionsData = [];
 function addQuizQuestion(type) {
   quizQuestionsData.push({ type, question: '', options: ['','','',''], correctIndex: 0 });
   renderQuizBuilder();
@@ -817,7 +818,7 @@ async function saveQuiz(dept) {
   const materialId = document.getElementById('head-quiz-material').value;
   if (!materialId || !quizQuestionsData.length) return showToast('Add questions first','error');
   await setDoc(doc(db, 'departments', dept, 'materials', materialId, 'quiz', 'questions'), { questions: quizQuestionsData, updatedAt: serverTimestamp() });
-  quizQuestionsData = []; renderQuizBuilder(); showToast('Quiz saved! ✅');
+  window.quizQuestionsData = []; renderQuizBuilder(); showToast('Quiz saved! ✅');
 }
 async function loadHeadEngagement(dept) {
   const container = document.getElementById('head-engagement'); if (!container) return;
