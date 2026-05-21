@@ -1020,10 +1020,10 @@ function downloadCertificate(certId) {
     const qrImg = new Image();
     qrImg.crossOrigin = 'anonymous';
     qrImg.onload = function() {
-      ctx.drawImage(qrImg, 535, 590, 130, 130);
+      ctx.drawImage(qrImg, 920, 590, 130, 130);
       ctx.textAlign = 'center';
       ctx.fillStyle = '#6B7280'; ctx.font = '12px Georgia';
-      ctx.fillText('Scan to verify', 600, 735);
+      ctx.fillText('Scan to verify', 985, 735);
       // Footer
       ctx.fillStyle = '#1B2A6B'; ctx.fillRect(20, 750, 1160, 45);
       ctx.fillStyle = '#FFFFFF'; ctx.font = '13px Georgia';
