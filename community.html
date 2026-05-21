@@ -226,7 +226,7 @@ function loadFeed() {
 function renderPost(post) {
   const canDelete = post.authorId === currentUser?.uid || currentUserData?.isAdmin;
   const likesArr = Array.isArray(post.likes) ? post.likes : Object.keys(post.likes || {});
-const liked = likesArr.includes(currentUser?.uid);
+  const liked = likesArr.includes(currentUser?.uid);
   return `
   <div class="post-card">
     <div class="post-header">
@@ -802,22 +802,22 @@ async function loadHeadMaterials(dept) {
 }
 window.quizQuestionsData = [];
 function addQuizQuestion(type) {
-  quizQuestionsData.push({ type, question: '', options: ['','','',''], correctIndex: 0 });
+  window.quizQuestionsData.push({ type, question: '', options: ['','','',''], correctIndex: 0 });
   renderQuizBuilder();
 }
 function renderQuizBuilder() {
   const container = document.getElementById('quiz-questions-list'); if (!container) return;
-  container.innerHTML = quizQuestionsData.map((q, i) => `
+  container.innerHTML = window.quizQuestionsData.map((q, i) => `
     <div class="quiz-builder-item">
-      <input type="text" placeholder="Question ${i+1}" value="${sanitize(q.question)}" oninput="quizQuestionsData[${i}].question=this.value">
-      ${q.type === 'mcq' ? q.options.map((opt, j) => `<div class="mcq-option"><input type="radio" name="correct-${i}" ${q.correctIndex===j?'checked':''} onchange="quizQuestionsData[${i}].correctIndex=${j}"><input type="text" placeholder="Option ${j+1}" value="${sanitize(opt)}" oninput="quizQuestionsData[${i}].options[${j}]=this.value"></div>`).join('') : '<small style="color:var(--gray)">Short answer</small>'}
-      <button class="btn-sm btn-red" onclick="quizQuestionsData.splice(${i},1);renderQuizBuilder()">Remove</button>
+      <input type="text" placeholder="Question ${i+1}" value="${sanitize(q.question)}" oninput="window.quizQuestionsData[${i}].question=this.value">
+      ${q.type === 'mcq' ? q.options.map((opt, j) => `<div class="mcq-option"><input type="radio" name="correct-${i}" ${q.correctIndex===j?'checked':''} onchange="window.quizQuestionsData[${i}].correctIndex=${j}"><input type="text" placeholder="Option ${j+1}" value="${sanitize(opt)}" oninput="window.quizQuestionsData[${i}].options[${j}]=this.value"></div>`).join('') : '<small style="color:var(--gray)">Short answer</small>'}
+      <button class="btn-sm btn-red" onclick="window.quizQuestionsData.splice(${i},1);renderQuizBuilder()">Remove</button>
     </div>`).join('');
 }
 async function saveQuiz(dept) {
   const materialId = document.getElementById('head-quiz-material').value;
-  if (!materialId || !quizQuestionsData.length) return showToast('Add questions first','error');
-  await setDoc(doc(db, 'departments', dept, 'materials', materialId, 'quiz', 'questions'), { questions: quizQuestionsData, updatedAt: serverTimestamp() });
+  if (!materialId || !window.quizQuestionsData.length) return showToast('Add questions first','error');
+  await setDoc(doc(db, 'departments', dept, 'materials', materialId, 'quiz', 'questions'), { questions: window.quizQuestionsData, updatedAt: serverTimestamp() });
   window.quizQuestionsData = []; renderQuizBuilder(); showToast('Quiz saved! ✅');
 }
 async function loadHeadEngagement(dept) {
