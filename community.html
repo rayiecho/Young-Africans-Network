@@ -319,8 +319,8 @@ async function submitReply(postId) {
 
 // DEPARTMENT
 function loadDepartment() {
-  const allDepts = currentUserData.departments || [currentUserData.department];
-  const dept = window._activeDept || currentUserData.department;
+  const allDepts = currentUserData.departments?.length ? currentUserData.departments : (currentUserData.department ? [currentUserData.department] : []);
+  const dept = window._activeDept || allDepts[0] || currentUserData.department;
   window._activeDept = dept;
   const deptInfo = DEPARTMENTS.find(d => d.id === dept);
   const container = document.getElementById('dept-container');
