@@ -894,7 +894,17 @@ async function loadAdminOverview() {
 async function loadAdminMembers() {
   const c = document.getElementById('admin-section-members'); c.innerHTML = '<div class="loading">Loading...</div>';
   const snap = await getDocs(collection(db,'users'));
-  c.innerHTML = `<div class="admin-members-list">${snap.docs.map(d=>{const u=d.data();return `<div class="admin-member-row"><div class="admin-member-info">${u.photoUrl?`<img src="${sanitize(u.photoUrl)}" alt="">`:`<div class="admin-avatar">${(u.name||'?')[0]}</div>`}<div><strong>${sanitize(u.name)}</strong><p>${sanitize(u.email)} · ${sanitize(u.country)}</p><p>${u.isAdmin?'🛡️ ':''} ${u.isDeptHead?'👑 ':''} ${u.isExec?'⭐ ':''} ${sanitize(u.role||'')}</p></div></div><div class="admin-member-actions"><button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isDeptHead',${!u.isDeptHead})">${u.isDeptHead?'Remove Head':'Make Head'}</button><button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isAdmin',${!u.isAdmin})">${u.isAdmin?'Remove Admin':'Make Admin'}</button><button class="btn-sm btn-red" onclick="removeMember('${d.id}')">Remove</button></div></div>`;}).join('')}</div>`;
+  c.innerHTML = `<div class="admin-members-list">${snap.docs.map(d=>{const u=d.data();return `<div class="admin-member-row"><div class="admin-member-info">${u.photoUrl?`<img src="${sanitize(u.photoUrl)}" alt="">`:`<div class="admin-avatar">${(u.name||'?')[0]}</div>`}<div><strong>${sanitize(u.name)}</strong><p>${sanitize(u.email)} · ${sanitize(u.country)}</p><p>${u.isAdmin?'🛡️ ':''} ${u.isDeptHead?'👑 ':''} ${u.isExec?'⭐ ':''} ${sanitize(u.role||'')}</p></div></div><div class="admin-member-actions"><button class="btn-sm btn-navy" onclick="viewMemberProgress('${d.id}','${sanitize(u.name)}')">📊 Progress</button><button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isDeptHead',${!u.isDeptHead})">${u.isDeptHead?'Remove Head':'Make Head'}</button><button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isAdmin',${!u.isAdmin})">${u.isAdmin?'Remove Admin':'Make Admin'}</button><button class="btn-sm btn-red" onclick="removeMember('${d.id}')">Remove</button></div></div>`;}).join('')}</div>`;
+}
+async function viewMemberProgress(userId, userName) {
+  const matsSnap = await getDocs(collection(db, 'results', userId, 'materials'));
+  let watched = 0, quizPassed = 0, totalScore = 0;
+  matsSnap.forEach(d => {
+    if (d.data().watched) watched++;
+    if (d.data().quizPassed) { quizPassed++; totalScore += d.data().quizScore || 0; }
+  });
+  const avgScore = quizPassed > 0 ? Math.round(totalScore / quizPassed) : 0;
+  alert(`📊 Progress for ${userName}\n\n✅ Materials Completed: ${watched}\n📝 Quizzes Passed: ${quizPassed}\n🎯 Average Score: ${avgScore}%\n🏆 Certificate: ${quizPassed >= 1 ? 'Eligible to request' : 'Not yet eligible'}`);
 }
 async function toggleRole(userId, role, value) { await updateDoc(doc(db,'users',userId),{[role]:value}); showToast('Updated ✅'); loadAdminMembers(); }
 async function removeMember(userId) { if (!confirm('Remove?')) return; await deleteDoc(doc(db,'users',userId)); showToast('Removed'); loadAdminMembers(); }
@@ -929,7 +939,7 @@ window.saveProfile=saveProfile; window.changeProfilePhoto=changeProfilePhoto; wi
 window.postMaterial=postMaterial; window.toggleMaterialFields=toggleMaterialFields; window.addQuizQuestion=addQuizQuestion;
 window.renderQuizBuilder=renderQuizBuilder; window.saveQuiz=saveQuiz; window.deleteMaterial=deleteMaterial;
 window.showAdminSection=showAdminSection; window.toggleRole=toggleRole; window.removeMember=removeMember;
-window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteQuiz=deleteQuiz;
+window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteQuiz=deleteQuiz; window.viewMemberProgress=viewMemberProgress;
 </script>
 
 <style>
