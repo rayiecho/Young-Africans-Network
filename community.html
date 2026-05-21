@@ -618,6 +618,7 @@ function loadMeetingsList() {
         </div>
         <div class="meeting-btns">
           <button class="btn-sm btn-navy" onclick="joinMeeting('${sanitize(m.roomUrl)}','${sanitize(m.title)}')">Join</button>
+<button class="btn-sm btn-outline" onclick="copyMeetingLink('${sanitize(m.roomUrl)}')">🔗 Copy Link</button>
           ${currentUserData?.isAdmin ? `<button class="btn-sm btn-gold" onclick="toggleLiveMeeting('${m.id}',${!m.isLive})">${m.isLive?'End':'Go Live'}</button>` : ''}
           ${currentUserData?.isAdmin ? `<button class="btn-sm btn-outline" onclick="addRecording('${m.id}')">+ Rec</button>` : ''}
           ${canDelete ? `<button class="btn-sm btn-red" onclick="deleteMeeting('${m.id}')">Delete</button>` : ''}
@@ -890,7 +891,12 @@ window.showDeptSection=showDeptSection; window.markWatched=markWatched; window.t
 window.submitDiscussion=submitDiscussion; window.openQuiz=openQuiz; window.submitQuiz=submitQuiz;
 window.requestCertificate=requestCertificate; window.sendDeptChat=sendDeptChat;
 window.loadMeetings=loadMeetings; window.showCreateMeeting=showCreateMeeting; window.createMeeting=createMeeting;
-window.joinMeeting=joinMeeting; window.leaveMeeting=leaveMeeting; window.toggleLiveMeeting=toggleLiveMeeting;
+window.joinMeeting=joinMeeting; window.leaveMeeting=leaveMeeting;
+window.copyMeetingLink = function(url) {
+  navigator.clipboard.writeText(url).then(() => showToast('Meeting link copied! 🔗')).catch(() => {
+    prompt('Copy this link:', url);
+  });
+}; window.toggleLiveMeeting=toggleLiveMeeting;
 window.addRecording=addRecording; window.deleteMeeting=deleteMeeting;
 window.saveProfile=saveProfile; window.changeProfilePhoto=changeProfilePhoto; window.downloadCertificate=downloadCertificate;
 window.postMaterial=postMaterial; window.toggleMaterialFields=toggleMaterialFields; window.addQuizQuestion=addQuizQuestion;
