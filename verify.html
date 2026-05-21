@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify Certificate | Young Africans Network</title>
+<link rel="icon" href="/images/logo.jpeg" type="image/jpeg">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;--green:#27AE60;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,var(--navy),var(--dark));min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;}
+.card{background:var(--white);border-radius:24px;padding:3rem;max-width:560px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;}
+.logo{width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);margin-bottom:1.5rem;}
+.card h1{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;}
+.card p.sub{color:var(--gray);font-size:0.88rem;margin-bottom:2rem;}
+.status-valid{background:#d4edda;border:2px solid #27AE60;border-radius:16px;padding:2rem;margin-bottom:1.5rem;}
+.status-invalid{background:#f8d7da;border:2px solid var(--red);border-radius:16px;padding:2rem;margin-bottom:1.5rem;}
+.status-loading{background:var(--light);border:2px solid rgba(27,42,107,0.15);border-radius:16px;padding:2rem;margin-bottom:1.5rem;}
+.status-icon{font-size:3rem;margin-bottom:1rem;}
+.status-title{font-size:1.2rem;font-weight:700;margin-bottom:0.5rem;}
+.status-valid .status-title{color:#155724;}
+.status-invalid .status-title{color:#721c24;}
+.status-loading .status-title{color:var(--navy);}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;border-bottom:1px solid rgba(27,42,107,0.08);text-align:left;}
+.detail-row:last-child{border-bottom:none;}
+.detail-label{font-size:0.78rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;}
+.detail-value{font-size:0.88rem;font-weight:600;color:var(--navy);}
+.cert-id{background:var(--light);border-radius:8px;padding:0.5rem 1rem;font-size:0.78rem;color:var(--gray);font-family:monospace;margin-top:1rem;}
+.btn-back{display:inline-block;margin-top:1.5rem;background:var(--navy);color:var(--white);padding:0.75rem 2rem;border-radius:50px;text-decoration:none;font-size:0.88rem;font-weight:600;transition:all 0.2s;}
+.btn-back:hover{background:var(--red);}
+.search-box{margin-bottom:2rem;}
+.search-box input{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.85rem 1rem;border-radius:12px;font-family:'Poppins',sans-serif;font-size:0.9rem;outline:none;text-align:center;}
+.search-box input:focus{border-color:var(--navy);}
+.btn-search{background:var(--red);color:var(--white);padding:0.85rem 2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.9rem;font-weight:700;border:none;cursor:pointer;width:100%;margin-top:0.75rem;transition:all 0.2s;}
+.btn-search:hover{background:var(--navy);}
+</style>
+</head>
+<body>
+<div class="card">
+  <img src="/images/logo.jpeg" alt="YAN Logo" class="logo">
+  <h1>Certificate Verification</h1>
+  <p class="sub">Young Africans Network — Official Certificate Verification Portal</p>
+
+  <div class="search-box">
+    <input type="text" id="cert-input" placeholder="Enter Certificate ID (e.g. YAN-9THCJ9TP)" maxlength="20">
+    <button class="btn-search" onclick="verifyCert()">🔍 Verify Certificate</button>
+  </div>
+
+  <div id="result"></div>
+
+  <a href="/index.html" class="btn-back">← Back to Website</a>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",
+  authDomain: "young-africans-network.firebaseapp.com",
+  projectId: "young-africans-network",
+  storageBucket: "young-africans-network.firebasestorage.app",
+  messagingSenderId: "224204618916",
+  appId: "1:224204618916:web:8ddfd36c6f112b4912fa31"
+};
+
+const DEPARTMENTS = [
+  { id: 'programs', name: 'Programs & Training', icon: '💻' },
+  { id: 'scholarships', name: 'Scholarships & Global Opportunities', icon: '🏆' },
+  { id: 'career', name: 'Career Development & Public Speaking', icon: '🎤' },
+  { id: 'community', name: 'Community Impact & Volunteering', icon: '🌍' },
+  { id: 'mental', name: 'Mental Health & Wellbeing', icon: '💚' }
+];
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Auto-verify if ID is in URL e.g. /verify/YAN-XXXXXXXX
+const pathParts = window.location.pathname.split('/');
+const urlCertId = pathParts[pathParts.length - 1];
+if (urlCertId && urlCertId.startsWith('YAN-')) {
+  document.getElementById('cert-input').value = urlCertId;
+  verifyCertId(urlCertId);
+}
+
+window.verifyCert = function() {
+  const id = document.getElementById('cert-input').value.trim().toUpperCase();
+  if (!id) { document.getElementById('result').innerHTML = '<div class="status-invalid"><div class="status-icon">⚠️</div><div class="status-title">Please enter a Certificate ID</div></div>'; return; }
+  verifyCertId(id);
+}
+
+async function verifyCertId(certId) {
+  const result = document.getElementById('result');
+  result.innerHTML = '<div class="status-loading"><div class="status-icon">🔍</div><div class="status-title">Verifying...</div></div>';
+
+  try {
+    // Extract userId from certId (YAN-XXXXXXXX)
+    const uidFragment = certId.replace('YAN-', '').toLowerCase();
+
+    // Search certificates collection
+    const snap = await getDocs(collection(db, 'certificates'));
+    let found = null;
+    snap.forEach(d => {
+      const data = d.data();
+      if (data.userId && data.userId.substring(0,8).toUpperCase() === uidFragment.toUpperCase() && data.status === 'approved') {
+        found = { id: d.id, ...data };
+      }
+    });
+
+    if (!found) {
+      result.innerHTML = `
+        <div class="status-invalid">
+          <div class="status-icon">❌</div>
+          <div class="status-title">Certificate Not Found</div>
+          <p style="color:#721c24;font-size:0.85rem;margin-top:0.5rem;">This certificate ID is not valid or has not been approved.</p>
+        </div>`;
+      return;
+    }
+
+    const dept = DEPARTMENTS.find(d => d.id === found.department);
+    const issuedDate = found.approvedAt?.toDate ? found.approvedAt.toDate().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) : 'N/A';
+
+    result.innerHTML = `
+      <div class="status-valid">
+        <div class="status-icon">✅</div>
+        <div class="status-title">Certificate is Valid!</div>
+        <div style="margin-top:1rem;">
+          <div class="detail-row"><span class="detail-label">Member Name</span><span class="detail-value">${found.userName}</span></div>
+          <div class="detail-row"><span class="detail-label">Department</span><span class="detail-value">${dept?.icon||''} ${dept?.name||found.department}</span></div>
+          <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value" style="color:var(--green);">✅ Approved</span></div>
+          <div class="detail-row"><span class="detail-label">Issued By</span><span class="detail-value">${found.approvedBy||'YAN Admin'}</span></div>
+          <div class="detail-row"><span class="detail-label">Date Issued</span><span class="detail-value">${issuedDate}</span></div>
+        </div>
+        <div class="cert-id">Certificate ID: ${certId}</div>
+      </div>`;
+  } catch(e) {
+    result.innerHTML = `<div class="status-invalid"><div class="status-icon">⚠️</div><div class="status-title">Verification Error</div><p style="color:#721c24;font-size:0.85rem;margin-top:0.5rem;">${e.message}</p></div>`;
+  }
+}
+</script>
+</body>
+</html>
