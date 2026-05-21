@@ -714,6 +714,14 @@ async function loadMembers(c) {
     </div>`;
 }
 
+window.adminChangeDept = async function(userId, dept) {
+  if (!dept) return;
+  try {
+    await updateDoc(doc(db,'users',userId),{ department: dept, departments: [dept] });
+    showToast('Department updated ✅');
+    loadSection('members');
+  } catch(e) { showToast(e.message,'error'); }
+};
 window.adminToggleRole = async function(userId, role, value) {
   try {
     await updateDoc(doc(db, 'users', userId), { [role]: value });
