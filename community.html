@@ -215,6 +215,7 @@ function loadTabContent(tab) {
   if (tab === 'admin') loadAdminPanel();
   if (tab === 'notifications') loadNotifications();
   if (tab === 'directory') loadDirectory();
+  if (tab === 'ai') loadAI();
 }
 
 // MEMBER DIRECTORY
@@ -809,6 +810,8 @@ function loadMeetingsList() {
         <div class="meeting-btns">
           <button class="btn-sm btn-navy" onclick="joinMeeting('${sanitize(m.roomUrl)}','${sanitize(m.title)}')">Join</button>
           <button class="btn-sm btn-outline" onclick="copyMeetingLink('${sanitize(m.roomUrl)}')">🔗 Copy Link</button>
+          <button class="btn-sm btn-gold" onclick="markAttendance('${m.id}','${sanitize(m.title)}')">✅ I'm Present</button>
+          ${currentUserData?.isAdmin ? `<button class="btn-sm btn-outline" onclick="viewAttendance('${m.id}','${sanitize(m.title)}')">👥 Attendance</button>` : ''}
           ${currentUserData?.isAdmin ? `<button class="btn-sm btn-gold" onclick="toggleLiveMeeting('${m.id}',${!m.isLive})">${m.isLive?'End':'Go Live'}</button>` : ''}
           ${currentUserData?.isAdmin ? `<button class="btn-sm btn-outline" onclick="addRecording('${m.id}')">+ Rec</button>` : ''}
           ${canDelete ? `<button class="btn-sm btn-red" onclick="deleteMeeting('${m.id}')">Delete</button>` : ''}
@@ -882,6 +885,7 @@ function loadProfile() {
       <div class="form-group"><label>WhatsApp</label><input type="text" id="edit-whatsapp" value="${sanitize(u.whatsapp||'')}"></div>
       <div class="form-group"><label>Bio</label><textarea id="edit-bio" rows="3">${sanitize(u.bio||'')}</textarea></div>
       <button class="btn-primary" onclick="saveProfile()">Save Changes</button>
+      <button class="btn-sm btn-navy" style="margin-top:0.75rem;width:100%;" onclick="downloadIDCard()">🪪 Download ID Card</button>
     </div>
     <div id="cert-section" class="cert-section"></div>`;
   loadProfileCerts();
@@ -1045,6 +1049,342 @@ function downloadCertificate(certId) {
   logo.src = '/images/logo.jpeg';
 }
 
+// YAN AI ASSISTANT
+function loadAI() {
+  const container = document.getElementById('ai-container');
+  container.innerHTML = `
+    <div style="max-width:700px;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <div style="font-size:3rem;margin-bottom:0.5rem;">🤖</div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);">YAN AI Assistant</h2>
+        <p style="color:var(--gray);font-size:0.85rem;">Ask me anything about YAN, scholarships, career advice or African opportunities!</p>
+      </div>
+      <div id="ai-messages" style="background:var(--white);border-radius:16px;height:420px;overflow-y:auto;padding:1.25rem;margin-bottom:1rem;display:flex;flex-direction:column;gap:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+        <div style="display:flex;gap:0.75rem;align-items:flex-start;">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">🤖</div>
+          <div style="background:var(--light);border-radius:12px;padding:0.85rem 1rem;max-width:85%;">
+            <p style="font-size:0.88rem;color:var(--navy);line-height:1.7;">Hello ${currentUserData?.name?.split(' ')[0] || 'there'}! 👋 I'm the YAN AI Assistant. I can help you with:<br><br>
+            🏆 Finding scholarships & opportunities<br>
+            💼 Career advice & CV tips<br>
+            🌍 Information about YAN programs<br>
+            👑 Leadership development guidance<br>
+            💚 Mental health & wellbeing resources<br><br>
+            What would you like to know?</p>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.75rem;">
+        <input type="text" id="ai-input" placeholder="Ask YAN AI anything..." style="flex:1;background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.85rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.88rem;outline:none;" onkeydown="if(event.key==='Enter')sendAIMessage()">
+        <button onclick="sendAIMessage()" style="background:var(--red);color:#fff;border:none;padding:0.85rem 1.5rem;border-radius:50px;cursor:pointer;font-weight:600;font-size:0.88rem;white-space:nowrap;">Send 🚀</button>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.75rem;">
+        <button onclick="askQuick('What scholarships are available for African youth?')" style="background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.4rem 0.85rem;border-radius:50px;font-size:0.75rem;cursor:pointer;font-family:'Poppins',sans-serif;">🏆 Scholarships</button>
+        <button onclick="askQuick('How can I improve my CV?')" style="background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.4rem 0.85rem;border-radius:50px;font-size:0.75rem;cursor:pointer;font-family:'Poppins',sans-serif;">💼 CV Tips</button>
+        <button onclick="askQuick('Tell me about YAN programs')" style="background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.4rem 0.85rem;border-radius:50px;font-size:0.75rem;cursor:pointer;font-family:'Poppins',sans-serif;">🌍 YAN Programs</button>
+        <button onclick="askQuick('How can I develop my leadership skills?')" style="background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.4rem 0.85rem;border-radius:50px;font-size:0.75rem;cursor:pointer;font-family:'Poppins',sans-serif;">👑 Leadership</button>
+        <button onclick="askQuick('Give me mental health tips for young Africans')" style="background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.4rem 0.85rem;border-radius:50px;font-size:0.75rem;cursor:pointer;font-family:'Poppins',sans-serif;">💚 Wellbeing</button>
+      </div>
+    </div>`;
+  window._aiHistory = [];
+}
+
+function askQuick(question) {
+  document.getElementById('ai-input').value = question;
+  sendAIMessage();
+}
+
+async function sendAIMessage() {
+  const input = document.getElementById('ai-input');
+  const message = input.value.trim();
+  if (!message) return;
+  input.value = '';
+
+  const messagesDiv = document.getElementById('ai-messages');
+
+  // Add user message
+  messagesDiv.innerHTML += `
+    <div style="display:flex;gap:0.75rem;align-items:flex-start;flex-direction:row-reverse;">
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.9rem;flex-shrink:0;">${(currentUserData?.name||'?')[0].toUpperCase()}</div>
+      <div style="background:var(--navy);border-radius:12px;padding:0.85rem 1rem;max-width:85%;">
+        <p style="font-size:0.88rem;color:#fff;line-height:1.7;">${sanitize(message)}</p>
+      </div>
+    </div>`;
+
+  // Add typing indicator
+  const typingId = 'typing-' + Date.now();
+  messagesDiv.innerHTML += `
+    <div id="${typingId}" style="display:flex;gap:0.75rem;align-items:flex-start;">
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">🤖</div>
+      <div style="background:var(--light);border-radius:12px;padding:0.85rem 1rem;">
+        <p style="font-size:0.88rem;color:var(--gray);">Thinking... ✨</p>
+      </div>
+    </div>`;
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+  // Add to history
+  if (!window._aiHistory) window._aiHistory = [];
+  window._aiHistory.push({ role: 'user', content: message });
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are the YAN AI Assistant for Young Africans Network (YAN) — a pan-African, youth-led volunteer organization founded in Kenya in April 2026. You help young Africans with:
+- Information about YAN programs: IT Training, Scholarships, Career Development, Leadership, Community Impact, Mental Health
+- Finding scholarships, fellowships and global opportunities for African youth
+- Career advice, CV writing, interview preparation and public speaking tips
+- Leadership development and personal growth guidance
+- Mental health and wellbeing support
+- General questions about Africa, education and youth empowerment
+
+The member you are speaking with is: ${currentUserData?.name}, Role: ${currentUserData?.role}, Department: ${currentUserData?.department}, Country: ${currentUserData?.country}.
+
+Be warm, encouraging, practical and pan-African in your responses. Use relevant emojis. Keep responses concise but helpful. Always encourage the member and remind them of YAN's mission: Building the Future, Together.`,
+        messages: window._aiHistory
+      })
+    });
+
+    const data = await response.json();
+    const reply = data.content?.[0]?.text || 'Sorry, I could not process that. Please try again.';
+
+    window._aiHistory.push({ role: 'assistant', content: reply });
+
+    // Remove typing indicator
+    document.getElementById(typingId)?.remove();
+
+    // Add AI response
+    messagesDiv.innerHTML += `
+      <div style="display:flex;gap:0.75rem;align-items:flex-start;">
+        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">🤖</div>
+        <div style="background:var(--light);border-radius:12px;padding:0.85rem 1rem;max-width:85%;">
+          <p style="font-size:0.88rem;color:var(--navy);line-height:1.7;white-space:pre-wrap;">${sanitize(reply)}</p>
+        </div>
+      </div>`;
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+  } catch(e) {
+    document.getElementById(typingId)?.remove();
+    messagesDiv.innerHTML += `
+      <div style="display:flex;gap:0.75rem;align-items:flex-start;">
+        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">🤖</div>
+        <div style="background:#f8d7da;border-radius:12px;padding:0.85rem 1rem;max-width:85%;">
+          <p style="font-size:0.88rem;color:#721c24;line-height:1.7;">Sorry, I'm having trouble connecting. Please try again! 🙏</p>
+        </div>
+      </div>`;
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+}
+
+// ATTENDANCE TRACKING
+async function markAttendance(meetingId, meetingTitle) {
+  const ref = doc(db, 'attendance', meetingId, 'attendees', currentUser.uid);
+  const existing = await getDoc(ref);
+  if (existing.exists()) return showToast('Already marked present ✅');
+  await setDoc(ref, {
+    userId: currentUser.uid,
+    userName: currentUserData.name,
+    department: currentUserData.department,
+    country: currentUserData.country,
+    markedAt: serverTimestamp(),
+    meetingTitle
+  });
+  showToast('Attendance marked! ✅');
+}
+
+async function viewAttendance(meetingId, meetingTitle) {
+  const snap = await getDocs(collection(db, 'attendance', meetingId, 'attendees'));
+  if (snap.empty) { showToast('No attendance yet', 'error'); return; }
+  const names = snap.docs.map(d => `${d.data().userName} (${d.data().country})`).join('\n');
+  alert(`📋 Attendance for: ${meetingTitle}\n\n${snap.size} present:\n\n${names}`);
+}
+
+// MEMBER ID CARD
+function downloadIDCard() {
+  const u = currentUserData;
+  const dept = DEPARTMENTS.find(d => d.id === u.department);
+  const memberId = 'YAN-' + currentUser.uid.substring(0, 8).toUpperCase();
+  const canvas = document.createElement('canvas');
+  canvas.width = 1012; canvas.height = 638;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#1B2A6B';
+  ctx.fillRect(0, 0, 1012, 638);
+
+  // Gold accent top
+  ctx.fillStyle = '#F5A623';
+  ctx.fillRect(0, 0, 1012, 8);
+  ctx.fillRect(0, 630, 1012, 8);
+
+  // Red left bar
+  ctx.fillStyle = '#E63329';
+  ctx.fillRect(0, 0, 8, 638);
+
+  // White card area
+  ctx.fillStyle = '#F8F9FF';
+  ctx.fillRect(8, 8, 1004, 622);
+
+  // Navy header bar
+  ctx.fillStyle = '#1B2A6B';
+  ctx.fillRect(8, 8, 1004, 140);
+
+  // Header text
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 36px Georgia';
+  ctx.textAlign = 'center';
+  ctx.fillText('YOUNG AFRICANS NETWORK', 506, 65);
+  ctx.fillStyle = '#F5A623';
+  ctx.font = '18px Georgia';
+  ctx.fillText('Building the Future, Together', 506, 100);
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.font = '14px Georgia';
+  ctx.fillText('OFFICIAL MEMBER IDENTIFICATION CARD', 506, 130);
+
+  // Load logo
+  const logo = new Image();
+  logo.crossOrigin = 'anonymous';
+  logo.onload = function() {
+    // Logo circle
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(130, 78, 45, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fill();
+    ctx.clip();
+    ctx.drawImage(logo, 85, 33, 90, 90);
+    ctx.restore();
+
+    // Photo area
+    ctx.fillStyle = '#E8EAFF';
+    ctx.beginPath();
+    ctx.arc(150, 350, 90, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#F5A623';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    const loadDetails = () => {
+      // Member name
+      ctx.fillStyle = '#1B2A6B';
+      ctx.font = 'bold 32px Georgia';
+      ctx.textAlign = 'left';
+      ctx.fillText(u.name, 280, 220);
+
+      // Role
+      ctx.fillStyle = '#E63329';
+      ctx.font = 'bold 18px Poppins, sans-serif';
+      ctx.fillText(u.role || 'Member', 280, 255);
+
+      // Department
+      ctx.fillStyle = '#F5A623';
+      ctx.font = 'bold 16px Poppins, sans-serif';
+      ctx.fillText(`${dept?.icon || ''} ${dept?.name || ''}`, 280, 285);
+
+      // Divider
+      ctx.strokeStyle = 'rgba(27,42,107,0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(280, 305);
+      ctx.lineTo(900, 305);
+      ctx.stroke();
+
+      // Details
+      ctx.fillStyle = '#6B7280';
+      ctx.font = '15px Poppins, sans-serif';
+      ctx.fillText(`📍 Country:`, 280, 340);
+      ctx.fillStyle = '#1B2A6B';
+      ctx.font = 'bold 15px Poppins, sans-serif';
+      ctx.fillText(u.country || '', 420, 340);
+
+      ctx.fillStyle = '#6B7280';
+      ctx.font = '15px Poppins, sans-serif';
+      ctx.fillText(`📱 WhatsApp:`, 280, 370);
+      ctx.fillStyle = '#1B2A6B';
+      ctx.font = 'bold 15px Poppins, sans-serif';
+      ctx.fillText(u.whatsapp || '', 420, 370);
+
+      ctx.fillStyle = '#6B7280';
+      ctx.font = '15px Poppins, sans-serif';
+      ctx.fillText(`🪪 Member ID:`, 280, 400);
+      ctx.fillStyle = '#E63329';
+      ctx.font = 'bold 15px Poppins, sans-serif';
+      ctx.fillText(memberId, 420, 400);
+
+      ctx.fillStyle = '#6B7280';
+      ctx.font = '15px Poppins, sans-serif';
+      ctx.fillText(`📅 Issued:`, 280, 430);
+      ctx.fillStyle = '#1B2A6B';
+      ctx.font = 'bold 15px Poppins, sans-serif';
+      ctx.fillText(new Date().toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'}), 420, 430);
+
+      // QR code
+      const qr = new Image();
+      qr.crossOrigin = 'anonymous';
+      qr.onload = function() {
+        ctx.drawImage(qr, 730, 310, 150, 150);
+        ctx.fillStyle = '#6B7280';
+        ctx.font = '11px Poppins, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Scan to verify', 805, 478);
+
+        // Footer
+        ctx.fillStyle = '#1B2A6B';
+        ctx.fillRect(8, 540, 1004, 90);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '13px Poppins, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com | +254791887609', 506, 575);
+        ctx.fillStyle = '#F5A623';
+        ctx.font = 'bold 13px Georgia';
+        ctx.fillText('This card is the property of Young Africans Network. If found please return.', 506, 608);
+
+        // Download
+        const link = document.createElement('a');
+        link.download = `YAN_ID_${u.name.replace(/ /g, '_')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('ID Card downloading! 🪪');
+      };
+      qr.onerror = function() {
+        const link = document.createElement('a');
+        link.download = `YAN_ID_${u.name.replace(/ /g, '_')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('ID Card downloading! 🪪');
+      };
+      qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://youngafricansnetwork.org/verify.html?id=${memberId}`;
+    };
+
+    // Load profile photo
+    if (u.photoUrl) {
+      const photo = new Image();
+      photo.crossOrigin = 'anonymous';
+      photo.onload = function() {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(150, 350, 88, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(photo, 62, 262, 176, 176);
+        ctx.restore();
+        loadDetails();
+      };
+      photo.onerror = loadDetails;
+      photo.src = u.photoUrl;
+    } else {
+      ctx.fillStyle = '#1B2A6B';
+      ctx.font = 'bold 60px Georgia';
+      ctx.textAlign = 'center';
+      ctx.fillText((u.name||'?')[0].toUpperCase(), 150, 370);
+      loadDetails();
+    }
+  };
+  logo.onerror = function() { showToast('Error generating ID card', 'error'); };
+  logo.src = '/images/logo.jpeg';
+}
+
 // HEAD PANEL
 async function loadHeadPanel() {
   const dept = currentUserData.department;
@@ -1162,6 +1502,26 @@ async function loadAdminPanel() {
   <div class="form-group"><label>Message</label><textarea id="bulk-message" rows="5" placeholder="Write your message to all members..."></textarea></div>
   <button class="btn-primary" id="bulk-send-btn" onclick="sendBulkEmail()">📧 Send to All Members</button>
 </div>
+<div class="head-section" style="margin-bottom:1.5rem;">
+  <h3>📰 Send Newsletter</h3>
+  <p style="font-size:0.82rem;color:var(--gray);margin-bottom:1rem;">Send a formatted newsletter to all members or a specific department.</p>
+  <div class="form-group"><label>Subject *</label><input type="text" id="newsletter-subject" placeholder="e.g. YAN Monthly Newsletter — May 2026"></div>
+  <div class="form-group"><label>Newsletter Content *</label><textarea id="newsletter-message" rows="8" placeholder="Write your newsletter content here..."></textarea></div>
+  <div class="form-group"><label>Send To</label>
+    <select id="newsletter-dept">
+      <option value="">📢 All Members</option>
+      <option value="programs">💻 Programs & Training</option>
+      <option value="scholarships">🏆 Scholarships</option>
+      <option value="career">🎤 Career Development</option>
+      <option value="community">🌍 Community Impact</option>
+      <option value="mental">💚 Mental Health</option>
+      <option value="communications">📢 Communications</option>
+      <option value="finance">💰 Finance</option>
+      <option value="partnerships">🤝 Partnerships</option>
+    </select>
+  </div>
+  <button class="btn-primary" id="newsletter-send-btn" onclick="sendNewsletter()">📰 Send Newsletter</button>
+</div>
     <div id="admin-section-members" class="admin-section" style="display:none;"></div>
     <div id="admin-section-certificates" class="admin-section" style="display:none;"></div>
     <div id="admin-section-moderation" class="admin-section" style="display:none;"></div>
@@ -1171,6 +1531,38 @@ async function loadAdminPanel() {
 function showAdminSection(section) {
   document.querySelectorAll('.admin-tab-btn').forEach((b,i) => b.classList.toggle('active', ['overview','members','certificates','moderation','team'][i]===section));
   ['overview','members','certificates','moderation','team'].forEach(s => { const el = document.getElementById(`admin-section-${s}`); if (el) el.style.display = s===section?'block':'none'; });
+}
+async function sendNewsletter() {
+  const subject = document.getElementById('newsletter-subject').value.trim();
+  const message = document.getElementById('newsletter-message').value.trim();
+  const dept = document.getElementById('newsletter-dept').value;
+  if (!subject || !message) return showToast('Enter subject and message','error');
+  if (!confirm(`Send newsletter to ${dept ? dept + ' department' : 'ALL members'}?`)) return;
+  const btn = document.getElementById('newsletter-send-btn');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  try {
+    const snap = await getDocs(collection(db,'users'));
+    let sent = 0, failed = 0;
+    for (const d of snap.docs) {
+      const u = d.data();
+      if (dept && u.department !== dept) continue;
+      if (!u.email) continue;
+      try {
+        await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
+          to_email: u.email,
+          name: u.name,
+          subject: subject,
+          message: message
+        });
+        sent++;
+      } catch(e) { failed++; }
+    }
+    showToast(`✅ Newsletter sent to ${sent} members! ${failed>0?`(${failed} failed)`:''}`);
+  } catch(e) {
+    showToast('Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '📧 Send Newsletter';
+  }
 }
 async function sendBulkEmail() {
   const subject = document.getElementById('bulk-subject').value.trim();
@@ -1328,7 +1720,7 @@ async function loadAdminModeration() {
 }
 
 // EXPOSE TO WINDOW
-window.showPostNotification=showPostNotification; window.postNotification=postNotification; window.markNotifRead=markNotifRead; window.deleteNotification=deleteNotification; window.filterDirectory=filterDirectory;
+window.showPostNotification=showPostNotification; window.postNotification=postNotification; window.markNotifRead=markNotifRead; window.deleteNotification=deleteNotification; window.filterDirectory=filterDirectory; window.sendAIMessage=sendAIMessage; window.askQuick=askQuick;
 window.doRegister=doRegister; window.doLogin=doLogin; window.doLogout=doLogout; window.doForgotPassword=doForgotPassword;
 window.showTab=showTab; window.showScreen=showScreen; window.submitPost=submitPost; window.deletePost=deletePost;
 window.toggleLike=toggleLike; window.toggleReplies=toggleReplies; window.submitReply=submitReply;
@@ -1340,8 +1732,8 @@ window.joinMeeting=joinMeeting; window.leaveMeeting=leaveMeeting; window.showScr
 window.copyMeetingLink = function(url) {
   navigator.clipboard.writeText(url).then(() => showToast('Meeting link copied! 🔗')).catch(() => { prompt('Copy this link:', url); });
 };
-window.toggleLiveMeeting=toggleLiveMeeting; window.addRecording=addRecording; window.deleteMeeting=deleteMeeting;
-window.saveProfile=saveProfile; window.changeProfilePhoto=changeProfilePhoto; window.downloadCertificate=downloadCertificate;
+window.toggleLiveMeeting=toggleLiveMeeting; window.markAttendance=markAttendance; window.viewAttendance=viewAttendance; window.addRecording=addRecording; window.deleteMeeting=deleteMeeting;
+window.saveProfile=saveProfile; window.downloadIDCard=downloadIDCard; window.changeProfilePhoto=changeProfilePhoto; window.downloadCertificate=downloadCertificate;
 window.postMaterial=postMaterial; window.toggleMaterialFields=toggleMaterialFields; window.addQuizQuestion=addQuizQuestion;
 window.renderQuizBuilder=renderQuizBuilder; window.saveQuiz=saveQuiz; window.deleteMaterial=deleteMaterial;
 window.showAdminSection=showAdminSection; window.toggleRole=toggleRole; window.removeMember=removeMember;
@@ -1716,6 +2108,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <button class="tab-btn" data-tab="meetings" onclick="showTab('meetings')"><span class="tab-icon">🎥</span> Meetings</button>
       <button class="tab-btn" data-tab="profile" onclick="showTab('profile')"><span class="tab-icon">👤</span> My Profile</button>
       <button class="tab-btn" data-tab="directory" onclick="showTab('directory')"><span class="tab-icon">👥</span> Directory</button>
+      <button class="tab-btn" data-tab="ai" onclick="showTab('ai')"><span class="tab-icon">🤖</span> YAN AI</button>
       <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">👑</span> Head Panel</button>
       <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;"><span class="tab-icon">🛡️</span> Admin Panel</button>
     </nav>
@@ -1764,6 +2157,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <div class="tab-panel" id="tab-admin"><div id="admin-container"></div></div>
     <div class="tab-panel" id="tab-notifications"><div id="notifications-container"></div></div>
     <div class="tab-panel" id="tab-directory"><div id="directory-container"></div></div>
+    <div class="tab-panel" id="tab-ai"><div id="ai-container"></div></div>
   </main>
 </div>
 
