@@ -1140,8 +1140,7 @@ async function sendAIMessage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemPrompt }] },
-        contents: [{ role: 'user', parts: [{ text: message }] }],
+        contents: [{ role: 'user', parts: [{ text: systemPrompt + '\n\nUser: ' + message }] }],
         generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
       })
     });
