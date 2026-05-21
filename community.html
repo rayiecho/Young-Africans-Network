@@ -1020,14 +1020,14 @@ function downloadCertificate(certId) {
     const qrImg = new Image();
     qrImg.crossOrigin = 'anonymous';
     qrImg.onload = function() {
-      ctx.drawImage(qrImg, 535, 790, 130, 130);
+      ctx.drawImage(qrImg, 535, 640, 130, 130);
       ctx.textAlign = 'center';
       ctx.fillStyle = '#6B7280'; ctx.font = '12px Georgia';
-      ctx.fillText('Scan to verify', 600, 935);
+      ctx.fillText('Scan to verify', 600, 785);
       // Footer
-      ctx.fillStyle = '#1B2A6B'; ctx.fillRect(20, 950, 1160, 45);
+      ctx.fillStyle = '#1B2A6B'; ctx.fillRect(20, 800, 1160, 45);
       ctx.fillStyle = '#FFFFFF'; ctx.font = '13px Georgia';
-      ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com', 600, 978);
+      ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com', 600, 828);
       // Download
       const link = document.createElement('a');
       link.download = `YAN_Certificate_${u.name.replace(/ /g,'_')}.png`;
