@@ -954,6 +954,12 @@ async function loadAdminPanel() {
       <button class="admin-tab-btn" onclick="showAdminSection('moderation')">🛡️ Moderation</button>
     </div>
     <div id="admin-section-overview" class="admin-section"></div>
+<div class="head-section" style="margin-bottom:1.5rem;">
+  <h3>📧 Message All Members</h3>
+  <div class="form-group"><label>Subject</label><input type="text" id="bulk-subject" placeholder="e.g. YAN Monthly Update"></div>
+  <div class="form-group"><label>Message</label><textarea id="bulk-message" rows="5" placeholder="Write your message to all members..."></textarea></div>
+  <button class="btn-primary" id="bulk-send-btn" onclick="sendBulkEmail()">📧 Send to All Members</button>
+</div>
     <div id="admin-section-members" class="admin-section" style="display:none;"></div>
     <div id="admin-section-certificates" class="admin-section" style="display:none;"></div>
     <div id="admin-section-moderation" class="admin-section" style="display:none;"></div>`;
@@ -962,6 +968,37 @@ async function loadAdminPanel() {
 function showAdminSection(section) {
   document.querySelectorAll('.admin-tab-btn').forEach((b,i) => b.classList.toggle('active', ['overview','members','certificates','moderation'][i]===section));
   ['overview','members','certificates','moderation'].forEach(s => { const el = document.getElementById(`admin-section-${s}`); if (el) el.style.display = s===section?'block':'none'; });
+}
+async function sendBulkEmail() {
+  const subject = document.getElementById('bulk-subject').value.trim();
+  const message = document.getElementById('bulk-message').value.trim();
+  if (!subject || !message) return showToast('Enter subject and message','error');
+  if (!confirm('Send this email to ALL members?')) return;
+  const btn = document.getElementById('bulk-send-btn');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  try {
+    const snap = await getDocs(collection(db,'users'));
+    let sent = 0, failed = 0;
+    for (const d of snap.docs) {
+      const email = d.data().email;
+      const name = d.data().name;
+      if (!email) continue;
+      try {
+        await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
+          to_email: email,
+          name: name,
+          subject: subject,
+          message: message
+        });
+        sent++;
+      } catch(e) { failed++; }
+    }
+    showToast(`✅ Sent to ${sent} members! ${failed>0?`(${failed} failed)`:''}`)
+  } catch(e) {
+    showToast('Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '📧 Send to All Members';
+  }
 }
 async function loadAdminOverview() {
   const c = document.getElementById('admin-section-overview');
@@ -1029,8 +1066,10 @@ window.saveProfile=saveProfile; window.changeProfilePhoto=changeProfilePhoto; wi
 window.postMaterial=postMaterial; window.toggleMaterialFields=toggleMaterialFields; window.addQuizQuestion=addQuizQuestion;
 window.renderQuizBuilder=renderQuizBuilder; window.saveQuiz=saveQuiz; window.deleteMaterial=deleteMaterial;
 window.showAdminSection=showAdminSection; window.toggleRole=toggleRole; window.removeMember=removeMember;
-window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteQuiz=deleteQuiz; window.viewMemberProgress=viewMemberProgress; window.issueCertificate=issueCertificate;
+window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteQuiz=deleteQuiz; window.viewMemberProgress=viewMemberProgress; window.issueCertificate=issueCertificate; window.sendBulkEmail=sendBulkEmail;
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>emailjs.init('NyhRgF1xCbrxy7XEG');</script>
 
 <style>
 :root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;--green:#27AE60;--sidebar:260px;}
