@@ -988,41 +988,46 @@ function downloadCertificate(certId) {
     ctx.beginPath(); ctx.moveTo(150, 630); ctx.lineTo(1050, 630); ctx.stroke();
 
     // Left signature - Founder
+    // Signature image ABOVE line
     const signImg = new Image();
     signImg.crossOrigin = 'anonymous';
     signImg.onload = function() {
-      ctx.drawImage(signImg, 80, 600, 180, 60);
+      ctx.drawImage(signImg, 100, 650, 180, 65);
     };
     signImg.src = '/images/emmanuel_signature.png';
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#1B2A6B'; ctx.font = 'italic bold 20px Georgia';
-    ctx.fillText('Emmanuel Ikumilu Mwori', 100, 700);
-    ctx.fillStyle = '#6B7280'; ctx.font = '14px Georgia';
-    ctx.fillText('Founder & CEO, Young Africans Network', 100, 718);
+    // Line below signature
     ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(100, 725); ctx.lineTo(450, 725); ctx.stroke();
+    // Name and title BELOW line
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#1B2A6B'; ctx.font = 'italic bold 18px Georgia';
+    ctx.fillText('Emmanuel Ikumilu Mwori', 100, 748);
+    ctx.fillStyle = '#6B7280'; ctx.font = '13px Georgia';
+    ctx.fillText('Founder & CEO, Young Africans Network', 100, 766);
 
     // Right signature - Dept Head
-    ctx.textAlign = 'right';
-    ctx.fillStyle = '#1B2A6B'; ctx.font = 'italic bold 20px Georgia';
-    ctx.fillText('Department Head', 1100, 690);
-    ctx.fillStyle = '#6B7280'; ctx.font = '14px Georgia';
-    ctx.fillText(dept?.name || 'Department', 1100, 710);
+    // Line below empty space for signature
     ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(750, 725); ctx.lineTo(1100, 725); ctx.stroke();
+    // Name and title BELOW line
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#1B2A6B'; ctx.font = 'italic bold 18px Georgia';
+    ctx.fillText('Department Head', 1100, 748);
+    ctx.fillStyle = '#6B7280'; ctx.font = '13px Georgia';
+    ctx.fillText(dept?.name || 'Department', 1100, 766);
 
     // QR Code
     const qrImg = new Image();
     qrImg.crossOrigin = 'anonymous';
     qrImg.onload = function() {
-      ctx.drawImage(qrImg, 535, 740, 130, 130);
+      ctx.drawImage(qrImg, 535, 790, 130, 130);
       ctx.textAlign = 'center';
       ctx.fillStyle = '#6B7280'; ctx.font = '12px Georgia';
-      ctx.fillText('Scan to verify', 600, 885);
+      ctx.fillText('Scan to verify', 600, 935);
       // Footer
-      ctx.fillStyle = '#1B2A6B'; ctx.fillRect(20, 855, 1160, 45);
+      ctx.fillStyle = '#1B2A6B'; ctx.fillRect(20, 950, 1160, 45);
       ctx.fillStyle = '#FFFFFF'; ctx.font = '13px Georgia';
-      ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com | +254791887609', 600, 883);
+      ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com', 600, 978);
       // Download
       const link = document.createElement('a');
       link.download = `YAN_Certificate_${u.name.replace(/ /g,'_')}.png`;
@@ -1037,7 +1042,7 @@ function downloadCertificate(certId) {
       link.click();
       showToast('Certificate downloading! 🏆');
     };
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=https://youngafricansnetwork.org/verify.html?id=${verifyCode}`;
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('https://youngafricansnetwork.org/verify.html?id='+verifyCode)}`;
   };
   logo.onerror = function() {
     const link = document.createElement('a');
@@ -1131,7 +1136,7 @@ async function sendAIMessage() {
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.content }]
     }));
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyBw-Y_08wMatBH5HFSwKQeV8x95_BX69B0`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=AIzaSyBw-Y_08wMatBH5HFSwKQeV8x95_BX69B0`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1330,7 +1335,7 @@ function downloadIDCard() {
         ctx.fillStyle = '#FFFFFF';
         ctx.font = '13px Poppins, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com | +254791887609', 506, 575);
+        ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com | ', 506, 575);
         ctx.fillStyle = '#F5A623';
         ctx.font = 'bold 13px Georgia';
         ctx.fillText('This card is the property of Young Africans Network. If found please return.', 506, 608);
