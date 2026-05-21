@@ -789,6 +789,12 @@ function downloadCertificate(certId) {
     ctx.beginPath(); ctx.moveTo(150, 630); ctx.lineTo(1050, 630); ctx.stroke();
 
     // Left signature - Founder
+    const signImg = new Image();
+    signImg.crossOrigin = 'anonymous';
+    signImg.onload = function() {
+      ctx.drawImage(signImg, 80, 620, 200, 75);
+    };
+    signImg.src = '/images/emmanuel_signature.png';
     ctx.textAlign = 'left';
     ctx.fillStyle = '#1B2A6B'; ctx.font = 'italic bold 20px Georgia';
     ctx.fillText('Emmanuel Ikumilu Mwori', 100, 690);
