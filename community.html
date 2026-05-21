@@ -868,29 +868,7 @@ function downloadCertificate(certId) {
   };
   logo.src = '/images/logo.jpeg';
 }
-  const u = currentUserData; const dept = DEPARTMENTS.find(d => d.id === u.department);
-  const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 850;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#F8F9FF'; ctx.fillRect(0, 0, 1200, 850);
-  ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 8; ctx.strokeRect(20, 20, 1160, 810);
-  ctx.strokeStyle = '#F5A623'; ctx.lineWidth = 3; ctx.strokeRect(32, 32, 1136, 786);
-  ctx.fillStyle = '#1B2A6B'; ctx.font = 'bold 48px Georgia'; ctx.textAlign = 'center'; ctx.fillText('YOUNG AFRICANS NETWORK', 600, 120);
-  ctx.fillStyle = '#E63329'; ctx.font = '24px Georgia'; ctx.fillText('Building the Future, Together', 600, 160);
-  ctx.fillStyle = '#F5A623'; ctx.font = 'bold 36px Georgia'; ctx.fillText('CERTIFICATE OF COMPLETION', 600, 240);
-  ctx.fillStyle = '#1B2A6B'; ctx.font = '22px Georgia'; ctx.fillText('This is to certify that', 600, 310);
-  ctx.font = 'bold 44px Georgia'; ctx.fillStyle = '#E63329'; ctx.fillText(u.name, 600, 370);
-  ctx.fillStyle = '#1B2A6B'; ctx.font = '22px Georgia'; ctx.fillText('has successfully completed the', 600, 420);
-  ctx.font = 'bold 28px Georgia'; ctx.fillText(dept?.name || u.department, 600, 465);
-  ctx.font = '20px Georgia'; ctx.fillStyle = '#6B7280'; ctx.fillText('training program at Young Africans Network', 600, 510);
-  ctx.fillStyle = '#1B2A6B'; ctx.font = '18px Georgia'; ctx.fillText(`Date: ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`, 600, 570);
-  ctx.font = 'italic bold 22px Georgia'; ctx.fillStyle = '#1B2A6B'; ctx.textAlign = 'left'; ctx.fillText('Emmanuel Ikumilu Mwori', 150, 680);
-  ctx.font = '16px Georgia'; ctx.fillStyle = '#6B7280'; ctx.fillText('Founder & CEO, Young Africans Network', 150, 705);
-  ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(100, 720); ctx.lineTo(500, 720); ctx.stroke();
-  ctx.textAlign = 'center'; ctx.fillStyle = '#6B7280'; ctx.font = '14px Georgia'; ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com', 600, 780);
-  const link = document.createEle
-  showToast('Certificate downloading! 🏆');ment('a'); link.download = `YAN_Certificate_${u.name.replace(/ /g,'_')}.png`; link.href = canvas.toDataURL('image/png'); link.click();
   
-}
 
 // HEAD PANEL
 async function loadHeadPanel() {
