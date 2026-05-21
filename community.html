@@ -894,7 +894,20 @@ async function loadAdminOverview() {
 async function loadAdminMembers() {
   const c = document.getElementById('admin-section-members'); c.innerHTML = '<div class="loading">Loading...</div>';
   const snap = await getDocs(collection(db,'users'));
-  c.innerHTML = `<div class="admin-members-list">${snap.docs.map(d=>{const u=d.data();return `<div class="admin-member-row"><div class="admin-member-info">${u.photoUrl?`<img src="${sanitize(u.photoUrl)}" alt="">`:`<div class="admin-avatar">${(u.name||'?')[0]}</div>`}<div><strong>${sanitize(u.name)}</strong><p>${sanitize(u.email)} · ${sanitize(u.country)}</p><p>${u.isAdmin?'🛡️ ':''} ${u.isDeptHead?'👑 ':''} ${u.isExec?'⭐ ':''} ${sanitize(u.role||'')}</p></div></div><div class="admin-member-actions"><button class="btn-sm btn-navy" onclick="viewMemberProgress('${d.id}','${sanitize(u.name)}')">📊 Progress</button><button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isDeptHead',${!u.isDeptHead})">${u.isDeptHead?'Remove Head':'Make Head'}</button><button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isAdmin',${!u.isAdmin})">${u.isAdmin?'Remove Admin':'Make Admin'}</button><button class="btn-sm btn-red" onclick="removeMember('${d.id}')">Remove</button></div></div>`;}).join('')}</div>`;
+  c.innerHTML = `<div class="admin-members-list">${snap.docs.map(d=>{const u=d.data();return `<div class="admin-member-row"><div class="admin-member-info">${u.photoUrl?`<img src="${sanitize(u.photoUrl)}" alt="">`:`<div class="admin-avatar">${(u.name||'?')[0]}</div>`}<div><strong>${sanitize(u.name)}</strong><p>${sanitize(u.email)} · ${sanitize(u.country)}</p><p>${u.isAdmin?'🛡️ ':''} ${u.isDeptHead?'👑 ':''} ${u.isExec?'⭐ ':''} ${sanitize(u.role||'')}</p></div></div><div class="admin-member-actions"><button class="btn-sm btn-navy" onclick="viewMemberProgress('${d.id}','${sanitize(u.name)}')">📊 Progress</button><button class="btn-sm btn-gold" onclick="issueCertificate('${d.id}','${sanitize(u.name)}')">🏆 Issue Cert</button><button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isDeptHead',${!u.isDeptHead})">${u.isDeptHead?'Remove Head':'Make Head'}</button><button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isAdmin',${!u.isAdmin})">${u.isAdmin?'Remove Admin':'Make Admin'}</button><button class="btn-sm btn-red" onclick="removeMember('${d.id}')">Remove</button></div></div>`;}).join('')}</div>`;
+}
+async function issueCertificate(userId, userName) {
+  const dept = prompt('Enter department ID:\nprograms\nscholarships\ncareer\ncommunity\nmental');
+  if (!dept) return;
+  const validDepts = ['programs','scholarships','career','community','mental'];
+  if (!validDepts.includes(dept)) return showToast('Invalid department ID','error');
+  if (!confirm(`Issue certificate to ${userName} for ${dept}?`)) return;
+  await setDoc(doc(db, 'certificates', `${userId}_${dept}`), {
+    userId, userName, department: dept,
+    status: 'approved', requestedAt: serverTimestamp(),
+    approvedBy: currentUserData.name, approvedAt: serverTimestamp()
+  });
+  showToast(`Certificate issued to ${userName} ✅`);
 }
 async function viewMemberProgress(userId, userName) {
   const matsSnap = await getDocs(collection(db, 'results', userId, 'materials'));
@@ -939,7 +952,7 @@ window.saveProfile=saveProfile; window.changeProfilePhoto=changeProfilePhoto; wi
 window.postMaterial=postMaterial; window.toggleMaterialFields=toggleMaterialFields; window.addQuizQuestion=addQuizQuestion;
 window.renderQuizBuilder=renderQuizBuilder; window.saveQuiz=saveQuiz; window.deleteMaterial=deleteMaterial;
 window.showAdminSection=showAdminSection; window.toggleRole=toggleRole; window.removeMember=removeMember;
-window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteQuiz=deleteQuiz; window.viewMemberProgress=viewMemberProgress;
+window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteQuiz=deleteQuiz; window.viewMemberProgress=viewMemberProgress; window.issueCertificate=issueCertificate;
 </script>
 
 <style>
