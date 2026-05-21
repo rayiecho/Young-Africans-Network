@@ -1142,7 +1142,7 @@ async function sendAIMessage() {
     });
 
     const data = await response.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not process that. Please try again.';
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || data.error?.message || JSON.stringify(data);
 
     window._aiHistory.push({ role: 'assistant', content: reply });
 
