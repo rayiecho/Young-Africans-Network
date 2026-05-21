@@ -237,7 +237,7 @@ function renderPost(post) {
       </div>
       ${canDelete ? `<button class="post-delete" onclick="deletePost('${post.id}')">🗑️</button>` : ''}
     </div>
-    <div class="post-content">${sanitize(post.content)}</div>
+    <div class="post-content">${sanitize(post.content).replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:var(--red);word-break:break-all;">$1</a>')}</div>
     ${post.link ? `<a href="${sanitize(post.link)}" target="_blank" class="post-link">🔗 ${sanitize(post.link)}</a>` : ''}
     <div class="post-actions">
       <button class="post-action ${liked?'liked':''}" onclick="toggleLike('${post.id}')">❤️ ${Array.isArray(post.likes) ? post.likes.length : Object.keys(post.likes||{}).length}</button>
