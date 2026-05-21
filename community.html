@@ -662,10 +662,7 @@ function toggleMeetingSize() {
   const floater = document.getElementById('floating-meeting');
   floater.classList.toggle('expanded');
 }
-function leaveMeeting() {
-  document.getElementById('meeting-iframe').src = '';
-  document.getElementById('meeting-room-container').style.display = 'none';
-}
+
 async function toggleLiveMeeting(id, isLive) {
   await updateDoc(doc(db, 'meetings', id), { isLive });
   showToast(isLive ? '🔴 Live!' : 'Ended');
@@ -1163,7 +1160,7 @@ window.showDeptSection=showDeptSection; window.markWatched=markWatched; window.t
 window.submitDiscussion=submitDiscussion; window.openQuiz=openQuiz; window.submitQuiz=submitQuiz;
 window.requestCertificate=requestCertificate; window.sendDeptChat=sendDeptChat;
 window.loadMeetings=loadMeetings; window.showCreateMeeting=showCreateMeeting; window.createMeeting=createMeeting;
-window.joinMeeting=joinMeeting; window.leaveMeeting=leaveMeeting;
+window.joinMeeting=joinMeeting; window.leaveMeeting=leaveMeeting; window.showScreen=showScreen;
 window.copyMeetingLink = function(url) {
   navigator.clipboard.writeText(url).then(() => showToast('Meeting link copied! 🔗')).catch(() => { prompt('Copy this link:', url); });
 };
