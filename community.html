@@ -80,7 +80,7 @@ function showScreen(id) {
   const target = document.getElementById(id);
   if (!target) return;
   target.classList.add('active');
-  target.style.display = id === 'screen-platform' ? 'flex' : 'flex';
+  target.style.display = 'flex';
 }
 function showTab(tab) {
   activeTab = tab;
@@ -438,9 +438,12 @@ async function openQuiz(materialId, dept) {
           <p><strong>Q${i+1}.</strong> ${sanitize(q.question)}</p>
           ${q.type === 'mcq' ? q.options.map((opt, j) => `<label class="quiz-option"><input type="radio" name="q${i}" value="${j}"> ${sanitize(opt)}</label>`).join('') : `<textarea class="quiz-answer" name="q${i}" rows="2"></textarea>`}
         </div>`).join('')}
-      <button type="button" class="btn-submit-quiz" onclick="submitQuiz('${materialId}','${dept}',${JSON.stringify(questions).replace(/'/g,"&#39;")})">Submit Quiz</button>
+      <button type="button" class="btn-submit-quiz" id="quiz-submit-${materialId}">Submit Quiz</button>
     </form>
   </div>`;
+  document.getElementById(`quiz-submit-${materialId}`).addEventListener('click', () => {
+    submitQuiz(materialId, dept, questions);
+  });
 }
 
 async function submitQuiz(materialId, dept, questions) {
@@ -618,7 +621,7 @@ function loadMeetingsList() {
         </div>
         <div class="meeting-btns">
           <button class="btn-sm btn-navy" onclick="joinMeeting('${sanitize(m.roomUrl)}','${sanitize(m.title)}')">Join</button>
-<button class="btn-sm btn-outline" onclick="copyMeetingLink('${sanitize(m.roomUrl)}')">🔗 Copy Link</button>
+          <button class="btn-sm btn-outline" onclick="copyMeetingLink('${sanitize(m.roomUrl)}')">🔗 Copy Link</button>
           ${currentUserData?.isAdmin ? `<button class="btn-sm btn-gold" onclick="toggleLiveMeeting('${m.id}',${!m.isLive})">${m.isLive?'End':'Go Live'}</button>` : ''}
           ${currentUserData?.isAdmin ? `<button class="btn-sm btn-outline" onclick="addRecording('${m.id}')">+ Rec</button>` : ''}
           ${canDelete ? `<button class="btn-sm btn-red" onclick="deleteMeeting('${m.id}')">Delete</button>` : ''}
@@ -723,26 +726,44 @@ async function loadProfileCerts() {
 }
 
 function downloadCertificate(certId) {
-  const u = currentUserData; const dept = DEPARTMENTS.find(d => d.id === u.department);
-  const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 850;
+  const u = currentUserData;
+  const dept = DEPARTMENTS.find(d => d.id === u.department);
+  const canvas = document.createElement('canvas');
+  canvas.width = 1200; canvas.height = 850;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#F8F9FF'; ctx.fillRect(0, 0, 1200, 850);
   ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 8; ctx.strokeRect(20, 20, 1160, 810);
   ctx.strokeStyle = '#F5A623'; ctx.lineWidth = 3; ctx.strokeRect(32, 32, 1136, 786);
-  ctx.fillStyle = '#1B2A6B'; ctx.font = 'bold 48px Georgia'; ctx.textAlign = 'center'; ctx.fillText('YOUNG AFRICANS NETWORK', 600, 120);
-  ctx.fillStyle = '#E63329'; ctx.font = '24px Georgia'; ctx.fillText('Building the Future, Together', 600, 160);
-  ctx.fillStyle = '#F5A623'; ctx.font = 'bold 36px Georgia'; ctx.fillText('CERTIFICATE OF ACHIEVEMENT', 600, 240);
-  ctx.fillStyle = '#1B2A6B'; ctx.font = '22px Georgia'; ctx.fillText('This is to certify that', 600, 310);
-  ctx.font = 'bold 44px Georgia'; ctx.fillStyle = '#E63329'; ctx.fillText(u.name, 600, 370);
-  ctx.fillStyle = '#1B2A6B'; ctx.font = '22px Georgia'; ctx.fillText('has successfully completed the', 600, 420);
-  ctx.font = 'bold 28px Georgia'; ctx.fillText(dept?.name || u.department, 600, 465);
-  ctx.font = '20px Georgia'; ctx.fillStyle = '#6B7280'; ctx.fillText('training program at Young Africans Network', 600, 510);
-  ctx.fillStyle = '#1B2A6B'; ctx.font = '18px Georgia'; ctx.fillText(`Date: ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`, 600, 570);
-  ctx.font = 'italic bold 22px Georgia'; ctx.fillStyle = '#1B2A6B'; ctx.textAlign = 'left'; ctx.fillText('Emmanuel Ikumilu Mwori', 150, 680);
-  ctx.font = '16px Georgia'; ctx.fillStyle = '#6B7280'; ctx.fillText('Founder & CEO, Young Africans Network', 150, 705);
-  ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(100, 720); ctx.lineTo(500, 720); ctx.stroke();
-  ctx.textAlign = 'center'; ctx.fillStyle = '#6B7280'; ctx.font = '14px Georgia'; ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com', 600, 780);
-  const link = document.createElement('a'); link.download = `YAN_Certificate_${u.name.replace(/ /g,'_')}.png`; link.href = canvas.toDataURL('image/png'); link.click();
+  ctx.fillStyle = '#1B2A6B'; ctx.font = 'bold 48px Georgia'; ctx.textAlign = 'center';
+  ctx.fillText('YOUNG AFRICANS NETWORK', 600, 120);
+  ctx.fillStyle = '#E63329'; ctx.font = '24px Georgia';
+  ctx.fillText('Building the Future, Together', 600, 160);
+  ctx.fillStyle = '#F5A623'; ctx.font = 'bold 36px Georgia';
+  ctx.fillText('CERTIFICATE OF ACHIEVEMENT', 600, 240);
+  ctx.fillStyle = '#1B2A6B'; ctx.font = '22px Georgia';
+  ctx.fillText('This is to certify that', 600, 310);
+  ctx.font = 'bold 44px Georgia'; ctx.fillStyle = '#E63329';
+  ctx.fillText(u.name, 600, 370);
+  ctx.fillStyle = '#1B2A6B'; ctx.font = '22px Georgia';
+  ctx.fillText('has successfully completed the', 600, 420);
+  ctx.font = 'bold 28px Georgia';
+  ctx.fillText(dept?.name || u.department, 600, 465);
+  ctx.font = '20px Georgia'; ctx.fillStyle = '#6B7280';
+  ctx.fillText('training program at Young Africans Network', 600, 510);
+  ctx.fillStyle = '#1B2A6B'; ctx.font = '18px Georgia';
+  ctx.fillText(`Date: ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`, 600, 570);
+  ctx.font = 'italic bold 22px Georgia'; ctx.fillStyle = '#1B2A6B'; ctx.textAlign = 'left';
+  ctx.fillText('Emmanuel Ikumilu Mwori', 150, 680);
+  ctx.font = '16px Georgia'; ctx.fillStyle = '#6B7280';
+  ctx.fillText('Founder & CEO, Young Africans Network', 150, 705);
+  ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(100, 720); ctx.lineTo(500, 720); ctx.stroke();
+  ctx.textAlign = 'center'; ctx.fillStyle = '#6B7280'; ctx.font = '14px Georgia';
+  ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com', 600, 780);
+  const link = document.createElement('a');
+  link.download = `YAN_Certificate_${u.name.replace(/ /g,'_')}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
   showToast('Certificate downloading! 🏆');
 }
 
@@ -865,7 +886,7 @@ async function loadAdminOverview() {
 async function loadAdminMembers() {
   const c = document.getElementById('admin-section-members'); c.innerHTML = '<div class="loading">Loading...</div>';
   const snap = await getDocs(collection(db,'users'));
-  c.innerHTML = `<div class="admin-members-list">${snap.docs.map(d=>{const u=d.data();const dept=DEPARTMENTS.find(x=>x.id===u.department);return `<div class="admin-member-row"><div class="admin-member-info">${u.photoUrl?`<img src="${sanitize(u.photoUrl)}" alt="">`:`<div class="admin-avatar">${(u.name||'?')[0]}</div>`}<div><strong>${sanitize(u.name)}</strong><p>${sanitize(u.email)} · ${sanitize(u.country)}</p><p>${u.isAdmin?'🛡️ ':''} ${u.isDeptHead?'👑 ':''} ${u.isExec?'⭐ ':''} ${sanitize(u.role||'')}</p></div></div><div class="admin-member-actions"><button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isDeptHead',${!u.isDeptHead})">${u.isDeptHead?'Remove Head':'Make Head'}</button><button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isAdmin',${!u.isAdmin})">${u.isAdmin?'Remove Admin':'Make Admin'}</button><button class="btn-sm btn-red" onclick="removeMember('${d.id}')">Remove</button></div></div>`;}).join('')}</div>`;
+  c.innerHTML = `<div class="admin-members-list">${snap.docs.map(d=>{const u=d.data();return `<div class="admin-member-row"><div class="admin-member-info">${u.photoUrl?`<img src="${sanitize(u.photoUrl)}" alt="">`:`<div class="admin-avatar">${(u.name||'?')[0]}</div>`}<div><strong>${sanitize(u.name)}</strong><p>${sanitize(u.email)} · ${sanitize(u.country)}</p><p>${u.isAdmin?'🛡️ ':''} ${u.isDeptHead?'👑 ':''} ${u.isExec?'⭐ ':''} ${sanitize(u.role||'')}</p></div></div><div class="admin-member-actions"><button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isDeptHead',${!u.isDeptHead})">${u.isDeptHead?'Remove Head':'Make Head'}</button><button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isAdmin',${!u.isAdmin})">${u.isAdmin?'Remove Admin':'Make Admin'}</button><button class="btn-sm btn-red" onclick="removeMember('${d.id}')">Remove</button></div></div>`;}).join('')}</div>`;
 }
 async function toggleRole(userId, role, value) { await updateDoc(doc(db,'users',userId),{[role]:value}); showToast('Updated ✅'); loadAdminMembers(); }
 async function removeMember(userId) { if (!confirm('Remove?')) return; await deleteDoc(doc(db,'users',userId)); showToast('Removed'); loadAdminMembers(); }
@@ -893,11 +914,9 @@ window.requestCertificate=requestCertificate; window.sendDeptChat=sendDeptChat;
 window.loadMeetings=loadMeetings; window.showCreateMeeting=showCreateMeeting; window.createMeeting=createMeeting;
 window.joinMeeting=joinMeeting; window.leaveMeeting=leaveMeeting;
 window.copyMeetingLink = function(url) {
-  navigator.clipboard.writeText(url).then(() => showToast('Meeting link copied! 🔗')).catch(() => {
-    prompt('Copy this link:', url);
-  });
-}; window.toggleLiveMeeting=toggleLiveMeeting;
-window.addRecording=addRecording; window.deleteMeeting=deleteMeeting;
+  navigator.clipboard.writeText(url).then(() => showToast('Meeting link copied! 🔗')).catch(() => { prompt('Copy this link:', url); });
+};
+window.toggleLiveMeeting=toggleLiveMeeting; window.addRecording=addRecording; window.deleteMeeting=deleteMeeting;
 window.saveProfile=saveProfile; window.changeProfilePhoto=changeProfilePhoto; window.downloadCertificate=downloadCertificate;
 window.postMaterial=postMaterial; window.toggleMaterialFields=toggleMaterialFields; window.addQuizQuestion=addQuizQuestion;
 window.renderQuizBuilder=renderQuizBuilder; window.saveQuiz=saveQuiz; window.deleteMaterial=deleteMaterial;
@@ -912,17 +931,12 @@ html,body{height:100%;}
 body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);overflow-x:hidden;}
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:var(--navy);}
-
 .toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);color:var(--white);padding:0.85rem 1.5rem;border-radius:12px;font-size:0.88rem;font-weight:500;z-index:9999;transform:translateY(100px);opacity:0;transition:all 0.3s;pointer-events:none;max-width:320px;}
 .toast.show{transform:translateY(0);opacity:1;}
 .toast.error{background:var(--red);}
 .toast.success{background:var(--green);}
-
-/* SCREENS */
 .screen{display:none;min-height:100vh;width:100%;}
 .screen.active{display:flex;}
-
-/* LANDING */
 #screen-landing{background:linear-gradient(135deg,var(--navy),var(--dark));align-items:center;justify-content:center;padding:2rem;}
 .landing-inner{text-align:center;max-width:600px;width:100%;}
 .landing-logo{width:100px;height:100px;margin:0 auto 1.5rem;border-radius:50%;overflow:hidden;border:4px solid rgba(255,255,255,0.2);}
@@ -939,8 +953,6 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .landing-feature{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:1.25rem;text-align:center;}
 .landing-feature .lf-icon{font-size:2rem;margin-bottom:0.5rem;}
 .landing-feature p{color:rgba(255,255,255,0.75);font-size:0.8rem;line-height:1.6;}
-
-/* AUTH */
 #screen-register,#screen-login,#screen-profile-setup{background:linear-gradient(135deg,var(--navy),var(--dark));align-items:center;justify-content:center;padding:2rem;overflow-y:auto;}
 .auth-card{background:var(--white);border-radius:24px;padding:2.5rem;width:100%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
 .auth-card-header{text-align:center;margin-bottom:2rem;}
@@ -957,10 +969,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .btn-primary:disabled{background:var(--gray);cursor:not-allowed;}
 .auth-switch{text-align:center;margin-top:1rem;font-size:0.85rem;color:var(--gray);}
 .auth-switch a{color:var(--red);font-weight:600;cursor:pointer;text-decoration:none;}
-
-/* PLATFORM */
 #screen-platform{flex-direction:row;background:var(--light);overflow:hidden;height:100vh;}
-
 .sidebar{width:var(--sidebar);background:var(--navy);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;height:100vh;}
 .sidebar-logo{padding:1.5rem 1.25rem;border-bottom:1px solid rgba(255,255,255,0.08);}
 .sidebar-logo a{display:flex;align-items:center;gap:0.75rem;text-decoration:none;}
@@ -980,7 +989,6 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .sidebar-logout{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,0.08);}
 .btn-logout{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;color:rgba(255,255,255,0.6);font-size:0.85rem;cursor:pointer;border:none;background:rgba(255,255,255,0.05);border-radius:10px;width:100%;transition:all 0.2s;font-family:'Poppins',sans-serif;}
 .btn-logout:hover{color:var(--white);background:rgba(230,51,41,0.2);}
-
 .main-content{flex:1;display:flex;flex-direction:column;overflow-y:auto;height:100vh;}
 .topbar{background:var(--white);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(27,42,107,0.08);position:sticky;top:0;z-index:40;flex-shrink:0;}
 .topbar-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--navy);}
@@ -989,11 +997,8 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .topbar-back:hover{background:var(--light);}
 .hamburger-mobile{display:none;background:none;border:none;cursor:pointer;padding:4px;flex-direction:column;gap:5px;}
 .hamburger-mobile span{display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;}
-
 .tab-panel{display:none;padding:2rem;max-width:900px;margin:0 auto;width:100%;}
 .tab-panel.active{display:block;}
-
-/* FEED */
 .post-composer{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
 .post-composer textarea{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.1);color:var(--navy);padding:1rem;border-radius:12px;font-family:'Poppins',sans-serif;font-size:0.9rem;resize:none;outline:none;min-height:80px;}
 .post-composer-row{display:flex;gap:0.75rem;margin-top:0.75rem;flex-wrap:wrap;align-items:center;}
@@ -1020,8 +1025,6 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .reply-item strong{color:var(--navy);}
 .reply-item span{color:var(--gray);}
 .reply-item small{color:var(--gray);font-size:0.7rem;margin-left:auto;}
-
-/* DEPARTMENT */
 .dept-header-bar{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
 .dept-icon-big{font-size:2.5rem;}
 .dept-header-bar h2{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);}
@@ -1082,8 +1085,6 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .chat-input-row{display:flex;gap:0.5rem;}
 .chat-input-row input{flex:1;background:var(--white);border:1.5px solid rgba(27,42,107,0.1);color:var(--navy);padding:0.75rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.88rem;outline:none;}
 .chat-input-row button{background:var(--navy);color:var(--white);border:none;padding:0.75rem 1.5rem;border-radius:50px;cursor:pointer;font-size:0.85rem;font-weight:600;}
-
-/* MEETINGS */
 .rooms-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1.5rem;}
 .room-card{background:var(--white);border-radius:16px;padding:1.25rem;display:flex;align-items:center;gap:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);transition:transform 0.2s;}
 .room-card:hover{transform:translateY(-2px);}
@@ -1098,7 +1099,6 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .meeting-form-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);display:flex;flex-direction:column;gap:0.75rem;}
 .meeting-form-card h3{font-size:1rem;font-weight:700;color:var(--navy);}
 .meeting-form-card input,.meeting-form-card select{background:var(--light);border:1.5px solid rgba(27,42,107,0.1);color:var(--navy);padding:0.7rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.85rem;outline:none;width:100%;}
-.live-banner{background:linear-gradient(135deg,var(--red),#c0392b);border-radius:14px;padding:1rem 1.5rem;display:flex;align-items:center;gap:1rem;color:var(--white);margin-bottom:1rem;flex-wrap:wrap;}
 .meeting-card{background:var(--white);border-radius:14px;padding:1.25rem;margin-bottom:0.75rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
 .meeting-card.live{border-left:4px solid var(--red);}
 .live-dot{color:var(--red);font-size:0.75rem;font-weight:700;display:block;margin-bottom:0.25rem;}
@@ -1110,8 +1110,6 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .meeting-room-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;}
 .meeting-room-header span{font-weight:700;color:var(--navy);}
 .meeting-room-header button{background:var(--red);color:var(--white);border:none;padding:0.5rem 1rem;border-radius:50px;cursor:pointer;font-size:0.82rem;}
-
-/* PROFILE */
 .profile-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);flex-wrap:wrap;}
 .profile-photo-wrap{text-align:center;}
 .profile-photo-wrap img{width:100px;height:100px;border-radius:50%;object-fit:cover;border:4px solid var(--light);}
@@ -1137,8 +1135,6 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .cert-status.approved{color:var(--green);}
 .cert-status.pending{color:var(--gold);}
 .cert-status.rejected{color:var(--red);}
-
-/* HEAD PANEL */
 .head-sections{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
 .head-section{background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
 .head-section h3{font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;}
@@ -1149,8 +1145,6 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .engagement-row{display:flex;align-items:center;justify-content:space-between;background:var(--light);border-radius:10px;padding:0.85rem 1rem;margin-bottom:0.5rem;gap:1rem;flex-wrap:wrap;}
 .engagement-mat{font-size:0.85rem;font-weight:600;color:var(--navy);flex:1;}
 .engagement-stat{font-size:0.78rem;color:var(--gray);}
-
-/* ADMIN */
 .admin-tabs{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;}
 .admin-tab-btn{background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.6rem 1.25rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
 .admin-tab-btn.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
@@ -1173,11 +1167,8 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .moderation-row strong{font-size:0.88rem;color:var(--navy);}
 .moderation-row p{font-size:0.78rem;color:var(--gray);}
 .moderation-row small{font-size:0.7rem;color:var(--gray);}
-
 .loading{text-align:center;padding:2rem;color:var(--gray);font-size:0.88rem;}
 .empty-state{text-align:center;padding:3rem 1rem;color:var(--gray);font-size:0.9rem;}
-
-/* RESPONSIVE */
 @media(max-width:768px){
   :root{--sidebar:0px;}
   .sidebar{position:fixed;transform:translateX(-100%);transition:transform 0.3s;width:260px;z-index:100;}
@@ -1236,8 +1227,8 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <div class="form-group"><label>Password * (min 6 characters)</label><input type="password" id="reg-pass" placeholder="Create a password"></div>
     <div class="form-group"><label>WhatsApp Number *</label><input type="tel" id="reg-whatsapp" placeholder="+254 700 000 000"></div>
     <div class="form-row-2">
-      <div class="form-group"><label>Role *</label><select id="reg-role"><option value="">Select role...</option><option value="Member">Member</option><option value="Volunteer">Volunteer</option><option value="Associate">Associate</option></select></div>
-      <div class="form-group"><label>Department *</label><select id="reg-dept"><option value="">Select department...</option><option value="programs">Programs & Training</option><option value="scholarships">Scholarships & Global Opportunities</option><option value="career">Career Development & Public Speaking</option><option value="community">Community Impact & Volunteering</option><option value="mental">Mental Health & Wellbeing</option></select></div>
+      <div class="form-group"><label>Role *</label><select id="reg-role"><option value="">Select role...</option><option value="Member">Member</option><option value="Volunteer">Volunteer</option><option value="Associate">Associate</option><option value="Executive">Executive</option></select></div>
+      <div class="form-group"><label>Department *</label><select id="reg-dept"><option value="">Select department...</option><option value="programs">💻 Programs & Training</option><option value="scholarships">🏆 Scholarships & Global Opportunities</option><option value="career">🎤 Career Development & Public Speaking</option><option value="community">🌍 Community Impact & Volunteering</option><option value="mental">💚 Mental Health & Wellbeing</option></select></div>
     </div>
     <div class="form-group"><label>Profile Photo (optional)</label><input type="file" id="reg-photo" accept="image/*"></div>
     <button class="btn-primary" id="reg-btn" onclick="doRegister()">Create Account 🚀</button>
@@ -1260,20 +1251,6 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <p class="auth-switch"><a onclick="doForgotPassword()" style="color:var(--gray);">Forgot password?</a></p>
     <p class="auth-switch">Don't have an account? <a onclick="showScreen('screen-register')">Create one</a></p>
     <p style="text-align:center;margin-top:0.75rem;"><a href="index.html" style="color:var(--gray);font-size:0.8rem;text-decoration:none;">← Back to website</a></p>
-  </div>
-</div>
-
-<!-- PROFILE SETUP -->
-<div id="screen-profile-setup" class="screen">
-  <div class="auth-card">
-    <div class="auth-card-header">
-      <img src="images/logo.jpeg" alt="YAN Logo">
-      <h2>Complete Your Profile</h2>
-      <p>Just a few more details to get you started</p>
-    </div>
-    <div class="form-group"><label>Profile Photo (optional)</label><input type="file" id="setup-photo" accept="image/*"></div>
-    <div class="form-group"><label>Bio</label><textarea id="setup-bio" rows="3" placeholder="I am a young African passionate about..."></textarea></div>
-    <button class="btn-primary" id="setup-btn" onclick="doProfileSetup()">Enter Community 🚀</button>
   </div>
 </div>
 
