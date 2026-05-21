@@ -201,6 +201,7 @@ function enterPlatform() {
   if (headTab) headTab.style.display = (currentUserData.isDeptHead||currentUserData.isAdmin) ? 'flex' : 'none';
   if (adminTab) adminTab.style.display = currentUserData.isAdmin ? 'flex' : 'none';
   showTab('feed');
+  updateNotifBadge();
 }
 
 function loadTabContent(tab) {
@@ -212,6 +213,180 @@ function loadTabContent(tab) {
   if (tab === 'profile') loadProfile();
   if (tab === 'head') loadHeadPanel();
   if (tab === 'admin') loadAdminPanel();
+  if (tab === 'notifications') loadNotifications();
+  if (tab === 'directory') loadDirectory();
+}
+
+// MEMBER DIRECTORY
+async function loadDirectory() {
+  const container = document.getElementById('directory-container');
+  container.innerHTML = `
+    <div style="margin-bottom:1.5rem;">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);margin-bottom:1rem;">👥 Member Directory</h2>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+        <input type="text" id="dir-search" placeholder="🔍 Search by name..." style="flex:1;min-width:200px;background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.75rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.88rem;outline:none;" oninput="filterDirectory()">
+        <select id="dir-dept" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.75rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.88rem;outline:none;" onchange="filterDirectory()">
+          <option value="">All Departments</option>
+          <option value="programs">💻 Programs & Training</option>
+          <option value="scholarships">🏆 Scholarships</option>
+          <option value="career">🎤 Career Development</option>
+          <option value="community">🌍 Community Impact</option>
+          <option value="mental">💚 Mental Health</option>
+          <option value="communications">📢 Communications</option>
+          <option value="finance">💰 Finance</option>
+          <option value="partnerships">🤝 Partnerships</option>
+        </select>
+        <select id="dir-country" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.75rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.88rem;outline:none;" onchange="filterDirectory()">
+          <option value="">All Countries</option>
+        </select>
+      </div>
+    </div>
+    <div id="dir-count" style="font-size:0.82rem;color:var(--gray);margin-bottom:1rem;"></div>
+    <div id="dir-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;"></div>`;
+  const snap = await getDocs(collection(db, 'users'));
+  window._dirMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  // Populate countries
+  const countries = [...new Set(window._dirMembers.map(m => m.country).filter(Boolean))].sort();
+  const countrySelect = document.getElementById('dir-country');
+  countries.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c;
+    countrySelect.appendChild(opt);
+  });
+  filterDirectory();
+}
+
+function filterDirectory() {
+  const search = document.getElementById('dir-search')?.value.toLowerCase() || '';
+  const dept = document.getElementById('dir-dept')?.value || '';
+  const country = document.getElementById('dir-country')?.value || '';
+  const members = window._dirMembers || [];
+  const filtered = members.filter(m => {
+    const matchName = m.name?.toLowerCase().includes(search);
+    const matchDept = !dept || m.department === dept;
+    const matchCountry = !country || m.country === country;
+    return matchName && matchDept && matchCountry;
+  });
+  document.getElementById('dir-count').textContent = `${filtered.length} member${filtered.length !== 1 ? 's' : ''} found`;
+  document.getElementById('dir-grid').innerHTML = filtered.map(m => {
+    const dept = DEPARTMENTS.find(d => d.id === m.department);
+    return `<div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+      <div style="width:64px;height:64px;border-radius:50%;margin:0 auto 0.75rem;overflow:hidden;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:900;color:#fff;">
+        ${m.photoUrl ? `<img src="${m.photoUrl}" style="width:100%;height:100%;object-fit:cover;">` : (m.name||'?')[0].toUpperCase()}
+      </div>
+      <div style="font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.2rem;">${sanitize(m.name||'')}</div>
+      <div style="font-size:0.72rem;color:var(--red);font-weight:600;margin-bottom:0.2rem;">${sanitize(m.role||'Member')}</div>
+      <div style="font-size:0.7rem;color:var(--gray);margin-bottom:0.25rem;">📍 ${sanitize(m.country||'')}</div>
+      <div style="font-size:0.68rem;color:var(--gold);font-weight:600;">${dept?.icon||''} ${dept?.name||''}</div>
+    </div>`;
+  }).join('') || '<div class="empty-state">No members found.</div>';
+}
+
+// NOTIFICATIONS
+function loadNotifications() {
+  const container = document.getElementById('notifications-container');
+  container.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);">🔔 Notifications</h2>
+      ${currentUserData?.isAdmin ? `<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="showPostNotification()">➕ Post Announcement</button>` : ''}
+    </div>
+    ${currentUserData?.isAdmin ? `
+    <div id="notif-form" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+      <div class="form-group"><label>Title *</label><input type="text" id="notif-title" placeholder="Announcement title"></div>
+      <div class="form-group"><label>Message *</label><textarea id="notif-message" rows="3" placeholder="Write your announcement..."></textarea></div>
+      <div class="form-group"><label>Type</label>
+        <select id="notif-type">
+          <option value="announcement">📢 Announcement</option>
+          <option value="event">📅 Event</option>
+          <option value="opportunity">🏆 Opportunity</option>
+          <option value="urgent">🚨 Urgent</option>
+        </select>
+      </div>
+      <button class="btn-primary" onclick="postNotification()">Send Notification</button>
+      <button class="btn-outline" style="margin-top:0.5rem;" onclick="document.getElementById('notif-form').style.display='none'">Cancel</button>
+    </div>` : ''}
+    <div id="notif-list"><div class="loading">Loading notifications...</div></div>`;
+  loadNotifList();
+}
+
+function showPostNotification() {
+  const form = document.getElementById('notif-form');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function postNotification() {
+  const title = document.getElementById('notif-title').value.trim();
+  const message = document.getElementById('notif-message').value.trim();
+  const type = document.getElementById('notif-type').value;
+  if (!title || !message) return showToast('Enter title and message','error');
+  await addDoc(collection(db, 'notifications'), {
+    title, message, type,
+    postedBy: currentUserData.name,
+    createdAt: serverTimestamp(),
+    readBy: []
+  });
+  document.getElementById('notif-title').value = '';
+  document.getElementById('notif-message').value = '';
+  document.getElementById('notif-form').style.display = 'none';
+  showToast('Notification sent! 🔔');
+  loadNotifList();
+}
+
+async function loadNotifList() {
+  const container = document.getElementById('notif-list');
+  if (!container) return;
+  const q = query(collection(db, 'notifications'), orderBy('createdAt', 'desc'), limit(20));
+  const snap = await getDocs(q);
+  if (snap.empty) { container.innerHTML = '<div class="empty-state">No notifications yet.</div>'; return; }
+  container.innerHTML = snap.docs.map(d => {
+    const n = d.data();
+    const isRead = Array.isArray(n.readBy) && n.readBy.includes(currentUser.uid);
+    const icons = { announcement:'📢', event:'📅', opportunity:'🏆', urgent:'🚨' };
+    return `<div style="background:${isRead?'var(--light)':'var(--white)'};border-radius:16px;padding:1.25rem;margin-bottom:0.75rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid ${isRead?'rgba(27,42,107,0.15)':'var(--red)'};cursor:pointer;" onclick="markNotifRead('${d.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <span>${icons[n.type]||'📢'}</span>
+          <strong style="font-size:0.92rem;color:var(--navy);">${sanitize(n.title)}</strong>
+          ${!isRead ? '<span style="background:var(--red);color:#fff;border-radius:50px;padding:0.1rem 0.5rem;font-size:0.65rem;font-weight:700;">NEW</span>' : ''}
+        </div>
+        ${currentUserData?.isAdmin ? `<button class="btn-sm btn-red" onclick="deleteNotification('${d.id}')">🗑️</button>` : ''}
+      </div>
+      <p style="font-size:0.85rem;color:var(--gray);line-height:1.7;">${sanitize(n.message)}</p>
+      <small style="font-size:0.72rem;color:var(--gray);">${timeAgo(n.createdAt)} · By ${sanitize(n.postedBy)}</small>
+    </div>`;
+  }).join('');
+}
+
+async function markNotifRead(notifId) {
+  await updateDoc(doc(db, 'notifications', notifId), { readBy: arrayUnion(currentUser.uid) });
+  loadNotifList();
+  updateNotifBadge();
+}
+
+async function deleteNotification(notifId) {
+  if (!confirm('Delete this notification?')) return;
+  await deleteDoc(doc(db, 'notifications', notifId));
+  loadNotifList();
+  updateNotifBadge();
+}
+
+async function updateNotifBadge() {
+  const q = query(collection(db, 'notifications'), orderBy('createdAt', 'desc'), limit(20));
+  const snap = await getDocs(q);
+  let unread = 0;
+  snap.forEach(d => {
+    const readBy = d.data().readBy || [];
+    if (!readBy.includes(currentUser.uid)) unread++;
+  });
+  const badge = document.getElementById('notif-badge');
+  if (badge) {
+    if (unread > 0) {
+      badge.style.display = 'flex';
+      badge.textContent = unread;
+    } else {
+      badge.style.display = 'none';
+    }
+  }
 }
 
 // MAIN FEED
@@ -1153,6 +1328,7 @@ async function loadAdminModeration() {
 }
 
 // EXPOSE TO WINDOW
+window.showPostNotification=showPostNotification; window.postNotification=postNotification; window.markNotifRead=markNotifRead; window.deleteNotification=deleteNotification; window.filterDirectory=filterDirectory;
 window.doRegister=doRegister; window.doLogin=doLogin; window.doLogout=doLogout; window.doForgotPassword=doForgotPassword;
 window.showTab=showTab; window.showScreen=showScreen; window.submitPost=submitPost; window.deletePost=deletePost;
 window.toggleLike=toggleLike; window.toggleReplies=toggleReplies; window.submitReply=submitReply;
@@ -1539,6 +1715,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <button class="tab-btn" data-tab="department" onclick="showTab('department')"><span class="tab-icon">📚</span> My Department</button>
       <button class="tab-btn" data-tab="meetings" onclick="showTab('meetings')"><span class="tab-icon">🎥</span> Meetings</button>
       <button class="tab-btn" data-tab="profile" onclick="showTab('profile')"><span class="tab-icon">👤</span> My Profile</button>
+      <button class="tab-btn" data-tab="directory" onclick="showTab('directory')"><span class="tab-icon">👥</span> Directory</button>
       <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">👑</span> Head Panel</button>
       <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;"><span class="tab-icon">🛡️</span> Admin Panel</button>
     </nav>
@@ -1553,7 +1730,13 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
         <span></span><span></span><span></span>
       </button>
       <div class="topbar-title">YAN Community</div>
-      <div class="topbar-right"><a href="index.html" class="topbar-back">← Main Site</a></div>
+      <div class="topbar-right">
+        <div style="position:relative;cursor:pointer;" onclick="showTab('notifications')">
+          <span style="font-size:1.4rem;">🔔</span>
+          <span id="notif-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;border-radius:50%;width:18px;height:18px;font-size:0.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;">0</span>
+        </div>
+        <a href="index.html" class="topbar-back">← Main Site</a>
+      </div>
     </div>
 
     <div class="tab-panel active" id="tab-feed">
@@ -1579,6 +1762,8 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <div class="tab-panel" id="tab-profile"><div id="profile-container"></div></div>
     <div class="tab-panel" id="tab-head"><div id="head-container"></div></div>
     <div class="tab-panel" id="tab-admin"><div id="admin-container"></div></div>
+    <div class="tab-panel" id="tab-notifications"><div id="notifications-container"></div></div>
+    <div class="tab-panel" id="tab-directory"><div id="directory-container"></div></div>
   </main>
 </div>
 
