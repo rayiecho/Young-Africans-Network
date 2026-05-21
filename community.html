@@ -101,14 +101,10 @@ onAuthStateChanged(auth, async user => {
     if (snap.exists()) {
       currentUserData = snap.data();
       if (!currentUserData.profileComplete) {
-      await updateDoc(doc(db, 'users', user.uid), { 
-        profileComplete: true 
-      });
-      currentUserData.profileComplete = true;
+        await updateDoc(doc(db, 'users', user.uid), { profileComplete: true });
+        currentUserData.profileComplete = true;
+      }
       enterPlatform();
-    } else {
-      enterPlatform();
-    }
     } else {
       showScreen('screen-register');
     }
@@ -127,8 +123,6 @@ async function doRegister() {
   const whatsapp = document.getElementById('reg-whatsapp').value.trim();
   const role = document.getElementById('reg-role').value;
   const dept = document.getElementById('reg-dept').value;
-const extraDepts = [...document.querySelectorAll('.reg-extra-dept:checked')].map(c => c.value).filter(d => d !== dept).slice(0, 2);
-const allDepts = [dept, ...extraDepts];
   const photoFile = document.getElementById('reg-photo').files[0];
   if (!name||!email||!pass||!country||!whatsapp||!role||!dept) return showToast('Please fill all required fields','error');
   if (pass.length < 6) return showToast('Password must be at least 6 characters','error');
@@ -147,7 +141,7 @@ const allDepts = [dept, ...extraDepts];
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     await sendEmailVerification(cred.user);
     await setDoc(doc(db, 'users', cred.user.uid), {
-      name, email, country, whatsapp, role, department: dept, departments: allDepts,
+      name, email, country, whatsapp, role, department: dept,
       photoUrl, bio: '', joinedAt: serverTimestamp(),
       isAdmin: false, isDeptHead: false, isExec: false,
       profileComplete: true
@@ -231,8 +225,7 @@ function loadFeed() {
 
 function renderPost(post) {
   const canDelete = post.authorId === currentUser?.uid || currentUserData?.isAdmin;
-  const likesArr = Array.isArray(post.likes) ? post.likes : Object.keys(post.likes || {});
-const liked = likesArr.includes(currentUser?.uid);
+  const liked = (post.likes || []).includes(currentUser?.uid);
   return `
   <div class="post-card">
     <div class="post-header">
@@ -246,7 +239,7 @@ const liked = likesArr.includes(currentUser?.uid);
     <div class="post-content">${sanitize(post.content)}</div>
     ${post.link ? `<a href="${sanitize(post.link)}" target="_blank" class="post-link">🔗 ${sanitize(post.link)}</a>` : ''}
     <div class="post-actions">
-      <button class="post-action ${liked?'liked':''}" onclick="toggleLike('${post.id}')">❤️ ${Array.isArray(post.likes) ? post.likes.length : Object.keys(post.likes||{}).length}</button>
+      <button class="post-action ${liked?'liked':''}" onclick="toggleLike('${post.id}')">❤️ ${(post.likes||[]).length}</button>
       <button class="post-action" onclick="toggleReplies('${post.id}')">💬 Reply</button>
     </div>
     <div class="reply-box" id="reply-box-${post.id}" style="display:none;">
@@ -319,24 +312,13 @@ async function submitReply(postId) {
 
 // DEPARTMENT
 function loadDepartment() {
-  const allDepts = currentUserData.departments?.length ? currentUserData.departments : (currentUserData.department ? [currentUserData.department] : []);
-  const dept = window._activeDept || allDepts[0] || currentUserData.department;
-  window._activeDept = dept;
+  const dept = currentUserData.department;
   const deptInfo = DEPARTMENTS.find(d => d.id === dept);
   const container = document.getElementById('dept-container');
   container.innerHTML = `
     <div class="dept-header-bar">
       <span class="dept-icon-big">${deptInfo?.icon||'📚'}</span>
-      <div>
-        <h2>${deptInfo?.name||'My Department'}</h2>
-        <p>Your learning space — videos, articles, quizzes and discussions</p>
-        ${allDepts.length > 1 ? `<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.75rem;">
-          ${allDepts.map(d => {
-            const info = DEPARTMENTS.find(x => x.id === d);
-            return `<button onclick="switchDept('${d}')" style="background:${d===dept?'var(--navy)':'var(--light)'};color:${d===dept?'var(--white)':'var(--navy)'};border:1.5px solid ${d===dept?'var(--navy)':'rgba(27,42,107,0.15)'};padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">${info?.icon||''} ${info?.name||d}</button>`;
-          }).join('')}
-        </div>` : ''}
-      </div>
+      <div><h2>${deptInfo?.name||'My Department'}</h2><p>Your learning space — videos, articles, quizzes and discussions</p></div>
     </div>
     <div class="dept-tabs">
       <button class="dept-tab-btn active" onclick="showDeptSection('materials')">📹 Materials</button>
@@ -739,149 +721,28 @@ async function loadProfileCerts() {
 }
 
 function downloadCertificate(certId) {
-  const u = currentUserData;
-  const dept = DEPARTMENTS.find(d => d.id === u.department);
-  const verifyCode = 'YAN-' + currentUser.uid.substring(0,8).toUpperCase();
-  const canvas = document.createElement('canvas');
-  canvas.width = 1400; canvas.height = 1000;
+  const u = currentUserData; const dept = DEPARTMENTS.find(d => d.id === u.department);
+  const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 850;
   const ctx = canvas.getContext('2d');
-
-  // Background
-  ctx.fillStyle = '#F8F9FF'; ctx.fillRect(0, 0, 1400, 1000);
-
-  // Outer border
-  ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 10;
-  ctx.strokeRect(20, 20, 1360, 960);
-
-  // Inner gold border
-  ctx.strokeStyle = '#F5A623'; ctx.lineWidth = 3;
-  ctx.strokeRect(35, 35, 1330, 930);
-
-  // Header background bar
-  ctx.fillStyle = '#1B2A6B';
-  ctx.fillRect(20, 20, 1360, 160);
-
-  // Load logo image
-  const logo = new Image();
-  logo.crossOrigin = 'anonymous';
-  logo.onload = function() {
-    // Logo circle
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(700, 190, 65, 0, Math.PI * 2);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fill();
-    ctx.clip();
-    ctx.drawImage(logo, 635, 125, 130, 130);
-    ctx.restore();
-
-    // Circle border
-    ctx.beginPath();
-    ctx.arc(700, 190, 66, 0, Math.PI * 2);
-    ctx.strokeStyle = '#F5A623'; ctx.lineWidth = 4;
-    ctx.stroke();
-
-    // Header text
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 42px Georgia';
-    ctx.textAlign = 'center';
-    ctx.fillText('YOUNG AFRICANS NETWORK', 700, 100);
-    ctx.fillStyle = '#F5A623';
-    ctx.font = '20px Georgia';
-    ctx.fillText('Building the Future, Together', 700, 140);
-
-    // Certificate of Achievement
-    ctx.fillStyle = '#F5A623';
-    ctx.font = 'bold 16px Georgia';
-    ctx.letterSpacing = '4px';
-    ctx.fillText('C E R T I F I C A T E   O F   A C H I E V E M E N T', 700, 295);
-
-    // Divider
-    ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(200, 315); ctx.lineTo(1200, 315); ctx.stroke();
-    ctx.strokeStyle = '#F5A623'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(200, 320); ctx.lineTo(1200, 320); ctx.stroke();
-
-    // Body text
-    ctx.fillStyle = '#6B7280'; ctx.font = '22px Georgia';
-    ctx.fillText('This is to certify that', 700, 370);
-
-    ctx.fillStyle = '#E63329'; ctx.font = 'bold 54px Georgia';
-    ctx.fillText(u.name, 700, 440);
-
-    ctx.fillStyle = '#6B7280'; ctx.font = '22px Georgia';
-    ctx.fillText('has successfully achieved the', 700, 490);
-
-    ctx.fillStyle = '#1B2A6B'; ctx.font = 'bold 30px Georgia';
-    ctx.fillText(dept?.name || u.department, 700, 540);
-
-    ctx.fillStyle = '#6B7280'; ctx.font = '20px Georgia';
-    ctx.fillText('training program at Young Africans Network, demonstrating', 700, 585);
-    ctx.fillText('outstanding commitment to pan-African youth leadership.', 700, 615);
-
-    // Date & Verify code
-    ctx.fillStyle = '#1B2A6B'; ctx.font = 'bold 18px Georgia';
-    ctx.fillText(`Date of Achievement: ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`, 700, 665);
-    ctx.fillStyle = '#6B7280'; ctx.font = '16px Georgia';
-    ctx.fillText(`Certificate ID: ${verifyCode} | Verify at youngafricansnetwork.org`, 700, 695);
-
-    // Divider
-    ctx.strokeStyle = '#F5A623'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(200, 715); ctx.lineTo(1200, 715); ctx.stroke();
-
-    // Signatures
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#1B2A6B'; ctx.font = 'italic bold 24px Georgia';
-    ctx.fillText('Emmanuel Ikumilu Mwori', 150, 790);
-    ctx.fillStyle = '#6B7280'; ctx.font = '16px Georgia';
-    ctx.fillText('Founder & CEO, Young Africans Network', 150, 815);
-    ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(150, 830); ctx.lineTo(550, 830); ctx.stroke();
-
-    ctx.textAlign = 'right';
-    ctx.fillStyle = '#1B2A6B'; ctx.font = 'italic bold 24px Georgia';
-    ctx.fillText('Department Head', 1250, 790);
-    ctx.fillStyle = '#6B7280'; ctx.font = '16px Georgia';
-    ctx.fillText(dept?.name || 'Department', 1250, 815);
-    ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(850, 830); ctx.lineTo(1250, 830); ctx.stroke();
-
-    // QR Code using API
-    const qrImg = new Image();
-    qrImg.crossOrigin = 'anonymous';
-    qrImg.onload = function() {
-      ctx.drawImage(qrImg, 610, 850, 180, 180);
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#6B7280'; ctx.font = '14px Georgia';
-      ctx.fillText('Scan to verify', 700, 970);
-      // Footer
-      ctx.fillStyle = '#1B2A6B';
-      ctx.fillRect(20, 930, 1360, 50);
-      ctx.fillStyle = '#FFFFFF'; ctx.font = '14px Georgia';
-      ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com | +254791887609', 700, 962);
-      // Download
-      const link = document.createElement('a');
-      link.download = `YAN_Certificate_${u.name.replace(/ /g,'_')}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      
-    };
-    qrImg.onerror = function() {
-      // Download without QR if it fails
-      const link = document.createElement('a');
-      link.download = `YAN_Certificate_${u.name.replace(/ /g,'_')}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      showToast('Certificate downloading! 🏆');
-    };
-    qrImg.src = `hshowToast('Certificate downloading! 🏆');ttps://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://youngafricansnetwork.org/verify/${verifyCode}`;
-  };
-  logo.onerror = function() {
-    showToast('Certificate generating...', 'success');
-  };
-  logo.src = '/images/logo.jpeg';
+  ctx.fillStyle = '#F8F9FF'; ctx.fillRect(0, 0, 1200, 850);
+  ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 8; ctx.strokeRect(20, 20, 1160, 810);
+  ctx.strokeStyle = '#F5A623'; ctx.lineWidth = 3; ctx.strokeRect(32, 32, 1136, 786);
+  ctx.fillStyle = '#1B2A6B'; ctx.font = 'bold 48px Georgia'; ctx.textAlign = 'center'; ctx.fillText('YOUNG AFRICANS NETWORK', 600, 120);
+  ctx.fillStyle = '#E63329'; ctx.font = '24px Georgia'; ctx.fillText('Building the Future, Together', 600, 160);
+  ctx.fillStyle = '#F5A623'; ctx.font = 'bold 36px Georgia'; ctx.fillText('CERTIFICATE OF COMPLETION', 600, 240);
+  ctx.fillStyle = '#1B2A6B'; ctx.font = '22px Georgia'; ctx.fillText('This is to certify that', 600, 310);
+  ctx.font = 'bold 44px Georgia'; ctx.fillStyle = '#E63329'; ctx.fillText(u.name, 600, 370);
+  ctx.fillStyle = '#1B2A6B'; ctx.font = '22px Georgia'; ctx.fillText('has successfully completed the', 600, 420);
+  ctx.font = 'bold 28px Georgia'; ctx.fillText(dept?.name || u.department, 600, 465);
+  ctx.font = '20px Georgia'; ctx.fillStyle = '#6B7280'; ctx.fillText('training program at Young Africans Network', 600, 510);
+  ctx.fillStyle = '#1B2A6B'; ctx.font = '18px Georgia'; ctx.fillText(`Date: ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`, 600, 570);
+  ctx.font = 'italic bold 22px Georgia'; ctx.fillStyle = '#1B2A6B'; ctx.textAlign = 'left'; ctx.fillText('Emmanuel Ikumilu Mwori', 150, 680);
+  ctx.font = '16px Georgia'; ctx.fillStyle = '#6B7280'; ctx.fillText('Founder & CEO, Young Africans Network', 150, 705);
+  ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(100, 720); ctx.lineTo(500, 720); ctx.stroke();
+  ctx.textAlign = 'center'; ctx.fillStyle = '#6B7280'; ctx.font = '14px Georgia'; ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com', 600, 780);
+  const link = document.createElement('a'); link.download = `YAN_Certificate_${u.name.replace(/ /g,'_')}.png`; link.href = canvas.toDataURL('image/png'); link.click();
+  showToast('Certificate downloading! 🏆');
 }
-  
 
 // HEAD PANEL
 async function loadHeadPanel() {
@@ -938,9 +799,9 @@ async function loadHeadMaterials(dept) {
   const snap = await getDocs(collection(db, 'departments', dept, 'materials'));
   sel.innerHTML = snap.docs.map(d => `<option value="${d.id}">${d.data().title}</option>`).join('') || '<option>No materials yet</option>';
 }
-window.quizQuestionsData = [];
+let quizQuestionsData = [];
 function addQuizQuestion(type) {
-  window.quizQuestionsData.push({ type, question: '', options: ['','','',''], correctIndex: 0 });
+  quizQuestionsData.push({ type, question: '', options: ['','','',''], correctIndex: 0 });
   renderQuizBuilder();
 }
 function renderQuizBuilder() {
@@ -956,7 +817,7 @@ async function saveQuiz(dept) {
   const materialId = document.getElementById('head-quiz-material').value;
   if (!materialId || !quizQuestionsData.length) return showToast('Add questions first','error');
   await setDoc(doc(db, 'departments', dept, 'materials', materialId, 'quiz', 'questions'), { questions: quizQuestionsData, updatedAt: serverTimestamp() });
-  window.quizQuestionsData = []; renderQuizBuilder(); showToast('Quiz saved! ✅');
+  quizQuestionsData = []; renderQuizBuilder(); showToast('Quiz saved! ✅');
 }
 async function loadHeadEngagement(dept) {
   const container = document.getElementById('head-engagement'); if (!container) return;
@@ -1024,8 +885,7 @@ async function loadAdminModeration() {
 window.doRegister=doRegister; window.doLogin=doLogin; window.doLogout=doLogout; window.doForgotPassword=doForgotPassword;
 window.showTab=showTab; window.showScreen=showScreen; window.submitPost=submitPost; window.deletePost=deletePost;
 window.toggleLike=toggleLike; window.toggleReplies=toggleReplies; window.submitReply=submitReply;
-window.showDeptSection=showDeptSection;
-window.switchDept = function(dept) { window._activeDept = dept; loadDepartment(); }; window.markWatched=markWatched; window.toggleDiscussion=toggleDiscussion;
+window.showDeptSection=showDeptSection; window.markWatched=markWatched; window.toggleDiscussion=toggleDiscussion;
 window.submitDiscussion=submitDiscussion; window.openQuiz=openQuiz; window.submitQuiz=submitQuiz;
 window.requestCertificate=requestCertificate; window.sendDeptChat=sendDeptChat;
 window.loadMeetings=loadMeetings; window.showCreateMeeting=showCreateMeeting; window.createMeeting=createMeeting;
@@ -1369,17 +1229,8 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <div class="form-group"><label>Password * (min 6 characters)</label><input type="password" id="reg-pass" placeholder="Create a password"></div>
     <div class="form-group"><label>WhatsApp Number *</label><input type="tel" id="reg-whatsapp" placeholder="+254 700 000 000"></div>
     <div class="form-row-2">
-      <div class="form-group"><label>Role *</label><select id="reg-role"><option value="">Select role...</option><option value="Member">Member</option><option value="Volunteer">Volunteer</option><option value="Associate">Associate</option>
-<option value="Executive">Executive</option>
-<option value="Executive">Executive</option></select></div>
-      <div class="form-group" style="grid-column:1/-1;"><label>Primary Department * <small style="color:var(--gray);font-weight:400;">(main department)</small></label><select id="reg-dept"><option value="">Select primary department...</option><option value="programs">💻 Programs & Training</option><option value="scholarships">🏆 Scholarships & Global Opportunities</option><option value="career">🎤 Career Development & Public Speaking</option><option value="community">🌍 Community Impact & Volunteering</option><option value="mental">💚 Mental Health & Wellbeing</option></select></div>
-<div class="form-group" style="grid-column:1/-1;"><label>Additional Departments <small style="color:var(--gray);font-weight:400;">(optional — select up to 2 more)</small></label><div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem;">
-<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;font-weight:400;cursor:pointer;background:var(--light);padding:0.5rem 0.75rem;border-radius:8px;"><input type="checkbox" value="programs" class="reg-extra-dept"> 💻 Programs & Training</label>
-<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;font-weight:400;cursor:pointer;background:var(--light);padding:0.5rem 0.75rem;border-radius:8px;"><input type="checkbox" value="scholarships" class="reg-extra-dept"> 🏆 Scholarships</label>
-<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;font-weight:400;cursor:pointer;background:var(--light);padding:0.5rem 0.75rem;border-radius:8px;"><input type="checkbox" value="career" class="reg-extra-dept"> 🎤 Career Development</label>
-<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;font-weight:400;cursor:pointer;background:var(--light);padding:0.5rem 0.75rem;border-radius:8px;"><input type="checkbox" value="community" class="reg-extra-dept"> 🌍 Community Impact</label>
-<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;font-weight:400;cursor:pointer;background:var(--light);padding:0.5rem 0.75rem;border-radius:8px;"><input type="checkbox" value="mental" class="reg-extra-dept"> 💚 Mental Health</label>
-</div></div>
+      <div class="form-group"><label>Role *</label><select id="reg-role"><option value="">Select role...</option><option value="Member">Member</option><option value="Volunteer">Volunteer</option><option value="Associate">Associate</option></select></div>
+      <div class="form-group"><label>Department *</label><select id="reg-dept"><option value="">Select department...</option><option value="programs">Programs & Training</option><option value="scholarships">Scholarships & Global Opportunities</option><option value="career">Career Development & Public Speaking</option><option value="community">Community Impact & Volunteering</option><option value="mental">Mental Health & Wellbeing</option></select></div>
     </div>
     <div class="form-group"><label>Profile Photo (optional)</label><input type="file" id="reg-photo" accept="image/*"></div>
     <button class="btn-primary" id="reg-btn" onclick="doRegister()">Create Account 🚀</button>
