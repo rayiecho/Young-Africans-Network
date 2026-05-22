@@ -33,7 +33,10 @@ const DEPARTMENTS = [
   { id: 'scholarships', name: 'Scholarships & Global Opportunities', icon: '🏆' },
   { id: 'career', name: 'Career Development & Public Speaking', icon: '🎤' },
   { id: 'community', name: 'Community Impact & Volunteering', icon: '🌍' },
-  { id: 'mental', name: 'Mental Health & Wellbeing', icon: '💚' }
+  { id: 'mental', name: 'Mental Health & Wellbeing', icon: '💚' },
+  { id: 'communications', name: 'Communications & Media', icon: '📢' },
+  { id: 'finance', name: 'Finance & Administration', icon: '💰' },
+  { id: 'partnerships', name: 'Partnership & External Relations', icon: '🤝' }
 ];
 
 const app = initializeApp(firebaseConfig);
@@ -278,10 +281,25 @@ async function loadTeam(c) {
           <input type="text" id="team-country" placeholder="e.g. Kenya">
         </div>
         <div class="form-group">
-          <label>Department</label>
-          <select id="team-dept">
+          <label>Category *</label>
+          <select id="team-category" onchange="toggleAdminDeptField()">
             <option value="Leadership">Leadership Core</option>
-            ${DEPARTMENTS.map(d => `<option value="${d.id}">${d.name}</option>`).join('')}
+            <option value="DeptHead">Department Head</option>
+            <option value="Volunteer">Department Volunteer</option>
+          </select>
+        </div>
+        <div class="form-group" id="admin-dept-group" style="display:none;">
+          <label>Department *</label>
+          <select id="team-dept">
+            <option value="">Select department...</option>
+            <option value="programs">💻 Programs & Training</option>
+            <option value="scholarships">🏆 Scholarships & Global Opportunities</option>
+            <option value="career">🎤 Career Development & Public Speaking</option>
+            <option value="community">🌍 Community Impact & Volunteering</option>
+            <option value="mental">💚 Mental Health & Wellbeing</option>
+            <option value="communications">📢 Communications & Media</option>
+            <option value="finance">💰 Finance & Administration</option>
+            <option value="partnerships">🤝 Partnership & External Relations</option>
           </select>
         </div>
         <div class="form-group">
@@ -290,7 +308,8 @@ async function loadTeam(c) {
         </div>
         <div class="form-group">
           <label>Photo</label>
-          <input type="file" id="team-photo" accept="image/*">
+          <input type="file" id="team-photo" accept="image/*" onchange="previewAdminTeamPhoto(this)">
+          <img id="admin-team-photo-preview" style="display:none;width:70px;height:70px;border-radius:50%;object-fit:cover;margin-top:0.5rem;border:3px solid var(--gold);">
         </div>
         <div class="form-group" style="grid-column:1/-1;">
           <label>Display Order (lower = first)</label>
@@ -306,18 +325,35 @@ async function loadTeam(c) {
   loadTeamMembers();
 }
 
+window.toggleAdminDeptField = function() {
+  const cat = document.getElementById('team-category').value;
+  const deptGroup = document.getElementById('admin-dept-group');
+  if (deptGroup) deptGroup.style.display = (cat === 'DeptHead' || cat === 'Volunteer') ? 'block' : 'none';
+};
+
+window.previewAdminTeamPhoto = function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const preview = document.getElementById('admin-team-photo-preview');
+  const reader = new FileReader();
+  reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
+  reader.readAsDataURL(file);
+};
+
 window.addTeamMember = async function() {
   const name = document.getElementById('team-name').value.trim();
   const role = document.getElementById('team-role').value.trim();
   const country = document.getElementById('team-country').value.trim();
-  const dept = document.getElementById('team-dept').value;
+  const category = document.getElementById('team-category').value;
+  const dept = document.getElementById('team-dept')?.value || '';
   const email = document.getElementById('team-email').value.trim();
   const order = parseInt(document.getElementById('team-order').value) || 10;
   const file = document.getElementById('team-photo').files[0];
   if (!name || !role || !country) return showToast('Fill required fields', 'error');
+  if ((category === 'DeptHead' || category === 'Volunteer') && !dept) return showToast('Select a department', 'error');
   let photoUrl = '';
   if (file) { showToast('Uploading photo...'); photoUrl = await uploadToCloudinary(file); }
-  await addDoc(collection(db, 'team'), { name, role, country, department: dept, email, photoUrl, order, createdAt: serverTimestamp() });
+  await addDoc(collection(db, 'team'), { name, role, country, category, department: dept, email, photoUrl, order, createdAt: serverTimestamp() });
   showToast('Team member added ✅');
   loadTeamMembers();
 };
