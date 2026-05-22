@@ -1068,6 +1068,487 @@ function downloadCertificate(certId) {
   logo.src = '/images/logo.jpeg';
 }
 
+// SCHOLARSHIPS SYSTEM
+async function loadScholarships() {
+  const container = document.getElementById('scholarships-container');
+  const isHeadOrAdmin = currentUserData?.isAdmin || currentUserData?.isDeptHead;
+  container.innerHTML = `
+    <div style="max-width:900px;margin:0 auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+        <div>
+          <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);">🏆 Scholarship Hub</h2>
+          <p style="color:var(--gray);font-size:0.82rem;">Opportunities, guidance and support until you receive your scholarship</p>
+        </div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          ${isHeadOrAdmin ? `<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="showScholarshipForm()">➕ Post Opportunity</button>` : ''}
+          <button class="btn-outline" onclick="showScholarshipSection('opportunities')">🔍 Opportunities</button>
+          <button class="btn-outline" onclick="showScholarshipSection('tracker')">📊 My Applications</button>
+          <button class="btn-outline" onclick="showScholarshipSection('resources')">📚 Resources</button>
+          <button class="btn-outline" onclick="showScholarshipSection('recommendation')">📝 Recommendation Letter</button>
+          <button class="btn-outline" onclick="showScholarshipSection('stories')">🌟 Success Stories</button>
+        </div>
+      </div>
+
+      ${isHeadOrAdmin ? `
+      <div id="scholarship-form" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+        <h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">➕ Post New Scholarship Opportunity</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group"><label>Scholarship Name *</label><input type="text" id="sch-title" placeholder="e.g. Mastercard Foundation Scholars"></div>
+          <div class="form-group"><label>Provider/Organization *</label><input type="text" id="sch-provider" placeholder="e.g. Mastercard Foundation"></div>
+          <div class="form-group"><label>Deadline *</label><input type="date" id="sch-deadline"></div>
+          <div class="form-group"><label>Funding Type</label>
+            <select id="sch-funding">
+              <option value="Fully Funded">✅ Fully Funded</option>
+              <option value="Partial">📊 Partial Funding</option>
+              <option value="Stipend">💰 Stipend Only</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Target Country/Region</label><input type="text" id="sch-country" placeholder="e.g. Africa, Global, Kenya"></div>
+          <div class="form-group"><label>Level</label>
+            <select id="sch-level">
+              <option value="Undergraduate">Undergraduate</option>
+              <option value="Postgraduate">Postgraduate</option>
+              <option value="PhD">PhD</option>
+              <option value="All Levels">All Levels</option>
+              <option value="Short Course">Short Course</option>
+              <option value="Fellowship">Fellowship</option>
+              <option value="Internship">Internship</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column:1/-1;"><label>Application Link *</label><input type="text" id="sch-link" placeholder="https://..."></div>
+          <div class="form-group" style="grid-column:1/-1;"><label>Description *</label><textarea id="sch-desc" rows="4" placeholder="Describe the scholarship, eligibility requirements, benefits..."></textarea></div>
+        </div>
+        <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+          <button class="btn-primary" onclick="postScholarship()">Post Opportunity</button>
+          <button class="btn-outline" onclick="previewScholarship()">👁️ Preview</button>
+          <button class="btn-outline" onclick="document.getElementById('scholarship-form').style.display='none'">Cancel</button>
+        </div>
+        <div id="scholarship-preview" style="display:none;margin-top:1.5rem;">
+          <p style="font-size:0.78rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.75rem;">Preview:</p>
+          <div id="scholarship-preview-card"></div>
+        </div>
+      </div>` : ''}
+
+      <div id="scholarship-section-opportunities"><div class="loading">Loading opportunities...</div></div>
+      <div id="scholarship-section-tracker" style="display:none;"></div>
+      <div id="scholarship-section-resources" style="display:none;"></div>
+      <div id="scholarship-section-recommendation" style="display:none;"></div>
+      <div id="scholarship-section-stories" style="display:none;"></div>
+    </div>`;
+  loadScholarshipOpportunities();
+}
+
+function previewScholarship() {
+  const title = document.getElementById('sch-title').value.trim() || 'Scholarship Name';
+  const provider = document.getElementById('sch-provider').value.trim() || 'Provider';
+  const deadline = document.getElementById('sch-deadline').value || 'TBD';
+  const funding = document.getElementById('sch-funding').value;
+  const country = document.getElementById('sch-country').value.trim() || 'Global';
+  const level = document.getElementById('sch-level').value;
+  const desc = document.getElementById('sch-desc').value.trim() || 'Description will appear here...';
+  const link = document.getElementById('sch-link').value.trim() || '#';
+  const today = new Date();
+  const deadlineDate = new Date(deadline);
+  const daysLeft = deadline !== 'TBD' ? Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24)) : 999;
+  const isUrgent = daysLeft <= 7 && daysLeft >= 0;
+  const preview = document.getElementById('scholarship-preview');
+  const card = document.getElementById('scholarship-preview-card');
+  preview.style.display = 'block';
+  card.innerHTML = `
+    <div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid ${isUrgent?'var(--red)':'var(--gold)'};">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">
+        <div>
+          <h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">${sanitize(title)}</h3>
+          <p style="font-size:0.82rem;color:var(--gray);">by ${sanitize(provider)}</p>
+        </div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <span style="background:${funding==='Fully Funded'?'rgba(39,174,96,0.1)':'rgba(245,166,35,0.1)'};color:${funding==='Fully Funded'?'#27AE60':'#b37800'};padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">${funding}</span>
+          <span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">${level}</span>
+          ${isUrgent ? `<span style="background:rgba(230,51,41,0.1);color:var(--red);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">🔥 ${daysLeft} days left</span>` :
+          deadline !== 'TBD' ? `<span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">📅 ${daysLeft} days left</span>` : ''}
+        </div>
+      </div>
+      <p style="font-size:0.85rem;color:var(--gray);line-height:1.7;margin-bottom:1rem;">${sanitize(desc?.substring(0,200))}${desc?.length>200?'...':''}</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <span style="font-size:0.75rem;color:var(--gray);">🌍 ${sanitize(country)}</span>
+          <span style="font-size:0.75rem;color:var(--gray);">· Deadline: ${deadline}</span>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+          <button class="btn-sm btn-gold" disabled>📊 Track Application</button>
+          <span class="btn-sm btn-navy" style="text-decoration:none;opacity:0.7;">Apply Now →</span>
+        </div>
+      </div>
+    </div>`;
+  card.scrollIntoView({behavior:'smooth'});
+}
+
+function showScholarshipForm() {
+  const form = document.getElementById('scholarship-form');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+function showScholarshipSection(section) {
+  ['opportunities','tracker','resources','recommendation','stories'].forEach(s => {
+    const el = document.getElementById(`scholarship-section-${s}`);
+    if (el) el.style.display = s === section ? 'block' : 'none';
+  });
+  if (section === 'opportunities') loadScholarshipOpportunities();
+  if (section === 'tracker') loadMyApplications();
+  if (section === 'resources') loadScholarshipResources();
+  if (section === 'recommendation') loadRecommendationSection();
+  if (section === 'stories') loadScholarshipStories();
+}
+
+async function postScholarship() {
+  const title = document.getElementById('sch-title').value.trim();
+  const provider = document.getElementById('sch-provider').value.trim();
+  const deadline = document.getElementById('sch-deadline').value;
+  const funding = document.getElementById('sch-funding').value;
+  const country = document.getElementById('sch-country').value.trim();
+  const level = document.getElementById('sch-level').value;
+  const link = document.getElementById('sch-link').value.trim();
+  const desc = document.getElementById('sch-desc').value.trim();
+  if (!title || !provider || !deadline || !link || !desc) return showToast('Fill all required fields','error');
+  await addDoc(collection(db, 'scholarships'), {
+    title, provider, deadline, funding, country, level, link, desc,
+    postedBy: currentUserData.name, postedById: currentUser.uid,
+    createdAt: serverTimestamp(), active: true
+  });
+  showToast('Scholarship posted! 🏆');
+  document.getElementById('scholarship-form').style.display = 'none';
+  loadScholarshipOpportunities();
+  // Send notification to all members
+  await addDoc(collection(db, 'notifications'), {
+    title: `🏆 New Scholarship: ${title}`,
+    message: `${provider} is offering a ${funding} scholarship. Deadline: ${deadline}. Apply now!`,
+    type: 'opportunity',
+    postedBy: currentUserData.name,
+    createdAt: serverTimestamp(),
+    readBy: []
+  });
+}
+
+async function loadScholarshipOpportunities() {
+  const container = document.getElementById('scholarship-section-opportunities');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading opportunities...</div>';
+  const snap = await getDocs(query(collection(db, 'scholarships'), orderBy('createdAt', 'desc')));
+  if (snap.empty) {
+    container.innerHTML = `<div class="empty-state">
+      <div style="font-size:3rem;margin-bottom:1rem;">🔍</div>
+      <p>No scholarship opportunities posted yet.</p>
+      <p style="font-size:0.82rem;color:var(--gray);">Check back soon — our team posts new opportunities regularly!</p>
+    </div>`;
+    return;
+  }
+  const today = new Date();
+  container.innerHTML = snap.docs.map(d => {
+    const s = d.data();
+    const deadline = new Date(s.deadline);
+    const daysLeft = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+    const isExpired = daysLeft < 0;
+    const isUrgent = daysLeft <= 7 && daysLeft >= 0;
+    return `
+    <div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid ${isExpired?'var(--gray)':isUrgent?'var(--red)':'var(--gold)'};">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">
+        <div>
+          <h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">${sanitize(s.title)}</h3>
+          <p style="font-size:0.82rem;color:var(--gray);">by ${sanitize(s.provider)}</p>
+        </div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <span style="background:${s.funding==='Fully Funded'?'rgba(39,174,96,0.1)':'rgba(245,166,35,0.1)'};color:${s.funding==='Fully Funded'?'#27AE60':'#b37800'};padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">${s.funding}</span>
+          <span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">${s.level}</span>
+          ${isExpired ? '<span style="background:rgba(107,114,128,0.1);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">Expired</span>' :
+          isUrgent ? `<span style="background:rgba(230,51,41,0.1);color:var(--red);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">🔥 ${daysLeft} days left</span>` :
+          `<span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">📅 ${daysLeft} days left</span>`}
+        </div>
+      </div>
+      <p style="font-size:0.85rem;color:var(--gray);line-height:1.7;margin-bottom:1rem;">${sanitize(s.desc?.substring(0,200))}${s.desc?.length>200?'...':''}</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <span style="font-size:0.75rem;color:var(--gray);">🌍 ${sanitize(s.country||'Global')}</span>
+          <span style="font-size:0.75rem;color:var(--gray);">· Deadline: ${s.deadline}</span>
+          <span style="font-size:0.75rem;color:var(--gray);">· Posted by ${sanitize(s.postedBy)}</span>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+          ${!isExpired ? `<button class="btn-sm btn-gold" onclick="trackApplication('${d.id}','${sanitize(s.title)}')">📊 Track Application</button>` : ''}
+          <a href="${sanitize(s.link)}" target="_blank" class="btn-sm btn-navy" style="text-decoration:none;">Apply Now →</a>
+          ${currentUserData?.isAdmin || currentUserData?.isDeptHead ? `<button class="btn-sm btn-red" onclick="deleteScholarship('${d.id}')">🗑️</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function trackApplication(scholarshipId, title) {
+  const ref = doc(db, 'applications', `${currentUser.uid}_${scholarshipId}`);
+  const existing = await getDoc(ref);
+  if (existing.exists()) {
+    showToast('Already tracking this application!');
+    showScholarshipSection('tracker');
+    return;
+  }
+  await setDoc(ref, {
+    userId: currentUser.uid, userName: currentUserData.name,
+    scholarshipId, title, status: 'Researching',
+    createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+  });
+  showToast('Added to your application tracker! 📊');
+  showScholarshipSection('tracker');
+}
+
+async function loadMyApplications() {
+  const container = document.getElementById('scholarship-section-tracker');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading...</div>';
+  const snap = await getDocs(query(collection(db,'applications'),where('userId','==',currentUser.uid)));
+  if (snap.empty) {
+    container.innerHTML = `<div class="empty-state"><div style="font-size:3rem;margin-bottom:1rem;">📊</div><p>No applications tracked yet.</p><p style="font-size:0.82rem;color:var(--gray);">Click "Track Application" on any opportunity to start tracking!</p></div>`;
+    return;
+  }
+  const statuses = ['Researching','Preparing Documents','Applied','Interview','Awarded','Rejected'];
+  const statusColors = {Researching:'#1B2A6B','Preparing Documents':'#F5A623',Applied:'#3498DB',Interview:'#9B59B6',Awarded:'#27AE60',Rejected:'#E63329'};
+  container.innerHTML = `<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">📊 My Application Tracker</h3>` +
+  snap.docs.map(d => {
+    const a = d.data();
+    return `<div style="background:var(--white);border-radius:16px;padding:1.25rem;margin-bottom:0.75rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+        <div>
+          <h4 style="font-size:0.92rem;font-weight:700;color:var(--navy);">${sanitize(a.title)}</h4>
+          <p style="font-size:0.75rem;color:var(--gray);">Started: ${timeAgo(a.createdAt)}</p>
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+          <select onchange="updateApplicationStatus('${d.id}',this.value)" style="background:rgba(${statusColors[a.status]?'27,42,107':'27,42,107'},0.08);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.4rem 0.75rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.78rem;outline:none;">
+            ${statuses.map(s => `<option value="${s}" ${a.status===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+          <button class="btn-sm btn-red" onclick="deleteApplication('${d.id}')">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function updateApplicationStatus(appId, status) {
+  await updateDoc(doc(db,'applications',appId),{status, updatedAt: serverTimestamp()});
+  showToast('Status updated ✅');
+  if (status === 'Awarded') {
+    showToast('🎉 Congratulations! Please share your success story!');
+  }
+}
+
+async function deleteApplication(appId) {
+  if (!confirm('Remove from tracker?')) return;
+  await deleteDoc(doc(db,'applications',appId));
+  loadMyApplications();
+}
+
+async function deleteScholarship(id) {
+  if (!confirm('Delete this scholarship?')) return;
+  await deleteDoc(doc(db,'scholarships',id));
+  loadScholarshipOpportunities();
+  showToast('Deleted ✅');
+}
+
+function loadScholarshipResources() {
+  const container = document.getElementById('scholarship-section-resources');
+  if (!container) return;
+  container.innerHTML = `
+    <h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">📚 Scholarship Resources</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem;">
+      <div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+        <div style="font-size:2rem;margin-bottom:0.75rem;">📄</div>
+        <h4 style="font-size:0.92rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">CV Writing Guide</h4>
+        <p style="font-size:0.82rem;color:var(--gray);line-height:1.7;margin-bottom:1rem;">Learn how to write a scholarship-ready CV that stands out to selection committees.</p>
+        <button class="btn-sm btn-navy" onclick="showAIHelp('Help me write a scholarship CV. What sections should I include and what should I highlight?')">Get AI Help 🤖</button>
+      </div>
+      <div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+        <div style="font-size:2rem;margin-bottom:0.75rem;">✉️</div>
+        <h4 style="font-size:0.92rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Motivation Letter</h4>
+        <p style="font-size:0.82rem;color:var(--gray);line-height:1.7;margin-bottom:1rem;">Master the art of writing compelling motivation letters that tell your unique story.</p>
+        <button class="btn-sm btn-navy" onclick="showAIHelp('Help me write a motivation letter for a scholarship application. Give me a template and tips.')">Get AI Help 🤖</button>
+      </div>
+      <div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+        <div style="font-size:2rem;margin-bottom:0.75rem;">🎤</div>
+        <h4 style="font-size:0.92rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Interview Preparation</h4>
+        <p style="font-size:0.82rem;color:var(--gray);line-height:1.7;margin-bottom:1rem;">Prepare for scholarship interviews with common questions and expert tips.</p>
+        <button class="btn-sm btn-navy" onclick="showAIHelp('What are common scholarship interview questions and how should I answer them?')">Get AI Help 🤖</button>
+      </div>
+      <div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+        <div style="font-size:2rem;margin-bottom:0.75rem;">🔍</div>
+        <h4 style="font-size:0.92rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Finding Scholarships</h4>
+        <p style="font-size:0.82rem;color:var(--gray);line-height:1.7;margin-bottom:1rem;">Tips on where to find scholarships that match your profile and background.</p>
+        <button class="btn-sm btn-navy" onclick="showAIHelp('Where can African students find fully funded scholarships? List the best resources and databases.')">Get AI Help 🤖</button>
+      </div>
+      <div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+        <div style="font-size:2rem;margin-bottom:0.75rem;">📝</div>
+        <h4 style="font-size:0.92rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Essays & Personal Statements</h4>
+        <p style="font-size:0.82rem;color:var(--gray);line-height:1.7;margin-bottom:1rem;">Write powerful essays that showcase your achievements and future goals.</p>
+        <button class="btn-sm btn-navy" onclick="showAIHelp('How do I write a powerful scholarship essay or personal statement as an African student?')">Get AI Help 🤖</button>
+      </div>
+      <div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+        <div style="font-size:2rem;margin-bottom:0.75rem;">🌍</div>
+        <h4 style="font-size:0.92rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Top Scholarships for Africans</h4>
+        <p style="font-size:0.82rem;color:var(--gray);line-height:1.7;margin-bottom:1rem;">Mastercard, Chevening, Fulbright, DAAD and more — a complete guide.</p>
+        <button class="btn-sm btn-navy" onclick="showAIHelp('Tell me about the top fully funded scholarships available for African students in 2026.')">Get AI Help 🤖</button>
+      </div>
+    </div>`;
+}
+
+function showAIHelp(question) {
+  showTab('ai');
+  setTimeout(() => {
+    const input = document.getElementById('ai-input');
+    if (input) { input.value = question; sendAIMessage(); }
+  }, 500);
+}
+
+async function loadRecommendationSection() {
+  const container = document.getElementById('scholarship-section-recommendation');
+  if (!container) return;
+  const myRequests = await getDocs(query(collection(db,'recommendations'),where('userId','==',currentUser.uid)));
+  container.innerHTML = `
+    <h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">📝 Request Recommendation Letter</h3>
+    <div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+      <div class="form-group" style="margin-bottom:1rem;"><label>Scholarship/Program Name *</label><input type="text" id="rec-scholarship" placeholder="e.g. Mastercard Foundation Scholars Program"></div>
+      <div class="form-group" style="margin-bottom:1rem;"><label>Recommender *</label>
+        <select id="rec-recommender">
+          <option value="Emmanuel Ikumilu Mwori">Mr. Emmanuel Ikumilu Mwori — Founder & CEO</option>
+          <option value="Department Head">My Department Head</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;"><label>Why do you deserve this scholarship? *</label><textarea id="rec-reason" rows="4" placeholder="Briefly describe your achievements, goals and why you deserve this scholarship..."></textarea></div>
+      <div class="form-group" style="margin-bottom:1rem;"><label>Deadline for Letter *</label><input type="date" id="rec-deadline"></div>
+      <button class="btn-primary" onclick="requestRecommendation()">Submit Request</button>
+    </div>
+    <h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">📋 My Requests</h3>
+    <div id="rec-requests-list">
+      ${myRequests.empty ? '<div class="empty-state">No requests yet.</div>' :
+      myRequests.docs.map(d => {
+        const r = d.data();
+        const statusColor = {pending:'#b37800',approved:'#27AE60',rejected:'#E63329'}[r.status]||'#1B2A6B';
+        return `<div style="background:var(--white);border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+            <div>
+              <strong style="font-size:0.88rem;color:var(--navy);">${sanitize(r.scholarship)}</strong>
+              <p style="font-size:0.75rem;color:var(--gray);">Recommender: ${sanitize(r.recommender)} · Deadline: ${r.deadline}</p>
+            </div>
+            <span style="background:rgba(0,0,0,0.05);color:${statusColor};padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">${r.status?.toUpperCase()}</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  
+  // Admin/Head view
+  if (currentUserData?.isAdmin || currentUserData?.isDeptHead) {
+    const allRequests = await getDocs(query(collection(db,'recommendations'),where('status','==','pending')));
+    if (!allRequests.empty) {
+      container.innerHTML += `
+        <h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin:1.5rem 0 1rem;">👑 Pending Requests (Admin/Head)</h3>
+        ${allRequests.docs.map(d => {
+          const r = d.data();
+          return `<div style="background:var(--white);border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+              <div>
+                <strong style="font-size:0.88rem;color:var(--navy);">${sanitize(r.userName)} → ${sanitize(r.scholarship)}</strong>
+                <p style="font-size:0.75rem;color:var(--gray);">Recommender: ${sanitize(r.recommender)} · Deadline: ${r.deadline}</p>
+                <p style="font-size:0.75rem;color:var(--gray);margin-top:0.25rem;">"${sanitize(r.reason?.substring(0,100))}..."</p>
+              </div>
+              <div style="display:flex;gap:0.5rem;">
+                <button class="btn-sm btn-gold" onclick="approveRecommendation('${d.id}')">✅ Approve</button>
+                <button class="btn-sm btn-red" onclick="rejectRecommendation('${d.id}')">❌ Reject</button>
+              </div>
+            </div>
+          </div>`;
+        }).join('')}`;
+    }
+  }
+}
+
+async function requestRecommendation() {
+  const scholarship = document.getElementById('rec-scholarship').value.trim();
+  const recommender = document.getElementById('rec-recommender').value;
+  const reason = document.getElementById('rec-reason').value.trim();
+  const deadline = document.getElementById('rec-deadline').value;
+  if (!scholarship || !reason || !deadline) return showToast('Fill all fields','error');
+  await addDoc(collection(db,'recommendations'), {
+    userId: currentUser.uid, userName: currentUserData.name,
+    department: currentUserData.department, country: currentUserData.country,
+    scholarship, recommender, reason, deadline,
+    status: 'pending', createdAt: serverTimestamp()
+  });
+  showToast('Request submitted! ✅ You will be notified when approved.');
+  await addDoc(collection(db,'notifications'), {
+    title: `📝 Recommendation Letter Request`,
+    message: `${currentUserData.name} has requested a recommendation letter for ${scholarship}. Please review.`,
+    type: 'urgent', postedBy: 'System', createdAt: serverTimestamp(), readBy: []
+  });
+  loadRecommendationSection();
+}
+
+async function approveRecommendation(recId) {
+  await updateDoc(doc(db,'recommendations',recId),{status:'approved', approvedBy: currentUserData.name, approvedAt: serverTimestamp()});
+  showToast('Recommendation approved ✅');
+  loadRecommendationSection();
+}
+
+async function rejectRecommendation(recId) {
+  await updateDoc(doc(db,'recommendations',recId),{status:'rejected'});
+  showToast('Recommendation rejected');
+  loadRecommendationSection();
+}
+
+async function loadScholarshipStories() {
+  const container = document.getElementById('scholarship-section-stories');
+  if (!container) return;
+  container.innerHTML = `
+    <h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">🌟 Success Stories</h3>
+    <div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+      <h4 style="font-size:0.92rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Share Your Success 🎉</h4>
+      <div class="form-group" style="margin-bottom:1rem;"><label>Scholarship/Opportunity You Won *</label><input type="text" id="story-scholarship" placeholder="e.g. Mastercard Foundation Scholars"></div>
+      <div class="form-group" style="margin-bottom:1rem;"><label>Your Story *</label><textarea id="story-content" rows="5" placeholder="Share your journey — how did you find it, apply, and win? What advice do you have for others?"></textarea></div>
+      <button class="btn-primary" onclick="shareSuccessStory()">Share Story 🌟</button>
+    </div>
+    <div id="success-stories-list"><div class="loading">Loading stories...</div></div>`;
+  loadSuccessStoriesList();
+}
+
+async function loadSuccessStoriesList() {
+  const container = document.getElementById('success-stories-list');
+  if (!container) return;
+  const snap = await getDocs(query(collection(db,'successStories'),orderBy('createdAt','desc')));
+  if (snap.empty) { container.innerHTML = '<div class="empty-state">No success stories yet. Be the first to share! 🌟</div>'; return; }
+  container.innerHTML = snap.docs.map(d => {
+    const s = d.data();
+    return `<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid var(--gold);">
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+        <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:1rem;flex-shrink:0;">${(s.userName||'?')[0]}</div>
+        <div>
+          <strong style="font-size:0.92rem;color:var(--navy);">${sanitize(s.userName)}</strong>
+          <p style="font-size:0.75rem;color:var(--gold);font-weight:600;">🏆 ${sanitize(s.scholarship)}</p>
+        </div>
+      </div>
+      <p style="font-size:0.85rem;color:var(--gray);line-height:1.7;">${sanitize(s.content)}</p>
+      <small style="font-size:0.72rem;color:var(--gray);">${timeAgo(s.createdAt)}</small>
+    </div>`;
+  }).join('');
+}
+
+async function shareSuccessStory() {
+  const scholarship = document.getElementById('story-scholarship').value.trim();
+  const content = document.getElementById('story-content').value.trim();
+  if (!scholarship || !content) return showToast('Fill all fields','error');
+  await addDoc(collection(db,'successStories'), {
+    userId: currentUser.uid, userName: currentUserData.name,
+    scholarship, content, createdAt: serverTimestamp()
+  });
+  showToast('Story shared! 🌟 Inspiring others!');
+  document.getElementById('story-scholarship').value = '';
+  document.getElementById('story-content').value = '';
+  loadSuccessStoriesList();
+}
+
 // YAN AI ASSISTANT
 function loadAI() {
   const container = document.getElementById('ai-container');
@@ -2203,6 +2684,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <button class="tab-btn" data-tab="profile" onclick="showTab('profile')"><span class="tab-icon">👤</span> My Profile</button>
       <button class="tab-btn" data-tab="directory" onclick="showTab('directory')"><span class="tab-icon">👥</span> Directory</button>
       <button class="tab-btn" data-tab="ai" onclick="showTab('ai')"><span class="tab-icon">🤖</span> YAN AI</button>
+      <button class="tab-btn" data-tab="scholarships" onclick="showTab('scholarships')"><span class="tab-icon">🏆</span> Scholarships</button>
       <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">👑</span> Head Panel</button>
       <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;"><span class="tab-icon">🛡️</span> Admin Panel</button>
     </nav>
@@ -2252,6 +2734,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <div class="tab-panel" id="tab-notifications"><div id="notifications-container"></div></div>
     <div class="tab-panel" id="tab-directory"><div id="directory-container"></div></div>
     <div class="tab-panel" id="tab-ai"><div id="ai-container"></div></div>
+    <div class="tab-panel" id="tab-scholarships"><div id="scholarships-container"></div></div>
   </main>
 </div>
 
