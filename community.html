@@ -1568,6 +1568,228 @@ async function rejectRecommendation(recId) {
 function downloadRecommendationLetter(scholarship, recommender, reason, deadline) {
   const u = currentUserData;
   const canvas = document.createElement('canvas');
+  canvas.width = 1200; canvas.height = 1650;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, 1200, 1650);
+
+  const logo = new Image();
+  logo.crossOrigin = 'anonymous';
+  logo.onload = function() {
+    // Logo circle
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(100, 95, 68, 0, Math.PI*2);
+    ctx.fillStyle = '#F8F9FF';
+    ctx.fill();
+    ctx.strokeStyle = '#F5A623';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+    ctx.clip();
+    ctx.drawImage(logo, 32, 27, 136, 136);
+    ctx.restore();
+
+    // Org name
+    ctx.fillStyle = '#1B2A6B';
+    ctx.font = 'bold 32px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('YOUNG AFRICANS NETWORK', 195, 75);
+    ctx.fillStyle = '#3A5DAE';
+    ctx.font = '16px Arial';
+    ctx.fillText('Building the Future, Together', 195, 108);
+
+    // Header separator
+    ctx.strokeStyle = '#E8EAFF';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(50, 155);
+    ctx.lineTo(1150, 155);
+    ctx.stroke();
+
+    // Ref and date
+    const refNum = 'YAN/REC/2026/' + String(Math.floor(Math.random()*900)+100);
+    const dateStr = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+    ctx.fillStyle = '#6B7280';
+    ctx.font = '13px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('Ref: ' + refNum, 50, 192);
+    ctx.textAlign = 'right';
+    ctx.fillText('Date: ' + dateStr, 1150, 192);
+
+    // RE: line
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#1B2A6B';
+    ctx.font = 'bold 15px Arial';
+    ctx.fillText('TO WHOM IT MAY CONCERN', 50, 238);
+    ctx.fillText('RE: LETTER OF RECOMMENDATION FOR ' + (u.name||'').toUpperCase(), 50, 265);
+
+    // Underline
+    ctx.strokeStyle = '#1B2A6B';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(50, 278);
+    ctx.lineTo(1150, 278);
+    ctx.stroke();
+
+    // Body
+    ctx.fillStyle = '#1B2A6B';
+    ctx.font = '14px Georgia';
+
+    const wrap = (text, x, y, maxW, lh) => {
+      const words = text.split(' ');
+      let line = '';
+      for (const word of words) {
+        const test = line + word + ' ';
+        if (ctx.measureText(test).width > maxW && line) {
+          ctx.fillText(line.trim(), x, y);
+          line = word + ' ';
+          y += lh;
+        } else line = test;
+      }
+      if (line.trim()) ctx.fillText(line.trim(), x, y);
+      return y + lh;
+    };
+
+    let y = 325;
+    ctx.fillText('Dear Scholarship Selection Committee,', 50, y); y += 45;
+
+    y = wrap(`It is with great honour and without any reservation that I write this letter of recommendation in strong support of ${u.name} from ${u.country||'Africa'}, who has applied for the ${scholarship}. I am Emmanuel Ikumilu Mwori, Founder and Chief Executive Officer of Young Africans Network (YAN), a pan-African youth-led volunteer organization founded in Kenya in April 2026, dedicated to empowering young Africans through education, leadership, mentorship and access to global opportunities.`, 50, y, 1100, 28); y += 18;
+
+    y = wrap(`I have had the privilege of knowing and working with ${u.name} as a valued and active member of our organization. During their time at YAN, ${u.name} has consistently demonstrated exceptional qualities that I believe make them an outstanding candidate for this prestigious opportunity. Their commitment to personal development, community service and pan-African values has been evident in everything they do.`, 50, y, 1100, 28); y += 18;
+
+    y = wrap(`In their capacity as a member of our ${u.department||'YAN'} department, ${u.name} has actively participated in our training programs, community initiatives and collaborative projects. They bring energy, dedication and a genuine passion for making a difference — qualities that are rare and invaluable in young leaders today.`, 50, y, 1100, 28); y += 18;
+
+    if (reason) {
+      y = wrap(`Regarding their motivation: "${reason.substring(0,200)}". This clarity of purpose speaks volumes about their readiness for this next step in their journey.`, 50, y, 1100, 28); y += 18;
+    }
+
+    y = wrap(`I am fully confident that ${u.name} possesses the intellectual ability, personal integrity and leadership potential to excel in this program and to represent Africa with distinction. I recommend them without any reservation and urge your committee to give their application the most favorable consideration.`, 50, y, 1100, 28); y += 18;
+
+    y = wrap(`Should you require any further information, please do not hesitate to contact me at youngafricansn@gmail.com.`, 50, y, 1100, 28); y += 45;
+
+    ctx.fillText('Yours faithfully,', 50, y); y += 55;
+
+    // Signature
+    const signImg = new Image();
+    signImg.crossOrigin = 'anonymous';
+    signImg.onload = function() {
+      ctx.drawImage(signImg, 50, y, 200, 72);
+      y += 82;
+      ctx.strokeStyle = '#1B2A6B';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.moveTo(50, y); ctx.lineTo(420, y); ctx.stroke();
+      y += 22;
+      ctx.fillStyle = '#1B2A6B';
+      ctx.font = 'bold italic 16px Georgia';
+      ctx.fillText('Emmanuel Ikumilu Mwori', 50, y); y += 24;
+      ctx.fillStyle = '#6B7280';
+      ctx.font = '13px Arial';
+      ctx.fillText('Founder & CEO, Young Africans Network', 50, y); y += 20;
+      ctx.fillText('youngafricansn@gmail.com | youngafricansnetwork.org', 50, y);
+
+      // OFFICIAL STAMP
+      const stampX = 950; const stampY = y - 60;
+      ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(stampX, stampY, 110, 0, Math.PI*2); ctx.stroke();
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(stampX, stampY, 90, 0, Math.PI*2); ctx.stroke();
+
+      // Stamp top text
+      ctx.save();
+      ctx.translate(stampX, stampY);
+      ctx.font = 'bold 13px Arial';
+      ctx.fillStyle = '#1B2A6B';
+      const topText = 'YOUNG AFRICANS NETWORK';
+      const topRadius = 100;
+      const topStartAngle = -Math.PI * 0.75;
+      topText.split('').forEach((char, i) => {
+        const angle = topStartAngle + (i * Math.PI * 1.5) / topText.length;
+        ctx.save();
+        ctx.rotate(angle + Math.PI/2);
+        ctx.translate(0, -topRadius);
+        ctx.rotate(-angle - Math.PI/2);
+        ctx.fillText(char, -4, 0);
+        ctx.restore();
+      });
+
+      // Stamp bottom text
+      const botText = 'youngafricansnetwork.org';
+      const botRadius = 100;
+      const botStartAngle = Math.PI * 0.18;
+      botText.split('').forEach((char, i) => {
+        const angle = botStartAngle + (i * Math.PI * 0.64) / botText.length;
+        ctx.save();
+        ctx.rotate(angle - Math.PI/2);
+        ctx.translate(0, botRadius);
+        ctx.rotate(-angle + Math.PI/2);
+        ctx.fillText(char, -4, 0);
+        ctx.restore();
+      });
+
+      // Stars
+      ctx.font = '16px Arial';
+      ctx.fillText('★', -115, 5);
+      ctx.fillText('★', 100, 5);
+
+      // Inner text
+      ctx.textAlign = 'center';
+      ctx.font = '13px Arial';
+      ctx.fillText('Building the Future,', 0, -15);
+      ctx.fillText('Together', 0, 5);
+      ctx.font = '11px Arial';
+      ctx.fillStyle = '#6B7280';
+      ctx.fillText('Est. 2026 · Kenya', 0, 25);
+      ctx.restore();
+
+      // FOOTER
+      const footerY = 1560;
+      ctx.textAlign = 'left';
+      ctx.font = '12px Arial';
+
+      ctx.fillStyle = '#F5A623';
+      ctx.beginPath(); ctx.arc(120, footerY, 14, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#333';
+      ctx.fillText('Kenya, Africa', 140, footerY+4);
+
+      ctx.fillStyle = '#E63329';
+      ctx.beginPath(); ctx.arc(380, footerY, 14, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#333';
+      ctx.fillText('youngafricansn@gmail.com', 400, footerY+4);
+
+      ctx.fillStyle = '#1B2A6B';
+      ctx.beginPath(); ctx.arc(680, footerY, 14, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#333';
+      ctx.fillText('youngafricansnetwork.org', 700, footerY+4);
+
+      // Multicolor bar
+      const barY = 1618;
+      const colors = ['#1B2A6B','#F5A623','#3A5DAE','#27AE60','#E63329','#1B2A6B','#F5A623','#3A5DAE','#E63329','#27AE60','#1B2A6B','#F5A623'];
+      colors.forEach((color, i) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(i * 100, barY, 100, 18);
+      });
+
+      // Download
+      const link = document.createElement('a');
+      link.download = `YAN_Recommendation_Letter_${(u.name||'Member').replace(/ /g,'_')}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('Letter downloading! 📄');
+    };
+    signImg.onerror = function() {
+      const link = document.createElement('a');
+      link.download = `YAN_Recommendation_Letter_${(u.name||'Member').replace(/ /g,'_')}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    };
+    signImg.src = '/images/emmanuel_signature.png';
+  };
+  logo.onerror = function() { showToast('Error generating letter','error'); };
+  logo.src = '/images/logo.jpeg';
+}
+  const u = currentUserData;
+  const canvas = document.createElement('canvas');
   canvas.width = 1200; canvas.height = 1000;
   const ctx = canvas.getContext('2d');
 
