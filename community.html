@@ -161,6 +161,38 @@ async function doRegister() {
   }
 }
 
+function showWelcomeModal() {
+  const modal = document.createElement('div');
+  modal.id = 'welcome-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  modal.innerHTML = `<div style="background:var(--white);border-radius:24px;padding:2.5rem;max-width:480px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);"><div style="font-size:3rem;margin-bottom:1rem;">🎉</div><h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">Welcome to YAN!</h2><p style="color:var(--gray);font-size:0.88rem;line-height:1.7;margin-bottom:1.5rem;">You are now part of the Young Africans Network family! Join our WhatsApp community to connect with members across Africa.</p><a href="https://chat.whatsapp.com/BlvxC0j6sUUBfWjbIW9dH9" target="_blank" style="display:block;background:#25D366;color:#fff;padding:0.85rem 2rem;border-radius:50px;font-weight:700;font-size:0.95rem;text-decoration:none;margin-bottom:0.75rem;">📱 Join YAN WhatsApp Community</a><button onclick="document.getElementById('welcome-modal').remove();showScreen('screen-login');" style="background:var(--light);color:var(--navy);border:none;padding:0.75rem 2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.88rem;cursor:pointer;width:100%;">Continue to Login →</button></div>`;
+  document.body.appendChild(modal);
+}
+
+function showOnboarding() {
+  const steps = [
+    { icon: '🌍', title: 'Welcome to YAN Community!', desc: 'This is your pan-African home. Learn, connect, grow and earn certificates with young Africans from across the continent.' },
+    { icon: '📚', title: 'Your Department', desc: 'Click the Department tab to access your training materials, quizzes and department chat. Complete all materials to earn your certificate!' },
+    { icon: '🏆', title: 'Scholarship Hub', desc: 'Click Scholarships to browse opportunities, track your applications and request recommendation letters from YAN leadership.' },
+    { icon: '🤖', title: 'YAN AI Assistant', desc: 'Click YAN AI anytime to get help with your CV, scholarship essays, career advice and more!' },
+    { icon: '🔔', title: 'Stay Updated', desc: 'Click the bell icon at the top to see announcements and new scholarship opportunities posted by the team.' },
+    { icon: '👥', title: 'Connect with Members', desc: 'Click Directory to find and connect with YAN members from across Africa. You are not alone on this journey!' },
+  ];
+  let current = 0;
+  const modal = document.createElement('div');
+  modal.id = 'onboarding-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  const render = () => {
+    const s = steps[current];
+    modal.innerHTML = `<div style="background:var(--white);border-radius:24px;padding:2.5rem;max-width:480px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);"><div style="display:flex;justify-content:center;gap:0.4rem;margin-bottom:1.5rem;">${steps.map((_,i) => `<div style="width:${i===current?24:8}px;height:8px;border-radius:50px;background:${i===current?'var(--navy)':'rgba(27,42,107,0.2)'};transition:all 0.3s;"></div>`).join('')}</div><div style="font-size:3.5rem;margin-bottom:1rem;">${s.icon}</div><h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:0.75rem;">${s.title}</h2><p style="color:var(--gray);font-size:0.88rem;line-height:1.8;margin-bottom:2rem;">${s.desc}</p><div style="display:flex;gap:0.75rem;justify-content:center;">${current > 0 ? `<button onclick="onboardingPrev()" style="background:var(--light);color:var(--navy);border:none;padding:0.75rem 1.5rem;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.88rem;cursor:pointer;">Back</button>` : ""}${current < steps.length-1 ? `<button onclick="onboardingNext()" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;">Next</button>` : `<button onclick="finishOnboarding()" style="background:var(--red);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;">Get Started!</button>`}</div><button onclick="finishOnboarding()" style="background:none;border:none;color:var(--gray);font-size:0.78rem;cursor:pointer;margin-top:1rem;font-family:'Poppins',sans-serif;">Skip tour</button></div>`;
+  };
+  window.onboardingNext = () => { current++; render(); };
+  window.onboardingPrev = () => { current--; render(); };
+  window.finishOnboarding = () => { localStorage.setItem('yan_onboarded_' + currentUser.uid, 'true'); modal.remove(); };
+  render();
+  document.body.appendChild(modal);
+}
+
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-pass').value;
@@ -205,6 +237,11 @@ function enterPlatform() {
   if (headTab) headTab.style.display = (currentUserData.isDeptHead||currentUserData.isAdmin) ? 'flex' : 'none';
   if (adminTab) adminTab.style.display = currentUserData.isAdmin ? 'flex' : 'none';
   showTab('feed');
+  // Show onboarding for first time users
+  const onboardingKey = 'yan_onboarded_' + currentUser.uid;
+  if (!localStorage.getItem(onboardingKey)) {
+    setTimeout(() => showOnboarding(), 1000);
+  }
   updateNotifBadge();
 }
 
