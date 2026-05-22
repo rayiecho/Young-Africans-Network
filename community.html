@@ -2658,6 +2658,7 @@ async function loadAdminDepartments() {
     <div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">
       <button class="btn-primary" style="width:auto;" onclick="loadAdminMembers()">👥 All Members</button>
       <button class="btn-outline" onclick="loadAdminDepartments()">🏢 By Department</button>
+      <button class="btn-outline" onclick="loadAdminScholarshipApplications()">🏆 Scholarship Applications</button>
     </div>
     ${Object.values(deptGroups).map(g => `
     <div style="background:var(--white);border-radius:16px;padding:1.25rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
@@ -2674,6 +2675,40 @@ async function loadAdminDepartments() {
         </div>
       </div>`).join('')}
     </div>`).join('')}`;
+}
+
+async function loadAdminScholarshipApplications() {
+  const c = document.getElementById('admin-section-members');
+  c.innerHTML = '<div class="loading">Loading applications...</div>';
+  const snap = await getDocs(collection(db,'applications'));
+  if (snap.empty) { c.innerHTML = '<div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;"><button class="btn-primary" style="width:auto;" onclick="loadAdminMembers()">👥 All Members</button><button class="btn-outline" onclick="loadAdminDepartments()">🏢 By Department</button><button class="btn-outline" onclick="loadAdminScholarshipApplications()">🏆 Scholarship Applications</button></div><div class="empty-state">No scholarship applications yet.</div>'; return; }
+  const statColors = {Researching:'#1B2A6B','Preparing Documents':'#F5A623',Applied:'#3498DB',Interview:'#9B59B6',Awarded:'#27AE60',Rejected:'#E63329'};
+  c.innerHTML = `
+    <div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+      <button class="btn-outline" onclick="loadAdminMembers()">👥 All Members</button>
+      <button class="btn-outline" onclick="loadAdminDepartments()">🏢 By Department</button>
+      <button class="btn-primary" style="width:auto;" onclick="loadAdminScholarshipApplications()">🏆 Scholarship Applications</button>
+    </div>
+    <h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">🏆 Member Scholarship Applications (${snap.size})</h3>
+    <div class="admin-members-list">
+      ${snap.docs.map(d => {
+        const a = d.data();
+        const color = statColors[a.status]||'#1B2A6B';
+        return `<div class="admin-member-row">
+          <div class="admin-member-info">
+            <div class="admin-avatar">${(a.userName||'?')[0]}</div>
+            <div>
+              <strong>${sanitize(a.userName||'')}</strong>
+              <p style="font-size:0.78rem;color:var(--gray);">📚 ${sanitize(a.title||'')}</p>
+              <p style="font-size:0.72rem;color:var(--gray);">Started: ${timeAgo(a.createdAt)}</p>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <span style="background:${color}20;color:${color};padding:0.3rem 0.85rem;border-radius:50px;font-size:0.75rem;font-weight:700;">${sanitize(a.status||'')}</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
 }
 
 async function loadAdminMembers() {
@@ -2846,7 +2881,7 @@ async function loadAdminModeration() {
 }
 
 // EXPOSE TO WINDOW
-window.showPostNotification=showPostNotification; window.postNotification=postNotification; window.markNotifRead=markNotifRead; window.deleteNotification=deleteNotification; window.filterDirectory=filterDirectory; window.sendAIMessage=sendAIMessage; window.askQuick=askQuick; window.showScholarshipForm=showScholarshipForm; window.previewScholarship=previewScholarship; window.showScholarshipSection=showScholarshipSection; window.postScholarship=postScholarship; window.trackApplication=trackApplication; window.updateApplicationStatus=updateApplicationStatus; window.deleteApplication=deleteApplication; window.deleteScholarship=deleteScholarship; window.showAIHelp=showAIHelp; window.requestRecommendation=requestRecommendation; window.approveRecommendation=approveRecommendation; window.rejectRecommendation=rejectRecommendation; window.shareSuccessStory=shareSuccessStory; window.generateMagazine=generateMagazine; window.downloadMagazine=downloadMagazine; window.downloadRecommendationLetter=downloadRecommendationLetter; window.downloadRecommendationLetter=downloadRecommendationLetter;
+window.showPostNotification=showPostNotification; window.postNotification=postNotification; window.markNotifRead=markNotifRead; window.deleteNotification=deleteNotification; window.filterDirectory=filterDirectory; window.sendAIMessage=sendAIMessage; window.askQuick=askQuick; window.showScholarshipForm=showScholarshipForm; window.previewScholarship=previewScholarship; window.showScholarshipSection=showScholarshipSection; window.postScholarship=postScholarship; window.trackApplication=trackApplication; window.updateApplicationStatus=updateApplicationStatus; window.deleteApplication=deleteApplication; window.deleteScholarship=deleteScholarship; window.showAIHelp=showAIHelp; window.requestRecommendation=requestRecommendation; window.approveRecommendation=approveRecommendation; window.rejectRecommendation=rejectRecommendation; window.shareSuccessStory=shareSuccessStory; window.downloadRecommendationLetter=downloadRecommendationLetter; window.downloadRecommendationLetter=downloadRecommendationLetter;
 window.doRegister=doRegister; window.doLogin=doLogin; window.doLogout=doLogout; window.doForgotPassword=doForgotPassword;
 window.showTab=showTab; window.showScreen=showScreen; window.submitPost=submitPost; window.deletePost=deletePost;
 window.toggleLike=toggleLike; window.toggleReplies=toggleReplies; window.submitReply=submitReply;
@@ -2862,7 +2897,7 @@ window.toggleLiveMeeting=toggleLiveMeeting; window.markAttendance=markAttendance
 window.saveProfile=saveProfile; window.downloadIDCard=downloadIDCard; window.changeProfilePhoto=changeProfilePhoto; window.downloadCertificate=downloadCertificate;
 window.postMaterial=postMaterial; window.toggleMaterialFields=toggleMaterialFields; window.addQuizQuestion=addQuizQuestion;
 window.renderQuizBuilder=renderQuizBuilder; window.saveQuiz=saveQuiz; window.deleteMaterial=deleteMaterial;
-window.showAdminSection=showAdminSection; window.toggleRole=toggleRole; window.removeMember=removeMember; window.loadAdminDepartments=loadAdminDepartments; window.loadAdminMembers=loadAdminMembers;
+window.showAdminSection=showAdminSection; window.toggleRole=toggleRole; window.removeMember=removeMember; window.loadAdminDepartments=loadAdminDepartments; window.loadAdminMembers=loadAdminMembers; window.loadAdminScholarshipApplications=loadAdminScholarshipApplications;
 window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteTeamMember=deleteTeamMember; window.addTeamMember=addTeamMember; window.toggleDeptField=toggleDeptField; window.previewTeamPhoto=previewTeamPhoto; window.deleteQuiz=deleteQuiz; window.viewMemberProgress=viewMemberProgress; window.issueCertificate=issueCertificate; window.sendBulkEmail=sendBulkEmail; window.sendNewsletter=sendNewsletter; window.deleteTeamMember=deleteTeamMember; 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
