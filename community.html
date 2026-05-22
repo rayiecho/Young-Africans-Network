@@ -1536,7 +1536,7 @@ async function loadAdminPanel() {
     <div id="admin-section-certificates" class="admin-section" style="display:none;"></div>
     <div id="admin-section-moderation" class="admin-section" style="display:none;"></div>
     <div id="admin-section-team" class="admin-section" style="display:none;"></div>`;
-  loadAdminOverview(); loadAdminMembers(); loadAdminCertificates(); loadAdminModeration(); loadAdminTeam();
+  loadAdminOverview(); loadAdminDepartments(); loadAdminCertificates(); loadAdminModeration(); loadAdminTeam();
 }
 function showAdminSection(section) {
   document.querySelectorAll('.admin-tab-btn').forEach((b,i) => b.classList.toggle('active', ['overview','members','certificates','moderation','team'][i]===section));
@@ -1610,6 +1610,40 @@ async function loadAdminOverview() {
   const [u,p,ca,pe] = await Promise.all([getDocs(collection(db,'users')),getDocs(collection(db,'posts')),getDocs(query(collection(db,'certificates'),where('status','==','approved'))),getDocs(query(collection(db,'certificates'),where('status','==','pending')))]);
   c.innerHTML = `<div class="admin-stats-grid"><div class="admin-stat-card"><div class="admin-stat-num">${u.size}</div><div class="admin-stat-label">Members</div></div><div class="admin-stat-card"><div class="admin-stat-num">${p.size}</div><div class="admin-stat-label">Posts</div></div><div class="admin-stat-card"><div class="admin-stat-num">${ca.size}</div><div class="admin-stat-label">Certs Issued</div></div><div class="admin-stat-card"><div class="admin-stat-num">${pe.size}</div><div class="admin-stat-label">Pending Certs</div></div></div>`;
 }
+async function loadAdminDepartments() {
+  const c = document.getElementById('admin-section-members');
+  c.innerHTML = '<div class="loading">Loading...</div>';
+  const snap = await getDocs(collection(db,'users'));
+  const members = snap.docs.map(d => ({id:d.id,...d.data()}));
+  const deptGroups = {};
+  DEPARTMENTS.forEach(d => { deptGroups[d.id] = {info:d, members:[]}; });
+  members.forEach(m => {
+    if (m.department && deptGroups[m.department]) {
+      deptGroups[m.department].members.push(m);
+    }
+  });
+  c.innerHTML = `
+    <div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+      <button class="btn-primary" style="width:auto;" onclick="loadAdminMembers()">👥 All Members</button>
+      <button class="btn-outline" onclick="loadAdminDepartments()">🏢 By Department</button>
+    </div>
+    ${Object.values(deptGroups).map(g => `
+    <div style="background:var(--white);border-radius:16px;padding:1.25rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <h3 style="font-size:1rem;font-weight:700;color:var(--navy);">${g.info.icon} ${g.info.name}</h3>
+        <span style="background:var(--light);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.78rem;font-weight:600;">${g.members.length} members</span>
+      </div>
+      ${g.members.length === 0 ? '<p style="font-size:0.82rem;color:var(--gray);">No members yet</p>' :
+      g.members.map(m => `<div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid rgba(27,42,107,0.07);">
+        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.85rem;flex-shrink:0;">${(m.name||'?')[0]}</div>
+        <div style="flex:1;">
+          <div style="font-size:0.85rem;font-weight:600;color:var(--navy);">${sanitize(m.name||'')}</div>
+          <div style="font-size:0.72rem;color:var(--gray);">📍 ${sanitize(m.country||'')} · ${sanitize(m.role||'Member')}</div>
+        </div>
+      </div>`).join('')}
+    </div>`).join('')}`;
+}
+
 async function loadAdminMembers() {
   const c = document.getElementById('admin-section-members'); c.innerHTML = '<div class="loading">Loading...</div>';
   const snap = await getDocs(collection(db,'users'));
@@ -1746,7 +1780,7 @@ window.toggleLiveMeeting=toggleLiveMeeting; window.markAttendance=markAttendance
 window.saveProfile=saveProfile; window.downloadIDCard=downloadIDCard; window.changeProfilePhoto=changeProfilePhoto; window.downloadCertificate=downloadCertificate;
 window.postMaterial=postMaterial; window.toggleMaterialFields=toggleMaterialFields; window.addQuizQuestion=addQuizQuestion;
 window.renderQuizBuilder=renderQuizBuilder; window.saveQuiz=saveQuiz; window.deleteMaterial=deleteMaterial;
-window.showAdminSection=showAdminSection; window.toggleRole=toggleRole; window.removeMember=removeMember;
+window.showAdminSection=showAdminSection; window.toggleRole=toggleRole; window.removeMember=removeMember; window.loadAdminDepartments=loadAdminDepartments; window.loadAdminMembers=loadAdminMembers;
 window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteTeamMember=deleteTeamMember; window.addTeamMember=addTeamMember; window.deleteQuiz=deleteQuiz; window.viewMemberProgress=viewMemberProgress; window.issueCertificate=issueCertificate; window.sendBulkEmail=sendBulkEmail; window.deleteTeamMember=deleteTeamMember; 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
