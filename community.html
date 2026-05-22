@@ -492,13 +492,22 @@ async function submitReply(postId) {
 
 // DEPARTMENT
 function loadDepartment() {
-  const dept = currentUserData.department;
-  const deptInfo = DEPARTMENTS.find(d => d.id === dept);
   const container = document.getElementById('dept-container');
+  const myDept = currentUserData.department;
+  const activeDept = window._activeDept || myDept;
+  const deptInfo = DEPARTMENTS.find(d => d.id === activeDept);
   container.innerHTML = `
+    <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);margin-bottom:1rem;">📚 Departments</h2>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+      ${DEPARTMENTS.map(d => `<button onclick="switchDept('${d.id}')" style="background:${activeDept===d.id?'var(--navy)':'var(--light)'};color:${activeDept===d.id?'#fff':'var(--navy)'};border:1.5px solid ${activeDept===d.id?'var(--navy)':'rgba(27,42,107,0.15)'};padding:0.5rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;">${d.icon} ${d.name}</button>`).join('')}
+    </div>
     <div class="dept-header-bar">
       <span class="dept-icon-big">${deptInfo?.icon||'📚'}</span>
-      <div><h2>${deptInfo?.name||'My Department'}</h2><p>Your learning space — videos, articles, quizzes and discussions</p></div>
+      <div>
+        <h2>${deptInfo?.name||'Department'}</h2>
+        <p>Your learning space — videos, articles, quizzes and discussions</p>
+        ${activeDept !== myDept ? `<span style="background:rgba(245,166,35,0.15);color:var(--gold);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">👁️ Viewing</span>` : '<span style="background:rgba(27,42,107,0.1);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">⭐ Your Department</span>'}
+      </div>
     </div>
     <div class="dept-tabs">
       <button class="dept-tab-btn active" onclick="showDeptSection('materials')">📹 Materials</button>
@@ -508,9 +517,14 @@ function loadDepartment() {
     <div id="dept-section-materials" class="dept-section"></div>
     <div id="dept-section-progress" class="dept-section" style="display:none;"></div>
     <div id="dept-section-chat" class="dept-section" style="display:none;"></div>`;
-  loadDeptMaterials(dept);
-  loadDeptProgress(dept);
-  loadDeptChat(dept);
+  loadDeptMaterials(activeDept);
+  loadDeptProgress(activeDept);
+  loadDeptChat(activeDept);
+}
+
+function switchDept(deptId) {
+  window._activeDept = deptId;
+  loadDepartment();
 }
 
 function showDeptSection(section) {
