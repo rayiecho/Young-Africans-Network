@@ -237,6 +237,12 @@ function enterPlatform() {
   if (headTab) headTab.style.display = (currentUserData.isDeptHead||currentUserData.isAdmin) ? 'flex' : 'none';
   if (adminTab) adminTab.style.display = currentUserData.isAdmin ? 'flex' : 'none';
   showTab('feed');
+  // Request push notification permission
+  if ('Notification' in window && Notification.permission === 'default') {
+    setTimeout(() => {
+      Notification.requestPermission();
+    }, 3000);
+  }
   // Show onboarding for first time users
   const onboardingKey = 'yan_onboarded_' + currentUser.uid;
   if (!localStorage.getItem(onboardingKey)) {
@@ -1259,6 +1265,13 @@ async function postScholarship() {
     createdAt: serverTimestamp(), active: true
   });
   showToast('Scholarship posted! 🏆');
+  // Send push notification
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('🏆 New Scholarship on YAN!', {
+      body: title + ' by ' + provider + ' — Deadline: ' + deadline,
+      icon: '/images/logo.jpeg'
+    });
+  }
   document.getElementById('scholarship-form').style.display = 'none';
   loadScholarshipOpportunities();
   // Send notification to all members
