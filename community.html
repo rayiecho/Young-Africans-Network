@@ -1641,6 +1641,7 @@ async function sendAIMessage() {
     });
     const data = await response.json();
     console.log("AI DATA:", JSON.stringify(data)); const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || data.error?.message || JSON.stringify(data);
+    console.log("AI RAW:", JSON.stringify(data));
 
     window._aiHistory.push({ role: 'assistant', content: reply });
 
