@@ -120,6 +120,10 @@ onAuthStateChanged(auth, async user => {
 
 async function doRegister() {
   const name = document.getElementById('reg-name').value.trim();
+  // Validate name — must have 2 words, letters only
+  const nameParts = name.split(' ').filter(p => p.length > 0);
+  if (nameParts.length < 2) return showToast('Please enter your full name (first and last name)','error');
+  if (!/^[a-zA-Z\s]+$/.test(name)) return showToast('Name must contain letters only — no numbers or symbols','error');
   const email = document.getElementById('reg-email').value.trim();
   const pass = document.getElementById('reg-pass').value;
   const country = document.getElementById('reg-country').value.trim();
