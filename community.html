@@ -1716,7 +1716,11 @@ async function loadAdminTeam() {
           <option value="partnerships">🤝 Partnership & External Relations</option>
         </select>
       </div>
-      <div class="form-group"><label>Photo URL</label><input type="text" id="team-photo" placeholder="https://..."></div>
+      <div class="form-group"><label>Photo</label>
+        <input type="file" id="team-photo-file" accept="image/*" onchange="previewTeamPhoto(this)" style="background:var(--light);border:1.5px solid rgba(27,42,107,0.15);padding:0.6rem;border-radius:10px;width:100%;font-family:'Poppins',sans-serif;font-size:0.82rem;">
+        <img id="team-photo-preview" style="display:none;width:80px;height:80px;border-radius:50%;object-fit:cover;margin-top:0.5rem;border:3px solid var(--gold);">
+        <input type="hidden" id="team-photo">
+      </div>
       <div class="form-group"><label>Order (display order number)</label><input type="number" id="team-order" placeholder="1" value="1"></div>
       <button class="btn-primary" onclick="addTeamMember()">Add Team Member</button>
     </div>
@@ -1724,6 +1728,31 @@ async function loadAdminTeam() {
     <div id="team-list"><div class="loading">Loading...</div></div>`;
   loadTeamList();
 }
+async function previewTeamPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const preview = document.getElementById('team-photo-preview');
+  const reader = new FileReader();
+  reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
+  reader.readAsDataURL(file);
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', 'yan_profiles');
+  formData.append('cloud_name', 'deigiiyq5');
+  try {
+    const res = await fetch('https://api.cloudinary.com/v1_1/deigiiyq5/image/upload', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (data.secure_url) {
+      document.getElementById('team-photo').value = data.secure_url;
+      showToast('Photo uploaded ✅');
+    } else {
+      showToast('Upload failed — ' + (data.error?.message||'try again'), 'error');
+    }
+  } catch(e) {
+    showToast('Upload failed', 'error');
+  }
+}
+
 function toggleDeptField() {
   const cat = document.getElementById('team-category').value;
   const deptGroup = document.getElementById('dept-select-group');
@@ -1802,7 +1831,7 @@ window.saveProfile=saveProfile; window.downloadIDCard=downloadIDCard; window.cha
 window.postMaterial=postMaterial; window.toggleMaterialFields=toggleMaterialFields; window.addQuizQuestion=addQuizQuestion;
 window.renderQuizBuilder=renderQuizBuilder; window.saveQuiz=saveQuiz; window.deleteMaterial=deleteMaterial;
 window.showAdminSection=showAdminSection; window.toggleRole=toggleRole; window.removeMember=removeMember; window.loadAdminDepartments=loadAdminDepartments; window.loadAdminMembers=loadAdminMembers;
-window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteTeamMember=deleteTeamMember; window.addTeamMember=addTeamMember; window.toggleDeptField=toggleDeptField; window.deleteQuiz=deleteQuiz; window.viewMemberProgress=viewMemberProgress; window.issueCertificate=issueCertificate; window.sendBulkEmail=sendBulkEmail; window.deleteTeamMember=deleteTeamMember; 
+window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteTeamMember=deleteTeamMember; window.addTeamMember=addTeamMember; window.toggleDeptField=toggleDeptField; window.previewTeamPhoto=previewTeamPhoto; window.deleteQuiz=deleteQuiz; window.viewMemberProgress=viewMemberProgress; window.issueCertificate=issueCertificate; window.sendBulkEmail=sendBulkEmail; window.deleteTeamMember=deleteTeamMember; 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>emailjs.init('NyhRgF1xCbrxy7XEG');</script>
