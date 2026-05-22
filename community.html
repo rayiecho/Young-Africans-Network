@@ -1697,9 +1697,23 @@ async function loadAdminTeam() {
       </div>
       <div class="form-group"><label>Email</label><input type="text" id="team-email" placeholder="email@example.com"></div>
       <div class="form-group"><label>Category</label>
-        <select id="team-category">
+        <select id="team-category" onchange="toggleDeptField()">
           <option value="Leadership">Leadership Core</option>
-          <option value="Department">Department Coordinator</option>
+          <option value="DeptHead">Department Head</option>
+          <option value="Volunteer">Department Volunteer</option>
+        </select>
+      </div>
+      <div class="form-group" id="dept-select-group" style="display:none;"><label>Department *</label>
+        <select id="team-dept-select">
+          <option value="">Select department...</option>
+          <option value="programs">💻 Programs & Training</option>
+          <option value="scholarships">🏆 Scholarships & Global Opportunities</option>
+          <option value="career">🎤 Career Development & Public Speaking</option>
+          <option value="community">🌍 Community Impact & Volunteering</option>
+          <option value="mental">💚 Mental Health & Wellbeing</option>
+          <option value="communications">📢 Communications & Media</option>
+          <option value="finance">💰 Finance & Administration</option>
+          <option value="partnerships">🤝 Partnership & External Relations</option>
         </select>
       </div>
       <div class="form-group"><label>Photo URL</label><input type="text" id="team-photo" placeholder="https://..."></div>
@@ -1710,16 +1724,23 @@ async function loadAdminTeam() {
     <div id="team-list"><div class="loading">Loading...</div></div>`;
   loadTeamList();
 }
+function toggleDeptField() {
+  const cat = document.getElementById('team-category').value;
+  const deptGroup = document.getElementById('dept-select-group');
+  if (deptGroup) deptGroup.style.display = (cat === 'DeptHead' || cat === 'Volunteer') ? 'block' : 'none';
+}
+
 async function addTeamMember() {
   const name = document.getElementById('team-name').value.trim();
   const role = document.getElementById('team-role').value.trim();
   const country = document.getElementById('team-country').value.trim();
-  const dept = document.getElementById('team-dept').value.trim();
+  const dept = document.getElementById('team-dept-select')?.value || document.getElementById('team-dept').value.trim();
   const email = document.getElementById('team-email').value.trim();
   const category = document.getElementById('team-category').value;
   const photoUrl = document.getElementById('team-photo').value.trim();
   const order = parseInt(document.getElementById('team-order').value) || 1;
   if (!name || !role || !country) return showToast('Name, role and country are required','error');
+  if ((category === 'DeptHead' || category === 'Volunteer') && !dept) return showToast('Please select a department','error');
   await addDoc(collection(db, 'team'), { name, role, country, department: dept, email, category, photoUrl, order, createdAt: serverTimestamp() });
   showToast('Team member added ✅');
   document.getElementById('team-name').value = '';
@@ -1781,7 +1802,7 @@ window.saveProfile=saveProfile; window.downloadIDCard=downloadIDCard; window.cha
 window.postMaterial=postMaterial; window.toggleMaterialFields=toggleMaterialFields; window.addQuizQuestion=addQuizQuestion;
 window.renderQuizBuilder=renderQuizBuilder; window.saveQuiz=saveQuiz; window.deleteMaterial=deleteMaterial;
 window.showAdminSection=showAdminSection; window.toggleRole=toggleRole; window.removeMember=removeMember; window.loadAdminDepartments=loadAdminDepartments; window.loadAdminMembers=loadAdminMembers;
-window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteTeamMember=deleteTeamMember; window.addTeamMember=addTeamMember; window.deleteQuiz=deleteQuiz; window.viewMemberProgress=viewMemberProgress; window.issueCertificate=issueCertificate; window.sendBulkEmail=sendBulkEmail; window.deleteTeamMember=deleteTeamMember; 
+window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteTeamMember=deleteTeamMember; window.addTeamMember=addTeamMember; window.toggleDeptField=toggleDeptField; window.deleteQuiz=deleteQuiz; window.viewMemberProgress=viewMemberProgress; window.issueCertificate=issueCertificate; window.sendBulkEmail=sendBulkEmail; window.deleteTeamMember=deleteTeamMember; 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>emailjs.init('NyhRgF1xCbrxy7XEG');</script>
