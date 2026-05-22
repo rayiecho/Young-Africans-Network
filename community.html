@@ -1435,7 +1435,10 @@ async function loadRecommendationSection() {
               <strong style="font-size:0.88rem;color:var(--navy);">${sanitize(r.scholarship)}</strong>
               <p style="font-size:0.75rem;color:var(--gray);">Recommender: ${sanitize(r.recommender)} · Deadline: ${r.deadline}</p>
             </div>
-            <span style="background:rgba(0,0,0,0.05);color:${statusColor};padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">${r.status?.toUpperCase()}</span>
+            <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+              <span style="background:rgba(0,0,0,0.05);color:${statusColor};padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">${r.status?.toUpperCase()}</span>
+              ${r.status === 'approved' ? `<button class="btn-sm btn-gold" onclick="downloadRecommendationLetter('${sanitize(r.scholarship)}','${sanitize(r.recommender)}','${sanitize(r.reason||'')}','${sanitize(r.deadline)}')">📄 Download Letter</button>` : ''}
+            </div>
           </div>
         </div>`;
       }).join('')}
@@ -1491,6 +1494,14 @@ async function requestRecommendation() {
 async function approveRecommendation(recId) {
   await updateDoc(doc(db,'recommendations',recId),{status:'approved', approvedBy: currentUserData.name, approvedAt: serverTimestamp()});
   showToast('Recommendation approved ✅');
+  // Send notification to member
+  const recDoc = await getDoc(doc(db,'recommendations',recId));
+  const r = recDoc.data();
+  await addDoc(collection(db,'notifications'),{
+    title: '📝 Recommendation Letter Approved!',
+    message: `Your recommendation letter for ${r.scholarship} has been approved! Go to Scholarships → Recommendation Letter to download it.`,
+    type: 'announcement', postedBy: 'System', createdAt: serverTimestamp(), readBy: []
+  });
   loadRecommendationSection();
 }
 
@@ -1498,6 +1509,177 @@ async function rejectRecommendation(recId) {
   await updateDoc(doc(db,'recommendations',recId),{status:'rejected'});
   showToast('Recommendation rejected');
   loadRecommendationSection();
+}
+
+function downloadRecommendationLetter(scholarship, recommender, reason, deadline) {
+  const u = currentUserData;
+  const canvas = document.createElement('canvas');
+  canvas.width = 1200; canvas.height = 1000;
+  const ctx = canvas.getContext('2d');
+
+  // White background
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, 1200, 1000);
+
+  // Navy top bar
+  ctx.fillStyle = '#1B2A6B';
+  ctx.fillRect(0, 0, 1200, 12);
+
+  // Gold accent
+  ctx.fillStyle = '#F5A623';
+  ctx.fillRect(0, 12, 1200, 4);
+
+  // Load logo then draw letter
+  const logo = new Image();
+  logo.crossOrigin = 'anonymous';
+  logo.onload = function() {
+    // Logo
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(120, 90, 55, 0, Math.PI * 2);
+    ctx.fillStyle = '#F8F9FF';
+    ctx.fill();
+    ctx.clip();
+    ctx.drawImage(logo, 65, 35, 110, 110);
+    ctx.restore();
+
+    // Organization name
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#1B2A6B';
+    ctx.font = 'bold 24px Georgia';
+    ctx.fillText('YOUNG AFRICANS NETWORK', 200, 70);
+    ctx.fillStyle = '#E63329';
+    ctx.font = '14px Georgia';
+    ctx.fillText('Building the Future, Together', 200, 95);
+    ctx.fillStyle = '#6B7280';
+    ctx.font = '12px Georgia';
+    ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com', 200, 118);
+
+    // Divider
+    ctx.strokeStyle = '#F5A623';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(60, 145);
+    ctx.lineTo(1140, 145);
+    ctx.stroke();
+
+    // Date
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#6B7280';
+    ctx.font = '13px Georgia';
+    ctx.fillText(new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}), 1140, 185);
+
+    // Title
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#1B2A6B';
+    ctx.font = 'bold 20px Georgia';
+    ctx.fillText('LETTER OF RECOMMENDATION', 600, 240);
+
+    // Underline
+    ctx.strokeStyle = '#1B2A6B';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(400, 248);
+    ctx.lineTo(800, 248);
+    ctx.stroke();
+
+    // Re: line
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#1B2A6B';
+    ctx.font = 'bold 14px Georgia';
+    ctx.fillText(`Re: Letter of Recommendation for ${u.name}`, 60, 290);
+    ctx.fillStyle = '#6B7280';
+    ctx.font = '13px Georgia';
+    ctx.fillText(`Scholarship/Program: ${scholarship}`, 60, 315);
+
+    // Salutation
+    ctx.fillStyle = '#1B2A6B';
+    ctx.font = '14px Georgia';
+    ctx.fillText('Dear Scholarship Committee,', 60, 365);
+
+    // Body paragraphs
+    const wrapText = (text, x, y, maxWidth, lineHeight) => {
+      const words = text.split(' ');
+      let line = '';
+      words.forEach(word => {
+        const testLine = line + word + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && line !== '') {
+          ctx.fillText(line, x, y);
+          line = word + ' ';
+          y += lineHeight;
+        } else { line = testLine; }
+      });
+      ctx.fillText(line, x, y);
+      return y + lineHeight;
+    };
+
+    ctx.font = '13px Georgia';
+    ctx.fillStyle = '#1B2A6B';
+
+    const para1 = `It is with great pleasure and without reservation that I recommend ${u.name} from ${u.country||'Africa'} for the ${scholarship}. As the Founder and CEO of Young Africans Network (YAN), I have had the privilege of working with ${u.name} as a valued member of our pan-African community.`;
+    let y = wrapText(para1, 60, 405, 1080, 22);
+
+    y += 15;
+    const para2 = `During their time at YAN, ${u.name} has demonstrated exceptional dedication, commitment and a genuine passion for personal development and community impact. Their active participation in our programs reflects the qualities we look for in future leaders of Africa.`;
+    y = wrapText(para2, 60, y, 1080, 22);
+
+    y += 15;
+    const para3 = `${u.name} has expressed a compelling vision for their future: "${reason?.substring(0,150)||'They have demonstrated a strong commitment to their academic and professional development.'}" This dedication makes them an ideal candidate for this opportunity.`;
+    y = wrapText(para3, 60, y, 1080, 22);
+
+    y += 15;
+    const para4 = `I strongly believe that ${u.name} has the intellectual capacity, character and determination to excel in this program. I recommend them without hesitation and am confident they will be an asset to your institution.`;
+    y = wrapText(para4, 60, y, 1080, 22);
+
+    y += 30;
+    ctx.fillText('Yours sincerely,', 60, y);
+
+    // Signature
+    const signImg = new Image();
+    signImg.crossOrigin = 'anonymous';
+    signImg.onload = function() {
+      ctx.drawImage(signImg, 60, y+10, 160, 55);
+      // Line
+      ctx.strokeStyle = '#1B2A6B';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(60, y+75);
+      ctx.lineTo(350, y+75);
+      ctx.stroke();
+      // Name
+      ctx.fillStyle = '#1B2A6B';
+      ctx.font = 'italic bold 15px Georgia';
+      ctx.fillText('Emmanuel Ikumilu Mwori', 60, y+92);
+      ctx.fillStyle = '#6B7280';
+      ctx.font = '12px Georgia';
+      ctx.fillText('Founder & CEO, Young Africans Network', 60, y+110);
+
+      // Footer
+      ctx.fillStyle = '#1B2A6B';
+      ctx.fillRect(0, 960, 1200, 40);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '11px Georgia';
+      ctx.textAlign = 'center';
+      ctx.fillText('Young Africans Network | youngafricansnetwork.org | youngafricansn@gmail.com', 600, 984);
+
+      // Download
+      const link = document.createElement('a');
+      link.download = `YAN_Recommendation_Letter_${u.name.replace(/ /g,'_')}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('Letter downloading! 📄');
+    };
+    signImg.onerror = function() {
+      const link = document.createElement('a');
+      link.download = `YAN_Recommendation_Letter_${u.name.replace(/ /g,'_')}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('Letter downloading! 📄');
+    };
+    signImg.src = '/images/emmanuel_signature.png';
+  };
+  logo.src = '/images/logo.jpeg';
 }
 
 async function loadScholarshipStories() {
@@ -2298,7 +2480,7 @@ async function loadAdminModeration() {
 }
 
 // EXPOSE TO WINDOW
-window.showPostNotification=showPostNotification; window.postNotification=postNotification; window.markNotifRead=markNotifRead; window.deleteNotification=deleteNotification; window.filterDirectory=filterDirectory; window.sendAIMessage=sendAIMessage; window.askQuick=askQuick; window.showScholarshipForm=showScholarshipForm; window.previewScholarship=previewScholarship; window.showScholarshipSection=showScholarshipSection; window.postScholarship=postScholarship; window.trackApplication=trackApplication; window.updateApplicationStatus=updateApplicationStatus; window.deleteApplication=deleteApplication; window.deleteScholarship=deleteScholarship; window.showAIHelp=showAIHelp; window.requestRecommendation=requestRecommendation; window.approveRecommendation=approveRecommendation; window.rejectRecommendation=rejectRecommendation; window.shareSuccessStory=shareSuccessStory;
+window.showPostNotification=showPostNotification; window.postNotification=postNotification; window.markNotifRead=markNotifRead; window.deleteNotification=deleteNotification; window.filterDirectory=filterDirectory; window.sendAIMessage=sendAIMessage; window.askQuick=askQuick; window.showScholarshipForm=showScholarshipForm; window.previewScholarship=previewScholarship; window.showScholarshipSection=showScholarshipSection; window.postScholarship=postScholarship; window.trackApplication=trackApplication; window.updateApplicationStatus=updateApplicationStatus; window.deleteApplication=deleteApplication; window.deleteScholarship=deleteScholarship; window.showAIHelp=showAIHelp; window.requestRecommendation=requestRecommendation; window.approveRecommendation=approveRecommendation; window.rejectRecommendation=rejectRecommendation; window.shareSuccessStory=shareSuccessStory; window.downloadRecommendationLetter=downloadRecommendationLetter; window.downloadRecommendationLetter=downloadRecommendationLetter;
 window.doRegister=doRegister; window.doLogin=doLogin; window.doLogout=doLogout; window.doForgotPassword=doForgotPassword;
 window.showTab=showTab; window.showScreen=showScreen; window.submitPost=submitPost; window.deletePost=deletePost;
 window.toggleLike=toggleLike; window.toggleReplies=toggleReplies; window.submitReply=submitReply;
