@@ -390,8 +390,6 @@ async function loadTeam() {
   if (leaderGrid) leaderGrid.innerHTML = '';
   if (deptGrid) deptGrid.innerHTML = '';
   if (snap.empty) { if (leaderGrid) leaderGrid.innerHTML = '<p style="text-align:center;color:var(--gray);padding:2rem;">Team members coming soon!</p>'; return; }
-  const leaderGrid = document.getElementById('leadership-grid');
-  const deptGrid = document.getElementById('dept-grid');
   snap.docs.forEach(d => {
     const t = d.data();
     const photo = t.photoUrl ? `<img src="${t.photoUrl}" alt="${t.name}" class="leader-image" loading="lazy">` : `<div class="leader-image" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1B2A6B,#E63329);font-size:2rem;font-weight:900;color:#fff;">${(t.name||'?')[0]}</div>`;
