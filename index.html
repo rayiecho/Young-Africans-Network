@@ -379,6 +379,19 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
       <span class="hero-tag">🌍 Pan-African Youth Network</span>
       <h1>Building the<br><span>Future, Together</span></h1>
       <p class="hero-sub">Empowering African youth through education, leadership, mentorship and access to global opportunities. Join a network of changemakers across Africa and beyond.</p>
+      <!-- LAUNCH COUNTDOWN -->
+      <div style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.3);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:inline-block;">
+        <p style="color:var(--gold);font-size:0.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:0.75rem;">🚀 Official Continental Launch</p>
+        <div style="display:flex;gap:1rem;" id="countdown">
+          <div style="text-align:center;"><div id="cd-days" style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.65rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1px;">Days</div></div>
+          <div style="color:rgba(255,255,255,0.3);font-size:2rem;font-weight:300;">:</div>
+          <div style="text-align:center;"><div id="cd-hours" style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.65rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1px;">Hours</div></div>
+          <div style="color:rgba(255,255,255,0.3);font-size:2rem;font-weight:300;">:</div>
+          <div style="text-align:center;"><div id="cd-mins" style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.65rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1px;">Mins</div></div>
+          <div style="color:rgba(255,255,255,0.3);font-size:2rem;font-weight:300;">:</div>
+          <div style="text-align:center;"><div id="cd-secs" style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.65rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1px;">Secs</div></div>
+        </div>
+      </div>
       <div class="hero-btns">
         <a href="join.html" class="btn-primary">Join YAN Today</a>
         <a href="about.html" class="btn-outline">Learn More</a>
@@ -700,6 +713,27 @@ mobileMenu.querySelectorAll('.mobile-submenu a, .mobile-join').forEach(link => {
     mobileMenu.classList.remove('open');
   });
 });
+</script>
+<script>
+function updateCountdown() {
+  const launch = new Date('2026-06-01T00:00:00');
+  const now = new Date();
+  const diff = launch - now;
+  if (diff <= 0) {
+    document.getElementById('countdown').innerHTML = '<p style="color:var(--gold);font-weight:700;font-size:1rem;">🎉 YAN is LIVE!</p>';
+    return;
+  }
+  const days = Math.floor(diff / (1000*60*60*24));
+  const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+  const mins = Math.floor((diff % (1000*60*60)) / (1000*60));
+  const secs = Math.floor((diff % (1000*60)) / 1000);
+  document.getElementById('cd-days').textContent = String(days).padStart(2,'0');
+  document.getElementById('cd-hours').textContent = String(hours).padStart(2,'0');
+  document.getElementById('cd-mins').textContent = String(mins).padStart(2,'0');
+  document.getElementById('cd-secs').textContent = String(secs).padStart(2,'0');
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
 </script>
 </body>
 </html>
