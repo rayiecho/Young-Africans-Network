@@ -154,36 +154,11 @@ async function doRegister() {
       profileComplete: true
     });
     showToast('Account created! Welcome to YAN! 🎉');
-    // Send welcome email
-    try {
-      await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
-        to_email: email,
-        name: name,
-        subject: 'Welcome to Young Africans Network! 🌍',
-        message: `Dear ${name},\n\nWelcome to the Young Africans Network (YAN) family! 🎉\n\nYou have successfully joined our pan-African community.\n\n📱 Join our WhatsApp: https://chat.whatsapp.com/BlvxC0j6sUUBfWjbIW9dH9\n\n🌐 Platform: https://youngafricansnetwork.org/community.html\n\nBuilding the Future, Together!\n\nYAN Team`
-      });
-    } catch(e) { console.log('Welcome email failed:', e); }
-    showWelcomeModal();
   } catch(e) {
     showToast(e.message, 'error');
   } finally {
     btn.disabled = false; btn.textContent = 'Create Account 🚀';
   }
-}
-
-function showWelcomeModal() {
-  const modal = document.createElement('div');
-  modal.id = 'welcome-modal';
-  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
-  modal.innerHTML = `
-    <div style="background:var(--white);border-radius:24px;padding:2.5rem;max-width:480px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-      <div style="font-size:3rem;margin-bottom:1rem;">🎉</div>
-      <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">Welcome to YAN!</h2>
-      <p style="color:var(--gray);font-size:0.88rem;line-height:1.7;margin-bottom:1.5rem;">You are now part of the Young Africans Network family! Join our WhatsApp community to connect with members across Africa.</p>
-      <a href="https://chat.whatsapp.com/BlvxC0j6sUUBfWjbIW9dH9" target="_blank" style="display:block;background:#25D366;color:#fff;padding:0.85rem 2rem;border-radius:50px;font-weight:700;font-size:0.95rem;text-decoration:none;margin-bottom:0.75rem;">📱 Join YAN WhatsApp Community</a>
-      <button onclick="document.getElementById('welcome-modal').remove(); showScreen('screen-login');" style="background:var(--light);color:var(--navy);border:none;padding:0.75rem 2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.88rem;cursor:pointer;width:100%;">Continue to Login →</button>
-    </div>`;
-  document.body.appendChild(modal);
 }
 
 async function doLogin() {
@@ -2507,7 +2482,7 @@ async function loadAdminModeration() {
 
 // EXPOSE TO WINDOW
 window.showPostNotification=showPostNotification; window.postNotification=postNotification; window.markNotifRead=markNotifRead; window.deleteNotification=deleteNotification; window.filterDirectory=filterDirectory; window.sendAIMessage=sendAIMessage; window.askQuick=askQuick; window.showScholarshipForm=showScholarshipForm; window.previewScholarship=previewScholarship; window.showScholarshipSection=showScholarshipSection; window.postScholarship=postScholarship; window.trackApplication=trackApplication; window.updateApplicationStatus=updateApplicationStatus; window.deleteApplication=deleteApplication; window.deleteScholarship=deleteScholarship; window.showAIHelp=showAIHelp; window.requestRecommendation=requestRecommendation; window.approveRecommendation=approveRecommendation; window.rejectRecommendation=rejectRecommendation; window.shareSuccessStory=shareSuccessStory; window.downloadRecommendationLetter=downloadRecommendationLetter; window.downloadRecommendationLetter=downloadRecommendationLetter;
-window.doRegister=doRegister; window.showWelcomeModal=showWelcomeModal; window.doLogin=doLogin; window.doLogout=doLogout; window.doForgotPassword=doForgotPassword;
+window.doRegister=doRegister; window.doLogin=doLogin; window.doLogout=doLogout; window.doForgotPassword=doForgotPassword;
 window.showTab=showTab; window.showScreen=showScreen; window.submitPost=submitPost; window.deletePost=deletePost;
 window.toggleLike=toggleLike; window.toggleReplies=toggleReplies; window.submitReply=submitReply;
 window.showDeptSection=showDeptSection; window.switchDept=switchDept; window.markWatched=markWatched; window.toggleDiscussion=toggleDiscussion;
