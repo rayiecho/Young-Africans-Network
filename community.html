@@ -1117,6 +1117,268 @@ function downloadCertificate(certId) {
   logo.src = '/images/logo.jpeg';
 }
 
+// MAGAZINE
+async function loadMagazine() {
+  const container = document.getElementById('magazine-container');
+  const isAdmin = currentUserData?.isAdmin;
+  container.innerHTML = `
+    <div style="max-width:900px;margin:0 auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+        <div>
+          <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);">📰 YAN Digital Magazine</h2>
+          <p style="color:var(--gray);font-size:0.82rem;">Monthly digest of scholarships, stories, opportunities and YAN updates</p>
+        </div>
+        ${isAdmin ? `<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="generateMagazine()">📰 Generate This Month's Magazine</button>` : ''}
+      </div>
+      <div id="magazine-editions"><div class="loading">Loading editions...</div></div>
+    </div>`;
+  loadMagazineEditions();
+}
+
+async function loadMagazineEditions() {
+  const container = document.getElementById('magazine-editions');
+  if (!container) return;
+  const snap = await getDocs(query(collection(db,'magazine'),orderBy('createdAt','desc')));
+  if (snap.empty) {
+    container.innerHTML = `<div class="empty-state">
+      <div style="font-size:3rem;margin-bottom:1rem;">📰</div>
+      <p>No magazine editions yet.</p>
+      ${currentUserData?.isAdmin ? '<p style="font-size:0.82rem;color:var(--gray);">Click "Generate This Month\'s Magazine" to create the first edition!</p>' : '<p style="font-size:0.82rem;color:var(--gray);">Check back soon!</p>'}
+    </div>`;
+    return;
+  }
+  container.innerHTML = snap.docs.map(d => {
+    const m = d.data();
+    return `<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <div style="width:60px;height:80px;background:linear-gradient(135deg,var(--navy),var(--red));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">📰</div>
+        <div>
+          <h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);">${sanitize(m.title)}</h3>
+          <p style="font-size:0.78rem;color:var(--gray);">Edition ${sanitize(m.edition||'1')} · ${timeAgo(m.createdAt)}</p>
+          <p style="font-size:0.75rem;color:var(--gray);">${m.scholarships||0} scholarships · ${m.stories||0} stories · ${m.events||0} events</p>
+        </div>
+      </div>
+      <button class="btn-sm btn-navy" onclick="downloadMagazine('${d.id}')">📥 Download PDF</button>
+    </div>`;
+  }).join('');
+}
+
+async function generateMagazine() {
+  showToast('Generating magazine... please wait ⏳');
+  const month = new Date().toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+
+  // Fetch content
+  const [schSnap, storySnap, eventSnap, postSnap] = await Promise.all([
+    getDocs(query(collection(db,'scholarships'),orderBy('createdAt','desc'),limit(5))),
+    getDocs(query(collection(db,'successStories'),orderBy('createdAt','desc'),limit(3))),
+    getDocs(query(collection(db,'events'),orderBy('createdAt','desc'),limit(3))),
+    getDocs(query(collection(db,'posts'),orderBy('createdAt','desc'),limit(5)))
+  ]);
+
+  const scholarships = schSnap.docs.map(d => d.data());
+  const stories = storySnap.docs.map(d => d.data());
+  const events = eventSnap.docs.map(d => d.data());
+  const posts = postSnap.docs.map(d => d.data());
+
+  // Save to Firebase
+  const editionRef = await addDoc(collection(db,'magazine'), {
+    title: `YAN Magazine — ${month}`,
+    edition: new Date().getMonth() + 1,
+    month,
+    scholarships: scholarships.length,
+    stories: stories.length,
+    events: events.length,
+    createdBy: currentUserData.name,
+    createdAt: serverTimestamp(),
+    content: { scholarships, stories, events, posts }
+  });
+
+  showToast('Magazine generated! 📰');
+  loadMagazineEditions();
+
+  // Auto download
+  await downloadMagazineById(editionRef.id, { title: `YAN Magazine — ${month}`, content: { scholarships, stories, events, posts } });
+}
+
+async function downloadMagazine(editionId) {
+  const snap = await getDoc(doc(db,'magazine',editionId));
+  if (!snap.exists()) return showToast('Edition not found','error');
+  await downloadMagazineById(editionId, snap.data());
+}
+
+async function downloadMagazineById(id, data) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1200; canvas.height = 1700;
+  const ctx = canvas.getContext('2d');
+
+  const { scholarships=[], stories=[], events=[], posts=[] } = data.content || {};
+  const month = data.month || new Date().toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+
+  const logo = new Image();
+  logo.crossOrigin = 'anonymous';
+  logo.onload = function() {
+
+    // COVER
+    ctx.fillStyle = '#1B2A6B';
+    ctx.fillRect(0, 0, 1200, 420);
+
+    // Gold accent bars
+    ctx.fillStyle = '#F5A623';
+    ctx.fillRect(0, 0, 8, 420);
+    ctx.fillRect(1192, 0, 8, 420);
+
+    // Logo
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(130, 80, 55, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+    ctx.fill();
+    ctx.clip();
+    ctx.drawImage(logo, 75, 25, 110, 110);
+    ctx.restore();
+
+    // Magazine title
+    ctx.fillStyle = '#F5A623';
+    ctx.font = 'bold 18px Georgia';
+    ctx.textAlign = 'left';
+    ctx.fillText('YOUNG AFRICANS NETWORK', 210, 60);
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = '14px Georgia';
+    ctx.fillText('Building the Future, Together', 210, 85);
+
+    // Big title
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 72px Georgia';
+    ctx.textAlign = 'center';
+    ctx.fillText('YAN', 600, 200);
+    ctx.fillStyle = '#F5A623';
+    ctx.font = 'bold 48px Georgia';
+    ctx.fillText('MAGAZINE', 600, 260);
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    ctx.font = '24px Georgia';
+    ctx.fillText(month, 600, 310);
+
+    // Edition info
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '14px Georgia';
+    ctx.fillText(`${scholarships.length} Scholarships · ${stories.length} Success Stories · ${events.length} Events`, 600, 370);
+
+    // Divider
+    ctx.fillStyle = '#F5A623';
+    ctx.fillRect(0, 420, 1200, 4);
+
+    // CONTENT BACKGROUND
+    ctx.fillStyle = '#F8F9FF';
+    ctx.fillRect(0, 424, 1200, 1276);
+
+    let y = 470;
+
+    // SCHOLARSHIPS SECTION
+    if (scholarships.length > 0) {
+      ctx.fillStyle = '#1B2A6B';
+      ctx.font = 'bold 28px Georgia';
+      ctx.textAlign = 'left';
+      ctx.fillText('🏆 SCHOLARSHIP OPPORTUNITIES', 60, y); y += 15;
+      ctx.fillStyle = '#F5A623';
+      ctx.fillRect(60, y, 400, 3); y += 25;
+
+      scholarships.slice(0,4).forEach(s => {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.roundRect(60, y, 1080, 85, 12);
+        ctx.fill();
+        ctx.fillStyle = '#E63329';
+        ctx.fillRect(60, y, 6, 85);
+        ctx.fillStyle = '#1B2A6B';
+        ctx.font = 'bold 16px Georgia';
+        ctx.fillText(s.title?.substring(0,60)||'', 85, y+28);
+        ctx.fillStyle = '#6B7280';
+        ctx.font = '13px Georgia';
+        ctx.fillText(`${s.provider||''} · ${s.funding||''} · Deadline: ${s.deadline||''}`, 85, y+52);
+        ctx.fillStyle = '#3A5DAE';
+        ctx.font = '13px Georgia';
+        ctx.fillText(`Apply: ${s.link?.substring(0,60)||''}`, 85, y+72);
+        y += 100;
+      });
+      y += 20;
+    }
+
+    // SUCCESS STORIES
+    if (stories.length > 0) {
+      ctx.fillStyle = '#1B2A6B';
+      ctx.font = 'bold 28px Georgia';
+      ctx.fillText('🌟 SUCCESS STORIES', 60, y); y += 15;
+      ctx.fillStyle = '#F5A623';
+      ctx.fillRect(60, y, 300, 3); y += 25;
+
+      stories.slice(0,2).forEach(s => {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.roundRect(60, y, 1080, 100, 12);
+        ctx.fill();
+        ctx.fillStyle = '#F5A623';
+        ctx.fillRect(60, y, 6, 100);
+        ctx.fillStyle = '#1B2A6B';
+        ctx.font = 'bold 16px Georgia';
+        ctx.fillText(`${s.userName||''} — ${s.scholarship?.substring(0,50)||''}`, 85, y+30);
+        ctx.fillStyle = '#6B7280';
+        ctx.font = '13px Georgia';
+        const story = s.content?.substring(0,120)||'';
+        ctx.fillText(story + (s.content?.length>120?'...':''), 85, y+55);
+        y += 115;
+      });
+      y += 20;
+    }
+
+    // EVENTS
+    if (events.length > 0) {
+      ctx.fillStyle = '#1B2A6B';
+      ctx.font = 'bold 28px Georgia';
+      ctx.fillText('📅 UPCOMING EVENTS', 60, y); y += 15;
+      ctx.fillStyle = '#F5A623';
+      ctx.fillRect(60, y, 300, 3); y += 25;
+
+      events.slice(0,2).forEach(e => {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.roundRect(60, y, 1080, 80, 12);
+        ctx.fill();
+        ctx.fillStyle = '#27AE60';
+        ctx.fillRect(60, y, 6, 80);
+        ctx.fillStyle = '#1B2A6B';
+        ctx.font = 'bold 16px Georgia';
+        ctx.fillText(e.title?.substring(0,60)||'', 85, y+28);
+        ctx.fillStyle = '#6B7280';
+        ctx.font = '13px Georgia';
+        ctx.fillText(`${e.date||''} · ${e.lead||''}`, 85, y+52);
+        y += 95;
+      });
+    }
+
+    // FOOTER
+    ctx.fillStyle = '#1B2A6B';
+    ctx.fillRect(0, 1640, 1200, 60);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '14px Georgia';
+    ctx.textAlign = 'center';
+    ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com | Building the Future, Together', 600, 1676);
+
+    // Multicolor bar
+    const colors = ['#1B2A6B','#F5A623','#3A5DAE','#27AE60','#E63329','#1B2A6B','#F5A623','#3A5DAE','#E63329','#27AE60','#1B2A6B','#F5A623'];
+    colors.forEach((color,i) => {
+      ctx.fillStyle = color;
+      ctx.fillRect(i*100, 1695, 100, 5);
+    });
+
+    const link = document.createElement('a');
+    link.download = `YAN_Magazine_${month.replace(/ /g,'_')}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('Magazine downloading! 📰');
+  };
+  logo.src = '/images/logo.jpeg';
+}
+
 // SCHOLARSHIPS SYSTEM
 async function loadScholarships() {
   const container = document.getElementById('scholarships-container');
