@@ -3497,10 +3497,10 @@ async function loadReferralSection() {
     '</div></div>' +
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">' +
     '<div style="background:var(--light);border-radius:10px;padding:1rem;text-align:center;">' +
-    '<div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--navy);">' + count + '</div>' +
+    '<div style="font-family:\'Playfair Display\',serif;font-size:2rem;font-weight:900;color:var(--navy);">' + count + '</div>' +
     '<div style="font-size:0.75rem;color:var(--gray);">Friends Invited</div></div>' +
     '<div style="background:var(--light);border-radius:10px;padding:1rem;text-align:center;">' +
-    '<div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--gold);">' + referredMembers.length + '</div>' +
+    '<div style="font-family:\'Playfair Display\',serif;font-size:2rem;font-weight:900;color:var(--gold);">' + referredMembers.length + '</div>' +
     '<div style="font-size:0.75rem;color:var(--gray);">Joined So Far</div></div></div>' +
     (referredMembers.length > 0 ?
       '<h4 style="font-size:0.85rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">Members You Invited</h4>' +
@@ -3559,13 +3559,13 @@ function shareOnLinkedIn(deptName) {
   modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
   modal.innerHTML = '<div style="background:var(--white);border-radius:24px;padding:2rem;max-width:440px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">' +
     '<div style="font-size:2.5rem;margin-bottom:1rem;">🎓</div>' +
-    '<h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">Share Your Achievement!</h2>' +
+    '<h2 style="font-family:\'Playfair Display\',serif;font-size:1.3rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">Share Your Achievement!</h2>' +
     '<p style="color:var(--gray);font-size:0.85rem;line-height:1.7;margin-bottom:1.5rem;">Congratulations on earning your <strong>' + sanitize(deptName) + '</strong> certificate! Add it to your LinkedIn profile to showcase your achievement.</p>' +
     '<a href="' + linkedInUrl + '" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:0.75rem;background:#0A66C2;color:#fff;padding:0.85rem 2rem;border-radius:50px;font-weight:700;font-size:0.95rem;text-decoration:none;margin-bottom:0.75rem;">' +
     '<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>' +
     'Add to LinkedIn Profile</a>' +
     '<p style="font-size:0.72rem;color:var(--gray);margin-bottom:1rem;">This will open LinkedIn and pre-fill your certificate details.</p>' +
-    '<button onclick="document.getElementById('linkedin-modal').remove();" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer;width:100%;">Maybe Later</button>' +
+    '<button onclick="document.getElementById(\'linkedin-modal\').remove();" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:\'Poppins\',sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer;width:100%;">Maybe Later</button>' +
     '</div>';
   document.body.appendChild(modal);
 }
@@ -3782,10 +3782,10 @@ function renderCalendar() {
           const color = e.type === 'meeting' ? 'var(--navy)' : 'var(--gold)';
           const bg = e.type === 'meeting' ? 'rgba(27,42,107,0.1)' : 'rgba(245,166,35,0.15)';
           const time = e.date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-          return '<div onclick="showCalendarEvent('' + e.id + '')" style="background:' + bg + ';color:' + color + ';border-radius:4px;padding:0.15rem 0.4rem;font-size:0.62rem;font-weight:600;margin-top:0.2rem;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" title="' + e.title + '">' + time + ' ' + e.title + '</div>';
+          return '<div onclick="showCalendarEvent(\'' + e.id + '\')"' style="background:' + bg + ';color:' + color + ';border-radius:4px;padding:0.15rem 0.4rem;font-size:0.62rem;font-weight:600;margin-top:0.2rem;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" title="' + e.title + '">' + time + ' ' + e.title + '</div>';
         }).join('');
         const moreText = dayEvents.length > 3 ? '<div style="font-size:0.6rem;color:var(--gray);margin-top:0.2rem;">+' + (dayEvents.length-3) + ' more</div>' : '';
-        gridHTML += '<div style="background:' + (isToday ? 'rgba(230,51,41,0.05)' : 'var(--white)') + ';border-radius:10px;padding:0.5rem;min-height:80px;border:' + (isToday ? '2px solid var(--red)' : '1px solid rgba(27,42,107,0.07)') + ';transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">' +
+        gridHTML += '<div style="background:' + (isToday ? 'rgba(230,51,41,0.05)' : 'var(--white)') + ';border-radius:10px;padding:0.5rem;min-height:80px;border:' + (isToday ? '2px solid var(--red)' : '1px solid rgba(27,42,107,0.07)') + ';transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow=\'0 2px 8px rgba(0,0,0,0.08)\'" onmouseout="this.style.boxShadow=\'none\'">' +
           '<div style="font-size:0.82rem;font-weight:' + (isToday ? '900' : '600') + ';color:' + (isToday ? 'var(--red)' : 'var(--navy)') + ';">' + dayCount + '</div>' +
           eventsHTML + moreText + '</div>';
         dayCount++;
@@ -3817,7 +3817,7 @@ function renderCalendar() {
 
   container.innerHTML = '<div style="max-width:900px;margin:0 auto;">' +
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">' +
-    '<h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);">📅 Event Calendar</h2>' +
+    '<h2 style="font-family:\'Playfair Display\',serif;font-size:1.5rem;font-weight:900;color:var(--navy);">📅 Event Calendar</h2>' +
     '<div style="display:flex;align-items:center;gap:0.75rem;">' +
     '<button class="btn-sm btn-outline" onclick="changeCalendarMonth(-1)">← Prev</button>' +
     '<span style="font-size:1rem;font-weight:700;color:var(--navy);min-width:140px;text-align:center;">' + monthNames[month] + ' ' + year + '</span>' +
@@ -3863,7 +3863,7 @@ function showCalendarEvent(id) {
     (e.createdBy ? '<p style="font-size:0.82rem;color:var(--gray);">👤 By ' + sanitize(e.createdBy) + '</p>' : '') +
     '</div>' +
     (e.roomUrl ? '<button class="btn-primary" onclick="joinMeeting('' + sanitize(e.roomUrl) + '','' + sanitize(e.title) + '');this.closest('[style*=fixed]').remove()">🎥 Join Meeting</button>' : '') +
-    '<button onclick="this.closest('[style*=fixed]').remove()" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer;width:100%;margin-top:0.5rem;">Close</button>' +
+    '<button onclick="this.closest(\'[style*=fixed]\').remove()" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:\'Poppins\',sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer;width:100%;margin-top:0.5rem;">Close</button>' +
     '</div>';
   document.body.appendChild(modal);
 }
