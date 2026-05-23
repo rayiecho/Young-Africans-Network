@@ -2632,7 +2632,7 @@ async function loadHeadPanel() {
     <div class="head-section" style="margin-top:1.5rem;">
       <h3>👥 Department Members</h3>
       <div id="head-members-list"><div class="loading">Loading...</div></div>
-    </div>\`;
+    </div>`;
   loadHeadMaterials(dept); loadHeadEngagement(dept); loadHeadMembers(dept); loadHeadMeetings(dept);
 }
 
@@ -3077,7 +3077,7 @@ async function loadAdminModeration() {
 // ACHIEVEMENTS BOARD
 async function loadAchievements() {
   const container = document.getElementById('achievements-container');
-  container.innerHTML = \`
+  container.innerHTML = `
     <div style="max-width:900px;margin:0 auto;">
       <div style="text-align:center;margin-bottom:2rem;">
         <h2 style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">🏆 Achievements Board</h2>
@@ -3090,7 +3090,7 @@ async function loadAchievements() {
       </div>
       <div id="achievements-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;"></div>
       <div id="achievements-loading" style="text-align:center;padding:2rem;color:var(--gray);">Loading achievements...</div>
-    </div>\`;
+    </div>`;
 
   window._allAchievements = [];
 
@@ -3170,14 +3170,14 @@ function renderAchievementsGrid(type) {
     : window._allAchievements.filter(a => a.type === type);
 
   if (filtered.length === 0) {
-    grid.innerHTML = \`<div class="empty-state" style="grid-column:1/-1;">
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
       <div style="font-size:3rem;margin-bottom:1rem;">🏆</div>
       <p>No achievements yet. Be the first! 🌍</p>
-    </div>\`;
+    </div>`;
     return;
   }
 
-  grid.innerHTML = filtered.map(a => \`
+  grid.innerHTML = filtered.map(a => `
     <div style="background:var(--white);border-radius:20px;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,0.07);text-align:center;transition:transform 0.2s;position:relative;overflow:hidden;"
       onmouseover="this.style.transform='translateY(-6px)'"
       onmouseout="this.style.transform='translateY(0)'">
@@ -3192,7 +3192,7 @@ function renderAchievementsGrid(type) {
       <div style="font-size:0.88rem;font-weight:600;color:var(--navy);margin-bottom:0.25rem;">\${a.icon} \${sanitize(a.title)}</div>
       <div style="font-size:0.75rem;color:var(--gray);line-height:1.5;">\${sanitize(a.subtitle)}</div>
       <div style="font-size:0.68rem;color:var(--gray);margin-top:0.75rem;">\${timeAgo(a.date)}</div>
-    </div>\`).join('');
+    </div>`).join('');
 }
 window.loadAchievements = loadAchievements;
 window.filterAchievements = filterAchievements;
@@ -3284,7 +3284,7 @@ function filterResources(type, e, fromSearch) {
   const isAdmin = currentUserData && currentUserData.isAdmin;
   grid.innerHTML = filtered.map(function(r) {
     const delBtn = isAdmin ? '<button class=\"btn-sm btn-red\" onclick=\"deleteResource(\'' + r.id + '\')\">Delete</button>' : '';
-    return '<div style=\"background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);display:flex;flex-direction:column;gap:0.75rem;transition:transform 0.2s;\" onmouseover=\"this.style.transform=\'translateY(-4px)'\" onmouseout=\"this.style.transform=\'translateY(0)\'\"><div style=\"display:flex;align-items:flex-start;gap:0.75rem;\"><div style=\"width:48px;height:48px;border-radius:12px;background:rgba(27,42,107,0.07);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--navy);flex-shrink:0;\">' + (fileIcons[r.filetype] || 'FILE') + '</div><div style=\"flex:1;\"><div style=\"font-size:0.88rem;font-weight:700;color:var(--navy);line-height:1.4;\">' + sanitize(r.title) + '</div><div style=\"font-size:0.7rem;color:var(--gold);font-weight:600;margin-top:0.2rem;\">' + (CATS[r.category] || r.category) + '</div></div></div><p style=\"font-size:0.78rem;color:var(--gray);line-height:1.6;flex:1;\">' + sanitize(r.desc ? r.desc.substring(0, 100) : '') + (r.desc && r.desc.length > 100 ? '...' : '') + '</p><div style=\"display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;\"><div style=\"display:flex;gap:0.5rem;align-items:center;\"><span style=\"background:rgba(27,42,107,0.07);color:var(--navy);padding:0.2rem 0.6rem;border-radius:50px;font-size:0.68rem;font-weight:600;\">' + (r.filetype || 'PDF') + '</span><span style=\"font-size:0.68rem;color:var(--gray);\">' + (r.lang || 'English') + '</span><span style=\"font-size:0.68rem;color:var(--gray);\">Downloads: ' + (r.downloads || 0) + '</span></div><div style=\"display:flex;gap:0.4rem;\"><a href=\"' + sanitize(r.url) + '\" target=\"_blank\" onclick=\"trackDownload(\'' + r.id + '\');\" style=\"background:var(--navy);color:#fff;padding:0.4rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;text-decoration:none;\">Download</a>' + delBtn + '</div></div></div>';
+    return '<div style=\"background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);display:flex;flex-direction:column;gap:0.75rem;transition:transform 0.2s;\" onmouseover=\"this.style.transform=\'translateY(-4px)\'\" onmouseout=\"this.style.transform=\'translateY(0)\'\"><div style=\"display:flex;align-items:flex-start;gap:0.75rem;\"><div style=\"width:48px;height:48px;border-radius:12px;background:rgba(27,42,107,0.07);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--navy);flex-shrink:0;\">' + (fileIcons[r.filetype] || 'FILE') + '</div><div style=\"flex:1;\"><div style=\"font-size:0.88rem;font-weight:700;color:var(--navy);line-height:1.4;\">' + sanitize(r.title) + '</div><div style=\"font-size:0.7rem;color:var(--gold);font-weight:600;margin-top:0.2rem;\">' + (CATS[r.category] || r.category) + '</div></div></div><p style=\"font-size:0.78rem;color:var(--gray);line-height:1.6;flex:1;\">' + sanitize(r.desc ? r.desc.substring(0, 100) : '') + (r.desc && r.desc.length > 100 ? '...' : '') + '</p><div style=\"display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;\"><div style=\"display:flex;gap:0.5rem;align-items:center;\"><span style=\"background:rgba(27,42,107,0.07);color:var(--navy);padding:0.2rem 0.6rem;border-radius:50px;font-size:0.68rem;font-weight:600;\">' + (r.filetype || 'PDF') + '</span><span style=\"font-size:0.68rem;color:var(--gray);\">' + (r.lang || 'English') + '</span><span style=\"font-size:0.68rem;color:var(--gray);\">Downloads: ' + (r.downloads || 0) + '</span></div><div style=\"display:flex;gap:0.4rem;\"><a href=\"' + sanitize(r.url) + '\" target=\"_blank\" onclick=\"trackDownload(\'' + r.id + '\');\" style=\"background:var(--navy);color:#fff;padding:0.4rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;text-decoration:none;\">Download</a>' + delBtn + '</div></div></div>';
   }).join('');
 }
 
