@@ -267,6 +267,7 @@ function loadTabContent(tab) {
   if (tab === 'scholarships') loadScholarships();
   if (tab === 'magazine') loadMagazine();
   if (tab === 'achievements') loadAchievements();
+  if (tab === 'resources') loadResources();
 }
 
 // MEMBER DIRECTORY
@@ -3006,6 +3007,103 @@ function renderAchievementsGrid(type) {
 window.loadAchievements = loadAchievements;
 window.filterAchievements = filterAchievements;
 
+
+// RESOURCE LIBRARY
+const RESOURCE_CATEGORIES = [
+  { id: 'cv', label: 'CV Templates', icon: '\u{1F4C4}' },
+  { id: 'cover', label: 'Cover Letters', icon: '\u2709\uFE0F' },
+  { id: 'scholarship', label: 'Scholarship Guides', icon: '\u{1F3C6}' },
+  { id: 'interview', label: 'Interview Prep', icon: '\u{1F3A4}' },
+  { id: 'general', label: 'General', icon: '\u{1F4C1}' }
+];
+
+async function loadResources() {
+  const container = document.getElementById('resources-container');
+  const isAdmin = currentUserData && currentUserData.isAdmin;
+  const catButtons = RESOURCE_CATEGORIES.map(c => '<button class="achieve-filter-btn" onclick="filterResources(\'' + c.id + '\', event)">' + c.icon + ' ' + c.label + '</button>').join('');
+  const adminForm = isAdmin ? '<div id="resource-form" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Add New Resource</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;"><div class="form-group"><label>Title *</label><input type="text" id="res-title" placeholder="e.g. ATS-Friendly CV Template"></div><div class="form-group"><label>Category *</label><select id="res-category"><option value="cv">CV Templates</option><option value="cover">Cover Letters</option><option value="scholarship">Scholarship Guides</option><option value="interview">Interview Prep</option><option value="general">General</option></select></div><div class="form-group" style="grid-column:1/-1;"><label>Download URL *</label><input type="text" id="res-url" placeholder="https://drive.google.com/..."></div><div class="form-group" style="grid-column:1/-1;"><label>Description *</label><textarea id="res-desc" rows="3" placeholder="Describe this resource..."></textarea></div><div class="form-group"><label>File Type</label><select id="res-filetype"><option value="PDF">PDF</option><option value="DOCX">DOCX</option><option value="PPTX">PPTX</option><option value="XLSX">XLSX</option><option value="Link">Link</option></select></div><div class="form-group"><label>Language</label><select id="res-lang"><option value="English">English</option><option value="French">French</option><option value="Swahili">Swahili</option><option value="Arabic">Arabic</option><option value="Portuguese">Portuguese</option></select></div></div><div style="display:flex;gap:0.75rem;margin-top:1rem;"><button class="btn-primary" onclick="addResource()">Add Resource</button><button class="btn-outline" onclick="toggleResourceForm()">Cancel</button></div></div>' : '';
+  const addBtn = isAdmin ? '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="toggleResourceForm()">Add Resource</button>' : '';
+  container.innerHTML = '<div style="max-width:900px;margin:0 auto;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;"><div><h2 style=\"font-family:\'Playfair Display\',serif;font-size:1.5rem;font-weight:900;color:var(--navy);margin-bottom:0.25rem;\">Resource Library</h2><p style=\"color:var(--gray);font-size:0.82rem;\">CV templates, cover letters, scholarship guides and more</p></div>' + addBtn + '</div>' + adminForm + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;"><button class=\"achieve-filter-btn active\" onclick=\"filterResources(\'all\', event)\">All</button>' + catButtons + '</div><input type="text" id="res-search" placeholder="Search resources..." oninput="filterResources(window._activeResFilter||\'all\', event, true)" style="width:100%;background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.75rem 1rem;border-radius:12px;font-family:\'Poppins\',sans-serif;font-size:0.88rem;outline:none;margin-bottom:1.5rem;"><div id=\"resources-count\" style=\"font-size:0.82rem;color:var(--gray);margin-bottom:1rem;\"></div><div id=\"resources-grid\" style=\"display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;\"></div><div id=\"resources-loading\" style=\"text-align:center;padding:2rem;color:var(--gray);\">Loading resources...</div></div>';
+  const snap = await getDocs(query(collection(db, 'resources'), orderBy('createdAt', 'desc')));
+  window._allResources = snap.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
+  window._activeResFilter = 'all';
+  const loadingEl = document.getElementById('resources-loading');
+  if (loadingEl) loadingEl.style.display = 'none';
+  filterResources('all', null, false);
+}
+
+function toggleResourceForm() {
+  const form = document.getElementById('resource-form');
+  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function addResource() {
+  const title = document.getElementById('res-title').value.trim();
+  const category = document.getElementById('res-category').value;
+  const url = document.getElementById('res-url').value.trim();
+  const desc = document.getElementById('res-desc').value.trim();
+  const filetype = document.getElementById('res-filetype').value;
+  const lang = document.getElementById('res-lang').value;
+  if (!title || !url || !desc) return showToast('Fill all required fields', 'error');
+  await addDoc(collection(db, 'resources'), {
+    title: title, category: category, url: url, desc: desc,
+    filetype: filetype, lang: lang, downloads: 0,
+    postedBy: currentUserData.name, createdAt: serverTimestamp()
+  });
+  showToast('Resource added!');
+  toggleResourceForm();
+  loadResources();
+}
+
+async function trackDownload(resourceId) {
+  const res = window._allResources.find(function(r) { return r.id === resourceId; });
+  if (!res) return;
+  await updateDoc(doc(db, 'resources', resourceId), { downloads: (res.downloads || 0) + 1 });
+}
+
+async function deleteResource(id) {
+  if (!confirm('Delete this resource?')) return;
+  await deleteDoc(doc(db, 'resources', id));
+  showToast('Deleted');
+  loadResources();
+}
+
+function filterResources(type, e, fromSearch) {
+  if (!fromSearch) {
+    window._activeResFilter = type;
+    document.querySelectorAll('.achieve-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+    if (e && e.target) e.target.classList.add('active');
+  }
+  const search = (document.getElementById('res-search') ? document.getElementById('res-search').value.toLowerCase() : '');
+  const resources = window._allResources || [];
+  const filtered = resources.filter(function(r) {
+    const matchCat = window._activeResFilter === 'all' || r.category === window._activeResFilter;
+    const matchSearch = !search || (r.title && r.title.toLowerCase().includes(search)) || (r.desc && r.desc.toLowerCase().includes(search));
+    return matchCat && matchSearch;
+  });
+  const countEl = document.getElementById('resources-count');
+  if (countEl) countEl.textContent = filtered.length + ' resource' + (filtered.length !== 1 ? 's' : '') + ' found';
+  const grid = document.getElementById('resources-grid');
+  if (!grid) return;
+  const fileIcons = { PDF: 'PDF', DOCX: 'DOC', PPTX: 'PPT', XLSX: 'XLS', Link: 'Link' };
+  const CATS = { cv: 'CV Templates', cover: 'Cover Letters', scholarship: 'Scholarship Guides', interview: 'Interview Prep', general: 'General' };
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class=\"empty-state\" style=\"grid-column:1/-1;\"><p>No resources found.</p></div>';
+    return;
+  }
+  const isAdmin = currentUserData && currentUserData.isAdmin;
+  grid.innerHTML = filtered.map(function(r) {
+    const delBtn = isAdmin ? '<button class=\"btn-sm btn-red\" onclick=\"deleteResource(\'' + r.id + '\')\">Delete</button>' : '';
+    return '<div style=\"background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);display:flex;flex-direction:column;gap:0.75rem;transition:transform 0.2s;\" onmouseover=\"this.style.transform=\'translateY(-4px)'\" onmouseout=\"this.style.transform=\'translateY(0)\'\"><div style=\"display:flex;align-items:flex-start;gap:0.75rem;\"><div style=\"width:48px;height:48px;border-radius:12px;background:rgba(27,42,107,0.07);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--navy);flex-shrink:0;\">' + (fileIcons[r.filetype] || 'FILE') + '</div><div style=\"flex:1;\"><div style=\"font-size:0.88rem;font-weight:700;color:var(--navy);line-height:1.4;\">' + sanitize(r.title) + '</div><div style=\"font-size:0.7rem;color:var(--gold);font-weight:600;margin-top:0.2rem;\">' + (CATS[r.category] || r.category) + '</div></div></div><p style=\"font-size:0.78rem;color:var(--gray);line-height:1.6;flex:1;\">' + sanitize(r.desc ? r.desc.substring(0, 100) : '') + (r.desc && r.desc.length > 100 ? '...' : '') + '</p><div style=\"display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;\"><div style=\"display:flex;gap:0.5rem;align-items:center;\"><span style=\"background:rgba(27,42,107,0.07);color:var(--navy);padding:0.2rem 0.6rem;border-radius:50px;font-size:0.68rem;font-weight:600;\">' + (r.filetype || 'PDF') + '</span><span style=\"font-size:0.68rem;color:var(--gray);\">' + (r.lang || 'English') + '</span><span style=\"font-size:0.68rem;color:var(--gray);\">Downloads: ' + (r.downloads || 0) + '</span></div><div style=\"display:flex;gap:0.4rem;\"><a href=\"' + sanitize(r.url) + '\" target=\"_blank\" onclick=\"trackDownload(\'' + r.id + '\');\" style=\"background:var(--navy);color:#fff;padding:0.4rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;text-decoration:none;\">Download</a>' + delBtn + '</div></div></div>';
+  }).join('');
+}
+
+window.loadResources = loadResources;
+window.toggleResourceForm = toggleResourceForm;
+window.addResource = addResource;
+window.filterResources = filterResources;
+window.trackDownload = trackDownload;
+window.deleteResource = deleteResource;
 // EXPOSE TO WINDOW
 window.showPostNotification=showPostNotification; window.postNotification=postNotification; window.markNotifRead=markNotifRead; window.deleteNotification=deleteNotification; window.filterDirectory=filterDirectory; window.sendAIMessage=sendAIMessage; window.askQuick=askQuick; window.showScholarshipForm=showScholarshipForm; window.previewScholarship=previewScholarship; window.showScholarshipSection=showScholarshipSection; window.postScholarship=postScholarship; window.trackApplication=trackApplication; window.updateApplicationStatus=updateApplicationStatus; window.deleteApplication=deleteApplication; window.deleteScholarship=deleteScholarship; window.showAIHelp=showAIHelp; window.requestRecommendation=requestRecommendation; window.approveRecommendation=approveRecommendation; window.rejectRecommendation=rejectRecommendation; window.shareSuccessStory=shareSuccessStory; window.downloadRecommendationLetter=downloadRecommendationLetter; window.downloadRecommendationLetter=downloadRecommendationLetter;
 window.doRegister=doRegister; window.doLogin=doLogin; window.doLogout=doLogout; window.doForgotPassword=doForgotPassword;
@@ -3402,6 +3500,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <button class="tab-btn" data-tab="scholarships" onclick="showTab('scholarships')"><span class="tab-icon">🏆</span> Scholarships</button>
       <button class="tab-btn" data-tab="magazine" onclick="showTab('magazine')"><span class="tab-icon">📰</span> Magazine</button>
       <button class="tab-btn" data-tab="achievements" onclick="showTab('achievements')"><span class="tab-icon">🏆</span> Achievements</button>
+      <button class="tab-btn" data-tab="resources" onclick="showTab('resources')"><span class="tab-icon">📚</span> Resources</button>
       <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">👑</span> Head Panel</button>
       <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;"><span class="tab-icon">🛡️</span> Admin Panel</button>
     </nav>
@@ -3454,6 +3553,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <div class="tab-panel" id="tab-scholarships"><div id="scholarships-container"></div></div>
     <div class="tab-panel" id="tab-magazine"><div id="magazine-container"></div></div>
     <div class="tab-panel" id="tab-achievements"><div id="achievements-container"></div></div>
+    <div class="tab-panel" id="tab-resources"><div id="resources-container"></div></div>
   </main>
 </div>
 
