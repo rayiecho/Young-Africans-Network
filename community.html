@@ -1030,7 +1030,9 @@ function leaveMeeting() {
 }
 function toggleMeetingSize() {
   const floater = document.getElementById('floating-meeting');
-  floater.classList.toggle('expanded');
+  const isExpanded = floater.classList.toggle('expanded');
+  const btn = floater.querySelector('button[onclick="toggleMeetingSize()"]');
+  if (btn) btn.textContent = isExpanded ? '⤡' : '⤢';
 }
 
 async function toggleLiveMeeting(id, isLive) {
@@ -4275,7 +4277,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .moderation-row p{font-size:0.78rem;color:var(--gray);}
 .moderation-row small{font-size:0.7rem;color:var(--gray);}
 .loading{text-align:center;padding:2rem;color:var(--gray);font-size:0.88rem;}
-#floating-meeting.expanded{width:700px;height:450px;}
+#floating-meeting.expanded{width:90vw !important;height:80vh !important;bottom:1rem !important;right:1rem !important;}
 .empty-state{text-align:center;padding:3rem 1rem;color:var(--gray);font-size:0.9rem;}
 .achieve-filter-btn{background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 1.25rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
 .achieve-filter-btn.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
