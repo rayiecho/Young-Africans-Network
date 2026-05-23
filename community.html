@@ -3998,9 +3998,8 @@ async function handleGlobalSearch(query) {
 }
 
 
-// ═══════════════════════════════════════════
+
 // CAREER DEVELOPMENT & PUBLIC SPEAKING HUB
-// ═══════════════════════════════════════════
 
 const CAREER_PATHS = [
   { id: 'cv', icon: '📄', title: 'CV & Resume Mastery', desc: 'Build a scholarship and job-ready CV that stands out', color: '#1B2A6B', lessons: 5 },
@@ -4013,67 +4012,53 @@ const CAREER_PATHS = [
   { id: 'international', icon: '🌍', title: 'Working Internationally', desc: 'Navigate global job markets and work across borders', color: '#1ABC9C', lessons: 4 },
 ];
 
-const JOB_TYPES = ['Full-time', 'Part-time', 'Internship', 'Volunteer', 'Freelance', 'Remote'];
-const JOB_FIELDS = ['Technology', 'Finance', 'Communications', 'Community Development', 'Education', 'Health', 'Engineering', 'Business', 'Arts & Media', 'Research', 'Other'];
+const JOB_TYPES = ['Full-time','Part-time','Internship','Volunteer','Freelance','Remote'];
+const JOB_FIELDS = ['Technology','Finance','Communications','Community Development','Education','Health','Engineering','Business','Arts & Media','Research','Other'];
 
 async function loadCareerHub() {
   const container = document.getElementById('career-container');
-  const isAdminOrCareerHead = currentUserData?.isAdmin || (currentUserData?.isDeptHead && currentUserData?.department === 'career');
-  container.innerHTML = \`
-    <div style="max-width:900px;margin:0 auto;">
-      <div style="background:linear-gradient(135deg,var(--navy),#2D3F7B);border-radius:20px;padding:2rem;margin-bottom:1.5rem;color:#fff;">
-        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">
-          <span style="font-size:2.5rem;">🎤</span>
-          <div>
-            <h2 style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;margin-bottom:0.25rem;">Career Development & Public Speaking Hub</h2>
-            <p style="color:rgba(255,255,255,0.75);font-size:0.88rem;">Master the skills that open doors — from CV writing to commanding any stage</p>
-          </div>
-        </div>
-        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem;">
-          <button class="career-nav-btn active" onclick="showCareerSection('paths')">🎯 Learning Paths</button>
-          <button class="career-nav-btn" onclick="showCareerSection('materials')">📚 Materials</button>
-          <button class="career-nav-btn" onclick="showCareerSection('jobs')">💼 Job Board</button>
-          <button class="career-nav-btn" onclick="showCareerSection('resources')">📄 Resources</button>
-          <button class="career-nav-btn" onclick="showCareerSection('progress')">📊 My Progress</button>
-          \${isAdminOrCareerHead ? '<button class="career-nav-btn" onclick="showCareerSection('manage')">⚙️ Manage</button>' : ''}
-        </div>
-      </div>
+  const isAdminOrCareerHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'career'));
 
-      <div id="career-section-paths"></div>
-      <div id="career-section-materials" style="display:none;"></div>
-      <div id="career-section-jobs" style="display:none;"></div>
-      <div id="career-section-resources" style="display:none;"></div>
-      <div id="career-section-progress" style="display:none;"></div>
-      <div id="career-section-manage" style="display:none;"></div>
-    </div>
-  \`;
-
-  // Add nav btn styles
   if (!document.getElementById('career-styles')) {
     const style = document.createElement('style');
     style.id = 'career-styles';
-    style.textContent = \`
-      .career-nav-btn{background:rgba(255,255,255,0.15);color:#fff;border:1.5px solid rgba(255,255,255,0.3);padding:0.5rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
-      .career-nav-btn:hover,.career-nav-btn.active{background:#fff;color:var(--navy);}
-      .path-card{background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);transition:transform 0.2s;cursor:pointer;border-top:4px solid;}
-      .path-card:hover{transform:translateY(-4px);}
-      .job-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
-      .career-material-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
-      .career-badge{display:inline-block;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;}
-      .score-ring{width:120px;height:120px;border-radius:50%;background:conic-gradient(var(--gold) 0deg, var(--light) 0deg);display:flex;align-items:center;justify-content:center;margin:0 auto;position:relative;}
-    \`;
+    style.textContent = '.career-nav-btn{background:rgba(255,255,255,0.15);color:#fff;border:1.5px solid rgba(255,255,255,0.3);padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;}.career-nav-btn:hover,.career-nav-btn.active{background:#fff;color:var(--navy);}.path-card{background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);transition:transform 0.2s;cursor:pointer;border-top:4px solid #1B2A6B;}.path-card:hover{transform:translateY(-4px);}.job-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}.career-material-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}';
     document.head.appendChild(style);
   }
+
+  const manageBtn = isAdminOrCareerHead ? '<button class="career-nav-btn" onclick="showCareerSection(\'manage\')">⚙️ Manage</button>' : '';
+
+  container.innerHTML = '<div style="max-width:900px;margin:0 auto;">'
+    + '<div style="background:linear-gradient(135deg,var(--navy),#2D3F7B);border-radius:20px;padding:2rem;margin-bottom:1.5rem;color:#fff;">'
+    + '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">'
+    + '<span style="font-size:2.5rem;">🎤</span>'
+    + '<div><h2 style="font-family:Playfair Display,serif;font-size:1.8rem;font-weight:900;margin-bottom:0.25rem;">Career Development & Public Speaking Hub</h2>'
+    + '<p style="color:rgba(255,255,255,0.75);font-size:0.88rem;">Master the skills that open doors — from CV writing to commanding any stage</p></div></div>'
+    + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem;">'
+    + '<button class="career-nav-btn active" onclick="showCareerSection(\'paths\')">🎯 Learning Paths</button>'
+    + '<button class="career-nav-btn" onclick="showCareerSection(\'materials\')">📚 Materials</button>'
+    + '<button class="career-nav-btn" onclick="showCareerSection(\'jobs\')">💼 Job Board</button>'
+    + '<button class="career-nav-btn" onclick="showCareerSection(\'resources\')">📄 Resources</button>'
+    + '<button class="career-nav-btn" onclick="showCareerSection(\'progress\')">📊 My Progress</button>'
+    + manageBtn
+    + '</div></div>'
+    + '<div id="career-section-paths"></div>'
+    + '<div id="career-section-materials" style="display:none;"></div>'
+    + '<div id="career-section-jobs" style="display:none;"></div>'
+    + '<div id="career-section-resources" style="display:none;"></div>'
+    + '<div id="career-section-progress" style="display:none;"></div>'
+    + '<div id="career-section-manage" style="display:none;"></div>'
+    + '</div>';
 
   loadCareerPaths();
 }
 
 function showCareerSection(section) {
-  document.querySelectorAll('.career-nav-btn').forEach((b, i) => {
+  document.querySelectorAll('.career-nav-btn').forEach(function(b, i) {
     const sections = ['paths','materials','jobs','resources','progress','manage'];
     b.classList.toggle('active', sections[i] === section);
   });
-  ['paths','materials','jobs','resources','progress','manage'].forEach(s => {
+  ['paths','materials','jobs','resources','progress','manage'].forEach(function(s) {
     const el = document.getElementById('career-section-' + s);
     if (el) el.style.display = s === section ? 'block' : 'none';
   });
@@ -4085,86 +4070,70 @@ function showCareerSection(section) {
   if (section === 'manage') loadCareerManage();
 }
 
-// ── LEARNING PATHS ──────────────────────────────
 function loadCareerPaths() {
   const container = document.getElementById('career-section-paths');
   if (!container) return;
-  container.innerHTML = \`
-    <h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">🎯 Choose Your Learning Path</h3>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;">
-      \${CAREER_PATHS.map(p => \`
-        <div class="path-card" style="border-top-color:\${p.color};" onclick="openCareerPath('\${p.id}')">
-          <div style="font-size:2.5rem;margin-bottom:0.75rem;">\${p.icon}</div>
-          <h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">\${p.title}</h3>
-          <p style="font-size:0.78rem;color:var(--gray);line-height:1.6;margin-bottom:0.75rem;">\${p.desc}</p>
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <span style="font-size:0.72rem;color:\${p.color};font-weight:700;">\${p.lessons} lessons</span>
-            <span style="background:\${p.color}18;color:\${p.color};padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">Start →</span>
-          </div>
-        </div>
-      \`).join('')}
-    </div>
-  \`;
+  let html = '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">🎯 Choose Your Learning Path</h3>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;">';
+  CAREER_PATHS.forEach(function(p) {
+    html += '<div class="path-card" style="border-top-color:' + p.color + ';" onclick="openCareerPath(\'' + p.id + '\')">'
+      + '<div style="font-size:2.5rem;margin-bottom:0.75rem;">' + p.icon + '</div>'
+      + '<h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">' + p.title + '</h3>'
+      + '<p style="font-size:0.78rem;color:var(--gray);line-height:1.6;margin-bottom:0.75rem;">' + p.desc + '</p>'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;">'
+      + '<span style="font-size:0.72rem;color:' + p.color + ';font-weight:700;">' + p.lessons + ' lessons</span>'
+      + '<span style="background:' + p.color + '18;color:' + p.color + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">Start →</span>'
+      + '</div></div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
 }
 
 async function openCareerPath(pathId) {
-  const path = CAREER_PATHS.find(p => p.id === pathId);
+  const path = CAREER_PATHS.find(function(p) { return p.id === pathId; });
   if (!path) return;
   const container = document.getElementById('career-section-paths');
   container.innerHTML = '<div class="loading">Loading path...</div>';
-
-  // Load materials for this path
   const snap = await getDocs(query(collection(db, 'careerMaterials'), where('pathId', '==', pathId), orderBy('order', 'asc')));
-  const materials = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const materials = snap.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
 
-  container.innerHTML = \`
-    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">
-      <button onclick="loadCareerPaths()" style="background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;cursor:pointer;">← Back to Paths</button>
-      <div>
-        <h2 style="font-size:1.3rem;font-weight:900;color:var(--navy);">\${path.icon} \${path.title}</h2>
-        <p style="font-size:0.82rem;color:var(--gray);">\${path.desc}</p>
-      </div>
-    </div>
-    \${materials.length === 0 ? \`
-      <div class="empty-state">
-        <div style="font-size:3rem;margin-bottom:1rem;">\${path.icon}</div>
-        <p>No lessons posted yet for this path.</p>
-        <p style="font-size:0.82rem;color:var(--gray);">Check back soon — materials are being prepared!</p>
-      </div>
-    \` : materials.map((m, i) => \`
-      <div class="career-material-card" style="border-left:4px solid \${path.color};">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">
-          <div style="display:flex;align-items:center;gap:0.75rem;">
-            <div style="width:36px;height:36px;border-radius:50%;background:\${path.color};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.85rem;flex-shrink:0;">
-              \${i + 1}
-            </div>
-            <div>
-              <h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);">\${sanitize(m.title)}</h4>
-              <span style="font-size:0.72rem;color:var(--gray);">\${m.type === 'video' ? '📹 Video' : m.type === 'article' ? '📄 Article' : '📝 Assignment'} · \${m.duration || '10 min'}</span>
-            </div>
-          </div>
-          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-            \${m.type === 'video' && m.url ? \`<button class="btn-sm btn-navy" onclick="playCareerVideo('\${m.id}','\${sanitize(m.url)}')">▶ Watch</button>\` : ''}
-            \${m.type === 'article' && m.url ? \`<a href="\${sanitize(m.url)}" target="_blank" class="btn-sm btn-outline" style="text-decoration:none;">🔗 Read</a>\` : ''}
-            \${m.type === 'assignment' ? \`<button class="btn-sm btn-gold" onclick="openCareerAssignment('\${m.id}')">📝 Submit</button>\` : ''}
-            <button class="btn-sm btn-outline" onclick="markCareerDone('\${m.id}','\${pathId}')">✅ Done</button>
-          </div>
-        </div>
-        \${m.description ? \`<p style="font-size:0.82rem;color:var(--gray);line-height:1.6;">\${sanitize(m.description)}</p>\` : ''}
-        <div id="career-video-\${m.id}" style="display:none;margin-top:0.75rem;"></div>
-        <div id="career-assign-\${m.id}" style="display:none;margin-top:0.75rem;"></div>
-      </div>
-    \`).join('')}
-  \`;
+  let html = '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">'
+    + '<button onclick="loadCareerPaths()" style="background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;cursor:pointer;">← Back to Paths</button>'
+    + '<div><h2 style="font-size:1.3rem;font-weight:900;color:var(--navy);">' + path.icon + ' ' + path.title + '</h2>'
+    + '<p style="font-size:0.82rem;color:var(--gray);">' + path.desc + '</p></div></div>';
+
+  if (materials.length === 0) {
+    html += '<div class="empty-state"><div style="font-size:3rem;margin-bottom:1rem;">' + path.icon + '</div><p>No lessons posted yet.</p><p style="font-size:0.82rem;color:var(--gray);">Check back soon!</p></div>';
+  } else {
+    materials.forEach(function(m, i) {
+      html += '<div class="career-material-card" style="border-left:4px solid ' + path.color + ';">'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">'
+        + '<div style="display:flex;align-items:center;gap:0.75rem;">'
+        + '<div style="width:36px;height:36px;border-radius:50%;background:' + path.color + ';display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.85rem;flex-shrink:0;">' + (i+1) + '</div>'
+        + '<div><h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);">' + sanitize(m.title) + '</h4>'
+        + '<span style="font-size:0.72rem;color:var(--gray);">' + (m.type === 'video' ? '📹 Video' : m.type === 'article' ? '📄 Article' : '📝 Assignment') + ' · ' + (m.duration || '10 min') + '</span></div></div>'
+        + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">';
+      if (m.type === 'video' && m.url) html += '<button class="btn-sm btn-navy" onclick="playCareerVideo(\'' + m.id + '\',\'' + m.url.replace(/'/g,"\\'") + '\')">▶ Watch</button>';
+      if (m.type === 'article' && m.url) html += '<a href="' + sanitize(m.url) + '" target="_blank" class="btn-sm btn-outline" style="text-decoration:none;">🔗 Read</a>';
+      if (m.type === 'assignment') html += '<button class="btn-sm btn-gold" onclick="openCareerAssignment(\'' + m.id + '\')">📝 Submit</button>';
+      html += '<button class="btn-sm btn-outline" onclick="markCareerDone(\'' + m.id + '\',\'' + pathId + '\')">✅ Done</button></div></div>';
+      if (m.description) html += '<p style="font-size:0.82rem;color:var(--gray);line-height:1.6;">' + sanitize(m.description) + '</p>';
+      if (m.type === 'assignment' && m.instructions) html += '<div style="background:var(--light);border-radius:10px;padding:0.75rem;margin-top:0.5rem;"><p style="font-size:0.82rem;color:var(--navy);font-weight:600;">Assignment:</p><p style="font-size:0.82rem;color:var(--gray);">' + sanitize(m.instructions) + '</p></div>';
+      html += '<div id="career-video-' + m.id + '" style="display:none;margin-top:0.75rem;"></div>';
+      html += '<div id="career-assign-' + m.id + '" style="display:none;margin-top:0.75rem;"></div>';
+      html += '</div>';
+    });
+  }
+  container.innerHTML = html;
 }
 
 function playCareerVideo(materialId, url) {
   const box = document.getElementById('career-video-' + materialId);
   if (!box) return;
   if (box.style.display !== 'none') { box.style.display = 'none'; return; }
-  const youtubeId = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
-  if (youtubeId) {
-    box.innerHTML = \`<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;"><iframe src="https://www.youtube.com/embed/\${youtubeId[1]}" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"></iframe></div>\`;
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  if (match) {
+    box.innerHTML = '<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;"><iframe src="https://www.youtube.com/embed/' + match[1] + '" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"></iframe></div>';
   }
   box.style.display = 'block';
 }
@@ -4173,125 +4142,104 @@ async function openCareerAssignment(materialId) {
   const box = document.getElementById('career-assign-' + materialId);
   if (!box) return;
   if (box.style.display !== 'none') { box.style.display = 'none'; return; }
-
-  // Check if already submitted
   const existing = await getDoc(doc(db, 'careerAssignments', currentUser.uid + '_' + materialId));
-
   if (existing.exists()) {
     const data = existing.data();
     const statusColor = data.status === 'approved' ? '#27AE60' : data.status === 'rejected' ? '#E63329' : '#F5A623';
-    box.innerHTML = \`
-      <div style="background:var(--light);border-radius:12px;padding:1rem;">
-        <p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Your Submission:</p>
-        <p style="font-size:0.82rem;color:var(--gray);line-height:1.6;">\${sanitize(data.submission)}</p>
-        <div style="margin-top:0.75rem;display:flex;align-items:center;gap:0.5rem;">
-          <span style="background:\${statusColor}18;color:\${statusColor};padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">\${data.status?.toUpperCase() || 'PENDING'}</span>
-          \${data.feedback ? \`<span style="font-size:0.78rem;color:var(--gray);">Feedback: \${sanitize(data.feedback)}</span>\` : ''}
-        </div>
-      </div>
-    \`;
+    box.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;">'
+      + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Your Submission:</p>'
+      + '<p style="font-size:0.82rem;color:var(--gray);line-height:1.6;">' + sanitize(data.submission) + '</p>'
+      + '<div style="margin-top:0.75rem;"><span style="background:' + statusColor + '18;color:' + statusColor + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (data.status || 'PENDING').toUpperCase() + '</span>'
+      + (data.feedback ? '<span style="font-size:0.78rem;color:var(--gray);margin-left:0.5rem;">Feedback: ' + sanitize(data.feedback) + '</span>' : '')
+      + '</div></div>';
   } else {
-    box.innerHTML = \`
-      <div style="background:var(--light);border-radius:12px;padding:1rem;">
-        <p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">📝 Submit Your Assignment</p>
-        <textarea id="assign-input-\${materialId}" rows="5" placeholder="Write your assignment here..." style="width:100%;background:var(--white);border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;padding:0.75rem;font-family:'Poppins',sans-serif;font-size:0.85rem;outline:none;resize:vertical;"></textarea>
-        <div style="display:flex;gap:0.5rem;margin-top:0.75rem;flex-wrap:wrap;">
-          <button class="btn-sm btn-navy" onclick="submitCareerAssignment('\${materialId}')">Submit Assignment</button>
-          <button class="btn-sm btn-outline" onclick="document.getElementById('career-assign-\${materialId}').style.display='none'">Cancel</button>
-        </div>
-      </div>
-    \`;
+    box.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;">'
+      + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">📝 Submit Your Assignment</p>'
+      + '<textarea id="assign-input-' + materialId + '" rows="5" placeholder="Write your assignment here..." style="width:100%;background:var(--white);border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.85rem;outline:none;resize:vertical;box-sizing:border-box;"></textarea>'
+      + '<div style="display:flex;gap:0.5rem;margin-top:0.75rem;">'
+      + '<button class="btn-sm btn-navy" onclick="submitCareerAssignment(\'' + materialId + '\')">Submit</button>'
+      + '<button class="btn-sm btn-outline" onclick="document.getElementById(\'career-assign-' + materialId + '\').style.display=\'none\'">Cancel</button>'
+      + '</div></div>';
   }
   box.style.display = 'block';
 }
 
 async function submitCareerAssignment(materialId) {
   const input = document.getElementById('assign-input-' + materialId);
-  const submission = input?.value.trim();
+  const submission = input ? input.value.trim() : '';
   if (!submission) return showToast('Write your assignment first', 'error');
   await setDoc(doc(db, 'careerAssignments', currentUser.uid + '_' + materialId), {
-    userId: currentUser.uid,
-    userName: currentUserData.name,
-    materialId,
-    submission,
-    status: 'pending',
-    feedback: '',
+    userId: currentUser.uid, userName: currentUserData.name,
+    materialId, submission, status: 'pending', feedback: '',
     submittedAt: serverTimestamp()
   });
-  showToast('Assignment submitted! ✅ Your head will review it.');
+  showToast('Assignment submitted! ✅');
   openCareerAssignment(materialId);
 }
 
 async function markCareerDone(materialId, pathId) {
   await setDoc(doc(db, 'careerProgress', currentUser.uid + '_' + materialId), {
-    userId: currentUser.uid,
-    materialId,
-    pathId,
-    completed: true,
-    completedAt: serverTimestamp()
+    userId: currentUser.uid, materialId, pathId, completed: true, completedAt: serverTimestamp()
   }, { merge: true });
   showToast('Marked as done! ✅');
 }
 
-// ── MATERIALS TAB ──────────────────────────────
 async function loadCareerMaterials() {
   const container = document.getElementById('career-section-materials');
   if (!container) return;
   container.innerHTML = '<div class="loading">Loading materials...</div>';
-
   const snap = await getDocs(query(collection(db, 'careerMaterials'), orderBy('createdAt', 'desc')));
-  const isAdminOrCareerHead = currentUserData?.isAdmin || (currentUserData?.isDeptHead && currentUserData?.department === 'career');
+  const isAdminOrCareerHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'career'));
+  window._careerMaterials = snap.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
 
-  const pathFilter = CAREER_PATHS.map(p =>
-    \`<button class="achieve-filter-btn" onclick="filterCareerMaterials('\${p.id}', event)">\${p.icon} \${p.title.split(' ')[0]}</button>\`
-  ).join('');
+  let filterBtns = '<button class="achieve-filter-btn active" onclick="filterCareerMaterials(\'all\', event)">All</button>';
+  CAREER_PATHS.forEach(function(p) {
+    filterBtns += '<button class="achieve-filter-btn" onclick="filterCareerMaterials(\'' + p.id + '\', event)">' + p.icon + ' ' + p.title.split(' ')[0] + '</button>';
+  });
 
-  container.innerHTML = \`
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">
-      <h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">📚 All Materials</h3>
-      \${isAdminOrCareerHead ? '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="showCareerSection('manage')">➕ Add Material</button>' : ''}
-    </div>
-    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.25rem;">
-      <button class="achieve-filter-btn active" onclick="filterCareerMaterials('all', event)">All</button>
-      \${pathFilter}
-    </div>
-    <div id="career-materials-grid">
-      \${snap.empty ? '<div class="empty-state">No materials yet. Check back soon!</div>' :
-        snap.docs.map(d => {
-          const m = { id: d.id, ...d.data() };
-          const path = CAREER_PATHS.find(p => p.id === m.pathId);
-          return \`<div class="career-material-card" data-path="\${m.pathId}" style="border-left:4px solid \${path?.color || 'var(--navy)'};">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
-              <div style="flex:1;">
-                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">
-                  <span style="background:\${path?.color || 'var(--navy)'}18;color:\${path?.color || 'var(--navy)'};padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">\${path?.icon || ''} \${path?.title || m.pathId}</span>
-                  <span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;">\${m.type === 'video' ? '📹 Video' : m.type === 'article' ? '📄 Article' : '📝 Assignment'}</span>
-                </div>
-                <h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">\${sanitize(m.title)}</h4>
-                \${m.description ? \`<p style="font-size:0.78rem;color:var(--gray);line-height:1.6;">\${sanitize(m.description.substring(0,120))}...</p>\` : ''}
-              </div>
-              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:flex-start;">
-                \${m.type === 'video' && m.url ? \`<button class="btn-sm btn-navy" onclick="playCareerVideo('\${m.id}','\${sanitize(m.url)}')">▶ Watch</button>\` : ''}
-                \${m.type === 'article' && m.url ? \`<a href="\${sanitize(m.url)}" target="_blank" class="btn-sm btn-outline" style="text-decoration:none;">🔗 Read</a>\` : ''}
-                \${m.type === 'assignment' ? \`<button class="btn-sm btn-gold" onclick="openCareerAssignment('\${m.id}')">📝 Submit</button>\` : ''}
-                <button class="btn-sm btn-outline" onclick="markCareerDone('\${m.id}','\${m.pathId}')">✅ Done</button>
-                \${isAdminOrCareerHead ? \`<button class="btn-sm btn-red" onclick="deleteCareerMaterial('\${m.id}')">🗑️</button>\` : ''}
-              </div>
-            </div>
-            <div id="career-video-\${m.id}" style="display:none;margin-top:0.75rem;"></div>
-            <div id="career-assign-\${m.id}" style="display:none;margin-top:0.75rem;"></div>
-          </div>\`;
-        }).join('')}
-    </div>
-  \`;
-  window._careerMaterials = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  let materialsHtml = '';
+  if (snap.empty) {
+    materialsHtml = '<div class="empty-state">No materials yet. Check back soon!</div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const m = Object.assign({ id: d.id }, d.data());
+      const path = CAREER_PATHS.find(function(p) { return p.id === m.pathId; });
+      const color = path ? path.color : 'var(--navy)';
+      materialsHtml += '<div class="career-material-card" data-path="' + m.pathId + '" style="border-left:4px solid ' + color + ';">'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">'
+        + '<div style="flex:1;">'
+        + '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">'
+        + '<span style="background:' + color + '18;color:' + color + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + (path ? path.icon + ' ' + path.title : m.pathId) + '</span>'
+        + '<span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;">' + (m.type === 'video' ? '📹 Video' : m.type === 'article' ? '📄 Article' : '📝 Assignment') + '</span>'
+        + '</div>'
+        + '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(m.title) + '</h4>'
+        + (m.description ? '<p style="font-size:0.78rem;color:var(--gray);line-height:1.6;">' + sanitize(m.description.substring(0,120)) + '...</p>' : '')
+        + '</div>'
+        + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:flex-start;">';
+      if (m.type === 'video' && m.url) materialsHtml += '<button class="btn-sm btn-navy" onclick="playCareerVideo(\'' + m.id + '\',\'' + m.url.replace(/'/g,"\\'") + '\')">▶ Watch</button>';
+      if (m.type === 'article' && m.url) materialsHtml += '<a href="' + sanitize(m.url) + '" target="_blank" class="btn-sm btn-outline" style="text-decoration:none;">🔗 Read</a>';
+      if (m.type === 'assignment') materialsHtml += '<button class="btn-sm btn-gold" onclick="openCareerAssignment(\'' + m.id + '\')">📝 Submit</button>';
+      materialsHtml += '<button class="btn-sm btn-outline" onclick="markCareerDone(\'' + m.id + '\',\'' + m.pathId + '\')">✅ Done</button>';
+      if (isAdminOrCareerHead) materialsHtml += '<button class="btn-sm btn-red" onclick="deleteCareerMaterial(\'' + m.id + '\')">🗑️</button>';
+      materialsHtml += '</div></div>';
+      materialsHtml += '<div id="career-video-' + m.id + '" style="display:none;margin-top:0.75rem;"></div>';
+      materialsHtml += '<div id="career-assign-' + m.id + '" style="display:none;margin-top:0.75rem;"></div>';
+      materialsHtml += '</div>';
+    });
+  }
+
+  container.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">'
+    + '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">📚 All Materials</h3>'
+    + (isAdminOrCareerHead ? '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="showCareerSection(\'manage\')">➕ Add Material</button>' : '')
+    + '</div>'
+    + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.25rem;">' + filterBtns + '</div>'
+    + '<div id="career-materials-grid">' + materialsHtml + '</div>';
 }
 
 function filterCareerMaterials(pathId, e) {
-  document.querySelectorAll('.achieve-filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.achieve-filter-btn').forEach(function(b) { b.classList.remove('active'); });
   if (e && e.target) e.target.classList.add('active');
-  const cards = document.querySelectorAll('#career-materials-grid .career-material-card');
-  cards.forEach(card => {
+  document.querySelectorAll('#career-materials-grid .career-material-card').forEach(function(card) {
     card.style.display = pathId === 'all' || card.dataset.path === pathId ? 'block' : 'none';
   });
 }
@@ -4303,67 +4251,48 @@ async function deleteCareerMaterial(id) {
   loadCareerMaterials();
 }
 
-// ── JOB BOARD ──────────────────────────────────
 async function loadJobBoard() {
   const container = document.getElementById('career-section-jobs');
   if (!container) return;
   container.innerHTML = '<div class="loading">Loading jobs...</div>';
-
   const snap = await getDocs(query(collection(db, 'careerJobs'), orderBy('createdAt', 'desc')));
+  window._careerJobs = snap.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
 
-  container.innerHTML = \`
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">
-      <h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">💼 Job & Opportunity Board</h3>
-      <button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="toggleJobForm()">➕ Post Opportunity</button>
-    </div>
+  let typeOpts = JOB_TYPES.map(function(t) { return '<option value="' + t + '">' + t + '</option>'; }).join('');
+  let fieldOpts = JOB_FIELDS.map(function(f) { return '<option value="' + f + '">' + f + '</option>'; }).join('');
+  let formTypeOpts = JOB_TYPES.map(function(t) { return '<option value="' + t + '">' + t + '</option>'; }).join('');
+  let formFieldOpts = JOB_FIELDS.map(function(f) { return '<option value="' + f + '">' + f + '</option>'; }).join('');
 
-    <div id="job-post-form" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
-      <h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Post an Opportunity</h4>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-        <div class="form-group"><label>Job Title *</label><input type="text" id="job-title" placeholder="e.g. Marketing Officer"></div>
-        <div class="form-group"><label>Organization *</label><input type="text" id="job-org" placeholder="e.g. UNICEF Kenya"></div>
-        <div class="form-group"><label>Type *</label>
-          <select id="job-type">
-            \${JOB_TYPES.map(t => \`<option value="\${t}">\${t}</option>\`).join('')}
-          </select>
-        </div>
-        <div class="form-group"><label>Field *</label>
-          <select id="job-field">
-            \${JOB_FIELDS.map(f => \`<option value="\${f}">\${f}</option>\`).join('')}
-          </select>
-        </div>
-        <div class="form-group"><label>Country *</label><input type="text" id="job-country" placeholder="e.g. Kenya, Remote, Pan-Africa"></div>
-        <div class="form-group"><label>Deadline</label><input type="date" id="job-deadline"></div>
-        <div class="form-group" style="grid-column:1/-1;"><label>Application Link *</label><input type="text" id="job-link" placeholder="https://..."></div>
-        <div class="form-group" style="grid-column:1/-1;"><label>Description *</label><textarea id="job-desc" rows="4" placeholder="Describe the role, requirements and how to apply..."></textarea></div>
-      </div>
-      <div style="display:flex;gap:0.75rem;margin-top:1rem;">
-        <button class="btn-primary" onclick="postCareerJob()">Post Opportunity</button>
-        <button class="btn-outline" onclick="toggleJobForm()">Cancel</button>
-      </div>
-    </div>
+  let jobsHtml = snap.empty
+    ? '<div class="empty-state"><div style="font-size:3rem;margin-bottom:1rem;">💼</div><p>No opportunities posted yet.</p><p style="font-size:0.82rem;color:var(--gray);">Be the first to post a job or internship!</p></div>'
+    : snap.docs.map(function(d) { return renderJobCard(d.id, d.data()); }).join('');
 
-    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.25rem;">
-      <select id="job-filter-type" onchange="filterJobs()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.82rem;outline:none;">
-        <option value="">All Types</option>
-        \${JOB_TYPES.map(t => \`<option value="\${t}">\${t}</option>\`).join('')}
-      </select>
-      <select id="job-filter-field" onchange="filterJobs()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.82rem;outline:none;">
-        <option value="">All Fields</option>
-        \${JOB_FIELDS.map(f => \`<option value="\${f}">\${f}</option>\`).join('')}
-      </select>
-      <input type="text" id="job-filter-search" placeholder="🔍 Search..." oninput="filterJobs()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.82rem;outline:none;flex:1;min-width:150px;">
-    </div>
-
-    <div id="jobs-list">
-      \${snap.empty ? \`<div class="empty-state">
-        <div style="font-size:3rem;margin-bottom:1rem;">💼</div>
-        <p>No opportunities posted yet.</p>
-        <p style="font-size:0.82rem;color:var(--gray);">Be the first to post a job or internship for the community!</p>
-      </div>\` : snap.docs.map(d => renderJobCard(d.id, d.data())).join('')}
-    </div>
-  \`;
-  window._careerJobs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  container.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">'
+    + '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">💼 Job & Opportunity Board</h3>'
+    + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="toggleJobForm()">➕ Post Opportunity</button>'
+    + '</div>'
+    + '<div id="job-post-form" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
+    + '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Post an Opportunity</h4>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">'
+    + '<div class="form-group"><label>Job Title *</label><input type="text" id="job-title" placeholder="e.g. Marketing Officer"></div>'
+    + '<div class="form-group"><label>Organization *</label><input type="text" id="job-org" placeholder="e.g. UNICEF Kenya"></div>'
+    + '<div class="form-group"><label>Type *</label><select id="job-type">' + formTypeOpts + '</select></div>'
+    + '<div class="form-group"><label>Field *</label><select id="job-field">' + formFieldOpts + '</select></div>'
+    + '<div class="form-group"><label>Country *</label><input type="text" id="job-country" placeholder="e.g. Kenya, Remote"></div>'
+    + '<div class="form-group"><label>Deadline</label><input type="date" id="job-deadline"></div>'
+    + '<div class="form-group" style="grid-column:1/-1;"><label>Application Link *</label><input type="text" id="job-link" placeholder="https://..."></div>'
+    + '<div class="form-group" style="grid-column:1/-1;"><label>Description *</label><textarea id="job-desc" rows="4" placeholder="Describe the role and requirements..."></textarea></div>'
+    + '</div>'
+    + '<div style="display:flex;gap:0.75rem;margin-top:1rem;">'
+    + '<button class="btn-primary" onclick="postCareerJob()">Post Opportunity</button>'
+    + '<button class="btn-outline" onclick="toggleJobForm()">Cancel</button>'
+    + '</div></div>'
+    + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.25rem;">'
+    + '<select id="job-filter-type" onchange="filterJobs()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;"><option value="">All Types</option>' + typeOpts + '</select>'
+    + '<select id="job-filter-field" onchange="filterJobs()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;"><option value="">All Fields</option>' + fieldOpts + '</select>'
+    + '<input type="text" id="job-filter-search" placeholder="Search..." oninput="filterJobs()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;flex:1;min-width:150px;">'
+    + '</div>'
+    + '<div id="jobs-list">' + jobsHtml + '</div>';
 }
 
 function renderJobCard(id, j) {
@@ -4374,50 +4303,43 @@ function renderJobCard(id, j) {
   const isUrgent = daysLeft !== null && daysLeft <= 7 && daysLeft >= 0;
   const typeColors = { 'Full-time':'#1B2A6B','Part-time':'#3498DB','Internship':'#27AE60','Volunteer':'#F5A623','Freelance':'#9B59B6','Remote':'#1ABC9C' };
   const color = typeColors[j.type] || '#1B2A6B';
-  const canDelete = j.postedById === currentUser?.uid || currentUserData?.isAdmin;
-  return \`<div class="job-card" data-type="\${j.type}" data-field="\${j.field}" style="border-left:4px solid \${isExpired ? '#ccc' : color};">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">
-      <div>
-        <h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">\${sanitize(j.title)}</h3>
-        <p style="font-size:0.82rem;color:var(--gray);">by \${sanitize(j.organization)}</p>
-      </div>
-      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-        <span style="background:\${color}18;color:\${color};padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">\${j.type}</span>
-        <span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">\${j.field}</span>
-        \${isExpired ? '<span style="background:rgba(107,114,128,0.1);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">Expired</span>' :
-          isUrgent ? \`<span style="background:rgba(230,51,41,0.1);color:var(--red);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">🔥 \${daysLeft} days left</span>\` :
-          daysLeft !== null ? \`<span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">📅 \${daysLeft} days left</span>\` : ''}
-      </div>
-    </div>
-    <p style="font-size:0.85rem;color:var(--gray);line-height:1.7;margin-bottom:0.75rem;">\${sanitize(j.description?.substring(0,200))}...</p>
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
-      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-        <span style="font-size:0.75rem;color:var(--gray);">📍 \${sanitize(j.country)}</span>
-        \${j.deadline ? \`<span style="font-size:0.75rem;color:var(--gray);">· Deadline: \${j.deadline}</span>\` : ''}
-        <span style="font-size:0.75rem;color:var(--gray);">· Posted by \${sanitize(j.postedBy)}</span>
-      </div>
-      <div style="display:flex;gap:0.5rem;">
-        \${!isExpired ? \`<a href="\${sanitize(j.link)}" target="_blank" class="btn-sm btn-navy" style="text-decoration:none;">Apply Now →</a>\` : ''}
-        \${canDelete ? \`<button class="btn-sm btn-red" onclick="deleteCareerJob('\${id}')">🗑️</button>\` : ''}
-      </div>
-    </div>
-  </div>\`;
+  const canDelete = j.postedById === currentUser.uid || (currentUserData && currentUserData.isAdmin);
+  let urgencyBadge = '';
+  if (isExpired) urgencyBadge = '<span style="background:rgba(107,114,128,0.1);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">Expired</span>';
+  else if (isUrgent) urgencyBadge = '<span style="background:rgba(230,51,41,0.1);color:var(--red);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">🔥 ' + daysLeft + ' days left</span>';
+  else if (daysLeft !== null) urgencyBadge = '<span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">📅 ' + daysLeft + ' days left</span>';
+
+  return '<div class="job-card" data-type="' + j.type + '" data-field="' + j.field + '" style="border-left:4px solid ' + (isExpired ? '#ccc' : color) + ';">'
+    + '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">'
+    + '<div><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(j.title) + '</h3>'
+    + '<p style="font-size:0.82rem;color:var(--gray);">by ' + sanitize(j.organization) + '</p></div>'
+    + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">'
+    + '<span style="background:' + color + '18;color:' + color + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + j.type + '</span>'
+    + '<span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">' + j.field + '</span>'
+    + urgencyBadge + '</div></div>'
+    + '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;margin-bottom:0.75rem;">' + sanitize((j.description || '').substring(0,200)) + '...</p>'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">'
+    + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">'
+    + '<span style="font-size:0.75rem;color:var(--gray);">📍 ' + sanitize(j.country) + '</span>'
+    + (j.deadline ? '<span style="font-size:0.75rem;color:var(--gray);">· Deadline: ' + j.deadline + '</span>' : '')
+    + '<span style="font-size:0.75rem;color:var(--gray);">· By ' + sanitize(j.postedBy) + '</span></div>'
+    + '<div style="display:flex;gap:0.5rem;">'
+    + (!isExpired ? '<a href="' + sanitize(j.link) + '" target="_blank" class="btn-sm btn-navy" style="text-decoration:none;">Apply Now →</a>' : '')
+    + (canDelete ? '<button class="btn-sm btn-red" onclick="deleteCareerJob(\'' + id + '\')">🗑️</button>' : '')
+    + '</div></div></div>';
 }
 
 function filterJobs() {
-  const type = document.getElementById('job-filter-type')?.value || '';
-  const field = document.getElementById('job-filter-field')?.value || '';
-  const search = document.getElementById('job-filter-search')?.value.toLowerCase() || '';
+  const type = (document.getElementById('job-filter-type') || {}).value || '';
+  const field = (document.getElementById('job-filter-field') || {}).value || '';
+  const search = ((document.getElementById('job-filter-search') || {}).value || '').toLowerCase();
   const jobs = window._careerJobs || [];
   const list = document.getElementById('jobs-list');
   if (!list) return;
-  const filtered = jobs.filter(j => {
-    const matchType = !type || j.type === type;
-    const matchField = !field || j.field === field;
-    const matchSearch = !search || j.title?.toLowerCase().includes(search) || j.organization?.toLowerCase().includes(search);
-    return matchType && matchField && matchSearch;
+  const filtered = jobs.filter(function(j) {
+    return (!type || j.type === type) && (!field || j.field === field) && (!search || (j.title || '').toLowerCase().includes(search) || (j.organization || '').toLowerCase().includes(search));
   });
-  list.innerHTML = filtered.length === 0 ? '<div class="empty-state">No jobs found.</div>' : filtered.map(j => renderJobCard(j.id, j)).join('');
+  list.innerHTML = filtered.length === 0 ? '<div class="empty-state">No jobs found.</div>' : filtered.map(function(j) { return renderJobCard(j.id, j); }).join('');
 }
 
 function toggleJobForm() {
@@ -4440,12 +4362,10 @@ async function postCareerJob() {
     description: desc, postedBy: currentUserData.name,
     postedById: currentUser.uid, createdAt: serverTimestamp(), active: true
   });
-  // Notify members
   await addDoc(collection(db, 'notifications'), {
     title: '💼 New ' + type + ': ' + title,
-    message: org + ' is looking for someone for: ' + title + '. Location: ' + country + (deadline ? '. Deadline: ' + deadline : '') + '. Check Career Hub!',
-    type: 'opportunity', postedBy: currentUserData.name,
-    createdAt: serverTimestamp(), readBy: []
+    message: org + ' is looking for: ' + title + '. Location: ' + country + (deadline ? '. Deadline: ' + deadline : '') + '. Check Career Hub!',
+    type: 'opportunity', postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
   });
   showToast('Opportunity posted! 💼');
   toggleJobForm();
@@ -4459,181 +4379,134 @@ async function deleteCareerJob(id) {
   loadJobBoard();
 }
 
-// ── RESOURCES ──────────────────────────────────
 function loadCareerResources() {
   const container = document.getElementById('career-section-resources');
   if (!container) return;
-  container.innerHTML = \`
-    <h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">📄 Career Resources</h3>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;">
-      \${[
-        { icon: '📄', title: 'ATS-Friendly CV Template', desc: 'A clean, professional CV template that passes applicant tracking systems used by global companies.', tag: 'CV Template', color: '#1B2A6B', action: "showAIHelp('Help me create an ATS-friendly CV. Give me a complete template with all sections.')" },
-        { icon: '✉️', title: 'Cover Letter Template', desc: 'A powerful cover letter template tailored for African job seekers applying to local and international roles.', tag: 'Template', color: '#E63329', action: "showAIHelp('Give me a professional cover letter template for an African job seeker.')" },
-        { icon: '🔗', title: 'LinkedIn Profile Checklist', desc: '10-point checklist to optimize your LinkedIn profile and attract recruiters and opportunities.', tag: 'Checklist', color: '#0A66C2', action: "showAIHelp('Give me a 10-point LinkedIn profile optimization checklist for African professionals.')" },
-        { icon: '🎤', title: 'Public Speaking Cheat Sheet', desc: 'Quick reference guide for structure, body language, voice and confidence when speaking publicly.', tag: 'Guide', color: '#F5A623', action: "showAIHelp('Give me a public speaking cheat sheet covering structure, body language, voice and confidence.')" },
-        { icon: '🤝', title: 'Interview Question Bank', desc: '50 most common interview questions with expert answer frameworks for African professionals.', tag: 'Question Bank', color: '#27AE60', action: "showAIHelp('Give me the 50 most common interview questions and how to answer them as an African professional.')" },
-        { icon: '💰', title: 'Salary Negotiation Script', desc: 'Word-for-word scripts for negotiating your salary confidently in any African or international context.', tag: 'Script', color: '#9B59B6', action: "showAIHelp('Give me a salary negotiation script I can use in an African or international job context.')" },
-        { icon: '🏆', title: 'Pitch Deck Template', desc: 'A winning pitch structure for presenting ideas to investors, organizations or grant committees.', tag: 'Template', color: '#E67E22', action: "showAIHelp('Give me a winning pitch deck structure for presenting ideas to investors or grant committees.')" },
-        { icon: '🌍', title: 'International Job Search Guide', desc: 'Where to find jobs internationally as an African professional — top platforms, tips and strategies.', tag: 'Guide', color: '#1ABC9C', action: "showAIHelp('Where can African professionals find international job opportunities? Give me a complete guide.')" },
-      ].map(r => \`
-        <div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-top:4px solid \${r.color};transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-          <div style="font-size:2rem;margin-bottom:0.75rem;">\${r.icon}</div>
-          <span style="background:\${r.color}18;color:\${r.color};padding:0.2rem 0.6rem;border-radius:50px;font-size:0.68rem;font-weight:700;">\${r.tag}</span>
-          <h4 style="font-size:0.92rem;font-weight:700;color:var(--navy);margin:0.5rem 0;">\${r.title}</h4>
-          <p style="font-size:0.78rem;color:var(--gray);line-height:1.6;margin-bottom:1rem;">\${r.desc}</p>
-          <button class="btn-sm btn-navy" onclick="\${r.action}">Get with AI 🤖</button>
-        </div>
-      \`).join('')}
-    </div>
-  \`;
+  const resources = [
+    { icon: '📄', title: 'ATS-Friendly CV Template', desc: 'A clean CV template that passes applicant tracking systems used by global companies.', tag: 'CV Template', color: '#1B2A6B', q: 'Help me create an ATS-friendly CV. Give me a complete template with all sections.' },
+    { icon: '✉️', title: 'Cover Letter Template', desc: 'A powerful cover letter template tailored for African job seekers.', tag: 'Template', color: '#E63329', q: 'Give me a professional cover letter template for an African job seeker.' },
+    { icon: '🔗', title: 'LinkedIn Profile Checklist', desc: '10-point checklist to optimize your LinkedIn profile and attract opportunities.', tag: 'Checklist', color: '#0A66C2', q: 'Give me a 10-point LinkedIn profile optimization checklist for African professionals.' },
+    { icon: '🎤', title: 'Public Speaking Cheat Sheet', desc: 'Quick reference for structure, body language, voice and confidence.', tag: 'Guide', color: '#F5A623', q: 'Give me a public speaking cheat sheet covering structure, body language, voice and confidence.' },
+    { icon: '🤝', title: 'Interview Question Bank', desc: '50 most common interview questions with expert answer frameworks.', tag: 'Question Bank', color: '#27AE60', q: 'Give me the 50 most common interview questions and how to answer them as an African professional.' },
+    { icon: '💰', title: 'Salary Negotiation Script', desc: 'Word-for-word scripts for negotiating your salary confidently.', tag: 'Script', color: '#9B59B6', q: 'Give me a salary negotiation script for an African or international job context.' },
+    { icon: '🏆', title: 'Pitch Deck Template', desc: 'A winning pitch structure for presenting ideas to investors or grant committees.', tag: 'Template', color: '#E67E22', q: 'Give me a winning pitch deck structure for presenting ideas to investors or grant committees.' },
+    { icon: '🌍', title: 'International Job Search Guide', desc: 'Where to find jobs internationally as an African professional.', tag: 'Guide', color: '#1ABC9C', q: 'Where can African professionals find international job opportunities? Give me a complete guide.' },
+  ];
+  let html = '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">📄 Career Resources</h3>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;">';
+  resources.forEach(function(r) {
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-top:4px solid ' + r.color + ';transition:transform 0.2s;" onmouseover="this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.transform=\'translateY(0)\'">'
+      + '<div style="font-size:2rem;margin-bottom:0.75rem;">' + r.icon + '</div>'
+      + '<span style="background:' + r.color + '18;color:' + r.color + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.68rem;font-weight:700;">' + r.tag + '</span>'
+      + '<h4 style="font-size:0.92rem;font-weight:700;color:var(--navy);margin:0.5rem 0;">' + r.title + '</h4>'
+      + '<p style="font-size:0.78rem;color:var(--gray);line-height:1.6;margin-bottom:1rem;">' + r.desc + '</p>'
+      + '<button class="btn-sm btn-navy" onclick="showAIHelp(\'' + r.q.replace(/'/g, "\\'") + '\')">Get with AI 🤖</button>'
+      + '</div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
 }
 
-// ── MY PROGRESS ────────────────────────────────
 async function loadCareerProgress() {
   const container = document.getElementById('career-section-progress');
   if (!container) return;
   container.innerHTML = '<div class="loading">Loading your progress...</div>';
-
   const progressSnap = await getDocs(query(collection(db, 'careerProgress'), where('userId', '==', currentUser.uid)));
   const assignSnap = await getDocs(query(collection(db, 'careerAssignments'), where('userId', '==', currentUser.uid)));
-  const jobsSnap = await getDocs(query(collection(db, 'careerJobs'), where('postedById', '==', currentUser.uid)));
-
   const completed = progressSnap.size;
   const assignments = assignSnap.size;
-  const approved = assignSnap.docs.filter(d => d.data().status === 'approved').length;
-  const jobsPosted = jobsSnap.size;
-
-  // Calculate score
-  const score = Math.min(100, (completed * 10) + (approved * 20) + (jobsPosted * 5));
-
-  // Path progress
+  const approved = assignSnap.docs.filter(function(d) { return d.data().status === 'approved'; }).length;
+  const score = Math.min(100, (completed * 10) + (approved * 20));
   const pathProgress = {};
-  CAREER_PATHS.forEach(p => { pathProgress[p.id] = 0; });
-  progressSnap.forEach(d => {
-    const pathId = d.data().pathId;
-    if (pathProgress[pathId] !== undefined) pathProgress[pathId]++;
+  CAREER_PATHS.forEach(function(p) { pathProgress[p.id] = 0; });
+  progressSnap.forEach(function(d) { const pid = d.data().pathId; if (pathProgress[pid] !== undefined) pathProgress[pid]++; });
+
+  let pathHtml = '';
+  CAREER_PATHS.forEach(function(p) {
+    const done = pathProgress[p.id] || 0;
+    const pct = Math.round((done / p.lessons) * 100);
+    pathHtml += '<div style="margin-bottom:1rem;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;">'
+      + '<span style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + p.icon + ' ' + p.title + '</span>'
+      + '<span style="font-size:0.75rem;color:var(--gray);">' + done + '/' + p.lessons + ' lessons</span></div>'
+      + '<div style="background:var(--light);border-radius:50px;height:8px;overflow:hidden;">'
+      + '<div style="width:' + pct + '%;height:100%;background:' + p.color + ';border-radius:50px;transition:width 0.5s;"></div>'
+      + '</div></div>';
   });
 
-  const deg = Math.round(score * 3.6);
-  container.innerHTML = \`
-    <h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">📊 My Career Progress</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
-      <div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
-        <div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--navy);">\${completed}</div>
-        <div style="font-size:0.72rem;color:var(--gray);">Lessons Completed</div>
-      </div>
-      <div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
-        <div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--red);">\${assignments}</div>
-        <div style="font-size:0.72rem;color:var(--gray);">Assignments Submitted</div>
-      </div>
-      <div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
-        <div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--green);">\${approved}</div>
-        <div style="font-size:0.72rem;color:var(--gray);">Assignments Approved</div>
-      </div>
-      <div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
-        <div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--gold);">\${score}</div>
-        <div style="font-size:0.72rem;color:var(--gray);">Career Readiness Score</div>
-      </div>
-    </div>
-    <div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-bottom:1.5rem;">
-      <h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">🎯 Path Progress</h4>
-      \${CAREER_PATHS.map(p => {
-        const done = pathProgress[p.id] || 0;
-        const pct = Math.round((done / p.lessons) * 100);
-        return \`<div style="margin-bottom:1rem;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;">
-            <span style="font-size:0.85rem;font-weight:600;color:var(--navy);">\${p.icon} \${p.title}</span>
-            <span style="font-size:0.75rem;color:var(--gray);">\${done}/\${p.lessons} lessons</span>
-          </div>
-          <div style="background:var(--light);border-radius:50px;height:8px;overflow:hidden;">
-            <div style="width:\${pct}%;height:100%;background:\${p.color};border-radius:50px;transition:width 0.5s;"></div>
-          </div>
-        </div>\`;
-      }).join('')}
-    </div>
-    \${assignSnap.size > 0 ? \`
-    <div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
-      <h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">📝 My Assignments</h4>
-      \${assignSnap.docs.map(d => {
-        const a = d.data();
-        const statusColor = { approved:'#27AE60', rejected:'#E63329', pending:'#F5A623' }[a.status] || '#1B2A6B';
-        return \`<div style="background:var(--light);border-radius:10px;padding:0.85rem 1rem;margin-bottom:0.5rem;">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
-            <span style="font-size:0.85rem;font-weight:600;color:var(--navy);">\${sanitize(a.submission?.substring(0,60))}...</span>
-            <span style="background:\${statusColor}18;color:\${statusColor};padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">\${a.status?.toUpperCase()}</span>
-          </div>
-          \${a.feedback ? \`<p style="font-size:0.75rem;color:var(--gray);margin-top:0.35rem;">Feedback: \${sanitize(a.feedback)}</p>\` : ''}
-        </div>\`;
-      }).join('')}
-    </div>
-    \` : ''}
-  \`;
+  let assignHtml = '';
+  if (assignSnap.size > 0) {
+    assignSnap.docs.forEach(function(d) {
+      const a = d.data();
+      const statusColor = { approved:'#27AE60', rejected:'#E63329', pending:'#F5A623' }[a.status] || '#1B2A6B';
+      assignHtml += '<div style="background:var(--light);border-radius:10px;padding:0.85rem 1rem;margin-bottom:0.5rem;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">'
+        + '<span style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + sanitize((a.submission || '').substring(0,60)) + '...</span>'
+        + '<span style="background:' + statusColor + '18;color:' + statusColor + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + (a.status || 'PENDING').toUpperCase() + '</span>'
+        + '</div>'
+        + (a.feedback ? '<p style="font-size:0.75rem;color:var(--gray);margin-top:0.35rem;">Feedback: ' + sanitize(a.feedback) + '</p>' : '')
+        + '</div>';
+    });
+  }
+
+  container.innerHTML = '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">📊 My Career Progress</h3>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem;">'
+    + '<div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--navy);">' + completed + '</div><div style="font-size:0.72rem;color:var(--gray);">Lessons Done</div></div>'
+    + '<div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--red);">' + assignments + '</div><div style="font-size:0.72rem;color:var(--gray);">Assignments</div></div>'
+    + '<div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--green);">' + approved + '</div><div style="font-size:0.72rem;color:var(--gray);">Approved</div></div>'
+    + '<div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + score + '</div><div style="font-size:0.72rem;color:var(--gray);">Career Score</div></div>'
+    + '</div>'
+    + '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-bottom:1.5rem;">'
+    + '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">🎯 Path Progress</h4>'
+    + pathHtml + '</div>'
+    + (assignSnap.size > 0 ? '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);"><h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">📝 My Assignments</h4>' + assignHtml + '</div>' : '');
 }
 
-// ── MANAGE (Admin/Head) ────────────────────────
 async function loadCareerManage() {
   const container = document.getElementById('career-section-manage');
   if (!container) return;
-
-  // Load pending assignments
   const assignSnap = await getDocs(query(collection(db, 'careerAssignments'), where('status', '==', 'pending'), orderBy('submittedAt', 'desc')));
 
-  container.innerHTML = \`
-    <h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">⚙️ Manage Career Hub</h3>
+  let pathOpts = CAREER_PATHS.map(function(p) { return '<option value="' + p.id + '">' + p.icon + ' ' + p.title + '</option>'; }).join('');
 
-    <div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
-      <h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">➕ Add Material / Lesson</h4>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-        <div class="form-group"><label>Learning Path *</label>
-          <select id="new-mat-path">
-            \${CAREER_PATHS.map(p => \`<option value="\${p.id}">\${p.icon} \${p.title}</option>\`).join('')}
-          </select>
-        </div>
-        <div class="form-group"><label>Title *</label><input type="text" id="new-mat-title" placeholder="Lesson title"></div>
-        <div class="form-group"><label>Type *</label>
-          <select id="new-mat-type" onchange="toggleCareerMatFields()">
-            <option value="video">📹 Video (YouTube)</option>
-            <option value="article">📄 Article</option>
-            <option value="assignment">📝 Assignment</option>
-          </select>
-        </div>
-        <div class="form-group"><label>Duration</label><input type="text" id="new-mat-duration" placeholder="e.g. 15 min"></div>
-        <div class="form-group" id="new-mat-url-field"><label>YouTube URL / Article Link</label><input type="text" id="new-mat-url" placeholder="https://..."></div>
-        <div class="form-group"><label>Order (1 = first)</label><input type="number" id="new-mat-order" value="1" min="1"></div>
-        <div class="form-group" style="grid-column:1/-1;"><label>Description</label><textarea id="new-mat-desc" rows="3" placeholder="Brief description of what members will learn..."></textarea></div>
-        <div class="form-group" id="new-mat-assign-field" style="display:none;grid-column:1/-1;"><label>Assignment Instructions *</label><textarea id="new-mat-instructions" rows="4" placeholder="What should members do? Be specific..."></textarea></div>
-      </div>
-      <button class="btn-primary" onclick="addCareerMaterial()">Add to Hub</button>
-    </div>
+  let pendingHtml = assignSnap.empty ? '<p style="color:var(--gray);font-size:0.85rem;">No pending assignments.</p>' : '';
+  assignSnap.docs.forEach(function(d) {
+    const a = d.data();
+    pendingHtml += '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;">'
+      + '<div style="flex:1;"><strong style="font-size:0.88rem;color:var(--navy);">' + sanitize(a.userName) + '</strong>'
+      + '<p style="font-size:0.82rem;color:var(--gray);margin:0.35rem 0;">' + sanitize(a.submission) + '</p>'
+      + '<small style="font-size:0.72rem;color:var(--gray);">' + timeAgo(a.submittedAt) + '</small></div>'
+      + '<div style="display:flex;flex-direction:column;gap:0.5rem;">'
+      + '<input type="text" id="feedback-' + d.id + '" placeholder="Feedback (optional)" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);padding:0.4rem 0.75rem;border-radius:8px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;">'
+      + '<div style="display:flex;gap:0.5rem;">'
+      + '<button class="btn-sm btn-gold" onclick="reviewCareerAssignment(\'' + d.id + '\',\'approved\')">✅ Approve</button>'
+      + '<button class="btn-sm btn-red" onclick="reviewCareerAssignment(\'' + d.id + '\',\'rejected\')">❌ Reject</button>'
+      + '</div></div></div></div>';
+  });
 
-    <div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
-      <h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">📝 Pending Assignments (\${assignSnap.size})</h4>
-      \${assignSnap.empty ? '<p style="color:var(--gray);font-size:0.85rem;">No pending assignments.</p>' :
-        assignSnap.docs.map(d => {
-          const a = d.data();
-          return \`<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;">
-              <div style="flex:1;">
-                <strong style="font-size:0.88rem;color:var(--navy);">\${sanitize(a.userName)}</strong>
-                <p style="font-size:0.82rem;color:var(--gray);margin:0.35rem 0;">\${sanitize(a.submission)}</p>
-                <small style="font-size:0.72rem;color:var(--gray);">\${timeAgo(a.submittedAt)}</small>
-              </div>
-              <div style="display:flex;flex-direction:column;gap:0.5rem;">
-                <input type="text" id="feedback-\${d.id}" placeholder="Feedback (optional)" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);padding:0.4rem 0.75rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.78rem;outline:none;">
-                <div style="display:flex;gap:0.5rem;">
-                  <button class="btn-sm btn-gold" onclick="reviewCareerAssignment('\${d.id}','approved')">✅ Approve</button>
-                  <button class="btn-sm btn-red" onclick="reviewCareerAssignment('\${d.id}','rejected')">❌ Reject</button>
-                </div>
-              </div>
-            </div>
-          </div>\`;
-        }).join('')}
-    </div>
-  \`;
+  container.innerHTML = '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">⚙️ Manage Career Hub</h3>'
+    + '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
+    + '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">➕ Add Material / Lesson</h4>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">'
+    + '<div class="form-group"><label>Learning Path *</label><select id="new-mat-path">' + pathOpts + '</select></div>'
+    + '<div class="form-group"><label>Title *</label><input type="text" id="new-mat-title" placeholder="Lesson title"></div>'
+    + '<div class="form-group"><label>Type *</label><select id="new-mat-type" onchange="toggleCareerMatFields()"><option value="video">📹 Video (YouTube)</option><option value="article">📄 Article</option><option value="assignment">📝 Assignment</option></select></div>'
+    + '<div class="form-group"><label>Duration</label><input type="text" id="new-mat-duration" placeholder="e.g. 15 min"></div>'
+    + '<div class="form-group" id="new-mat-url-field"><label>YouTube URL / Article Link</label><input type="text" id="new-mat-url" placeholder="https://..."></div>'
+    + '<div class="form-group"><label>Order</label><input type="number" id="new-mat-order" value="1" min="1"></div>'
+    + '<div class="form-group" style="grid-column:1/-1;"><label>Description</label><textarea id="new-mat-desc" rows="3" placeholder="What will members learn?"></textarea></div>'
+    + '<div class="form-group" id="new-mat-assign-field" style="display:none;grid-column:1/-1;"><label>Assignment Instructions *</label><textarea id="new-mat-instructions" rows="4" placeholder="What should members do?"></textarea></div>'
+    + '</div>'
+    + '<button class="btn-primary" onclick="addCareerMaterial()">Add to Hub</button>'
+    + '</div>'
+    + '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
+    + '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">📝 Pending Assignments (' + assignSnap.size + ')</h4>'
+    + pendingHtml + '</div>';
 }
 
 function toggleCareerMatFields() {
-  const type = document.getElementById('new-mat-type')?.value;
+  const type = (document.getElementById('new-mat-type') || {}).value;
   const urlField = document.getElementById('new-mat-url-field');
   const assignField = document.getElementById('new-mat-assign-field');
   if (urlField) urlField.style.display = type === 'assignment' ? 'none' : 'block';
@@ -4645,10 +4518,10 @@ async function addCareerMaterial() {
   const title = document.getElementById('new-mat-title').value.trim();
   const type = document.getElementById('new-mat-type').value;
   const duration = document.getElementById('new-mat-duration').value.trim();
-  const url = document.getElementById('new-mat-url')?.value.trim() || '';
+  const url = (document.getElementById('new-mat-url') || {}).value ? document.getElementById('new-mat-url').value.trim() : '';
   const order = parseInt(document.getElementById('new-mat-order').value) || 1;
   const desc = document.getElementById('new-mat-desc').value.trim();
-  const instructions = document.getElementById('new-mat-instructions')?.value.trim() || '';
+  const instructions = (document.getElementById('new-mat-instructions') || {}).value ? document.getElementById('new-mat-instructions').value.trim() : '';
   if (!title) return showToast('Enter a title', 'error');
   if (type === 'assignment' && !instructions) return showToast('Enter assignment instructions', 'error');
   await addDoc(collection(db, 'careerMaterials'), {
@@ -4658,31 +4531,29 @@ async function addCareerMaterial() {
   });
   showToast('Material added! 📚');
   document.getElementById('new-mat-title').value = '';
-  document.getElementById('new-mat-url').value = '';
+  if (document.getElementById('new-mat-url')) document.getElementById('new-mat-url').value = '';
   document.getElementById('new-mat-desc').value = '';
   loadCareerManage();
 }
 
 async function reviewCareerAssignment(assignId, status) {
-  const feedback = document.getElementById('feedback-' + assignId)?.value.trim() || '';
+  const feedbackEl = document.getElementById('feedback-' + assignId);
+  const feedback = feedbackEl ? feedbackEl.value.trim() : '';
   await updateDoc(doc(db, 'careerAssignments', assignId), {
     status, feedback, reviewedBy: currentUserData.name, reviewedAt: serverTimestamp()
   });
-  showToast(status === 'approved' ? 'Assignment approved! ✅' : 'Assignment rejected');
-  // Notify member
-  const assignDoc = await getDoc(doc(db, 'careerAssignments', assignId));
-  const a = assignDoc.data();
+  showToast(status === 'approved' ? 'Approved! ✅' : 'Rejected');
   await addDoc(collection(db, 'notifications'), {
     title: status === 'approved' ? '✅ Assignment Approved!' : '❌ Assignment Needs Revision',
-    message: 'Your Career Hub assignment has been ' + status + (feedback ? '. Feedback: ' + feedback : '') + '. Keep up the great work!',
-    type: 'announcement', postedBy: currentUserData.name,
-    createdAt: serverTimestamp(), readBy: []
+    message: 'Your Career Hub assignment has been ' + status + (feedback ? '. Feedback: ' + feedback : '') + '.',
+    type: 'announcement', postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
   });
   loadCareerManage();
 }
 
 window.loadCareerHub = loadCareerHub;
 window.showCareerSection = showCareerSection;
+window.loadCareerPaths = loadCareerPaths;
 window.openCareerPath = openCareerPath;
 window.playCareerVideo = playCareerVideo;
 window.openCareerAssignment = openCareerAssignment;
@@ -4692,10 +4563,11 @@ window.loadCareerMaterials = loadCareerMaterials;
 window.filterCareerMaterials = filterCareerMaterials;
 window.deleteCareerMaterial = deleteCareerMaterial;
 window.loadJobBoard = loadJobBoard;
+window.renderJobCard = renderJobCard;
+window.filterJobs = filterJobs;
 window.toggleJobForm = toggleJobForm;
 window.postCareerJob = postCareerJob;
 window.deleteCareerJob = deleteCareerJob;
-window.filterJobs = filterJobs;
 window.loadCareerResources = loadCareerResources;
 window.loadCareerProgress = loadCareerProgress;
 window.loadCareerManage = loadCareerManage;
