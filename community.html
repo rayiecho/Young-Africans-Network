@@ -3766,6 +3766,126 @@ window.loadCalendar = loadCalendar;
 window.renderCalendar = renderCalendar;
 window.changeCalendarMonth = changeCalendarMonth;
 window.showCalendarEvent = showCalendarEvent;
+
+// GLOBAL SEARCH
+let _searchTimeout = null;
+
+async function handleGlobalSearch(query) {
+  const dropdown = document.getElementById('search-results-dropdown');
+  if (!dropdown) return;
+  query = query.trim();
+  if (!query || query.length < 2) {
+    dropdown.innerHTML = '';
+    dropdown.style.display = 'none';
+    return;
+  }
+  dropdown.style.display = 'block';
+  dropdown.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--gray);font-size:0.82rem;">Searching...</div>';
+
+  clearTimeout(_searchTimeout);
+  _searchTimeout = setTimeout(async function() {
+    const q = query.toLowerCase();
+    const results = [];
+
+    try {
+      // Search members
+      const usersSnap = await getDocs(collection(db, 'users'));
+      usersSnap.docs.forEach(function(d) {
+        const u = d.data();
+        if ((u.name && u.name.toLowerCase().includes(q)) ||
+            (u.country && u.country.toLowerCase().includes(q))) {
+          results.push({
+            type: 'member',
+            icon: u.photoUrl ? '<img src="' + u.photoUrl + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">' : '<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.85rem;">' + (u.name||'?')[0] + '</div>',
+            title: u.name || '',
+            subtitle: (u.role || 'Member') + ' · ' + (u.country || ''),
+            action: "showTab('directory')"
+          });
+        }
+      });
+
+      // Search posts
+      const postsSnap = await getDocs(query(collection(db, 'posts'), orderBy('createdAt','desc'), limit(50))).catch(()=>({docs:[]}));
+      postsSnap.docs.forEach(function(d) {
+        const p = d.data();
+        if (p.content && p.content.toLowerCase().includes(q)) {
+          results.push({
+            type: 'post',
+            icon: '<div style="width:32px;height:32px;border-radius:50%;background:var(--light);display:flex;align-items:center;justify-content:center;font-size:1rem;">💬</div>',
+            title: p.content.substring(0, 60) + '...',
+            subtitle: 'Post by ' + (p.authorName || ''),
+            action: "showTab('feed')"
+          });
+        }
+      });
+
+      // Search scholarships
+      const schSnap = await getDocs(collection(db, 'scholarships'));
+      schSnap.docs.forEach(function(d) {
+        const s = d.data();
+        if ((s.title && s.title.toLowerCase().includes(q)) ||
+            (s.provider && s.provider.toLowerCase().includes(q))) {
+          results.push({
+            type: 'scholarship',
+            icon: '<div style="width:32px;height:32px;border-radius:50%;background:rgba(245,166,35,0.15);display:flex;align-items:center;justify-content:center;font-size:1rem;">🏆</div>',
+            title: s.title || '',
+            subtitle: s.provider + ' · ' + (s.funding || ''),
+            action: "showTab('scholarships')"
+          });
+        }
+      });
+
+      // Search resources
+      const resSnap = await getDocs(collection(db, 'resources'));
+      resSnap.docs.forEach(function(d) {
+        const r = d.data();
+        if ((r.title && r.title.toLowerCase().includes(q)) ||
+            (r.desc && r.desc.toLowerCase().includes(q))) {
+          results.push({
+            type: 'resource',
+            icon: '<div style="width:32px;height:32px;border-radius:50%;background:rgba(27,42,107,0.07);display:flex;align-items:center;justify-content:center;font-size:1rem;">📄</div>',
+            title: r.title || '',
+            subtitle: (r.filetype || 'PDF') + ' · ' + (r.lang || 'English'),
+            action: "showTab('resources')"
+          });
+        }
+      });
+
+    } catch(e) {
+      console.error('Search error:', e);
+    }
+
+    if (results.length === 0) {
+      dropdown.innerHTML = '<div style="padding:1.25rem;text-align:center;color:var(--gray);font-size:0.85rem;">No results for "' + sanitize(query) + '"</div>';
+      return;
+    }
+
+    const typeLabels = { member:'👤 Member', post:'💬 Post', scholarship:'🏆 Scholarship', resource:'📄 Resource' };
+    const grouped = {};
+    results.forEach(function(r) {
+      if (!grouped[r.type]) grouped[r.type] = [];
+      grouped[r.type].push(r);
+    });
+
+    let html = '';
+    Object.keys(grouped).forEach(function(type) {
+      html += '<div style="padding:0.5rem 1rem;font-size:0.68rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;background:var(--light);">' + (typeLabels[type]||type) + 's</div>';
+      grouped[type].slice(0,4).forEach(function(r) {
+        html += '<div onclick="' + r.action + ';document.getElementById('global-search-input').value='';document.getElementById('search-results-dropdown').style.display='none';" ' +
+          'style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;cursor:pointer;transition:background 0.15s;" ' +
+          'onmouseover="this.style.background='var(--light)'" onmouseout="this.style.background='transparent'">' +
+          r.icon +
+          '<div style="flex:1;min-width:0;"><div style="font-size:0.85rem;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + sanitize(r.title) + '</div>' +
+          '<div style="font-size:0.72rem;color:var(--gray);">' + sanitize(r.subtitle) + '</div></div></div>';
+      });
+    });
+
+    html += '<div style="padding:0.75rem 1rem;text-align:center;font-size:0.75rem;color:var(--gray);border-top:1px solid var(--light);">' + results.length + ' result' + (results.length!==1?'s':'') + ' found</div>';
+    dropdown.innerHTML = html;
+  }, 300);
+}
+
+window.handleGlobalSearch = handleGlobalSearch;
 // EXPOSE TO WINDOW
 window.showPostNotification=showPostNotification; window.postNotification=postNotification; window.markNotifRead=markNotifRead; window.deleteNotification=deleteNotification; window.filterDirectory=filterDirectory; window.sendAIMessage=sendAIMessage; window.askQuick=askQuick; window.showScholarshipForm=showScholarshipForm; window.previewScholarship=previewScholarship; window.showScholarshipSection=showScholarshipSection; window.postScholarship=postScholarship; window.trackApplication=trackApplication; window.updateApplicationStatus=updateApplicationStatus; window.deleteApplication=deleteApplication; window.deleteScholarship=deleteScholarship; window.showAIHelp=showAIHelp; window.requestRecommendation=requestRecommendation; window.approveRecommendation=approveRecommendation; window.rejectRecommendation=rejectRecommendation; window.shareSuccessStory=shareSuccessStory; window.downloadRecommendationLetter=downloadRecommendationLetter; window.downloadRecommendationLetter=downloadRecommendationLetter;
 window.doRegister=doRegister; window.doLogin=doLogin; window.doLogout=doLogout; window.doForgotPassword=doForgotPassword;
@@ -4178,7 +4298,17 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <button class="hamburger-mobile" id="hamburger-mobile" onclick="document.getElementById('sidebar').classList.toggle('open')">
         <span></span><span></span><span></span>
       </button>
-      <div class="topbar-title">YAN Community</div>
+      <div class="topbar-title" style="display:none;" id="topbar-title-text">YAN Community</div>
+      <div style="flex:1;max-width:400px;position:relative;margin:0 1rem;">
+        <input type="text" id="global-search-input" placeholder="🔍 Search members, posts, scholarships..."
+          style="width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.55rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;outline:none;"
+          oninput="handleGlobalSearch(this.value)"
+          onfocus="document.getElementById('search-results-dropdown').style.display='block'"
+          onblur="setTimeout(()=>document.getElementById('search-results-dropdown').style.display='none',200)">
+        <div id="search-results-dropdown"
+          style="display:none;position:absolute;top:110%;left:0;right:0;background:var(--white);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.15);z-index:999;max-height:400px;overflow-y:auto;border:1px solid rgba(27,42,107,0.1);">
+        </div>
+      </div>
       <div class="topbar-right">
         <div style="position:relative;cursor:pointer;" onclick="showTab('notifications')">
           <span style="font-size:1.4rem;">🔔</span>
