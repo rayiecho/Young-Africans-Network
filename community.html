@@ -2655,7 +2655,7 @@ async function postMaterial(dept) {
 async function loadHeadMaterials(dept) {
   const sel = document.getElementById('head-quiz-material'); if (!sel) return;
   const snap = await getDocs(collection(db, 'departments', dept, 'materials'));
-  sel.innerHTML = snap.docs.map(d => `<option value="${d.id}">${d.data().title}</option>`).join('') || '<option>No materials yet</option>';
+  sel.innerHTML = snap.docs.map(d => '<option value="' + d.id + '">' + d.data().title + '<\/option>').join('') || '<option>No materials yet<\/option>';
 }
 window.quizQuestionsData = [];
 function addQuizQuestion(type) {
