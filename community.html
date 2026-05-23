@@ -268,6 +268,7 @@ function loadTabContent(tab) {
   if (tab === 'magazine') loadMagazine();
   if (tab === 'achievements') loadAchievements();
   if (tab === 'resources') loadResources();
+  if (tab === 'polls') loadPolls();
 }
 
 // MEMBER DIRECTORY
@@ -3104,6 +3105,177 @@ window.addResource = addResource;
 window.filterResources = filterResources;
 window.trackDownload = trackDownload;
 window.deleteResource = deleteResource;
+
+// POLL / VOTING SYSTEM
+async function loadPolls() {
+  const container = document.getElementById('polls-container');
+  const isAdmin = currentUserData && currentUserData.isAdmin;
+
+  let adminFormHTML = '';
+  if (isAdmin) {
+    adminFormHTML = '<div id="poll-form" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">' +
+      '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Create New Poll</h3>' +
+      '<div class="form-group"><label>Question *</label><input type="text" id="poll-question" placeholder="e.g. What topic should we focus on next month?"></div>' +
+      '<div class="form-group"><label>Option 1 *</label><input type="text" id="poll-opt-0" placeholder="Option 1"></div>' +
+      '<div class="form-group"><label>Option 2 *</label><input type="text" id="poll-opt-1" placeholder="Option 2"></div>' +
+      '<div class="form-group"><label>Option 3</label><input type="text" id="poll-opt-2" placeholder="Option 3 (optional)"></div>' +
+      '<div class="form-group"><label>Option 4</label><input type="text" id="poll-opt-3" placeholder="Option 4 (optional)"></div>' +
+      '<div class="form-group"><label>Poll closes on</label><input type="date" id="poll-deadline"></div>' +
+      '<div style="display:flex;gap:0.75rem;margin-top:1rem;">' +
+      '<button class="btn-primary" onclick="createPoll()">Create Poll</button>' +
+      '<button class="btn-outline" onclick="togglePollForm()">Cancel</button>' +
+      '</div></div>';
+  }
+
+  const addBtn = isAdmin ? '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="togglePollForm()">+ Create Poll</button>' : '';
+
+  container.innerHTML = '<div style="max-width:700px;margin:0 auto;">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">' +
+    '<div><h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);margin-bottom:0.25rem;">Polls & Voting</h2>' +
+    '<p style="color:var(--gray);font-size:0.82rem;">Have your say — vote on community decisions</p></div>' +
+    addBtn + '</div>' + adminFormHTML +
+    '<div id="polls-list"><div class="loading">Loading polls...</div></div></div>';
+
+  loadPollsList();
+}
+
+function togglePollForm() {
+  const form = document.getElementById('poll-form');
+  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function createPoll() {
+  const question = document.getElementById('poll-question').value.trim();
+  const opt0 = document.getElementById('poll-opt-0').value.trim();
+  const opt1 = document.getElementById('poll-opt-1').value.trim();
+  const opt2 = document.getElementById('poll-opt-2').value.trim();
+  const opt3 = document.getElementById('poll-opt-3').value.trim();
+  const deadline = document.getElementById('poll-deadline').value;
+  if (!question || !opt0 || !opt1) return showToast('Question and at least 2 options required', 'error');
+  const options = [opt0, opt1];
+  if (opt2) options.push(opt2);
+  if (opt3) options.push(opt3);
+  const votes = {};
+  options.forEach(function(opt, i) { votes[i] = []; });
+  await addDoc(collection(db, 'polls'), {
+    question: question,
+    options: options,
+    votes: votes,
+    deadline: deadline || '',
+    createdBy: currentUserData.name,
+    createdAt: serverTimestamp(),
+    active: true
+  });
+  showToast('Poll created!');
+  togglePollForm();
+  loadPollsList();
+}
+
+function loadPollsList() {
+  const list = document.getElementById('polls-list');
+  if (!list) return;
+  const q = query(collection(db, 'polls'), orderBy('createdAt', 'desc'), limit(20));
+  const unsub = onSnapshot(q, function(snap) {
+    if (snap.empty) {
+      list.innerHTML = '<div class="empty-state"><div style="font-size:3rem;margin-bottom:1rem;">🗳️</div><p>No polls yet.</p>' +
+        (currentUserData && currentUserData.isAdmin ? '<p style="font-size:0.82rem;color:var(--gray);">Click Create Poll to post the first one!</p>' : '') + '</div>';
+      return;
+    }
+    list.innerHTML = snap.docs.map(function(d) {
+      return renderPoll(d.id, d.data());
+    }).join('');
+  });
+  if (window.unsubscribers) window.unsubscribers.push(unsub);
+}
+
+function renderPoll(pollId, poll) {
+  const options = poll.options || [];
+  const votes = poll.votes || {};
+  const totalVotes = options.reduce(function(sum, opt, i) {
+    return sum + (Array.isArray(votes[i]) ? votes[i].length : 0);
+  }, 0);
+  const hasVoted = options.some(function(opt, i) {
+    return Array.isArray(votes[i]) && votes[i].includes(currentUser.uid);
+  });
+  const isExpired = poll.deadline && new Date(poll.deadline) < new Date();
+  const isAdmin = currentUserData && currentUserData.isAdmin;
+  const deadlineText = poll.deadline ? ('Closes: ' + poll.deadline) : 'No deadline';
+
+  let optionsHTML = '';
+  options.forEach(function(opt, i) {
+    const voteArr = Array.isArray(votes[i]) ? votes[i] : [];
+    const count = voteArr.length;
+    const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+    const isMine = voteArr.includes(currentUser.uid);
+
+    if (hasVoted || isExpired) {
+      optionsHTML += '<div style="margin-bottom:0.75rem;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem;">' +
+        '<span style="font-size:0.85rem;color:var(--navy);font-weight:' + (isMine ? '700' : '400') + ';">' +
+        (isMine ? '✓ ' : '') + sanitize(opt) + '</span>' +
+        '<span style="font-size:0.78rem;color:var(--gray);">' + count + ' (' + pct + '%)</span></div>' +
+        '<div style="background:var(--light);border-radius:50px;height:10px;overflow:hidden;">' +
+        '<div style="width:' + pct + '%;height:100%;background:' + (isMine ? 'var(--red)' : 'var(--navy)') + ';border-radius:50px;transition:width 0.5s;"></div>' +
+        '</div></div>';
+    } else {
+      optionsHTML += '<button onclick="castVote('' + pollId + '',' + i + ')" ' +
+        'style="width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.75rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.85rem;font-weight:500;cursor:pointer;text-align:left;margin-bottom:0.5rem;transition:all 0.2s;" ' +
+        'onmouseover="this.style.background='rgba(27,42,107,0.08)'" onmouseout="this.style.background='var(--light)'">' +
+        sanitize(opt) + '</button>';
+    }
+  });
+
+  const deleteBtn = isAdmin ? '<button class="btn-sm btn-red" onclick="deletePoll('' + pollId + '')">Delete</button>' : '';
+  const closeBtn = (isAdmin && !isExpired) ? '<button class="btn-sm btn-outline" onclick="closePoll('' + pollId + '')">Close Poll</button>' : '';
+  const statusBadge = isExpired
+    ? '<span style="background:rgba(107,114,128,0.1);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">Closed</span>'
+    : '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">Live</span>';
+
+  return '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">' +
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">' +
+    '<div style="flex:1;"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(poll.question) + '</h3>' +
+    '<p style="font-size:0.72rem;color:var(--gray);">By ' + sanitize(poll.createdBy) + ' · ' + totalVotes + ' votes · ' + deadlineText + '</p></div>' +
+    statusBadge + '</div>' +
+    optionsHTML +
+    '<div style="display:flex;gap:0.5rem;margin-top:1rem;flex-wrap:wrap;">' + closeBtn + deleteBtn + '</div></div>';
+}
+
+async function castVote(pollId, optionIndex) {
+  const ref = doc(db, 'polls', pollId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+  const poll = snap.data();
+  const votes = poll.votes || {};
+  // Check already voted
+  const alreadyVoted = (poll.options || []).some(function(opt, i) {
+    return Array.isArray(votes[i]) && votes[i].includes(currentUser.uid);
+  });
+  if (alreadyVoted) return showToast('You have already voted!', 'error');
+  const key = 'votes.' + optionIndex;
+  await updateDoc(ref, { [key]: arrayUnion(currentUser.uid) });
+  showToast('Vote cast!');
+}
+
+async function closePoll(pollId) {
+  if (!confirm('Close this poll?')) return;
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  await updateDoc(doc(db, 'polls', pollId), { deadline: yesterday.toISOString().split('T')[0] });
+  showToast('Poll closed');
+}
+
+async function deletePoll(pollId) {
+  if (!confirm('Delete this poll?')) return;
+  await deleteDoc(doc(db, 'polls', pollId));
+  showToast('Poll deleted');
+}
+
+window.loadPolls = loadPolls;
+window.togglePollForm = togglePollForm;
+window.createPoll = createPoll;
+window.castVote = castVote;
+window.closePoll = closePoll;
+window.deletePoll = deletePoll;
 // EXPOSE TO WINDOW
 window.showPostNotification=showPostNotification; window.postNotification=postNotification; window.markNotifRead=markNotifRead; window.deleteNotification=deleteNotification; window.filterDirectory=filterDirectory; window.sendAIMessage=sendAIMessage; window.askQuick=askQuick; window.showScholarshipForm=showScholarshipForm; window.previewScholarship=previewScholarship; window.showScholarshipSection=showScholarshipSection; window.postScholarship=postScholarship; window.trackApplication=trackApplication; window.updateApplicationStatus=updateApplicationStatus; window.deleteApplication=deleteApplication; window.deleteScholarship=deleteScholarship; window.showAIHelp=showAIHelp; window.requestRecommendation=requestRecommendation; window.approveRecommendation=approveRecommendation; window.rejectRecommendation=rejectRecommendation; window.shareSuccessStory=shareSuccessStory; window.downloadRecommendationLetter=downloadRecommendationLetter; window.downloadRecommendationLetter=downloadRecommendationLetter;
 window.doRegister=doRegister; window.doLogin=doLogin; window.doLogout=doLogout; window.doForgotPassword=doForgotPassword;
@@ -3501,6 +3673,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <button class="tab-btn" data-tab="magazine" onclick="showTab('magazine')"><span class="tab-icon">📰</span> Magazine</button>
       <button class="tab-btn" data-tab="achievements" onclick="showTab('achievements')"><span class="tab-icon">🏆</span> Achievements</button>
       <button class="tab-btn" data-tab="resources" onclick="showTab('resources')"><span class="tab-icon">📚</span> Resources</button>
+      <button class="tab-btn" data-tab="polls" onclick="showTab('polls')"><span class="tab-icon">🗳️</span> Polls</button>
       <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">👑</span> Head Panel</button>
       <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;"><span class="tab-icon">🛡️</span> Admin Panel</button>
     </nav>
@@ -3554,6 +3727,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <div class="tab-panel" id="tab-magazine"><div id="magazine-container"></div></div>
     <div class="tab-panel" id="tab-achievements"><div id="achievements-container"></div></div>
     <div class="tab-panel" id="tab-resources"><div id="resources-container"></div></div>
+    <div class="tab-panel" id="tab-polls"><div id="polls-container"></div></div>
   </main>
 </div>
 
