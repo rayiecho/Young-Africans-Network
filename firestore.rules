@@ -187,6 +187,35 @@ service cloud.firestore {
       allow read: if isAdmin();
     }
 
+
+    // ── CAREER HUB ────────────────────────────────────
+    match /careerMaterials/{matId} {
+      allow read: if isLoggedIn();
+      allow create, update, delete: if isAdminOrHead() || isSystemAdmin();
+    }
+
+    match /careerJobs/{jobId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow delete: if isLoggedIn() && (
+        resource.data.postedById == request.auth.uid || isAdmin()
+      );
+      allow update: if isAdmin() || isSystemAdmin();
+    }
+
+    match /careerAssignments/{assignId} {
+      allow read: if isLoggedIn() && (
+        resource.data.userId == request.auth.uid || isAdminOrHead()
+      );
+      allow create: if isLoggedIn();
+      allow update: if isAdminOrHead() || isSystemAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /careerProgress/{progressId} {
+      allow read, write: if isLoggedIn();
+    }
+
     match /moderation_log/{logId} {
       allow read: if isAdmin();
       allow create: if isLoggedIn();
