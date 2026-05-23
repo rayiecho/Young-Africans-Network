@@ -150,7 +150,7 @@ service cloud.firestore {
     }
 
     match /team/{memberId} {
-      allow read: if isLoggedIn();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
@@ -160,17 +160,17 @@ service cloud.firestore {
     }
 
     match /events/{eventId} {
-      allow read: if isLoggedIn();
+      allow read: if true;
       allow write: if isAdminOrHead();
     }
 
     match /gallery/{itemId} {
-      allow read: if isLoggedIn();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     match /stories/{storyId} {
-      allow read: if isLoggedIn();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
