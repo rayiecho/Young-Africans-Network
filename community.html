@@ -2192,6 +2192,21 @@ async function sendAIMessage() {
   const input = document.getElementById('ai-input');
   const message = input.value.trim();
   if (!message) return;
+  const today = new Date().toISOString().split('T')[0];
+  const rateLimitRef = doc(db, 'aiUsage', currentUser.uid);
+  const rateLimitSnap = await getDoc(rateLimitRef);
+  const rateLimitData = rateLimitSnap.exists() ? rateLimitSnap.data() : {};
+  const todayCount = rateLimitData.date === today ? (rateLimitData.count || 0) : 0;
+  const DAILY_LIMIT = 20;
+  if (todayCount >= DAILY_LIMIT) {
+    showToast('Daily AI limit reached (20/day). Come back tomorrow!', 'error');
+    const md = document.getElementById('ai-messages');
+    if (md) { md.innerHTML += '<div style="display:flex;gap:0.75rem;"><div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;flex-shrink:0;">🤖</div><div style="background:#f8d7da;border-radius:12px;padding:0.85rem 1rem;max-width:85%;"><p style="font-size:0.88rem;color:#721c24;">You have reached your daily limit of 20 AI messages. Come back tomorrow!</p></div></div>'; md.scrollTop = md.scrollHeight; }
+    return;
+  }
+  await setDoc(rateLimitRef, { date: today, count: todayCount + 1 }, { merge: true });
+  const remaining = DAILY_LIMIT - (todayCount + 1);
+  if (remaining <= 5 && remaining > 0) showToast('AI requests remaining today: ' + remaining);
   input.value = '';
 
   const messagesDiv = document.getElementById('ai-messages');
