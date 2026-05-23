@@ -3977,7 +3977,7 @@ async function handleGlobalSearch(query) {
     Object.keys(grouped).forEach(function(type) {
       html += '<div style="padding:0.5rem 1rem;font-size:0.68rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;background:var(--light);">' + (typeLabels[type]||type) + 's</div>';
       grouped[type].slice(0,4).forEach(function(r) {
-        html += '<div onclick="' + r.action + ';document.getElementById('global-search-input').value='';document.getElementById('search-results-dropdown').style.display='none';" ' +
+        html += '<div onclick="' + r.action + ';document.getElementById(\'global-search-input\').value=\'\';document.getElementById(\'search-results-dropdown\').style.display=\'none\';" ' +
           'style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;cursor:pointer;transition:background 0.15s;" ' +
           'onmouseover="this.style.background='var(--light)'" onmouseout="this.style.background='transparent'">' +
           r.icon +
