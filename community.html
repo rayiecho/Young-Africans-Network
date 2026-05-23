@@ -3979,7 +3979,7 @@ async function handleGlobalSearch(query) {
       grouped[type].slice(0,4).forEach(function(r) {
         html += '<div onclick="' + r.action + ';document.getElementById(\'global-search-input\').value=\'\';document.getElementById(\'search-results-dropdown\').style.display=\'none\';" ' +
           'style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;cursor:pointer;transition:background 0.15s;" ' +
-          'onmouseover="this.style.background='var(--light)'" onmouseout="this.style.background='transparent'">' +
+          'onmouseover="this.style.background=\'var(--light)\'" onmouseout="this.style.background=\'transparent\'">' +
           r.icon +
           '<div style="flex:1;min-width:0;"><div style="font-size:0.85rem;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + sanitize(r.title) + '</div>' +
           '<div style="font-size:0.72rem;color:var(--gray);">' + sanitize(r.subtitle) + '</div></div></div>';
