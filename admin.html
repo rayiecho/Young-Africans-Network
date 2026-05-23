@@ -14,7 +14,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, signInAnonymously, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",
@@ -42,7 +42,9 @@ const DEPARTMENTS = [
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-signInAnonymously(auth).then(() => console.log('Admin auth ready ✅')).catch(e => console.log('Auth error:', e));
+signInWithEmailAndPassword(auth, 'yan.admin.cms@youngafricansnetwork.org', 'YAN@Admin2026@CMS')
+  .then(() => console.log('Admin auth ready ✅'))
+  .catch(e => console.log('Auth error:', e));
 
 // ===== AUTH =====
 function checkAuth() {
