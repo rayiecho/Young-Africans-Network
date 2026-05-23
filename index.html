@@ -173,7 +173,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .section-desc{font-size:0.95rem;color:var(--gray);line-height:1.9;margin-bottom:1.5rem;}
 .values-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem;}
 .value-card{background:var(--white);border-radius:12px;padding:1.25rem;border-left:4px solid var(--gold);box-shadow:0 2px 12px rgba(0,0,0,0.05);}
-.value-icon{font-size:1.5rem;margin-bottom:0.5rem;}
+.value-icon{font-family:"Playfair Display",serif;font-size:1.5rem;font-weight:900;color:var(--gold);margin-bottom:0.5rem;line-height:1;}
 .value-title{font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;}
 .value-desc{font-size:0.78rem;color:var(--gray);line-height:1.6;}
 .about-img{background:linear-gradient(135deg,var(--navy),var(--dark));border-radius:24px;min-height:400px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
@@ -198,7 +198,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .program-card:nth-child(4){border-top-color:var(--red);}
 .program-card:nth-child(5){border-top-color:var(--gold);}
 .program-card:nth-child(6){border-top-color:var(--navy);}
-.program-icon{font-size:2.5rem;margin-bottom:1rem;}
+.program-icon{font-family:"Playfair Display",serif;font-size:2rem;font-weight:900;color:var(--gold);margin-bottom:1rem;line-height:1;opacity:0.9;}
 .program-title{font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;}
 .program-desc{font-size:0.82rem;color:var(--gray);line-height:1.7;}
 .program-sdg{display:inline-block;margin-top:0.75rem;background:rgba(27,42,107,0.1);color:var(--navy);padding:0.25rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:600;}
@@ -236,8 +236,8 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
 .footer-logo-text{font-size:0.9rem;font-weight:700;color:var(--white);}
 .footer-desc{font-size:0.82rem;color:rgba(255,255,255,0.6);line-height:1.8;margin-bottom:1.5rem;}
 .footer-social{display:flex;gap:0.75rem;}
-.social-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:0.9rem;text-decoration:none;transition:background 0.2s;}
-.social-btn:hover{background:var(--red);}
+.social-btn{width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:700;font-family:"Poppins",sans-serif;letter-spacing:0.5px;text-transform:uppercase;color:rgba(255,255,255,0.8);text-decoration:none;transition:all 0.2s;border:1px solid rgba(255,255,255,0.15);}
+.social-btn:hover{background:var(--gold);color:var(--navy);border-color:var(--gold);}
 .footer-title{font-size:0.85rem;font-weight:700;color:var(--white);margin-bottom:1rem;text-transform:uppercase;letter-spacing:1px;}
 .footer-links{list-style:none;display:flex;flex-direction:column;gap:0.5rem;}
 .footer-links a{font-size:0.8rem;color:rgba(255,255,255,0.6);text-decoration:none;transition:color 0.2s;}
@@ -432,7 +432,7 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
         </div>
         <div class="hero-card-stat">
           <span class="hcs-label">Launch</span>
-          <span class="hcs-val">1st June 2026 🚀</span>
+          <span class="hcs-val">1st June 2026</span>
         </div>
       </div>
     </div>
@@ -469,22 +469,22 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
       <p class="section-desc">We are non-partisan, inclusive and committed to creating lasting impact across Africa and the diaspora.</p>
       <div class="values-grid">
         <div class="value-card">
-          <div class="value-icon">⚖️</div>
+          <div class="value-icon">01</div>
           <div class="value-title">Integrity</div>
           <div class="value-desc">Honesty and accountability in all actions</div>
         </div>
         <div class="value-card">
-          <div class="value-icon">🤝</div>
+          <div class="value-icon">02</div>
           <div class="value-title">Collaboration</div>
           <div class="value-desc">Building together through shared purpose</div>
         </div>
         <div class="value-card">
-          <div class="value-icon">🌟</div>
+          <div class="value-icon">03</div>
           <div class="value-title">Excellence</div>
           <div class="value-desc">Highest standards in all we do</div>
         </div>
         <div class="value-card">
-          <div class="value-icon">💡</div>
+          <div class="value-icon">04</div>
           <div class="value-title">Impact</div>
           <div class="value-desc">Real lasting change in lives and communities</div>
         </div>
@@ -493,7 +493,7 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
     <div class="about-img">
       <img src="images/logo.jpeg" class="about-img-logo" alt="Young Africans Network">
       <div class="about-badge">
-        <span>🌍</span>
+        
         Pan-African<br>& Global Reach
       </div>
     </div>
@@ -532,37 +532,37 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
     </div>
     <div class="programs-grid">
       <div class="program-card">
-        <div class="program-icon">💻</div>
+        <div class="program-icon">01</div>
         <div class="program-title">IT Training & Digital Awareness</div>
         <div class="program-desc">Equipping youth with digital skills, online safety awareness and 21st century competencies for the digital economy.</div>
         <span class="program-sdg">SDG 4 — Quality Education</span>
       </div>
       <div class="program-card">
-        <div class="program-icon">🏆</div>
+        <div class="program-icon">02</div>
         <div class="program-title">Scholarships & Global Opportunities</div>
         <div class="program-desc">Increasing access to scholarships, fellowships, internships and global opportunities for African youth worldwide.</div>
         <span class="program-sdg">SDG 4 & SDG 10</span>
       </div>
       <div class="program-card">
-        <div class="program-icon">🎤</div>
+        <div class="program-icon">03</div>
         <div class="program-title">Career Development & Public Speaking</div>
         <div class="program-desc">Improving employability, confidence and communication skills through CV training, mock interviews and public speaking.</div>
         <span class="program-sdg">SDG 8 — Decent Work</span>
       </div>
       <div class="program-card">
-        <div class="program-icon">👑</div>
+        <div class="program-icon">04</div>
         <div class="program-title">Leadership & 21st Century Skills</div>
         <div class="program-desc">Nurturing ethical, future-ready African leaders through workshops, mentorship and leadership development programs.</div>
         <span class="program-sdg">SDG 16 — Strong Institutions</span>
       </div>
       <div class="program-card">
-        <div class="program-icon">🌍</div>
+        <div class="program-icon">05</div>
         <div class="program-title">Community Impact & Giving Back</div>
         <div class="program-desc">Promoting social responsibility, volunteerism and community service across Africa and the diaspora.</div>
         <span class="program-sdg">SDG 17 — Partnerships</span>
       </div>
       <div class="program-card">
-        <div class="program-icon">💚</div>
+        <div class="program-icon">06</div>
         <div class="program-title">Mental Health & Wellbeing</div>
         <div class="program-desc">Promoting youth wellbeing, resilience and emotional awareness through peer support programs and wellness sessions.</div>
         <span class="program-sdg">SDG 3 — Good Health</span>
@@ -586,19 +586,19 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
         <div class="team-avatar">EM</div>
         <div class="team-name">Mr. Emmanuel Ikumilu Mwori</div>
         <div class="team-role">Founder & Executive Director</div>
-        <div class="team-country">📍 Kenya</div>
+        <div class="team-country">Kenya</div>
       </div>
       <div class="team-card">
         <div class="team-avatar">MK</div>
         <div class="team-name">Ms. Merlene Kamanda</div>
         <div class="team-role">Co-Founder</div>
-        <div class="team-country">📍 Kenya</div>
+        <div class="team-country">Kenya</div>
       </div>
       <div class="team-card">
         <div class="team-avatar">RA</div>
         <div class="team-name">Mr. Regan Ayiecho</div>
         <div class="team-role">Co-Founder</div>
-        <div class="team-country">📍 Kenya</div>
+        <div class="team-country">Kenya</div>
       </div>
     </div>
     <div style="text-align:center;margin-top:2.5rem;">
@@ -628,8 +628,8 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
 <!-- JOIN CTA -->
 <section class="join-cta">
   <h2>Ready to Build the Future?</h2>
-  <p>Join thousands of young Africans who are making a difference through leadership, education and community action. Your journey starts here!</p>
-  <a href="join.html" class="btn-white">Join YAN Today 🚀</a>
+  <p>Join young Africans from across the continent who are building skills, earning certificates and accessing global opportunities. Your journey starts here.</p>
+  <a href="join.html" class="btn-white">Join YAN Today</a>
 </section>
 
 <!-- FOOTER -->
@@ -642,11 +642,11 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
       </div>
       <p class="footer-desc">Empowering African youth through education, leadership, mentorship and access to global opportunities. Building the Future, Together.</p>
       <div class="footer-social">
-        <a href="https://www.facebook.com/profile.php?id=61589163254586" target="_blank" class="social-btn" aria-label="Facebook">📘</a>
-        <a href="https://x.com/YoungAfricanNet" target="_blank" class="social-btn" aria-label="X / Twitter">🐦</a>
-        <a href="https://www.instagram.com/youngafricansnetwork" target="_blank" class="social-btn" aria-label="Instagram">📸</a>
-        <a href="https://www.linkedin.com/company/115838329" target="_blank" class="social-btn" aria-label="LinkedIn">💼</a>
-<a href="https://www.youtube.com/channel/UCo5ptDN88YdQ86RI2yu45ZA" target="_blank" class="social-btn" aria-label="YouTube">▶️</a>
+        <a href="https://www.facebook.com/profile.php?id=61589163254586" target="_blank" class="social-btn" aria-label="Facebook">fb</a>
+        <a href="https://x.com/YoungAfricanNet" target="_blank" class="social-btn" aria-label="X / Twitter">𝕏</a>
+        <a href="https://www.instagram.com/youngafricansnetwork" target="_blank" class="social-btn" aria-label="Instagram">ig</a>
+        <a href="https://www.linkedin.com/company/115838329" target="_blank" class="social-btn" aria-label="LinkedIn">in</a>
+<a href="https://www.youtube.com/channel/UCo5ptDN88YdQ86RI2yu45ZA" target="_blank" class="social-btn" aria-label="YouTube">yt</a>
       </div>
     </div>
     <div>
@@ -674,15 +674,15 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
     <div>
       <div class="footer-title">Contact</div>
       <ul class="footer-links">
-        <li><a href="mailto:youngafricansn@gmail.com">📧 youngafricansn@gmail.com</a></li>
-        <li><a href="tel:">📞 +254 791 887 609</a></li>
-        <li><a href="#">📍 Kenya | Pan-African</a></li>
+        <li><a href="mailto:youngafricansn@gmail.com">youngafricansn@gmail.com</a></li>
+        <li><a href="tel:">+254 791 887 609</a></li>
+        <li><a href="#">Kenya | Pan-African</a></li>
       </ul>
     </div>
   </div>
   <div class="footer-bottom">
     <p class="footer-copy">© 2026 Young Africans Network. All Rights Reserved. | Website by <a href="https://rayiecho.github.io" target="_blank">Regan Ayiecho</a></p>
-    <p class="footer-copy" style="color:var(--gold);">"Building the Future, Together" 🌍</p>
+    <p class="footer-copy" style="color:var(--gold);">"Building the Future, Together"</p>
   </div>
 </footer>
 
