@@ -27,7 +27,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, getDocs, deleteDoc, arrayUnion, arrayRemove, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, getDocs, deleteDoc, arrayUnion, arrayRemove, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const DAILY_DOMAIN = 'youngafricansnetwork.daily.co';
 const DAILY_API_KEY = '2e484de488713ded6e5cb999714cb9fcfb624378c2e9fc1c8efa02a4b4733a4e';
