@@ -266,6 +266,7 @@ function loadTabContent(tab) {
   if (tab === 'ai') loadAI();
   if (tab === 'scholarships') loadScholarships();
   if (tab === 'magazine') loadMagazine();
+  if (tab === 'achievements') loadAchievements();
 }
 
 // MEMBER DIRECTORY
@@ -2881,6 +2882,130 @@ async function loadAdminModeration() {
   c.innerHTML = `<h3>Recent Posts</h3>${snap.docs.map(d=>{const p=d.data();return `<div class="moderation-row"><div><strong>${sanitize(p.authorName)}</strong><p>${sanitize(p.content?.substring(0,100))}...</p><small>${timeAgo(p.createdAt)}</small></div><button class="btn-sm btn-red" onclick="deletePost('${d.id}')">Delete</button></div>`;}).join('')}`;
 }
 
+
+// ACHIEVEMENTS BOARD
+async function loadAchievements() {
+  const container = document.getElementById('achievements-container');
+  container.innerHTML = \`
+    <div style="max-width:900px;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:2rem;">
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">🏆 Achievements Board</h2>
+        <p style="color:var(--gray);font-size:0.88rem;">Celebrating the wins of our pan-African community</p>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;justify-content:center;">
+        <button class="achieve-filter-btn active" onclick="filterAchievements('all')">🌍 All</button>
+        <button class="achieve-filter-btn" onclick="filterAchievements('certificate')">🎓 Certificates</button>
+        <button class="achieve-filter-btn" onclick="filterAchievements('scholarship')">🏆 Scholarships</button>
+      </div>
+      <div id="achievements-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;"></div>
+      <div id="achievements-loading" style="text-align:center;padding:2rem;color:var(--gray);">Loading achievements...</div>
+    </div>\`;
+
+  window._allAchievements = [];
+
+  // Load approved certificates
+  const certSnap = await getDocs(query(
+    collection(db, 'certificates'),
+    where('status', '==', 'approved'),
+    orderBy('approvedAt', 'desc')
+  ));
+
+  for (const d of certSnap.docs) {
+    const c = d.data();
+    const dept = DEPARTMENTS.find(x => x.id === c.department);
+    // Get user photo
+    let photoUrl = '';
+    try {
+      const userSnap = await getDoc(doc(db, 'users', c.userId));
+      if (userSnap.exists()) photoUrl = userSnap.data().photoUrl || '';
+    } catch(e) {}
+
+    window._allAchievements.push({
+      type: 'certificate',
+      name: c.userName || '',
+      photoUrl,
+      title: dept?.name || c.department,
+      icon: dept?.icon || '🎓',
+      subtitle: 'YAN Certificate of Achievement',
+      date: c.approvedAt,
+      badge: '🎓 Certificate',
+      badgeColor: '#1B2A6B'
+    });
+  }
+
+  // Load scholarship success stories
+  const storySnap = await getDocs(query(
+    collection(db, 'successStories'),
+    orderBy('createdAt', 'desc')
+  ));
+
+  for (const d of storySnap.docs) {
+    const s = d.data();
+    let photoUrl = '';
+    try {
+      const userSnap = await getDoc(doc(db, 'users', s.userId));
+      if (userSnap.exists()) photoUrl = userSnap.data().photoUrl || '';
+    } catch(e) {}
+
+    window._allAchievements.push({
+      type: 'scholarship',
+      name: s.userName || '',
+      photoUrl,
+      title: s.scholarship || '',
+      icon: '🏆',
+      subtitle: s.content?.substring(0, 80) + '...' || '',
+      date: s.createdAt,
+      badge: '🏆 Scholarship',
+      badgeColor: '#F5A623'
+    });
+  }
+
+  document.getElementById('achievements-loading').style.display = 'none';
+  renderAchievementsGrid('all');
+}
+
+function filterAchievements(type) {
+  document.querySelectorAll('.achieve-filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderAchievementsGrid(type);
+}
+
+function renderAchievementsGrid(type) {
+  const grid = document.getElementById('achievements-grid');
+  if (!grid) return;
+
+  const filtered = type === 'all'
+    ? window._allAchievements
+    : window._allAchievements.filter(a => a.type === type);
+
+  if (filtered.length === 0) {
+    grid.innerHTML = \`<div class="empty-state" style="grid-column:1/-1;">
+      <div style="font-size:3rem;margin-bottom:1rem;">🏆</div>
+      <p>No achievements yet. Be the first! 🌍</p>
+    </div>\`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(a => \`
+    <div style="background:var(--white);border-radius:20px;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,0.07);text-align:center;transition:transform 0.2s;position:relative;overflow:hidden;"
+      onmouseover="this.style.transform='translateY(-6px)'"
+      onmouseout="this.style.transform='translateY(0)'">
+      <div style="position:absolute;top:0;left:0;right:0;height:4px;background:\${a.badgeColor};"></div>
+      <div style="width:72px;height:72px;border-radius:50%;margin:0 auto 1rem;overflow:hidden;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:900;color:#fff;border:3px solid var(--light);">
+        \${a.photoUrl
+          ? \`<img src="\${a.photoUrl}" style="width:100%;height:100%;object-fit:cover;">\`
+          : (a.name||'?')[0].toUpperCase()}
+      </div>
+      <div style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">\${sanitize(a.name)}</div>
+      <div style="display:inline-block;background:\${a.badgeColor}18;color:\${a.badgeColor};padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;margin-bottom:0.75rem;">\${a.badge}</div>
+      <div style="font-size:0.88rem;font-weight:600;color:var(--navy);margin-bottom:0.25rem;">\${a.icon} \${sanitize(a.title)}</div>
+      <div style="font-size:0.75rem;color:var(--gray);line-height:1.5;">\${sanitize(a.subtitle)}</div>
+      <div style="font-size:0.68rem;color:var(--gray);margin-top:0.75rem;">\${timeAgo(a.date)}</div>
+    </div>\`).join('');
+}
+window.loadAchievements = loadAchievements;
+window.filterAchievements = filterAchievements;
+
 // EXPOSE TO WINDOW
 window.showPostNotification=showPostNotification; window.postNotification=postNotification; window.markNotifRead=markNotifRead; window.deleteNotification=deleteNotification; window.filterDirectory=filterDirectory; window.sendAIMessage=sendAIMessage; window.askQuick=askQuick; window.showScholarshipForm=showScholarshipForm; window.previewScholarship=previewScholarship; window.showScholarshipSection=showScholarshipSection; window.postScholarship=postScholarship; window.trackApplication=trackApplication; window.updateApplicationStatus=updateApplicationStatus; window.deleteApplication=deleteApplication; window.deleteScholarship=deleteScholarship; window.showAIHelp=showAIHelp; window.requestRecommendation=requestRecommendation; window.approveRecommendation=approveRecommendation; window.rejectRecommendation=rejectRecommendation; window.shareSuccessStory=shareSuccessStory; window.downloadRecommendationLetter=downloadRecommendationLetter; window.downloadRecommendationLetter=downloadRecommendationLetter;
 window.doRegister=doRegister; window.doLogin=doLogin; window.doLogout=doLogout; window.doForgotPassword=doForgotPassword;
@@ -3150,6 +3275,8 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .loading{text-align:center;padding:2rem;color:var(--gray);font-size:0.88rem;}
 #floating-meeting.expanded{width:700px;height:450px;}
 .empty-state{text-align:center;padding:3rem 1rem;color:var(--gray);font-size:0.9rem;}
+.achieve-filter-btn{background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 1.25rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.achieve-filter-btn.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
 @media(max-width:768px){
   :root{--sidebar:0px;}
   .sidebar{position:fixed;transform:translateX(-100%);transition:transform 0.3s;width:260px;z-index:100;}
@@ -3274,6 +3401,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <button class="tab-btn" data-tab="ai" onclick="showTab('ai')"><span class="tab-icon">🤖</span> YAN AI</button>
       <button class="tab-btn" data-tab="scholarships" onclick="showTab('scholarships')"><span class="tab-icon">🏆</span> Scholarships</button>
       <button class="tab-btn" data-tab="magazine" onclick="showTab('magazine')"><span class="tab-icon">📰</span> Magazine</button>
+      <button class="tab-btn" data-tab="achievements" onclick="showTab('achievements')"><span class="tab-icon">🏆</span> Achievements</button>
       <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">👑</span> Head Panel</button>
       <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;"><span class="tab-icon">🛡️</span> Admin Panel</button>
     </nav>
@@ -3325,6 +3453,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <div class="tab-panel" id="tab-ai"><div id="ai-container"></div></div>
     <div class="tab-panel" id="tab-scholarships"><div id="scholarships-container"></div></div>
     <div class="tab-panel" id="tab-magazine"><div id="magazine-container"></div></div>
+    <div class="tab-panel" id="tab-achievements"><div id="achievements-container"></div></div>
   </main>
 </div>
 
