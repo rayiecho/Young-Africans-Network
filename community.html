@@ -150,11 +150,22 @@ async function doRegister() {
     await sendEmailVerification(cred.user);
     await setDoc(doc(db, 'users', cred.user.uid), {
       name, email, country, whatsapp, dob, role, department: dept,
+      referredBy: localStorage.getItem('yan_referral') || '',
       photoUrl, bio: '', joinedAt: serverTimestamp(),
       isAdmin: false, isDeptHead: false, isExec: false,
       profileComplete: true
     });
     showToast('Account created! Welcome to YAN! 🎉');
+    // Increment referrer's count
+    const refCode = localStorage.getItem('yan_referral');
+    if (refCode) {
+      const refSnap = await getDocs(query(collection(db,'users'), where('referralCode','==',refCode)));
+      if (!refSnap.empty) {
+        await updateDoc(doc(db,'users',refSnap.docs[0].id), { referralCount: (refSnap.docs[0].data().referralCount||0)+1 });
+      }
+      localStorage.removeItem('yan_referral');
+    }
+    showWelcomeModal();
   } catch(e) {
     showToast(e.message, 'error');
   } finally {
@@ -982,6 +993,7 @@ function loadProfile() {
     </div>
     <div id="cert-section" class="cert-section"></div>`;
   loadProfileCerts();
+  loadReferralSection();
 }
 
 async function saveProfile() {
@@ -3302,6 +3314,76 @@ window.createPoll = createPoll;
 window.castVote = castVote;
 window.closePoll = closePoll;
 window.deletePoll = deletePoll;
+
+// REFERRAL SYSTEM
+async function initReferralCode() {
+  if (!currentUserData.referralCode) {
+    const code = 'YAN' + currentUser.uid.substring(0,8).toUpperCase();
+    await updateDoc(doc(db, 'users', currentUser.uid), { referralCode: code, referralCount: 0 });
+    currentUserData.referralCode = code;
+    currentUserData.referralCount = 0;
+  }
+}
+
+async function loadReferralSection() {
+  await initReferralCode();
+  const code = currentUserData.referralCode || '';
+  const count = currentUserData.referralCount || 0;
+  const referralUrl = 'https://youngafricansnetwork.org/community.html?ref=' + code;
+
+  // Get referred members list
+  const snap = await getDocs(query(collection(db,'users'), where('referredBy','==',code)));
+  const referredMembers = snap.docs.map(function(d) { return d.data(); });
+
+  const sectionHTML = '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-top:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">' +
+    '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Your Referral Link</h3>' +
+    '<div style="background:var(--light);border-radius:10px;padding:1rem;margin-bottom:1rem;">' +
+    '<p style="font-size:0.72rem;color:var(--gray);margin-bottom:0.5rem;">Share this link to invite friends to YAN:</p>' +
+    '<div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">' +
+    '<input type="text" value="' + referralUrl + '" readonly id="referral-url-input" style="flex:1;background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.72rem;outline:none;min-width:0;">' +
+    '<button class="btn-sm btn-navy" onclick="copyReferralLink()">Copy</button>' +
+    '<a href="https://wa.me/?text=' + encodeURIComponent('Join me on Young Africans Network — the pan-African youth community! Register here: ' + referralUrl) + '" target="_blank" class="btn-sm btn-gold" style="text-decoration:none;">WhatsApp</a>' +
+    '</div></div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">' +
+    '<div style="background:var(--light);border-radius:10px;padding:1rem;text-align:center;">' +
+    '<div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--navy);">' + count + '</div>' +
+    '<div style="font-size:0.75rem;color:var(--gray);">Friends Invited</div></div>' +
+    '<div style="background:var(--light);border-radius:10px;padding:1rem;text-align:center;">' +
+    '<div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--gold);">' + referredMembers.length + '</div>' +
+    '<div style="font-size:0.75rem;color:var(--gray);">Joined So Far</div></div></div>' +
+    (referredMembers.length > 0 ?
+      '<h4 style="font-size:0.85rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">Members You Invited</h4>' +
+      referredMembers.map(function(m) {
+        return '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid var(--light);">' +
+          '<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.85rem;flex-shrink:0;">' + (m.name||'?')[0] + '</div>' +
+          '<div><div style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + sanitize(m.name||'') + '</div>' +
+          '<div style="font-size:0.72rem;color:var(--gray);">' + sanitize(m.country||'') + ' · ' + sanitize(m.department||'') + '</div></div></div>';
+      }).join('') : '<p style="font-size:0.82rem;color:var(--gray);">No referrals yet. Share your link to invite friends!</p>') +
+    '</div>';
+
+  // Append to profile container
+  const profileContainer = document.getElementById('profile-container');
+  if (profileContainer) {
+    const existing = document.getElementById('referral-section');
+    if (existing) existing.remove();
+    const div = document.createElement('div');
+    div.id = 'referral-section';
+    div.innerHTML = sectionHTML;
+    profileContainer.appendChild(div);
+  }
+}
+
+function copyReferralLink() {
+  const input = document.getElementById('referral-url-input');
+  if (!input) return;
+  navigator.clipboard.writeText(input.value)
+    .then(function() { showToast('Referral link copied!'); })
+    .catch(function() { input.select(); document.execCommand('copy'); showToast('Referral link copied!'); });
+}
+
+window.initReferralCode = initReferralCode;
+window.loadReferralSection = loadReferralSection;
+window.copyReferralLink = copyReferralLink;
 // EXPOSE TO WINDOW
 window.showPostNotification=showPostNotification; window.postNotification=postNotification; window.markNotifRead=markNotifRead; window.deleteNotification=deleteNotification; window.filterDirectory=filterDirectory; window.sendAIMessage=sendAIMessage; window.askQuick=askQuick; window.showScholarshipForm=showScholarshipForm; window.previewScholarship=previewScholarship; window.showScholarshipSection=showScholarshipSection; window.postScholarship=postScholarship; window.trackApplication=trackApplication; window.updateApplicationStatus=updateApplicationStatus; window.deleteApplication=deleteApplication; window.deleteScholarship=deleteScholarship; window.showAIHelp=showAIHelp; window.requestRecommendation=requestRecommendation; window.approveRecommendation=approveRecommendation; window.rejectRecommendation=rejectRecommendation; window.shareSuccessStory=shareSuccessStory; window.downloadRecommendationLetter=downloadRecommendationLetter; window.downloadRecommendationLetter=downloadRecommendationLetter;
 window.doRegister=doRegister; window.doLogin=doLogin; window.doLogout=doLogout; window.doForgotPassword=doForgotPassword;
@@ -3758,6 +3840,13 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 </div>
 
 <script>
+// REFERRAL — capture ref code from URL on page load
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
+  if (ref) localStorage.setItem('yan_referral', ref);
+})();
+
 document.addEventListener('click', function(e) {
   const sidebar = document.getElementById('sidebar');
   const hamburger = document.getElementById('hamburger-mobile');
