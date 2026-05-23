@@ -3320,7 +3320,7 @@ async function loadPolls() {
 
   container.innerHTML = '<div style="max-width:700px;margin:0 auto;">' +
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">' +
-    '<div><h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);margin-bottom:0.25rem;">Polls & Voting</h2>' +
+    '<div><h2 style="font-family:\'Playfair Display\',serif;font-size:1.5rem;font-weight:900;color:var(--navy);margin-bottom:0.25rem;">Polls &amp; Voting</h2>' +
     '<p style="color:var(--gray);font-size:0.82rem;">Have your say — vote on community decisions</p></div>' +
     addBtn + '</div>' + adminFormHTML +
     '<div id="polls-list"><div class="loading">Loading polls...</div></div></div>';
@@ -3407,15 +3407,15 @@ function renderPoll(pollId, poll) {
         '<div style="width:' + pct + '%;height:100%;background:' + (isMine ? 'var(--red)' : 'var(--navy)') + ';border-radius:50px;transition:width 0.5s;"></div>' +
         '</div></div>';
     } else {
-      optionsHTML += '<button onclick="castVote('' + pollId + '',' + i + ')" ' +
-        'style="width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.75rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.85rem;font-weight:500;cursor:pointer;text-align:left;margin-bottom:0.5rem;transition:all 0.2s;" ' +
-        'onmouseover="this.style.background='rgba(27,42,107,0.08)'" onmouseout="this.style.background='var(--light)'">' +
+      optionsHTML += '<button onclick="castVote(\'' + pollId + '\',' + i + ')" ' +
+        'style="width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.75rem 1rem;border-radius:10px;font-family:\'Poppins\',sans-serif;font-size:0.85rem;font-weight:500;cursor:pointer;text-align:left;margin-bottom:0.5rem;transition:all 0.2s;" ' +
+        'onmouseover="this.style.background=\'rgba(27,42,107,0.08)\'" onmouseout="this.style.background=\'var(--light)\'">' +
         sanitize(opt) + '</button>';
     }
   });
 
-  const deleteBtn = isAdmin ? '<button class="btn-sm btn-red" onclick="deletePoll('' + pollId + '')">Delete</button>' : '';
-  const closeBtn = (isAdmin && !isExpired) ? '<button class="btn-sm btn-outline" onclick="closePoll('' + pollId + '')">Close Poll</button>' : '';
+  const deleteBtn = isAdmin ? '<button class="btn-sm btn-red" onclick="deletePoll(\'' + pollId + '\')">Delete</button>' : '';
+  const closeBtn = (isAdmin && !isExpired) ? '<button class="btn-sm btn-outline" onclick="closePoll(\'' + pollId + '\')">Close Poll</button>' : '';
   const statusBadge = isExpired
     ? '<span style="background:rgba(107,114,128,0.1);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">Closed</span>'
     : '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">Live</span>';
