@@ -128,10 +128,11 @@ async function doRegister() {
   const pass = document.getElementById('reg-pass').value;
   const country = document.getElementById('reg-country').value.trim();
   const whatsapp = document.getElementById('reg-whatsapp').value.trim();
+  const dob = document.getElementById('reg-dob').value;
   const role = document.getElementById('reg-role').value;
   const dept = document.getElementById('reg-dept').value;
   const photoFile = document.getElementById('reg-photo').files[0];
-  if (!name||!email||!pass||!country||!whatsapp||!role||!dept) return showToast('Please fill all required fields','error');
+  if (!name||!email||!pass||!country||!whatsapp||!dob||!role||!dept) return showToast('Please fill all required fields','error');
   if (pass.length < 6) return showToast('Password must be at least 6 characters','error');
   const btn = document.getElementById('reg-btn');
   btn.disabled = true; btn.textContent = 'Creating account...';
@@ -148,7 +149,7 @@ async function doRegister() {
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     await sendEmailVerification(cred.user);
     await setDoc(doc(db, 'users', cred.user.uid), {
-      name, email, country, whatsapp, role, department: dept,
+      name, email, country, whatsapp, dob, role, department: dept,
       photoUrl, bio: '', joinedAt: serverTimestamp(),
       isAdmin: false, isDeptHead: false, isExec: false,
       profileComplete: true
@@ -3218,6 +3219,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <div class="form-group"><label>Email Address *</label><input type="email" id="reg-email" placeholder="your@email.com"></div>
     <div class="form-group"><label>Password * (min 6 characters)</label><input type="password" id="reg-pass" placeholder="Create a password"></div>
     <div class="form-group"><label>WhatsApp Number *</label><input type="tel" id="reg-whatsapp" placeholder="+254 700 000 000"></div>
+    <div class="form-group"><label>Date of Birth *</label><input type="date" id="reg-dob" style="width:100%;"></div>
     <div class="form-row-2">
       <div class="form-group"><label>Role *</label><select id="reg-role"><option value="">Select role...</option><option value="Member">Member</option><option value="Volunteer">Volunteer</option><option value="Associate">Associate</option><option value="Executive">Executive</option></select></div>
       <div class="form-group"><label>Department *</label><select id="reg-dept"><option value="">Select department...</option><optgroup label="── Training & Certification Departments ──"><option value="programs">💻 Programs & Training</option><option value="scholarships">🏆 Scholarships & Global Opportunities</option><option value="career">🎤 Career Development & Public Speaking</option><option value="community">🌍 Community Impact & Volunteering</option><option value="mental">💚 Mental Health & Wellbeing</option></optgroup><optgroup label="── Other Departments ──"><option value="communications">📢 Communications & Media</option><option value="finance">💰 Finance & Administration</option><option value="partnerships">🤝 Partnership & External Relations</option></optgroup></select></div>
