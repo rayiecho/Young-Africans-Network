@@ -280,6 +280,7 @@ function loadTabContent(tab) {
   if (tab === 'achievements') loadAchievements();
   if (tab === 'resources') loadResources();
   if (tab === 'polls') loadPolls();
+  if (tab === 'calendar') loadCalendar();
 }
 
 // MEMBER DIRECTORY
@@ -3582,6 +3583,189 @@ window.sendDeptNotification = sendDeptNotification;
 window.scheduleHeadMeeting = scheduleHeadMeeting;
 window.loadHeadMeetings = loadHeadMeetings;
 window.loadHeadMembers = loadHeadMembers;
+
+// EVENT CALENDAR
+async function loadCalendar() {
+  const container = document.getElementById('calendar-container');
+  container.innerHTML = '<div class="loading">Loading calendar...</div>';
+
+  // Fetch meetings and events
+  const [meetingsSnap, eventsSnap] = await Promise.all([
+    getDocs(query(collection(db, 'meetings'), orderBy('scheduledAt', 'asc'))),
+    getDocs(query(collection(db, 'events'), orderBy('date', 'asc'))).catch(() => ({ docs: [] }))
+  ]);
+
+  window._calendarEvents = [];
+
+  meetingsSnap.docs.forEach(function(d) {
+    const m = d.data();
+    if (!m.scheduledAt) return;
+    const date = m.scheduledAt.toDate ? m.scheduledAt.toDate() : new Date(m.scheduledAt);
+    window._calendarEvents.push({
+      id: d.id,
+      title: m.title,
+      date: date,
+      type: 'meeting',
+      topic: m.topic || '',
+      roomUrl: m.roomUrl || '',
+      createdBy: m.createdByName || '',
+      dept: m.targetDept || 'all'
+    });
+  });
+
+  eventsSnap.docs.forEach(function(d) {
+    const e = d.data();
+    if (!e.date) return;
+    window._calendarEvents.push({
+      id: d.id,
+      title: e.title,
+      date: new Date(e.date),
+      type: 'event',
+      topic: e.description || '',
+      createdBy: e.lead || ''
+    });
+  });
+
+  window._calendarDate = new Date();
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const container = document.getElementById('calendar-container');
+  if (!container) return;
+
+  const now = window._calendarDate;
+  const year = now.getFullYear();
+  const month = now.getMonth();
+
+  const monthNames = ['January','February','March','April','May','June',
+    'July','August','September','October','November','December'];
+  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  // First day of month and total days
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date();
+
+  // Group events by date string
+  const eventsByDate = {};
+  (window._calendarEvents || []).forEach(function(e) {
+    const d = e.date;
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      const key = d.getDate();
+      if (!eventsByDate[key]) eventsByDate[key] = [];
+      eventsByDate[key].push(e);
+    }
+  });
+
+  // Build calendar grid
+  let gridHTML = '';
+  let dayCount = 1;
+  let started = false;
+
+  // 6 rows x 7 cols
+  for (let row = 0; row < 6; row++) {
+    for (let col = 0; col < 7; col++) {
+      const cellIndex = row * 7 + col;
+      if (cellIndex < firstDay || dayCount > daysInMonth) {
+        gridHTML += '<div style="background:transparent;border-radius:10px;padding:0.5rem;min-height:80px;"></div>';
+      } else {
+        const isToday = dayCount === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+        const dayEvents = eventsByDate[dayCount] || [];
+        const eventsHTML = dayEvents.slice(0,3).map(function(e) {
+          const color = e.type === 'meeting' ? 'var(--navy)' : 'var(--gold)';
+          const bg = e.type === 'meeting' ? 'rgba(27,42,107,0.1)' : 'rgba(245,166,35,0.15)';
+          const time = e.date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+          return '<div onclick="showCalendarEvent('' + e.id + '')" style="background:' + bg + ';color:' + color + ';border-radius:4px;padding:0.15rem 0.4rem;font-size:0.62rem;font-weight:600;margin-top:0.2rem;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" title="' + e.title + '">' + time + ' ' + e.title + '</div>';
+        }).join('');
+        const moreText = dayEvents.length > 3 ? '<div style="font-size:0.6rem;color:var(--gray);margin-top:0.2rem;">+' + (dayEvents.length-3) + ' more</div>' : '';
+        gridHTML += '<div style="background:' + (isToday ? 'rgba(230,51,41,0.05)' : 'var(--white)') + ';border-radius:10px;padding:0.5rem;min-height:80px;border:' + (isToday ? '2px solid var(--red)' : '1px solid rgba(27,42,107,0.07)') + ';transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">' +
+          '<div style="font-size:0.82rem;font-weight:' + (isToday ? '900' : '600') + ';color:' + (isToday ? 'var(--red)' : 'var(--navy)') + ';">' + dayCount + '</div>' +
+          eventsHTML + moreText + '</div>';
+        dayCount++;
+      }
+    }
+    if (dayCount > daysInMonth) break;
+  }
+
+  // Upcoming events list
+  const upcoming = (window._calendarEvents || [])
+    .filter(function(e) { return e.date >= today; })
+    .sort(function(a,b) { return a.date - b.date; })
+    .slice(0, 8);
+
+  const upcomingHTML = upcoming.length === 0
+    ? '<div class="empty-state">No upcoming events.</div>'
+    : upcoming.map(function(e) {
+        const color = e.type === 'meeting' ? 'var(--navy)' : 'var(--gold)';
+        const icon = e.type === 'meeting' ? '🎥' : '📅';
+        const dateStr = e.date.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+        const timeStr = e.date.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+        return '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--white);border-radius:10px;margin-bottom:0.5rem;box-shadow:0 1px 6px rgba(0,0,0,0.05);cursor:pointer;" onclick="showCalendarEvent('' + e.id + '')">' +
+          '<div style="width:44px;height:44px;border-radius:10px;background:rgba(27,42,107,0.07);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">' + icon + '</div>' +
+          '<div style="flex:1;min-width:0;"><div style="font-size:0.85rem;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + sanitize(e.title) + '</div>' +
+          '<div style="font-size:0.72rem;color:var(--gray);">' + dateStr + ' · ' + timeStr + (e.createdBy ? ' · By ' + sanitize(e.createdBy) : '') + '</div></div>' +
+          (e.roomUrl ? '<button class="btn-sm btn-navy" onclick="event.stopPropagation();joinMeeting('' + sanitize(e.roomUrl) + '','' + sanitize(e.title) + '')">Join</button>' : '') +
+          '</div>';
+      }).join('');
+
+  container.innerHTML = '<div style="max-width:900px;margin:0 auto;">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">' +
+    '<h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);">📅 Event Calendar</h2>' +
+    '<div style="display:flex;align-items:center;gap:0.75rem;">' +
+    '<button class="btn-sm btn-outline" onclick="changeCalendarMonth(-1)">← Prev</button>' +
+    '<span style="font-size:1rem;font-weight:700;color:var(--navy);min-width:140px;text-align:center;">' + monthNames[month] + ' ' + year + '</span>' +
+    '<button class="btn-sm btn-outline" onclick="changeCalendarMonth(1)">Next →</button>' +
+    '<button class="btn-sm btn-navy" onclick="window._calendarDate=new Date();renderCalendar()">Today</button>' +
+    '</div></div>' +
+    '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:0.5rem;margin-bottom:0.5rem;">' +
+    dayNames.map(function(d) { return '<div style="text-align:center;font-size:0.72rem;font-weight:700;color:var(--gray);padding:0.4rem;">' + d + '</div>'; }).join('') +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:0.5rem;margin-bottom:2rem;">' + gridHTML + '</div>' +
+    '<div style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">' +
+    '<span style="display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;color:var(--gray);"><span style="width:12px;height:12px;border-radius:3px;background:rgba(27,42,107,0.1);display:inline-block;"></span>Meeting</span>' +
+    '<span style="display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;color:var(--gray);"><span style="width:12px;height:12px;border-radius:3px;background:rgba(245,166,35,0.15);display:inline-block;"></span>Event</span>' +
+    '<span style="display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;color:var(--gray);"><span style="width:12px;height:12px;border-radius:3px;border:2px solid var(--red);display:inline-block;"></span>Today</span>' +
+    '</div>' +
+    '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">🗓️ Upcoming Events</h3>' +
+    upcomingHTML + '</div>';
+
+  // Store event map for modal
+  window._calendarEventMap = {};
+  (window._calendarEvents || []).forEach(function(e) { window._calendarEventMap[e.id] = e; });
+}
+
+function changeCalendarMonth(dir) {
+  window._calendarDate.setMonth(window._calendarDate.getMonth() + dir);
+  renderCalendar();
+}
+
+function showCalendarEvent(id) {
+  const e = (window._calendarEventMap || {})[id];
+  if (!e) return;
+  const dateStr = e.date.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const timeStr = e.date.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  modal.innerHTML = '<div style="background:var(--white);border-radius:20px;padding:2rem;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">' +
+    '<div style="font-size:2.5rem;text-align:center;margin-bottom:1rem;">' + (e.type==='meeting'?'🎥':'📅') + '</div>' +
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);text-align:center;margin-bottom:0.5rem;">' + sanitize(e.title) + '</h3>' +
+    (e.topic ? '<p style="font-size:0.85rem;color:var(--gray);text-align:center;margin-bottom:0.75rem;">' + sanitize(e.topic) + '</p>' : '') +
+    '<div style="background:var(--light);border-radius:10px;padding:1rem;margin-bottom:1rem;">' +
+    '<p style="font-size:0.82rem;color:var(--navy);margin-bottom:0.3rem;">📅 ' + dateStr + '</p>' +
+    '<p style="font-size:0.82rem;color:var(--navy);margin-bottom:0.3rem;">⏰ ' + timeStr + '</p>' +
+    (e.createdBy ? '<p style="font-size:0.82rem;color:var(--gray);">👤 By ' + sanitize(e.createdBy) + '</p>' : '') +
+    '</div>' +
+    (e.roomUrl ? '<button class="btn-primary" onclick="joinMeeting('' + sanitize(e.roomUrl) + '','' + sanitize(e.title) + '');this.closest('[style*=fixed]').remove()">🎥 Join Meeting</button>' : '') +
+    '<button onclick="this.closest('[style*=fixed]').remove()" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer;width:100%;margin-top:0.5rem;">Close</button>' +
+    '</div>';
+  document.body.appendChild(modal);
+}
+
+window.loadCalendar = loadCalendar;
+window.renderCalendar = renderCalendar;
+window.changeCalendarMonth = changeCalendarMonth;
+window.showCalendarEvent = showCalendarEvent;
 // EXPOSE TO WINDOW
 window.showPostNotification=showPostNotification; window.postNotification=postNotification; window.markNotifRead=markNotifRead; window.deleteNotification=deleteNotification; window.filterDirectory=filterDirectory; window.sendAIMessage=sendAIMessage; window.askQuick=askQuick; window.showScholarshipForm=showScholarshipForm; window.previewScholarship=previewScholarship; window.showScholarshipSection=showScholarshipSection; window.postScholarship=postScholarship; window.trackApplication=trackApplication; window.updateApplicationStatus=updateApplicationStatus; window.deleteApplication=deleteApplication; window.deleteScholarship=deleteScholarship; window.showAIHelp=showAIHelp; window.requestRecommendation=requestRecommendation; window.approveRecommendation=approveRecommendation; window.rejectRecommendation=rejectRecommendation; window.shareSuccessStory=shareSuccessStory; window.downloadRecommendationLetter=downloadRecommendationLetter; window.downloadRecommendationLetter=downloadRecommendationLetter;
 window.doRegister=doRegister; window.doLogin=doLogin; window.doLogout=doLogout; window.doForgotPassword=doForgotPassword;
@@ -3980,6 +4164,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <button class="tab-btn" data-tab="achievements" onclick="showTab('achievements')"><span class="tab-icon">🏆</span> Achievements</button>
       <button class="tab-btn" data-tab="resources" onclick="showTab('resources')"><span class="tab-icon">📚</span> Resources</button>
       <button class="tab-btn" data-tab="polls" onclick="showTab('polls')"><span class="tab-icon">🗳️</span> Polls</button>
+      <button class="tab-btn" data-tab="calendar" onclick="showTab('calendar')"><span class="tab-icon">📅</span> Calendar</button>
       <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">👑</span> Head Panel</button>
       <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;"><span class="tab-icon">🛡️</span> Admin Panel</button>
     </nav>
@@ -4034,6 +4219,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <div class="tab-panel" id="tab-achievements"><div id="achievements-container"></div></div>
     <div class="tab-panel" id="tab-resources"><div id="resources-container"></div></div>
     <div class="tab-panel" id="tab-polls"><div id="polls-container"></div></div>
+    <div class="tab-panel" id="tab-calendar"><div id="calendar-container"></div></div>
   </main>
 </div>
 
