@@ -56,9 +56,44 @@ let activeTab = 'feed';
 let unsubscribers = [];
 
 function sanitize(str) {
+  if (!str) return '';
   const div = document.createElement('div');
-  div.textContent = str || '';
+  div.textContent = String(str);
   return div.innerHTML;
+}
+
+// Strip HTML tags completely (for inputs we store in Firestore)
+function stripHTML(str) {
+  if (!str) return '';
+  return String(str).replace(/<[^>]*>/g, '').trim();
+}
+
+// Validate email format
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// Validate phone/whatsapp
+function isValidPhone(phone) {
+  return /^[+\d\s\-()]{7,20}$/.test(phone);
+}
+
+// Validate URL
+function isValidUrl(url) {
+  try { new URL(url); return true; } catch(e) { return false; }
+}
+
+// Sanitize all form inputs before saving
+function sanitizeInputs(obj) {
+  const clean = {};
+  Object.keys(obj).forEach(function(key) {
+    if (typeof obj[key] === 'string') {
+      clean[key] = stripHTML(obj[key]).substring(0, 2000);
+    } else {
+      clean[key] = obj[key];
+    }
+  });
+  return clean;
 }
 function timeAgo(ts) {
   if (!ts) return '';
@@ -134,6 +169,8 @@ async function doRegister() {
   const photoFile = document.getElementById('reg-photo').files[0];
   if (!name||!email||!pass||!country||!whatsapp||!dob||!role||!dept) return showToast('Please fill all required fields','error');
   if (pass.length < 6) return showToast('Password must be at least 6 characters','error');
+  if (!isValidEmail(email)) return showToast('Please enter a valid email address','error');
+  if (!isValidPhone(whatsapp)) return showToast('Please enter a valid WhatsApp number','error');
   const btn = document.getElementById('reg-btn');
   btn.disabled = true; btn.textContent = 'Creating account...';
   try {
@@ -149,7 +186,7 @@ async function doRegister() {
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     await sendEmailVerification(cred.user);
     await setDoc(doc(db, 'users', cred.user.uid), {
-      name, email, country, whatsapp, dob, role, department: dept,
+      ...sanitizeInputs({name, email, country, whatsapp, dob, role}), department: dept,
       referredBy: localStorage.getItem('yan_referral') || '',
       photoUrl, bio: '', joinedAt: serverTimestamp(),
       isAdmin: false, isDeptHead: false, isExec: false,
@@ -521,8 +558,10 @@ async function submitPost() {
     console.warn('Moderation check failed, allowing post:', e);
   }
 
+  const cleanContent = stripHTML(content).substring(0, 2000);
+  const cleanLink = link && isValidUrl(link) ? link : '';
   await addDoc(collection(db, 'posts'), {
-    content, category, link,
+    content: cleanContent, category, link: cleanLink,
     authorId: currentUser.uid, authorName: currentUserData.name,
     likes: [], createdAt: serverTimestamp()
   });
