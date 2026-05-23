@@ -500,6 +500,27 @@ async function submitPost() {
   const category = document.getElementById('post-category').value;
   const link = document.getElementById('post-link').value.trim();
   if (!content) return showToast('Write something first','error');
+
+  // AI CONTENT MODERATION
+  const btn = document.querySelector('.btn-post');
+  if (btn) { btn.disabled = true; btn.textContent = 'Checking...'; }
+  try {
+    const modResult = await moderateContent(content);
+    if (modResult.flagged) {
+      showToast('Post blocked: ' + modResult.reason, 'error');
+      // Log to Firestore for admin review
+      await addDoc(collection(db, 'moderation_log'), {
+        content, authorId: currentUser.uid, authorName: currentUserData.name,
+        reason: modResult.reason, createdAt: serverTimestamp(), status: 'blocked'
+      });
+      if (btn) { btn.disabled = false; btn.textContent = 'Post 🚀'; }
+      return;
+    }
+  } catch(e) {
+    // If moderation fails, allow post through
+    console.warn('Moderation check failed, allowing post:', e);
+  }
+
   await addDoc(collection(db, 'posts'), {
     content, category, link,
     authorId: currentUser.uid, authorName: currentUserData.name,
@@ -507,8 +528,28 @@ async function submitPost() {
   });
   document.getElementById('post-input').value = '';
   document.getElementById('post-link').value = '';
+  if (btn) { btn.disabled = false; btn.textContent = 'Post 🚀'; }
   showToast('Post shared! 🌍');
 }
+
+async function moderateContent(text) {
+  const response = await fetch('https://yan-ai-worker.youngafricansn.workers.dev', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{
+        role: 'user',
+        parts: [{ text: 'You are a content moderator for a pan-African youth community platform. Analyze this post and respond ONLY with valid JSON in this exact format: {"flagged": false, "reason": ""} or {"flagged": true, "reason": "brief reason"}. Flag content that contains: hate speech, racism, sexual content, violence, spam, scams, or harassment. Do NOT flag normal community discussions, scholarship info, career advice, or motivational content. Post to analyze: ' + text }]
+      }],
+      generationConfig: { maxOutputTokens: 100, temperature: 0.1 }
+    })
+  });
+  const data = await response.json();
+  const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '{"flagged":false,"reason":""}';
+  const clean = reply.replace(/```json|```/g, '').trim();
+  return JSON.parse(clean);
+}
+window.moderateContent = moderateContent;
 
 async function deletePost(postId) {
   if (!confirm('Delete this post?')) return;
@@ -2963,8 +3004,27 @@ async function deleteTeamMember(id) {
 }
 async function loadAdminModeration() {
   const c = document.getElementById('admin-section-moderation');
-  const snap = await getDocs(query(collection(db,'posts'),orderBy('createdAt','desc'),limit(20)));
-  c.innerHTML = `<h3>Recent Posts</h3>${snap.docs.map(d=>{const p=d.data();return `<div class="moderation-row"><div><strong>${sanitize(p.authorName)}</strong><p>${sanitize(p.content?.substring(0,100))}...</p><small>${timeAgo(p.createdAt)}</small></div><button class="btn-sm btn-red" onclick="deletePost('${d.id}')">Delete</button></div>`;}).join('')}`;
+  const [postsSnap, flaggedSnap] = await Promise.all([
+    getDocs(query(collection(db,'posts'),orderBy('createdAt','desc'),limit(20))),
+    getDocs(query(collection(db,'moderation_log'),orderBy('createdAt','desc'),limit(20)))
+  ]);
+  c.innerHTML = '<h3 style="margin-bottom:1rem;">🛡️ Flagged & Blocked Posts</h3>' +
+    (flaggedSnap.empty ? '<p style="color:var(--gray);font-size:0.85rem;margin-bottom:1.5rem;">No flagged posts yet.</p>' :
+    flaggedSnap.docs.map(function(d) {
+      const p = d.data();
+      return '<div class="moderation-row" style="border-left:3px solid var(--red);">' +
+        '<div><strong style="color:var(--red);">🚫 BLOCKED</strong> · <strong>' + sanitize(p.authorName) + '</strong>' +
+        '<p>' + sanitize(p.content?.substring(0,120)) + '...</p>' +
+        '<small>Reason: ' + sanitize(p.reason) + ' · ' + timeAgo(p.createdAt) + '</small></div></div>';
+    }).join('')) +
+    '<h3 style="margin:1.5rem 0 1rem;">📝 Recent Posts</h3>' +
+    postsSnap.docs.map(function(d) {
+      const p = d.data();
+      return '<div class="moderation-row"><div><strong>' + sanitize(p.authorName) + '</strong>' +
+        '<p>' + sanitize(p.content?.substring(0,100)) + '...</p>' +
+        '<small>' + timeAgo(p.createdAt) + '</small></div>' +
+        '<button class="btn-sm btn-red" onclick="deletePost('' + d.id + '')">Delete</button></div>';
+    }).join('');
 }
 
 
