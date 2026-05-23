@@ -814,6 +814,17 @@ async function loadMeetings() {
       <input type="text" id="mtg-title" placeholder="Session title *">
       <input type="text" id="mtg-topic" placeholder="Topic">
       <input type="datetime-local" id="mtg-date">
+      <select id="mtg-dept">
+        <option value="all">📢 All Members</option>
+        <option value="programs">💻 Programs & Training</option>
+        <option value="scholarships">🏆 Scholarships & Global Opportunities</option>
+        <option value="career">🎤 Career Development & Public Speaking</option>
+        <option value="community">🌍 Community Impact & Volunteering</option>
+        <option value="mental">💚 Mental Health & Wellbeing</option>
+        <option value="communications">📢 Communications & Media</option>
+        <option value="finance">💰 Finance & Administration</option>
+        <option value="partnerships">🤝 Partnership & External Relations</option>
+      </select>
       <select id="mtg-room">
         <option value="https://youngafricansnetwork.daily.co/YAN_GENERAL_FORUM">General Forum</option>
         <option value="https://youngafricansnetwork.daily.co/YAN_TRAINING_FORUM">Training Forum</option>
@@ -846,16 +857,30 @@ async function createMeeting() {
   const topic = document.getElementById('mtg-topic').value.trim();
   const dateVal = document.getElementById('mtg-date').value;
   const roomUrl = document.getElementById('mtg-room').value;
+  const targetDept = document.getElementById('mtg-dept').value;
   if (!title) return showToast('Enter a title','error');
   await addDoc(collection(db, 'meetings'), {
-    title, topic, roomUrl,
+    title, topic, roomUrl, targetDept,
     scheduledAt: dateVal ? new Date(dateVal) : serverTimestamp(),
     createdBy: currentUser.uid, createdByName: currentUserData.name,
     createdAt: serverTimestamp(), isLive: false, recordingUrl: ''
   });
+  // Post bell notification
+  const deptLabel = targetDept === 'all' ? 'All Members' : DEPARTMENTS.find(d => d.id === targetDept)?.name || targetDept;
+  const dateLabel = dateVal ? new Date(dateVal).toLocaleString('en-GB', {day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}) : 'Soon';
+  await addDoc(collection(db, 'notifications'), {
+    title: '📅 New Meeting Scheduled: ' + title,
+    message: 'A new session has been scheduled by ' + currentUserData.name + '. Topic: ' + (topic||title) + '. Date: ' + dateLabel + '. For: ' + deptLabel + '. Go to the Meetings tab to join!',
+    type: 'event',
+    postedBy: currentUserData.name,
+    targetDept: targetDept,
+    createdAt: serverTimestamp(),
+    readBy: []
+  });
   document.getElementById('create-meeting-form').style.display = 'none';
   document.getElementById('mtg-title').value = '';
-  showToast('Session scheduled! 🎥');
+  document.getElementById('mtg-topic').value = '';
+  showToast('Session scheduled and members notified! 🎥');
 }
 
 function loadMeetingsList() {
@@ -872,6 +897,7 @@ function loadMeetingsList() {
           ${m.isLive ? '<span class="live-dot">🔴 LIVE</span>' : ''}
           <h4>${sanitize(m.title)}</h4>
           <p>${sanitize(m.topic||'')} · By ${sanitize(m.createdByName||'')}</p>
+          ${m.targetDept ? '<span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.15rem 0.6rem;border-radius:50px;font-size:0.68rem;font-weight:600;">' + (m.targetDept==='all'?'📢 All Members':'🏢 '+( DEPARTMENTS.find(d=>d.id===m.targetDept)?.name||m.targetDept)) + '</span>' : ''}
           ${m.recordingUrl ? `<a href="${sanitize(m.recordingUrl)}" target="_blank" class="recording-link">📼 Recording</a>` : ''}
         </div>
         <div class="meeting-btns">
