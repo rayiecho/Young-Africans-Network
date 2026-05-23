@@ -216,6 +216,66 @@ service cloud.firestore {
       allow read, write: if isLoggedIn();
     }
 
+
+    match /careerMaterials/{matId} {
+      allow read: if isLoggedIn();
+      allow create, update, delete: if isAdminOrHead() || isSystemAdmin();
+    }
+
+    match /careerJobs/{jobId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow delete: if isLoggedIn() && (
+        resource.data.postedById == request.auth.uid || isAdmin()
+      );
+      allow update: if isAdmin() || isSystemAdmin();
+    }
+
+    match /careerAssignments/{assignId} {
+      allow read: if isLoggedIn() && (
+        resource.data.userId == request.auth.uid || isAdminOrHead()
+      );
+      allow create: if isLoggedIn();
+      allow update: if isAdminOrHead() || isSystemAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /careerProgress/{progressId} {
+      allow read, write: if isLoggedIn();
+    }
+
+    match /communityTasks/{taskId} {
+      allow read: if isLoggedIn();
+      allow create: if isAdminOrHead() || isSystemAdmin();
+      allow update: if isLoggedIn();
+      allow delete: if isAdminOrHead() || isSystemAdmin();
+    }
+
+    match /communityProjects/{projId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn() && (
+        resource.data.proposedById == request.auth.uid || isAdminOrHead()
+      );
+      allow delete: if isLoggedIn() && (
+        resource.data.proposedById == request.auth.uid || isAdminOrHead()
+      );
+    }
+
+    match /communityReports/{reportId} {
+      allow read: if isLoggedIn() && (
+        resource.data.userId == request.auth.uid || isAdminOrHead()
+      );
+      allow create: if isLoggedIn();
+      allow update: if isAdminOrHead() || isSystemAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /communityImpact/{userId} {
+      allow read: if isLoggedIn();
+      allow write: if isLoggedIn() && isOwner(userId);
+    }
+
     match /moderation_log/{logId} {
       allow read: if isAdmin();
       allow create: if isLoggedIn();
