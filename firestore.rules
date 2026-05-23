@@ -8,6 +8,9 @@ service cloud.firestore {
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
+    function isSystemAdmin() {
+      return request.auth != null && request.auth.uid == 'tNbO0jryVeadlpIkKQnv6mjYJn42';
+    }
     function isAdmin() {
       return isLoggedIn() &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
@@ -18,6 +21,11 @@ service cloud.firestore {
     }
     function isAdminOrHead() {
       return isAdmin() || isDeptHead();
+    }
+
+    // SYSTEM ADMIN — full access to everything
+    match /{document=**} {
+      allow read, write: if isSystemAdmin();
     }
 
     match /users/{userId} {
