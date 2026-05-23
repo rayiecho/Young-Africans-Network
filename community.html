@@ -399,7 +399,7 @@ function loadNotifications() {
   container.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
       <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);">🔔 Notifications</h2>
-      ${currentUserData?.isAdmin ? `<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="showPostNotification()">➕ Post Announcement</button>` : ''}
+      ${currentUserData?.isAdmin ? `<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="showPostNotification()">Post Announcement</button>` : ''}
     </div>
     ${currentUserData?.isAdmin ? `
     <div id="notif-form" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
@@ -663,9 +663,9 @@ function loadDepartment() {
       </div>
     </div>
     <div class="dept-tabs">
-      <button class="dept-tab-btn active" onclick="showDeptSection('materials')">📹 Materials</button>
-      <button class="dept-tab-btn" onclick="showDeptSection('progress')">📊 My Progress</button>
-      <button class="dept-tab-btn" onclick="showDeptSection('chat')">💬 Dept Chat</button>
+      <button class="dept-tab-btn active" onclick="showDeptSection('materials')">Materials</button>
+      <button class="dept-tab-btn" onclick="showDeptSection('progress')">My Progress</button>
+      <button class="dept-tab-btn" onclick="showDeptSection('chat')">Dept Chat</button>
     </div>
     <div id="dept-section-materials" class="dept-section"></div>
     <div id="dept-section-progress" class="dept-section" style="display:none;"></div>
@@ -714,9 +714,9 @@ function renderMaterial(mat, dept) {
     </div>
     ${videoEmbed}${articleContent}
     <div class="material-actions">
-      <button class="btn-sm btn-navy" onclick="markWatched('${mat.id}','${dept}')">✅ Mark as Done</button>
-      <button class="btn-sm btn-outline" onclick="toggleDiscussion('${mat.id}','${dept}')">💬 Discussion</button>
-      <button class="btn-sm btn-gold" onclick="openQuiz('${mat.id}','${dept}')">📝 Take Quiz</button>
+      <button class="btn-sm btn-navy" onclick="markWatched('${mat.id}','${dept}')">Mark as Done</button>
+      <button class="btn-sm btn-outline" onclick="toggleDiscussion('${mat.id}','${dept}')">Discussion</button>
+      <button class="btn-sm btn-navy" onclick="openQuiz('${mat.id}','${dept}')">Take Quiz</button>
     </div>
     <div id="discussion-${mat.id}" style="display:none;" class="discussion-box"></div>
     <div id="quiz-${mat.id}" style="display:none;" class="quiz-box"></div>
@@ -834,7 +834,7 @@ const eligible = hasCertification && monthsActive >= 3 && quizPassed >= total &&
         <div class="progress-num">${eligible?'✅':'⏳'}</div>
         <div class="progress-label">Certificate ${eligible?'Eligible!':'Not Yet'}</div>
         <p style="font-size:0.75rem;color:var(--gray);margin-top:0.5rem;">Need: 3+ months, all quizzes passed, admin approval</p>
-        ${eligible ? `<button class="btn-sm btn-gold" onclick="requestCertificate()">Request Certificate</button>` : ''}
+        ${eligible ? `<button class="btn-sm btn-navy" onclick="requestCertificate()">Request Certificate</button>` : ''}
       </div>` : `<div class="progress-card">
         <div class="progress-num">🤝</div>
         <div class="progress-label">Support Department</div>
@@ -895,19 +895,19 @@ async function loadMeetings() {
     <div class="meetings-header"><h2>🎥 YAN Meetings</h2></div>
     <p style="color:var(--gray);font-size:0.88rem;margin-bottom:1.5rem;">Click any room to join instantly — available 24/7.</p>
     <div class="rooms-grid">
-      <div class="room-card"><div class="room-icon">🌍</div><div class="room-info"><h4>General Forum</h4><p>Open to all members</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_GENERAL_FORUM','General Forum')">Join</button></div>
-      <div class="room-card"><div class="room-icon">💻</div><div class="room-info"><h4>Training Forum</h4><p>Training sessions and program discussions</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_TRAINING_FORUM','Training Forum')">Join</button></div>
-      <div class="room-card"><div class="room-icon">🏆</div><div class="room-info"><h4>Scholarship Revision</h4><p>Scholarship and opportunity sessions</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_SCHOLARSHIP_REVISION','Scholarship Revision')">Join</button></div>
-      <div class="room-card"><div class="room-icon">🎤</div><div class="room-info"><h4>Career Room</h4><p>Career guidance and public speaking</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_CAREER_ROOM','Career Room')">Join</button></div>
-      <div class="room-card"><div class="room-icon">🤝</div><div class="room-info"><h4>Any Business</h4><p>Community impact meetings</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_ANY_BUSINESS','Any Business')">Join</button></div>
-      <div class="room-card"><div class="room-icon">💚</div><div class="room-info"><h4>Mental Health Discussion</h4><p>Wellness and peer support</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_MENTAL_DISCUSSION','Mental Health')">Join</button></div>
-      ${currentUserData?.role === 'Volunteer' || currentUserData?.role === 'Executive' || currentUserData?.isAdmin || currentUserData?.isDeptHead ? `<div class="room-card"><div class="room-icon">🤝</div><div class="room-info"><h4>Volunteers Room</h4><p>Volunteers only</p></div><button class="btn-sm btn-gold" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_VOLUNTEERS_ROOM','Volunteers Room')">Join</button></div>` : ''}
-      ${currentUserData?.role === 'Executive' || currentUserData?.isAdmin || currentUserData?.isDeptHead ? `<div class="room-card"><div class="room-icon">⭐</div><div class="room-info"><h4>Executive Room</h4><p>Executive committee only</p></div><button class="btn-sm btn-gold" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_EXECUTIVE_ROOM','Executive Room')">Join</button></div>` : ''}
-      ${currentUserData?.isAdmin || currentUserData?.isDeptHead ? `<div class="room-card"><div class="room-icon">👑</div><div class="room-info"><h4>Head & Admin Room</h4><p>Department heads and admins only</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_HEAD_ADMIN_ROOM','Head & Admin Room')">Join</button></div>` : ''}
+      <div class="room-card"><div class="room-icon">GF</div><div class="room-info"><h4>General Forum</h4><p>Open to all members</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_GENERAL_FORUM','General Forum')">Join</button></div>
+      <div class="room-card"><div class="room-icon">TR</div><div class="room-info"><h4>Training Forum</h4><p>Training sessions and program discussions</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_TRAINING_FORUM','Training Forum')">Join</button></div>
+      <div class="room-card"><div class="room-icon">SC</div><div class="room-info"><h4>Scholarship Revision</h4><p>Scholarship and opportunity sessions</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_SCHOLARSHIP_REVISION','Scholarship Revision')">Join</button></div>
+      <div class="room-card"><div class="room-icon">CR</div><div class="room-info"><h4>Career Room</h4><p>Career guidance and public speaking</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_CAREER_ROOM','Career Room')">Join</button></div>
+      <div class="room-card"><div class="room-icon">AB</div><div class="room-info"><h4>Any Business</h4><p>Community impact meetings</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_ANY_BUSINESS','Any Business')">Join</button></div>
+      <div class="room-card"><div class="room-icon">MH</div><div class="room-info"><h4>Mental Health Discussion</h4><p>Wellness and peer support</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_MENTAL_DISCUSSION','Mental Health')">Join</button></div>
+      ${currentUserData?.role === 'Volunteer' || currentUserData?.role === 'Executive' || currentUserData?.isAdmin || currentUserData?.isDeptHead ? `<div class="room-card"><div class="room-icon">AB</div><div class="room-info"><h4>Volunteers Room</h4><p>Volunteers only</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_VOLUNTEERS_ROOM','Volunteers Room')">Join</button></div>` : ''}
+      ${currentUserData?.role === 'Executive' || currentUserData?.isAdmin || currentUserData?.isDeptHead ? `<div class="room-card"><div class="room-icon">EX</div><div class="room-info"><h4>Executive Room</h4><p>Executive committee only</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_EXECUTIVE_ROOM','Executive Room')">Join</button></div>` : ''}
+      ${currentUserData?.isAdmin || currentUserData?.isDeptHead ? `<div class="room-card"><div class="room-icon">HA</div><div class="room-info"><h4>Head & Admin Room</h4><p>Department heads and admins only</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_HEAD_ADMIN_ROOM','Head & Admin Room')">Join</button></div>` : ''}
     </div>
     <div class="meetings-header" style="margin-top:2rem;">
       <h3>📅 Scheduled Sessions</h3>
-      <button class="btn-primary" onclick="showCreateMeeting()">➕ Schedule Session</button>
+      <button class="btn-primary" onclick="showCreateMeeting()">Schedule Session</button>
     </div>
     <div id="create-meeting-form" style="display:none;" class="meeting-form-card">
       <h3>Schedule a Session</h3>
@@ -1002,11 +1002,11 @@ function loadMeetingsList() {
         </div>
         <div class="meeting-btns">
           <button class="btn-sm btn-navy" onclick="joinMeeting('${sanitize(m.roomUrl)}','${sanitize(m.title)}')">Join</button>
-          <button class="btn-sm btn-outline" onclick="copyMeetingLink('${sanitize(m.roomUrl)}')">🔗 Copy Link</button>
-          <button class="btn-sm btn-gold" onclick="markAttendance('${m.id}','${sanitize(m.title)}')">✅ I'm Present</button>
-          ${currentUserData?.isAdmin ? `<button class="btn-sm btn-outline" onclick="viewAttendance('${m.id}','${sanitize(m.title)}')">👥 Attendance</button>` : ''}
-          ${currentUserData?.isAdmin ? `<button class="btn-sm btn-gold" onclick="toggleLiveMeeting('${m.id}',${!m.isLive})">${m.isLive?'End':'Go Live'}</button>` : ''}
-          ${currentUserData?.isAdmin ? `<button class="btn-sm btn-outline" onclick="addRecording('${m.id}')">+ Rec</button>` : ''}
+          <button class="btn-sm btn-outline" onclick="copyMeetingLink('${sanitize(m.roomUrl)}')">Copy Link</button>
+          <button class="btn-sm btn-navy" onclick="markAttendance('${m.id}','${sanitize(m.title)}')">Present</button>
+          ${currentUserData?.isAdmin ? `<button class="btn-sm btn-outline" onclick="viewAttendance('${m.id}','${sanitize(m.title)}')">Attendance</button>` : ''}
+          ${currentUserData?.isAdmin ? `<button class="btn-sm btn-navy" onclick="toggleLiveMeeting('${m.id}',${!m.isLive})">${m.isLive?'End':'Go Live'}</button>` : ''}
+          ${currentUserData?.isAdmin ? `<button class="btn-sm btn-outline" onclick="addRecording('${m.id}')">Recording</button>` : ''}
           ${canDelete ? `<button class="btn-sm btn-red" onclick="deleteMeeting('${m.id}')">Delete</button>` : ''}
         </div>
       </div>`;
@@ -1116,7 +1116,7 @@ async function loadProfileCerts() {
   if (snap.empty) { container.innerHTML = '<p style="color:var(--gray);font-size:0.85rem;">No certificates yet. Complete training to become eligible!</p>'; return; }
   container.innerHTML = '<h3>🏆 My Certificates</h3>' + snap.docs.map(d => {
     const c = d.data(); const dept = DEPARTMENTS.find(x => x.id === c.department);
-    return `<div class="cert-card"><div class="cert-info"><span>${dept?.icon||'🏆'}</span><div><strong>${dept?.name||c.department}</strong><p>Status: <span class="cert-status ${c.status}">${c.status}</span></p></div></div><div style="display:flex;gap:0.5rem;flex-wrap:wrap;">${c.status==='approved'?`<button class="btn-sm btn-gold" onclick="downloadCertificate('${d.id}')">⬇️ Download</button>`:''} ${c.status==='approved'?`<button class="btn-sm btn-navy" onclick="shareOnLinkedIn('${dept?.name||c.department}')">🔗 LinkedIn</button>`:''}</div></div>`;
+    return `<div class="cert-card"><div class="cert-info"><span>${dept?.icon||'🏆'}</span><div><strong>${dept?.name||c.department}</strong><p>Status: <span class="cert-status ${c.status}">${c.status}</span></p></div></div><div style="display:flex;gap:0.5rem;flex-wrap:wrap;">${c.status==='approved'?`<button class="btn-sm btn-navy" onclick="downloadCertificate('${d.id}')">⬇️ Download</button>`:''} ${c.status==='approved'?`<button class="btn-sm btn-navy" onclick="shareOnLinkedIn('${dept?.name||c.department}')">🔗 LinkedIn</button>`:''}</div></div>`;
   }).join('');
 }
 
@@ -1525,7 +1525,7 @@ async function loadScholarships() {
           <p style="color:var(--gray);font-size:0.82rem;">Opportunities, guidance and support until you receive your scholarship</p>
         </div>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-          ${isHeadOrAdmin ? `<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="showScholarshipForm()">➕ Post Opportunity</button>` : ''}
+          ${isHeadOrAdmin ? `<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="showScholarshipForm()">Post Opportunity</button>` : ''}
           <button class="btn-outline" onclick="showScholarshipSection('opportunities')">🔍 Opportunities</button>
           <button class="btn-outline" onclick="showScholarshipSection('tracker')">📊 My Applications</button>
           <button class="btn-outline" onclick="showScholarshipSection('resources')">📚 Resources</button>
@@ -1621,7 +1621,7 @@ function previewScholarship() {
           <span style="font-size:0.75rem;color:var(--gray);">· Deadline: ${deadline}</span>
         </div>
         <div style="display:flex;gap:0.5rem;">
-          <button class="btn-sm btn-gold" disabled>📊 Track Application</button>
+          <button class="btn-sm btn-navy" disabled>📊 Track Application</button>
           <span class="btn-sm btn-navy" style="text-decoration:none;opacity:0.7;">Apply Now →</span>
         </div>
       </div>
@@ -1725,7 +1725,7 @@ async function loadScholarshipOpportunities() {
           <span style="font-size:0.75rem;color:var(--gray);">· Posted by ${sanitize(s.postedBy)}</span>
         </div>
         <div style="display:flex;gap:0.5rem;">
-          ${!isExpired ? `<button class="btn-sm btn-gold" onclick="trackApplication('${d.id}','${sanitize(s.title)}')">📊 Track Application</button>` : ''}
+          ${!isExpired ? `<button class="btn-sm btn-navy" onclick="trackApplication('${d.id}','${sanitize(s.title)}')">📊 Track Application</button>` : ''}
           <a href="${sanitize(s.link)}" target="_blank" class="btn-sm btn-navy" style="text-decoration:none;">Apply Now →</a>
           ${currentUserData?.isAdmin || currentUserData?.isDeptHead ? `<button class="btn-sm btn-red" onclick="deleteScholarship('${d.id}')">🗑️</button>` : ''}
         </div>
@@ -1888,7 +1888,7 @@ async function loadRecommendationSection() {
             </div>
             <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
               <span style="background:rgba(0,0,0,0.05);color:${statusColor};padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">${r.status?.toUpperCase()}</span>
-              ${r.status === 'approved' ? `<button class="btn-sm btn-gold" onclick="downloadRecommendationLetter('${sanitize(r.scholarship)}','${sanitize(r.recommender)}','${sanitize(r.reason||'')}','${sanitize(r.deadline)}')">📄 Download Letter</button>` : ''}
+              ${r.status === 'approved' ? `<button class="btn-sm btn-navy" onclick="downloadRecommendationLetter('${sanitize(r.scholarship)}','${sanitize(r.recommender)}','${sanitize(r.reason||'')}','${sanitize(r.deadline)}')">📄 Download Letter</button>` : ''}
             </div>
           </div>
         </div>`;
@@ -1911,7 +1911,7 @@ async function loadRecommendationSection() {
                 <p style="font-size:0.75rem;color:var(--gray);margin-top:0.25rem;">"${sanitize(r.reason?.substring(0,100))}..."</p>
               </div>
               <div style="display:flex;gap:0.5rem;">
-                <button class="btn-sm btn-gold" onclick="approveRecommendation('${d.id}')">✅ Approve</button>
+                <button class="btn-sm btn-navy" onclick="approveRecommendation('${d.id}')">✅ Approve</button>
                 <button class="btn-sm btn-red" onclick="rejectRecommendation('${d.id}')">❌ Reject</button>
               </div>
             </div>
@@ -2261,7 +2261,7 @@ function loadAI() {
       </div>
       <div style="display:flex;gap:0.75rem;">
         <input type="text" id="ai-input" placeholder="Ask YAN AI anything..." style="flex:1;background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.85rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.88rem;outline:none;" onkeydown="if(event.key==='Enter')sendAIMessage()">
-        <button onclick="sendAIMessage()" style="background:var(--red);color:#fff;border:none;padding:0.85rem 1.5rem;border-radius:50px;cursor:pointer;font-weight:600;font-size:0.88rem;white-space:nowrap;">Send 🚀</button>
+        <button onclick="sendAIMessage()" style="background:var(--red);color:#fff;border:none;padding:0.85rem 1.5rem;border-radius:50px;cursor:pointer;font-weight:600;font-size:0.88rem;white-space:nowrap;">Send</button>
       </div>
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.75rem;">
         <button onclick="askQuick('What scholarships are available for African youth?')" style="background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.4rem 0.85rem;border-radius:50px;font-size:0.75rem;cursor:pointer;font-family:'Poppins',sans-serif;">🏆 Scholarships</button>
@@ -2891,7 +2891,7 @@ async function loadAdminScholarshipApplications() {
 async function loadAdminMembers() {
   const c = document.getElementById('admin-section-members'); c.innerHTML = '<div class="loading">Loading...</div>';
   const snap = await getDocs(collection(db,'users'));
-  c.innerHTML = `<div class="admin-members-list">${snap.docs.map(d=>{const u=d.data();return `<div class="admin-member-row"><div class="admin-member-info">${u.photoUrl?`<img src="${sanitize(u.photoUrl)}" alt="">`:`<div class="admin-avatar">${(u.name||'?')[0]}</div>`}<div><strong>${sanitize(u.name)}</strong><p>${sanitize(u.email)} · ${sanitize(u.country)}</p><p>${u.isAdmin?'🛡️ ':''} ${u.isDeptHead?'👑 ':''} ${u.isExec?'⭐ ':''} ${sanitize(u.role||'')}</p></div></div><div class="admin-member-actions"><button class="btn-sm btn-navy" onclick="viewMemberProgress('${d.id}','${sanitize(u.name)}')">📊 Progress</button><button class="btn-sm btn-gold" onclick="issueCertificate('${d.id}','${sanitize(u.name)}')">🏆 Issue Cert</button><button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isDeptHead',${!u.isDeptHead})">${u.isDeptHead?'Remove Head':'Make Head'}</button><button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isAdmin',${!u.isAdmin})">${u.isAdmin?'Remove Admin':'Make Admin'}</button><button class="btn-sm btn-red" onclick="removeMember('${d.id}')">Remove</button></div></div>`;}).join('')}</div>`;
+  c.innerHTML = `<div class="admin-members-list">${snap.docs.map(d=>{const u=d.data();return `<div class="admin-member-row"><div class="admin-member-info">${u.photoUrl?`<img src="${sanitize(u.photoUrl)}" alt="">`:`<div class="admin-avatar">${(u.name||'?')[0]}</div>`}<div><strong>${sanitize(u.name)}</strong><p>${sanitize(u.email)} · ${sanitize(u.country)}</p><p>${u.isAdmin?'🛡️ ':''} ${u.isDeptHead?'👑 ':''} ${u.isExec?'⭐ ':''} ${sanitize(u.role||'')}</p></div></div><div class="admin-member-actions"><button class="btn-sm btn-navy" onclick="viewMemberProgress('${d.id}','${sanitize(u.name)}')">📊 Progress</button><button class="btn-sm btn-navy" onclick="issueCertificate('${d.id}','${sanitize(u.name)}')">🏆 Issue Cert</button><button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isDeptHead',${!u.isDeptHead})">${u.isDeptHead?'Remove Head':'Make Head'}</button><button class="btn-sm btn-outline" onclick="toggleRole('${d.id}','isAdmin',${!u.isAdmin})">${u.isAdmin?'Remove Admin':'Make Admin'}</button><button class="btn-sm btn-red" onclick="removeMember('${d.id}')">Remove</button></div></div>`;}).join('')}</div>`;
 }
 async function issueCertificate(userId, userName) {
   const dept = prompt('Enter department ID:\nprograms\nscholarships\ncareer\ncommunity\nmental');
@@ -2922,7 +2922,7 @@ async function loadAdminCertificates() {
   const c = document.getElementById('admin-section-certificates');
   const snap = await getDocs(query(collection(db,'certificates'),orderBy('requestedAt','desc')));
   if (snap.empty) { c.innerHTML = '<div class="empty-state">No requests yet.</div>'; return; }
-  c.innerHTML = snap.docs.map(d=>{const cert=d.data();const dept=DEPARTMENTS.find(x=>x.id===cert.department);return `<div class="cert-admin-row"><div><strong>${sanitize(cert.userName)}</strong><p>${dept?.name||cert.department} · <span class="cert-status ${cert.status}">${cert.status}</span></p></div>${cert.status==='pending'?`<div><button class="btn-sm btn-gold" onclick="approveCert('${d.id}')">✅ Approve</button><button class="btn-sm btn-red" onclick="rejectCert('${d.id}')">❌ Reject</button></div>`:''}</div>`;}).join('');
+  c.innerHTML = snap.docs.map(d=>{const cert=d.data();const dept=DEPARTMENTS.find(x=>x.id===cert.department);return `<div class="cert-admin-row"><div><strong>${sanitize(cert.userName)}</strong><p>${dept?.name||cert.department} · <span class="cert-status ${cert.status}">${cert.status}</span></p></div>${cert.status==='pending'?`<div><button class="btn-sm btn-navy" onclick="approveCert('${d.id}')">✅ Approve</button><button class="btn-sm btn-red" onclick="rejectCert('${d.id}')">❌ Reject</button></div>`:''}</div>`;}).join('');
 }
 async function approveCert(id) { await updateDoc(doc(db,'certificates',id),{status:'approved',approvedBy:currentUserData.name,approvedAt:serverTimestamp()}); showToast('Approved! 🏆'); loadAdminCertificates(); }
 async function rejectCert(id) { await updateDoc(doc(db,'certificates',id),{status:'rejected'}); showToast('Rejected'); loadAdminCertificates(); }
@@ -3499,7 +3499,7 @@ async function loadReferralSection() {
     '<div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">' +
     '<input type="text" value="' + referralUrl + '" readonly id="referral-url-input" style="flex:1;background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:8px;font-family:\'Poppins\',sans-serif;font-size:0.72rem;outline:none;min-width:0;">' +
     '<button class="btn-sm btn-navy" onclick="copyReferralLink()">Copy</button>' +
-    '<a href="https://wa.me/?text=' + encodeURIComponent('Join me on Young Africans Network — the pan-African youth community! Register here: ' + referralUrl) + '" target="_blank" class="btn-sm btn-gold" style="text-decoration:none;">WhatsApp</a>' +
+    '<a href="https://wa.me/?text=' + encodeURIComponent('Join me on Young Africans Network — the pan-African youth community! Register here: ' + referralUrl) + '" target="_blank" class="btn-sm btn-navy" style="text-decoration:none;">WhatsApp</a>' +
     '</div></div>' +
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">' +
     '<div style="background:var(--light);border-radius:10px;padding:1rem;text-align:center;">' +
@@ -4039,7 +4039,7 @@ async function loadCareerHub() {
     + '<button class="career-nav-btn" onclick="showCareerSection(\'materials\')">📚 Materials</button>'
     + '<button class="career-nav-btn" onclick="showCareerSection(\'jobs\')">💼 Job Board</button>'
     + '<button class="career-nav-btn" onclick="showCareerSection(\'resources\')">📄 Resources</button>'
-    + '<button class="career-nav-btn" onclick="showCareerSection(\'progress\')">📊 My Progress</button>'
+    + '<button class="career-nav-btn" onclick="showCareerSection(\'progress\')">My Progress</button>'
     + manageBtn
     + '</div></div>'
     + '<div id="career-section-paths"></div>'
@@ -4115,7 +4115,7 @@ async function openCareerPath(pathId) {
         + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">';
       if (m.type === 'video' && m.url) html += '<button class="btn-sm btn-navy" onclick="playCareerVideo(\'' + m.id + '\',\'' + m.url.replace(/'/g,"\\'") + '\')">▶ Watch</button>';
       if (m.type === 'article' && m.url) html += '<a href="' + sanitize(m.url) + '" target="_blank" class="btn-sm btn-outline" style="text-decoration:none;">🔗 Read</a>';
-      if (m.type === 'assignment') html += '<button class="btn-sm btn-gold" onclick="openCareerAssignment(\'' + m.id + '\')">📝 Submit</button>';
+      if (m.type === 'assignment') html += '<button class="btn-sm btn-navy" onclick="openCareerAssignment(\'' + m.id + '\')">📝 Submit</button>';
       html += '<button class="btn-sm btn-outline" onclick="markCareerDone(\'' + m.id + '\',\'' + pathId + '\')">✅ Done</button></div></div>';
       if (m.description) html += '<p style="font-size:0.82rem;color:var(--gray);line-height:1.6;">' + sanitize(m.description) + '</p>';
       if (m.type === 'assignment' && m.instructions) html += '<div style="background:var(--light);border-radius:10px;padding:0.75rem;margin-top:0.5rem;"><p style="font-size:0.82rem;color:var(--navy);font-weight:600;">Assignment:</p><p style="font-size:0.82rem;color:var(--gray);">' + sanitize(m.instructions) + '</p></div>';
@@ -4218,7 +4218,7 @@ async function loadCareerMaterials() {
         + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:flex-start;">';
       if (m.type === 'video' && m.url) materialsHtml += '<button class="btn-sm btn-navy" onclick="playCareerVideo(\'' + m.id + '\',\'' + m.url.replace(/'/g,"\\'") + '\')">▶ Watch</button>';
       if (m.type === 'article' && m.url) materialsHtml += '<a href="' + sanitize(m.url) + '" target="_blank" class="btn-sm btn-outline" style="text-decoration:none;">🔗 Read</a>';
-      if (m.type === 'assignment') materialsHtml += '<button class="btn-sm btn-gold" onclick="openCareerAssignment(\'' + m.id + '\')">📝 Submit</button>';
+      if (m.type === 'assignment') materialsHtml += '<button class="btn-sm btn-navy" onclick="openCareerAssignment(\'' + m.id + '\')">📝 Submit</button>';
       materialsHtml += '<button class="btn-sm btn-outline" onclick="markCareerDone(\'' + m.id + '\',\'' + m.pathId + '\')">✅ Done</button>';
       if (isAdminOrCareerHead) materialsHtml += '<button class="btn-sm btn-red" onclick="deleteCareerMaterial(\'' + m.id + '\')">🗑️</button>';
       materialsHtml += '</div></div>';
@@ -4269,7 +4269,7 @@ async function loadJobBoard() {
 
   container.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">'
     + '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">💼 Job & Opportunity Board</h3>'
-    + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="toggleJobForm()">➕ Post Opportunity</button>'
+    + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="toggleJobForm()">Post Opportunity</button>'
     + '</div>'
     + '<div id="job-post-form" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
     + '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Post an Opportunity</h4>'
@@ -4480,7 +4480,7 @@ async function loadCareerManage() {
       + '<div style="display:flex;flex-direction:column;gap:0.5rem;">'
       + '<input type="text" id="feedback-' + d.id + '" placeholder="Feedback (optional)" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);padding:0.4rem 0.75rem;border-radius:8px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;">'
       + '<div style="display:flex;gap:0.5rem;">'
-      + '<button class="btn-sm btn-gold" onclick="reviewCareerAssignment(\'' + d.id + '\',\'approved\')">✅ Approve</button>'
+      + '<button class="btn-sm btn-navy" onclick="reviewCareerAssignment(\'' + d.id + '\',\'approved\')">✅ Approve</button>'
       + '<button class="btn-sm btn-red" onclick="reviewCareerAssignment(\'' + d.id + '\',\'rejected\')">❌ Reject</button>'
       + '</div></div></div></div>';
   });
@@ -4676,7 +4676,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .tab-btn{display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1.25rem;color:rgba(255,255,255,0.6);font-size:0.85rem;font-weight:500;cursor:pointer;transition:all 0.2s;border:none;background:none;width:100%;text-align:left;}
 .tab-btn:hover{color:var(--white);background:rgba(255,255,255,0.06);}
 .tab-btn.active{color:var(--white);background:rgba(255,255,255,0.12);border-left:3px solid var(--gold);}
-.tab-btn .tab-icon{font-size:1.1rem;width:24px;text-align:center;}
+.tab-btn .tab-icon{font-size:0.65rem;width:24px;text-align:center;color:var(--gold);font-weight:900;letter-spacing:-1px;}
 .sidebar-logout{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,0.08);}
 .btn-logout{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;color:rgba(255,255,255,0.6);font-size:0.85rem;cursor:pointer;border:none;background:rgba(255,255,255,0.05);border-radius:10px;width:100%;transition:all 0.2s;font-family:'Poppins',sans-serif;}
 .btn-logout:hover{color:var(--white);background:rgba(230,51,41,0.2);}
@@ -4779,7 +4779,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .rooms-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1.5rem;}
 .room-card{background:var(--white);border-radius:16px;padding:1.25rem;display:flex;align-items:center;gap:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);transition:transform 0.2s;}
 .room-card:hover{transform:translateY(-2px);}
-.room-icon{font-size:2rem;flex-shrink:0;}
+.room-icon{font-size:0.68rem;font-weight:900;font-family:"Poppins",sans-serif;flex-shrink:0;width:48px;height:48px;border-radius:10px;background:var(--navy);color:var(--gold);display:flex;align-items:center;justify-content:center;letter-spacing:0.5px;}
 .room-info{flex:1;}
 .room-info h4{font-size:0.92rem;font-weight:700;color:var(--navy);margin-bottom:0.2rem;}
 .room-info p{font-size:0.75rem;color:var(--gray);}
@@ -4979,21 +4979,21 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       </div>
     </div>
     <nav class="sidebar-nav">
-      <button class="tab-btn active" data-tab="feed" onclick="showTab('feed')"><span class="tab-icon">🌍</span> Main Feed</button>
-      <button class="tab-btn" data-tab="department" onclick="showTab('department')"><span class="tab-icon">📚</span> My Department</button>
-      <button class="tab-btn" data-tab="meetings" onclick="showTab('meetings')"><span class="tab-icon">🎥</span> Meetings</button>
-      <button class="tab-btn" data-tab="profile" onclick="showTab('profile')"><span class="tab-icon">👤</span> My Profile</button>
-      <button class="tab-btn" data-tab="directory" onclick="showTab('directory')"><span class="tab-icon">👥</span> Directory</button>
-      <button class="tab-btn" data-tab="ai" onclick="showTab('ai')"><span class="tab-icon">🤖</span> YAN AI</button>
-      <button class="tab-btn" data-tab="scholarships" onclick="showTab('scholarships')"><span class="tab-icon">🏆</span> Scholarships</button>
-      <button class="tab-btn" data-tab="career" onclick="showTab('career')"><span class="tab-icon">🎤</span> Career & Public Speaking</button>
-      <button class="tab-btn" data-tab="magazine" onclick="showTab('magazine')"><span class="tab-icon">📰</span> Magazine</button>
-      <button class="tab-btn" data-tab="achievements" onclick="showTab('achievements')"><span class="tab-icon">🏆</span> Achievements</button>
-      <button class="tab-btn" data-tab="resources" onclick="showTab('resources')"><span class="tab-icon">📚</span> Resources</button>
-      <button class="tab-btn" data-tab="polls" onclick="showTab('polls')"><span class="tab-icon">🗳️</span> Polls</button>
-      <button class="tab-btn" data-tab="calendar" onclick="showTab('calendar')"><span class="tab-icon">📅</span> Calendar</button>
-      <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">👑</span> Head Panel</button>
-      <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;"><span class="tab-icon">🛡️</span> Admin Panel</button>
+      <button class="tab-btn active" data-tab="feed" onclick="showTab('feed')"><span class="tab-icon">—</span> Main Feed</button>
+      <button class="tab-btn" data-tab="department" onclick="showTab('department')"><span class="tab-icon">—</span> My Department</button>
+      <button class="tab-btn" data-tab="meetings" onclick="showTab('meetings')"><span class="tab-icon">—</span> Meetings</button>
+      <button class="tab-btn" data-tab="profile" onclick="showTab('profile')"><span class="tab-icon">—</span> My Profile</button>
+      <button class="tab-btn" data-tab="directory" onclick="showTab('directory')"><span class="tab-icon">—</span> Directory</button>
+      <button class="tab-btn" data-tab="ai" onclick="showTab('ai')"><span class="tab-icon">—</span> YAN AI</button>
+      <button class="tab-btn" data-tab="scholarships" onclick="showTab('scholarships')"><span class="tab-icon">—</span> Scholarships</button>
+      <button class="tab-btn" data-tab="career" onclick="showTab('career')"><span class="tab-icon">—</span> Career & Public Speaking</button>
+      <button class="tab-btn" data-tab="magazine" onclick="showTab('magazine')"><span class="tab-icon">—</span> Magazine</button>
+      <button class="tab-btn" data-tab="achievements" onclick="showTab('achievements')"><span class="tab-icon">—</span> Achievements</button>
+      <button class="tab-btn" data-tab="resources" onclick="showTab('resources')"><span class="tab-icon">—</span> Resources</button>
+      <button class="tab-btn" data-tab="polls" onclick="showTab('polls')"><span class="tab-icon">—</span> Polls</button>
+      <button class="tab-btn" data-tab="calendar" onclick="showTab('calendar')"><span class="tab-icon">—</span> Calendar</button>
+      <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">—</span> Head Panel</button>
+      <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;"><span class="tab-icon">—</span> Admin Panel</button>
     </nav>
     <div class="sidebar-logout">
       <button class="btn-logout" onclick="doLogout()"><span>🚪</span> Sign Out</button>
@@ -5037,7 +5037,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
             <option value="Motivation">🌟 Motivation</option>
           </select>
           <input type="text" id="post-link" placeholder="🔗 Add a link (optional)">
-          <button class="btn-post" onclick="submitPost()">Post 🚀</button>
+          <button class="btn-post" onclick="submitPost()">Post</button>
         </div>
       </div>
       <div id="feed-posts"></div>
