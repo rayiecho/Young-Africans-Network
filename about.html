@@ -240,6 +240,27 @@ footer{background:var(--navy);padding:3rem 2rem;border-top:1px solid rgba(255,25
   .values-grid{grid-template-columns:1fr;}
   .obj-grid{grid-template-columns:1fr;}
 }
+
+/* ── YAN GOLD LINE SIGNATURE ── */
+.section-title{position:relative;padding-bottom:0.75rem;margin-bottom:1.5rem;}
+.section-title::after{content:'';position:absolute;bottom:0;left:0;width:60px;height:3px;background:var(--gold);}
+.section-title.centered::after{left:50%;transform:translateX(-50%);}
+.nav-links > li > a.active::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:2px;background:var(--gold);}
+.nav-links > li > a{position:relative;}
+.stat-num{position:relative;display:inline-block;padding-bottom:0.5rem;}
+.stat-num::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:2px;background:var(--gold);}
+.hero-card{border-top:3px solid var(--gold);}
+.value-card{border-bottom:2px solid transparent;transition:border-color 0.3s;}
+.value-card:hover{border-bottom-color:var(--gold);}
+.program-card{border-bottom:2px solid transparent;transition:border-bottom-color 0.3s;}
+.program-card:hover{border-bottom-color:var(--gold);}
+.team-card{border-bottom:2px solid transparent;transition:border-bottom-color 0.3s;}
+.team-card:hover{border-bottom-color:var(--gold);}
+.footer-title{position:relative;padding-bottom:0.5rem;margin-bottom:1rem;}
+.footer-title::after{content:'';position:absolute;bottom:0;left:0;width:30px;height:2px;background:var(--gold);}
+.nav-logo-text::after{content:'';display:block;width:100%;height:1.5px;background:var(--gold);margin-top:2px;}
+/* ── END GOLD LINE ── */
+
 </style>
 </head>
 <body>
@@ -324,7 +345,7 @@ footer{background:var(--navy);padding:3rem 2rem;border-top:1px solid rgba(255,25
 <div class="story">
   <div class="story-text">
     <span class="section-tag">Who We Are</span>
-    <h2 class="section-title">Our <span>Story</span></h2>
+    <h2 class="section-title centered">Our <span>Story</span></h2>
     <p>Young Africans Network (YAN) was founded in <strong>April 2026 in Kenya</strong> by a group of passionate young Africans who believed that the continent's greatest resource is its youth — and that with the right support, guidance and opportunities, African youth can change the world.</p>
     <p>We are a <strong>pan-African, non-partisan, youth-led</strong> organization with members across Kenya, Cameroon, Rwanda, Tanzania, South Sudan, Ghana, Nigeria and beyond. Our work spans eight core departments — each focused on a specific area of youth development.</p>
     <p>From digital skills training to scholarship access, career development to mental health — YAN is a comprehensive platform that meets young Africans where they are and takes them where they need to go.</p>
@@ -341,7 +362,7 @@ footer{background:var(--navy);padding:3rem 2rem;border-top:1px solid rgba(255,25
   <div class="vm-inner">
     <div style="text-align:center;">
       <span class="section-tag">Purpose</span>
-      <h2 class="section-title">Vision & <span>Mission</span></h2>
+      <h2 class="section-title centered">Vision & <span>Mission</span></h2>
     </div>
     <div class="vm-grid">
       <div class="vm-card">
@@ -362,7 +383,7 @@ footer{background:var(--navy);padding:3rem 2rem;border-top:1px solid rgba(255,25
 <div class="values">
   <div style="text-align:center;">
     <span class="section-tag">What We Stand For</span>
-    <h2 class="section-title">Our Core <span>Values</span></h2>
+    <h2 class="section-title centered">Our Core <span>Values</span></h2>
   </div>
   <div class="values-grid">
     <div class="value-card">
@@ -454,7 +475,7 @@ footer{background:var(--navy);padding:3rem 2rem;border-top:1px solid rgba(255,25
 <div class="principles">
   <div class="prin-inner">
     <span class="section-tag">How We Operate</span>
-    <h2 class="section-title">Guiding <span>Principles</span></h2>
+    <h2 class="section-title centered">Guiding <span>Principles</span></h2>
     <div class="prin-grid">
       <span class="prin-tag">Youth-led & Youth-centered</span>
       <span class="prin-tag">Inclusion & Equity</span>

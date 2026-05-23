@@ -297,6 +297,27 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
   .hero-btns{flex-direction:column;}
   .btn-primary,.btn-outline{text-align:center;}
 }
+
+/* ── YAN GOLD LINE SIGNATURE ── */
+.section-title{position:relative;padding-bottom:0.75rem;margin-bottom:1.5rem;}
+.section-title::after{content:'';position:absolute;bottom:0;left:0;width:60px;height:3px;background:var(--gold);}
+.section-title.centered::after{left:50%;transform:translateX(-50%);}
+.nav-links > li > a.active::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:2px;background:var(--gold);}
+.nav-links > li > a{position:relative;}
+.stat-num{position:relative;display:inline-block;padding-bottom:0.5rem;}
+.stat-num::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:2px;background:var(--gold);}
+.hero-card{border-top:3px solid var(--gold);}
+.value-card{border-bottom:2px solid transparent;transition:border-color 0.3s;}
+.value-card:hover{border-bottom-color:var(--gold);}
+.program-card{border-bottom:2px solid transparent;transition:border-bottom-color 0.3s;}
+.program-card:hover{border-bottom-color:var(--gold);}
+.team-card{border-bottom:2px solid transparent;transition:border-bottom-color 0.3s;}
+.team-card:hover{border-bottom-color:var(--gold);}
+.footer-title{position:relative;padding-bottom:0.5rem;margin-bottom:1rem;}
+.footer-title::after{content:'';position:absolute;bottom:0;left:0;width:30px;height:2px;background:var(--gold);}
+.nav-logo-text::after{content:'';display:block;width:100%;height:1.5px;background:var(--gold);margin-top:2px;}
+/* ── END GOLD LINE ── */
+
 </style>
 </head>
 <body>
@@ -464,7 +485,7 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
   <div class="about-inner">
     <div>
       <span class="section-tag">Who We Are</span>
-      <h2 class="section-title">Empowering <span>African Youth</span> Through Action</h2>
+      <h2 class="section-title centered">Empowering <span>African Youth</span> Through Action</h2>
       <p class="section-desc">Young Africans Network (YAN) is a pan-African, youth-led, volunteer-driven organization founded in Kenya in April 2026. We exist to empower young Africans through education, skills development, mentorship and access to opportunities that enable them to actively build the future together.</p>
       <p class="section-desc">We are non-partisan, inclusive and committed to creating lasting impact across Africa and the diaspora.</p>
       <div class="values-grid">
@@ -527,7 +548,7 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
   <div class="programs-inner">
     <div style="text-align:center;">
       <span class="section-tag">What We Do</span>
-      <h2 class="section-title">Our Core <span>Programs</span></h2>
+      <h2 class="section-title centered">Our Core <span>Programs</span></h2>
       <p style="color:var(--gray);font-size:0.95rem;max-width:600px;margin:0.5rem auto 0;line-height:1.8;">Six transformative programs aligned with the United Nations Sustainable Development Goals</p>
     </div>
     <div class="programs-grid">
@@ -579,7 +600,7 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
   <div class="team-inner">
     <div style="text-align:center;">
       <span class="section-tag">Our People</span>
-      <h2 class="section-title">Meet the <span>Leadership</span></h2>
+      <h2 class="section-title centered">Meet the <span>Leadership</span></h2>
     </div>
     <div class="team-grid">
       <div class="team-card">
@@ -611,7 +632,7 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
 <section class="countries">
   <div class="countries-inner">
     <span class="section-tag">Our Reach</span>
-    <h2 class="section-title">Members Across <span>Africa & Beyond</span></h2>
+    <h2 class="section-title centered">Members Across <span>Africa & Beyond</span></h2>
     <div class="countries-grid">
       <span class="country-tag">🇰🇪 Kenya</span>
       <span class="country-tag">🇨🇲 Cameroon</span>

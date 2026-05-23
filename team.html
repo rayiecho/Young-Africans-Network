@@ -222,6 +222,27 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
   .dept-card{padding:1.5rem 1rem;}
   .btn-gold{width:100%;text-align:center;}
 }
+
+/* ── YAN GOLD LINE SIGNATURE ── */
+.section-title{position:relative;padding-bottom:0.75rem;margin-bottom:1.5rem;}
+.section-title::after{content:'';position:absolute;bottom:0;left:0;width:60px;height:3px;background:var(--gold);}
+.section-title.centered::after{left:50%;transform:translateX(-50%);}
+.nav-links > li > a.active::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:2px;background:var(--gold);}
+.nav-links > li > a{position:relative;}
+.stat-num{position:relative;display:inline-block;padding-bottom:0.5rem;}
+.stat-num::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:2px;background:var(--gold);}
+.hero-card{border-top:3px solid var(--gold);}
+.value-card{border-bottom:2px solid transparent;transition:border-color 0.3s;}
+.value-card:hover{border-bottom-color:var(--gold);}
+.program-card{border-bottom:2px solid transparent;transition:border-bottom-color 0.3s;}
+.program-card:hover{border-bottom-color:var(--gold);}
+.team-card{border-bottom:2px solid transparent;transition:border-bottom-color 0.3s;}
+.team-card:hover{border-bottom-color:var(--gold);}
+.footer-title{position:relative;padding-bottom:0.5rem;margin-bottom:1rem;}
+.footer-title::after{content:'';position:absolute;bottom:0;left:0;width:30px;height:2px;background:var(--gold);}
+.nav-logo-text::after{content:'';display:block;width:100%;height:1.5px;background:var(--gold);margin-top:2px;}
+/* ── END GOLD LINE ── */
+
 </style>
 </head>
 <body>
@@ -306,7 +327,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
 <div class="leadership">
   <div style="text-align:center;">
     <span class="section-tag">Leadership Core</span>
-    <h2 class="section-title">Founding <span>Leadership</span></h2>
+    <h2 class="section-title centered">Founding <span>Leadership</span></h2>
     <p style="color:var(--gray);font-size:0.92rem;max-width:600px;margin:0.5rem auto 0;line-height:1.8;">The founding team providing strategic direction, oversight and institutional continuity for YAN.</p>
   </div>
   <div class="leadership-grid" id="leadership-grid">
@@ -318,7 +339,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
   <div class="dept-inner">
     <div style="text-align:center;">
       <span class="section-tag">8 Departments</span>
-      <h2 class="section-title">Department <span>Coordinators</span></h2>
+      <h2 class="section-title centered">Department <span>Coordinators</span></h2>
       <p style="color:var(--gray);font-size:0.92rem;max-width:600px;margin:0.5rem auto 0;line-height:1.8;">Eight volunteer-driven departments each led by passionate young Africans from across the continent.</p>
     </div>
     <div class="dept-grid" id="dept-grid">
