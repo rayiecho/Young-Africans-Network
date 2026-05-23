@@ -1259,10 +1259,10 @@ async function loadMagazine() {
     <div style="max-width:900px;margin:0 auto;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
         <div>
-          <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);">📰 YAN Digital Magazine</h2>
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.5rem;"><img src="images/Magazine.jpg" alt="YAN Magazine" style="width:60px;height:60px;object-fit:cover;border-radius:10px;border:2px solid var(--gold);"><h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);">YAN Digital Magazine</h2></div>
           <p style="color:var(--gray);font-size:0.82rem;">Monthly digest of scholarships, stories, opportunities and YAN updates</p>
         </div>
-        ${isAdmin ? `<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="generateMagazine()">📰 Generate This Month's Magazine</button>` : ''}
+        ${isAdmin ? `<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="generateMagazine()">Generate This Month's Magazine</button>` : ''}
       </div>
       <div id="magazine-editions"><div class="loading">Loading editions...</div></div>
     </div>`;
@@ -1327,7 +1327,7 @@ async function generateMagazine() {
     content: { scholarships, stories, events, posts }
   });
 
-  showToast('Magazine generated! 📰');
+  showToast('Magazine generated!');
   loadMagazineEditions();
 
   // Auto download
@@ -1508,7 +1508,7 @@ async function downloadMagazineById(id, data) {
     link.download = `YAN_Magazine_${month.replace(/ /g,'_')}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-    showToast('Magazine downloading! 📰');
+    showToast('Magazine downloading!');
   };
   logo.src = '/images/logo.jpeg';
 }
