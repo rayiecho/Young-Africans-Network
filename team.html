@@ -290,7 +290,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
   </li>
   <li><a href="community.html">Community</a></li>
   <li><a href="contact.html">Contact</a></li>
-  <li><a href="join.html" class="mobile-join">Join YAN 🚀</a></li>
+  <li><a href="join.html" class="mobile-join">Join YAN </a></li>
 </ul>
 
 <!-- HERO -->
@@ -400,7 +400,7 @@ async function loadTeam() {
   if (leaderGrid) {
     leaderGrid.innerHTML = leaders.map(t => {
       const photo = t.photoUrl ? `<img src="${t.photoUrl}" alt="${t.name}" class="leader-image" loading="lazy">` : `<div class="leader-image" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1B2A6B,#E63329);font-size:2rem;font-weight:900;color:#fff;">${(t.name||'?')[0]}</div>`;
-      return `<div class="leader-card">${photo}<div class="leader-name">${t.name}</div><div class="leader-role">${t.role}</div><div class="leader-country">📍 ${t.country}</div>${t.email?`<a href="mailto:${t.email}" class="leader-email">${t.email}</a>`:''}</div>`;
+      return `<div class="leader-card">${photo}<div class="leader-name">${t.name}</div><div class="leader-role">${t.role}</div><div class="leader-country"> ${t.country}</div>${t.email?`<a href="mailto:${t.email}" class="leader-email">${t.email}</a>`:''}</div>`;
     }).join('') || '<p style="text-align:center;color:var(--gray);padding:2rem;grid-column:1/-1;">No leadership members added yet.</p>';
   }
 
@@ -420,8 +420,8 @@ async function loadTeam() {
           ${head.photoUrl ? `<img src="${head.photoUrl}" alt="${head.name}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);">` : `<div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#1B2A6B,#E63329);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:900;color:#fff;border:3px solid var(--gold);">${(head.name||'?')[0]}</div>`}
           <div>
             <div class="member-name">${head.name}</div>
-            <div class="member-role">🌟 Department Head</div>
-            <div class="member-info">📍 ${head.country}</div>
+            <div class="member-role">Department Head</div>
+            <div class="member-info"> ${head.country}</div>
           </div>
         </div>` : '';
 
@@ -433,7 +433,7 @@ async function loadTeam() {
             ${v.photoUrl ? `<img src="${v.photoUrl}" alt="${v.name}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">` : `<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1B2A6B,#E63329);display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:900;color:#fff;">${(v.name||'?')[0]}</div>`}
             <div>
               <div style="font-size:0.78rem;font-weight:600;color:var(--navy);">${v.name}</div>
-              <div style="font-size:0.68rem;color:var(--gray);">📍 ${v.country}</div>
+              <div style="font-size:0.68rem;color:var(--gray);"> ${v.country}</div>
             </div>
           </div>`).join('')}
         </div>` : '';
@@ -452,7 +452,7 @@ async function loadTeam() {
   snap.docs.forEach(d => {
     const t = d.data();
     const photo = t.photoUrl ? `<img src="${t.photoUrl}" alt="${t.name}" class="leader-image" loading="lazy">` : `<div class="leader-image" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1B2A6B,#E63329);font-size:2rem;font-weight:900;color:#fff;">${(t.name||'?')[0]}</div>`;
-    const card = `<div class="leader-card">${photo}<div class="leader-name">${t.name}</div><div class="leader-role">${t.role}</div><div class="leader-country">📍 ${t.country}</div>${t.email?`<a href="mailto:${t.email}" class="leader-email">${t.email}</a>`:''}</div>`;
+    const card = `<div class="leader-card">${photo}<div class="leader-name">${t.name}</div><div class="leader-role">${t.role}</div><div class="leader-country"> ${t.country}</div>${t.email?`<a href="mailto:${t.email}" class="leader-email">${t.email}</a>`:''}</div>`;
     if (t.department === 'Leadership' || !t.department) {
       leaderGrid.insertAdjacentHTML('beforeend', card);
     } else {
