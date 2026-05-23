@@ -27,7 +27,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, getDocs, deleteDoc, arrayUnion, arrayRemove, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, getDocs, deleteDoc, arrayUnion, arrayRemove, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const DAILY_DOMAIN = 'youngafricansnetwork.daily.co';
 const DAILY_API_KEY = '2e484de488713ded6e5cb999714cb9fcfb624378c2e9fc1c8efa02a4b4733a4e';
@@ -321,6 +321,7 @@ function loadTabContent(tab) {
   if (tab === 'ai') loadAI();
   if (tab === 'scholarships') loadScholarships();
   if (tab === 'career') loadCareerHub();
+  if (tab === 'community-impact') loadCommunityHub();
   if (tab === 'magazine') loadMagazine();
   if (tab === 'achievements') loadAchievements();
   if (tab === 'resources') loadResources();
@@ -4550,6 +4551,627 @@ async function reviewCareerAssignment(assignId, status) {
   loadCareerManage();
 }
 
+async function loadCommunityHub() {
+  const container = document.getElementById('community-impact-container');
+  if (!container) return;
+  const isAdminOrHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'community'));
+
+  if (!document.getElementById('community-hub-styles')) {
+    const style = document.createElement('style');
+    style.id = 'community-hub-styles';
+    style.textContent = [
+      '.comm-nav-btn{background:rgba(255,255,255,0.15);color:#fff;border:1.5px solid rgba(255,255,255,0.3);padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;}',
+      '.comm-nav-btn:hover,.comm-nav-btn.active{background:#fff;color:var(--navy);}',
+      '.task-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid var(--navy);}',
+      '.project-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid var(--gold);}',
+      '.impact-stat{background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);}'
+    ].join('');
+    document.head.appendChild(style);
+  }
+
+  const manageBtn = isAdminOrHead
+    ? '<button class="comm-nav-btn" onclick="showCommunitySection(\'manage\')">Manage</button>'
+    : '';
+
+  container.innerHTML = [
+    '<div style="max-width:900px;margin:0 auto;">',
+    '<div style="background:linear-gradient(135deg,#1B2A6B,#2D3F7B);border-radius:20px;padding:2rem;margin-bottom:1.5rem;color:#fff;">',
+    '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">',
+    '<img src="images/Community.jpg" alt="Community" style="width:70px;height:70px;object-fit:cover;border-radius:12px;border:3px solid var(--gold);">',
+    '<div>',
+    '<h2 style="font-family:Playfair Display,serif;font-size:1.8rem;font-weight:900;margin-bottom:0.25rem;">Community Impact & Volunteering Hub</h2>',
+    '<p style="color:rgba(255,255,255,0.75);font-size:0.88rem;">Take action. Create impact. Build Africa one community at a time.</p>',
+    '</div></div>',
+    '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem;">',
+    '<button class="comm-nav-btn active" onclick="showCommunitySection(\'tasks\')">Task Board</button>',
+    '<button class="comm-nav-btn" onclick="showCommunitySection(\'projects\')">Community Projects</button>',
+    '<button class="comm-nav-btn" onclick="showCommunitySection(\'resources\')">Resources</button>',
+    '<button class="comm-nav-btn" onclick="showCommunitySection(\'impact\')">My Impact</button>',
+    '<button class="comm-nav-btn" onclick="showCommunitySection(\'leaderboard\')">Champions</button>',
+    manageBtn,
+    '</div></div>',
+    '<div id="community-section-tasks"></div>',
+    '<div id="community-section-projects" style="display:none;"></div>',
+    '<div id="community-section-resources" style="display:none;"></div>',
+    '<div id="community-section-impact" style="display:none;"></div>',
+    '<div id="community-section-leaderboard" style="display:none;"></div>',
+    '<div id="community-section-manage" style="display:none;"></div>',
+    '</div>'
+  ].join('');
+
+  loadCommunityTasks();
+}
+
+function showCommunitySection(section) {
+  const sections = ['tasks','projects','resources','impact','leaderboard','manage'];
+  document.querySelectorAll('.comm-nav-btn').forEach(function(b, i) {
+    b.classList.toggle('active', sections[i] === section);
+  });
+  sections.forEach(function(s) {
+    const el = document.getElementById('community-section-' + s);
+    if (el) el.style.display = s === section ? 'block' : 'none';
+  });
+  if (section === 'tasks') loadCommunityTasks();
+  if (section === 'projects') loadCommunityProjects();
+  if (section === 'resources') loadCommunityResources();
+  if (section === 'impact') loadMyImpact();
+  if (section === 'leaderboard') loadCommunityLeaderboard();
+  if (section === 'manage') loadCommunityManage();
+}
+
+async function loadCommunityTasks() {
+  const container = document.getElementById('community-section-tasks');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading tasks...</div>';
+  const isAdminOrHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'community'));
+  const categoryColors = {
+    Communications:'#1B2A6B', Design:'#E63329', Technology:'#0A66C2',
+    Events:'#F5A623', Writing:'#27AE60', Research:'#9B59B6',
+    Finance:'#E67E22', Other:'#6B7280'
+  };
+
+  let snap;
+  try {
+    snap = await getDocs(query(collection(db, 'communityTasks'), orderBy('createdAt', 'desc')));
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state"><p>Error loading tasks.</p></div>';
+    return;
+  }
+
+  let tasksHtml = '';
+  if (snap.empty) {
+    tasksHtml = '<div class="empty-state"><p>No tasks posted yet.</p><p style="font-size:0.82rem;color:var(--gray);">Check back soon!</p></div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const t = Object.assign({id: d.id}, d.data());
+      const color = categoryColors[t.category] || '#1B2A6B';
+      const spotsLeft = (t.spots || 1) - (t.applicants || 0);
+      const isFull = spotsLeft <= 0;
+      const hasApplied = t.appliedBy && t.appliedBy.includes(currentUser.uid);
+      const isAssigned = t.assignedTo && t.assignedTo.includes(currentUser.uid);
+
+      const spotBadge = isFull
+        ? '<span style="background:rgba(107,114,128,0.1);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">Full</span>'
+        : '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + spotsLeft + ' spot' + (spotsLeft > 1 ? 's' : '') + ' left</span>';
+
+      const applyBtn = (!isFull && !hasApplied && !isAssigned)
+        ? '<button class="btn-sm btn-navy" onclick="applyForTask(\'' + t.id + '\')">Apply Now</button>' : '';
+      const appliedBadge = (hasApplied && !isAssigned)
+        ? '<span style="background:rgba(245,166,35,0.1);color:var(--gold);padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;">Applied</span>' : '';
+      const assignedBadge = isAssigned
+        ? '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;">Assigned to you</span>' : '';
+      const reportBtn = isAssigned
+        ? '<button class="btn-sm btn-navy" onclick="submitTaskReport(\'' + t.id + '\')">Submit Report</button>' : '';
+      const deleteBtn = isAdminOrHead
+        ? '<button class="btn-sm btn-red" onclick="deleteCommunityTask(\'' + t.id + '\')">Delete</button>' : '';
+
+      tasksHtml += [
+        '<div class="task-card" style="border-left-color:' + color + ';">',
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">',
+        '<div style="flex:1;">',
+        '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">',
+        '<span style="background:' + color + '18;color:' + color + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + (t.category || '') + '</span>',
+        '<span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;">' + (t.duration || 'Flexible') + '</span>',
+        spotBadge,
+        '</div>',
+        '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(t.title) + '</h3>',
+        '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;">' + sanitize(t.description) + '</p>',
+        (t.skills ? '<p style="font-size:0.78rem;color:var(--navy);margin-top:0.5rem;"><strong>Skills needed:</strong> ' + sanitize(t.skills) + '</p>' : ''),
+        '</div>',
+        '<div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">',
+        assignedBadge, applyBtn, appliedBadge, reportBtn, deleteBtn,
+        '</div></div>',
+        '<div id="task-report-' + t.id + '" style="display:none;margin-top:0.75rem;"></div>',
+        '</div>'
+      ].join('');
+    });
+  }
+
+  const postBtn = isAdminOrHead
+    ? '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="showCommunitySection(\'manage\')">Post Task</button>'
+    : '';
+
+  container.innerHTML = [
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">',
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">YAN Task Board</h3>',
+    postBtn,
+    '</div>',
+    '<div style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1rem;margin-bottom:1.25rem;">',
+    '<p style="font-size:0.85rem;color:var(--navy);font-weight:600;margin-bottom:0.25rem;">How it works</p>',
+    '<p style="font-size:0.82rem;color:var(--gray);line-height:1.7;">Browse available YAN roles. Apply, get assigned by the Community Head, complete it and submit your report. You will receive a Community Service Certificate for every completed task.</p>',
+    '</div>',
+    tasksHtml
+  ].join('');
+}
+
+async function applyForTask(taskId) {
+  if (!confirm('Apply for this task?')) return;
+  const taskRef = doc(db, 'communityTasks', taskId);
+  const taskSnap = await getDoc(taskRef);
+  const task = taskSnap.data();
+  const appliedBy = task.appliedBy || [];
+  if (appliedBy.includes(currentUser.uid)) return showToast('Already applied!', 'error');
+  appliedBy.push(currentUser.uid);
+  await updateDoc(taskRef, {appliedBy: appliedBy, applicants: appliedBy.length});
+  await addDoc(collection(db, 'notifications'), {
+    title: 'New Task Application: ' + task.title,
+    message: currentUserData.name + ' applied for: ' + task.title,
+    type: 'announcement', postedBy: currentUserData.name,
+    createdAt: serverTimestamp(), readBy: []
+  });
+  showToast('Application submitted!');
+  loadCommunityTasks();
+}
+
+function submitTaskReport(taskId) {
+  const box = document.getElementById('task-report-' + taskId);
+  if (!box) return;
+  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
+  box.innerHTML = [
+    '<div style="background:var(--light);border-radius:12px;padding:1rem;">',
+    '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">Submit Task Report</p>',
+    '<div class="form-group"><label>What did you do?</label>',
+    '<textarea id="task-desc-' + taskId + '" rows="4" placeholder="Describe what you accomplished..."></textarea></div>',
+    '<div class="form-group"><label>People reached</label>',
+    '<input type="number" id="task-reach-' + taskId + '" placeholder="e.g. 50" min="0"></div>',
+    '<div class="form-group"><label>Hours spent</label>',
+    '<input type="number" id="task-hours-' + taskId + '" placeholder="e.g. 5" min="1"></div>',
+    '<div style="display:flex;gap:0.5rem;margin-top:0.75rem;">',
+    '<button class="btn-sm btn-navy" onclick="saveTaskReport(\'' + taskId + '\')">Submit</button>',
+    '<button class="btn-sm btn-outline" onclick="document.getElementById(\'task-report-' + taskId + '\').style.display=\'none\'">Cancel</button>',
+    '</div></div>'
+  ].join('');
+  box.style.display = 'block';
+}
+
+async function saveTaskReport(taskId) {
+  const desc = (document.getElementById('task-desc-' + taskId) || {}).value || '';
+  const reach = parseInt((document.getElementById('task-reach-' + taskId) || {}).value) || 0;
+  const hours = parseInt((document.getElementById('task-hours-' + taskId) || {}).value) || 0;
+  if (!desc.trim()) return showToast('Describe what you did', 'error');
+  if (!hours) return showToast('Enter hours spent', 'error');
+  await addDoc(collection(db, 'communityReports'), {
+    taskId: taskId, userId: currentUser.uid, userName: currentUserData.name,
+    type: 'task', description: desc, peopleReached: reach, hoursSpent: hours,
+    status: 'pending', createdAt: serverTimestamp()
+  });
+  await setDoc(doc(db, 'communityImpact', currentUser.uid), {
+    userId: currentUser.uid, userName: currentUserData.name,
+    totalHours: increment(hours), totalReach: increment(reach),
+    tasksCompleted: increment(1), updatedAt: serverTimestamp()
+  }, {merge: true});
+  showToast('Report submitted! Certificate will be issued after review.');
+  document.getElementById('task-report-' + taskId).style.display = 'none';
+}
+
+async function deleteCommunityTask(id) {
+  if (!confirm('Delete this task?')) return;
+  await deleteDoc(doc(db, 'communityTasks', id));
+  showToast('Deleted');
+  loadCommunityTasks();
+}
+
+async function loadCommunityProjects() {
+  const container = document.getElementById('community-section-projects');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading projects...</div>';
+  const isAdminOrHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'community'));
+  const statusColors = {pending:'#F5A623', approved:'#27AE60', completed:'#1B2A6B', rejected:'#E63329'};
+
+  let snap;
+  try {
+    snap = await getDocs(query(collection(db, 'communityProjects'), orderBy('createdAt', 'desc')));
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state"><p>Error loading projects.</p></div>';
+    return;
+  }
+
+  let projectsHtml = '';
+  if (snap.empty) {
+    projectsHtml = '<div class="empty-state"><p>No community projects yet.</p><p style="font-size:0.82rem;color:var(--gray);">Be the first to propose one!</p></div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const p = Object.assign({id: d.id}, d.data());
+      const color = statusColors[p.status] || '#1B2A6B';
+      const isOwner = p.proposedById === currentUser.uid;
+      const reportBtn = (p.status === 'approved' && isOwner)
+        ? '<button class="btn-sm btn-navy" onclick="submitProjectReport(\'' + p.id + '\')">Submit Report</button>' : '';
+      const approveBtn = (isAdminOrHead && p.status === 'pending')
+        ? '<button class="btn-sm btn-navy" onclick="reviewCommunityProject(\'' + p.id + '\',\'approved\')">Approve</button>' : '';
+      const rejectBtn = (isAdminOrHead && p.status === 'pending')
+        ? '<button class="btn-sm btn-red" onclick="reviewCommunityProject(\'' + p.id + '\',\'rejected\')">Reject</button>' : '';
+      const deleteBtn = (isOwner || isAdminOrHead)
+        ? '<button class="btn-sm btn-outline" onclick="deleteCommunityProject(\'' + p.id + '\')">Delete</button>' : '';
+
+      projectsHtml += [
+        '<div class="project-card">',
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">',
+        '<div style="flex:1;">',
+        '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">',
+        '<span style="background:' + color + '18;color:' + color + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + (p.status || 'pending').toUpperCase() + '</span>',
+        '<span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;">' + sanitize(p.country || '') + '</span>',
+        '</div>',
+        '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(p.title) + '</h3>',
+        '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;">' + sanitize(p.description) + '</p>',
+        '<p style="font-size:0.78rem;color:var(--navy);margin-top:0.35rem;"><strong>By:</strong> ' + sanitize(p.proposedBy || '') + ' · <strong>Target:</strong> ' + (p.targetBeneficiaries || 0) + ' people</p>',
+        '</div>',
+        '<div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">',
+        reportBtn, approveBtn, rejectBtn, deleteBtn,
+        '</div></div>',
+        '<div id="project-report-' + p.id + '" style="display:none;margin-top:0.75rem;"></div>',
+        '</div>'
+      ].join('');
+    });
+  }
+
+  container.innerHTML = [
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">',
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">Community Projects</h3>',
+    '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="toggleProjectForm()">Propose Project</button>',
+    '</div>',
+    '<div id="project-form" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">',
+    '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Propose a Community Project</h4>',
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">',
+    '<div class="form-group"><label>Project Title *</label><input type="text" id="proj-title" placeholder="e.g. Digital Skills Workshop"></div>',
+    '<div class="form-group"><label>Category *</label><select id="proj-category"><option>Education</option><option>Environment</option><option>Health</option><option>Technology</option><option>Arts</option><option>Sports</option><option>Other</option></select></div>',
+    '<div class="form-group"><label>Country/Location *</label><input type="text" id="proj-country" placeholder="e.g. Nairobi, Kenya"></div>',
+    '<div class="form-group"><label>Target Beneficiaries *</label><input type="number" id="proj-beneficiaries" placeholder="e.g. 50" min="1"></div>',
+    '<div class="form-group"><label>Planned Date *</label><input type="date" id="proj-date"></div>',
+    '<div class="form-group"><label>Duration</label><input type="text" id="proj-duration" placeholder="e.g. 1 day"></div>',
+    '<div class="form-group" style="grid-column:1/-1;"><label>Description *</label><textarea id="proj-desc" rows="4" placeholder="What will you do and what impact will it create?"></textarea></div>',
+    '<div class="form-group" style="grid-column:1/-1;"><label>Resources Needed</label><textarea id="proj-resources" rows="2" placeholder="What support do you need from YAN?"></textarea></div>',
+    '</div>',
+    '<div style="display:flex;gap:0.75rem;margin-top:1rem;">',
+    '<button class="btn-primary" onclick="submitCommunityProject()">Submit Proposal</button>',
+    '<button class="btn-outline" onclick="toggleProjectForm()">Cancel</button>',
+    '</div></div>',
+    '<div style="background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.3);border-radius:12px;padding:1rem;margin-bottom:1.25rem;">',
+    '<p style="font-size:0.82rem;color:var(--navy);font-weight:600;margin-bottom:0.25rem;">How it works</p>',
+    '<p style="font-size:0.82rem;color:var(--gray);line-height:1.7;">Propose a project → Head approves → You execute → Submit report → Get Community Champion Certificate → Story featured in YAN Magazine.</p>',
+    '</div>',
+    projectsHtml
+  ].join('');
+}
+
+function toggleProjectForm() {
+  const form = document.getElementById('project-form');
+  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function submitCommunityProject() {
+  const title = (document.getElementById('proj-title') || {}).value.trim();
+  const category = (document.getElementById('proj-category') || {}).value;
+  const country = (document.getElementById('proj-country') || {}).value.trim();
+  const beneficiaries = parseInt((document.getElementById('proj-beneficiaries') || {}).value) || 0;
+  const date = (document.getElementById('proj-date') || {}).value;
+  const duration = (document.getElementById('proj-duration') || {}).value.trim();
+  const desc = (document.getElementById('proj-desc') || {}).value.trim();
+  const resources = (document.getElementById('proj-resources') || {}).value.trim();
+  if (!title || !country || !beneficiaries || !date || !desc) return showToast('Fill all required fields', 'error');
+  await addDoc(collection(db, 'communityProjects'), {
+    title: title, category: category, country: country,
+    targetBeneficiaries: beneficiaries, plannedDate: date,
+    duration: duration, description: desc, resourcesNeeded: resources,
+    proposedBy: currentUserData.name, proposedById: currentUser.uid,
+    status: 'pending', createdAt: serverTimestamp()
+  });
+  await addDoc(collection(db, 'notifications'), {
+    title: 'New Project Proposal: ' + title,
+    message: currentUserData.name + ' proposed a project: ' + title + ' in ' + country,
+    type: 'announcement', postedBy: currentUserData.name,
+    createdAt: serverTimestamp(), readBy: []
+  });
+  showToast('Proposal submitted! Head will review it.');
+  toggleProjectForm();
+  loadCommunityProjects();
+}
+
+async function reviewCommunityProject(projectId, status) {
+  await updateDoc(doc(db, 'communityProjects', projectId), {
+    status: status, reviewedBy: currentUserData.name, reviewedAt: serverTimestamp()
+  });
+  showToast(status === 'approved' ? 'Project approved!' : 'Project rejected');
+  loadCommunityProjects();
+}
+
+async function deleteCommunityProject(id) {
+  if (!confirm('Delete this project?')) return;
+  await deleteDoc(doc(db, 'communityProjects', id));
+  showToast('Deleted');
+  loadCommunityProjects();
+}
+
+function submitProjectReport(projectId) {
+  const box = document.getElementById('project-report-' + projectId);
+  if (!box) return;
+  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
+  box.innerHTML = [
+    '<div style="background:var(--light);border-radius:12px;padding:1rem;">',
+    '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">Submit Project Report</p>',
+    '<div class="form-group"><label>What happened and what impact did you create? *</label>',
+    '<textarea id="proj-rep-desc-' + projectId + '" rows="5" placeholder="Describe what happened, who participated and what changed..."></textarea></div>',
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">',
+    '<div class="form-group"><label>People Reached *</label><input type="number" id="proj-rep-reach-' + projectId + '" placeholder="e.g. 50" min="1"></div>',
+    '<div class="form-group"><label>Hours Spent *</label><input type="number" id="proj-rep-hours-' + projectId + '" placeholder="e.g. 8" min="1"></div>',
+    '<div class="form-group"><label>Volunteers</label><input type="number" id="proj-rep-vol-' + projectId + '" placeholder="e.g. 5" min="0"></div>',
+    '</div>',
+    '<div style="display:flex;gap:0.5rem;margin-top:0.75rem;">',
+    '<button class="btn-sm btn-navy" onclick="saveProjectReport(\'' + projectId + '\')">Submit Report</button>',
+    '<button class="btn-sm btn-outline" onclick="document.getElementById(\'project-report-' + projectId + '\').style.display=\'none\'">Cancel</button>',
+    '</div></div>'
+  ].join('');
+  box.style.display = 'block';
+}
+
+async function saveProjectReport(projectId) {
+  const desc = (document.getElementById('proj-rep-desc-' + projectId) || {}).value.trim();
+  const reach = parseInt((document.getElementById('proj-rep-reach-' + projectId) || {}).value) || 0;
+  const hours = parseInt((document.getElementById('proj-rep-hours-' + projectId) || {}).value) || 0;
+  const vol = parseInt((document.getElementById('proj-rep-vol-' + projectId) || {}).value) || 0;
+  if (!desc) return showToast('Describe your project impact', 'error');
+  if (!reach || !hours) return showToast('Fill people reached and hours spent', 'error');
+  await addDoc(collection(db, 'communityReports'), {
+    projectId: projectId, userId: currentUser.uid, userName: currentUserData.name,
+    type: 'project', description: desc, peopleReached: reach,
+    hoursSpent: hours, volunteersInvolved: vol,
+    status: 'pending', createdAt: serverTimestamp()
+  });
+  await setDoc(doc(db, 'communityImpact', currentUser.uid), {
+    userId: currentUser.uid, userName: currentUserData.name,
+    totalHours: increment(hours), totalReach: increment(reach),
+    projectsCompleted: increment(1), updatedAt: serverTimestamp()
+  }, {merge: true});
+  await updateDoc(doc(db, 'communityProjects', projectId), {status: 'completed'});
+  showToast('Report submitted! Certificate will be issued after review.');
+  document.getElementById('project-report-' + projectId).style.display = 'none';
+  loadCommunityProjects();
+}
+
+function loadCommunityResources() {
+  const container = document.getElementById('community-section-resources');
+  if (!container) return;
+  const resources = [
+    {icon:'📋', title:'Project Proposal Template', desc:'Template for proposing a community impact project to YAN.', tag:'Template', color:'#1B2A6B', q:'Give me a community project proposal template for a youth-led NGO in Africa.'},
+    {icon:'📊', title:'Impact Measurement Guide', desc:'How to measure and document the impact of your project.', tag:'Guide', color:'#27AE60', q:'Give me a practical guide on measuring community project impact.'},
+    {icon:'🤝', title:'Volunteer Recruitment Script', desc:'How to recruit volunteers for your community project.', tag:'Script', color:'#F5A623', q:'Give me a volunteer recruitment script for a community project in Africa.'},
+    {icon:'📸', title:'Documentation Checklist', desc:'What to photograph and report during your project.', tag:'Checklist', color:'#E63329', q:'Give me a project documentation checklist for community impact projects.'},
+    {icon:'✉️', title:'Partnership Letter Template', desc:'Letter template for approaching organizations for partnerships.', tag:'Template', color:'#9B59B6', q:'Give me a partnership letter template for approaching local organizations for a community project.'},
+    {icon:'🌍', title:'SDG Alignment Guide', desc:'How to align your project with the UN SDGs.', tag:'Guide', color:'#1ABC9C', q:'Explain how to align a youth community project in Africa with the UN SDGs.'},
+    {icon:'📝', title:'Grant Writing Basics', desc:'Introduction to writing grant proposals for community projects.', tag:'Guide', color:'#E67E22', q:'Give me grant writing basics for African youth-led community projects.'},
+    {icon:'🏆', title:'Community Leader Skills', desc:'Key skills every community leader needs.', tag:'Skills', color:'#0A66C2', q:'What are the key skills every community leader needs to run impactful projects in Africa?'}
+  ];
+  let html = '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">Community Impact Resources</h3>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;">';
+  resources.forEach(function(r) {
+    const q = r.q.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    html += [
+      '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-top:4px solid ' + r.color + ';">',
+      '<div style="font-size:2rem;margin-bottom:0.75rem;">' + r.icon + '</div>',
+      '<span style="background:' + r.color + '18;color:' + r.color + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.68rem;font-weight:700;">' + r.tag + '</span>',
+      '<h4 style="font-size:0.92rem;font-weight:700;color:var(--navy);margin:0.5rem 0;">' + r.title + '</h4>',
+      '<p style="font-size:0.78rem;color:var(--gray);line-height:1.6;margin-bottom:1rem;">' + r.desc + '</p>',
+      '<button class="btn-sm btn-navy" onclick="showAIHelp(\'' + q + '\')">Get with AI</button>',
+      '</div>'
+    ].join('');
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+async function loadMyImpact() {
+  const container = document.getElementById('community-section-impact');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading your impact...</div>';
+  const impactSnap = await getDoc(doc(db, 'communityImpact', currentUser.uid));
+  const reportsSnap = await getDocs(query(collection(db, 'communityReports'), where('userId', '==', currentUser.uid), orderBy('createdAt', 'desc')));
+  const impact = impactSnap.exists() ? impactSnap.data() : {totalHours:0, totalReach:0, tasksCompleted:0, projectsCompleted:0};
+  const totalActivities = (impact.tasksCompleted || 0) + (impact.projectsCompleted || 0);
+  const score = Math.min(100, ((impact.tasksCompleted || 0) * 15) + ((impact.projectsCompleted || 0) * 25));
+
+  let reportsHtml = '';
+  reportsSnap.docs.forEach(function(d) {
+    const r = d.data();
+    const sc = {pending:'#F5A623', approved:'#27AE60', rejected:'#E63329'}[r.status] || '#1B2A6B';
+    reportsHtml += [
+      '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">',
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">',
+      '<div style="flex:1;">',
+      '<span style="font-size:0.72rem;color:var(--gray);">' + (r.type === 'task' ? 'YAN Task' : 'Community Project') + '</span>',
+      '<p style="font-size:0.85rem;font-weight:600;color:var(--navy);margin:0.25rem 0;">' + sanitize((r.description || '').substring(0,80)) + '...</p>',
+      '<span style="font-size:0.75rem;color:var(--gray);">' + (r.hoursSpent || 0) + ' hours · ' + (r.peopleReached || 0) + ' people reached</span>',
+      '</div>',
+      '<span style="background:' + sc + '18;color:' + sc + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + (r.status || 'PENDING').toUpperCase() + '</span>',
+      '</div></div>'
+    ].join('');
+  });
+
+  container.innerHTML = [
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">My Community Impact</h3>',
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;">',
+    '<div class="impact-stat"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--navy);">' + (impact.totalHours || 0) + '</div><div style="font-size:0.72rem;color:var(--gray);">Hours Volunteered</div></div>',
+    '<div class="impact-stat"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + (impact.totalReach || 0) + '</div><div style="font-size:0.72rem;color:var(--gray);">People Reached</div></div>',
+    '<div class="impact-stat"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--navy);">' + totalActivities + '</div><div style="font-size:0.72rem;color:var(--gray);">Activities Done</div></div>',
+    '<div class="impact-stat"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + score + '</div><div style="font-size:0.72rem;color:var(--gray);">Impact Score</div></div>',
+    '</div>',
+    reportsSnap.size > 0
+      ? '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);"><h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">My Reports</h4>' + reportsHtml + '</div>'
+      : '<div class="empty-state"><p>No activities yet.</p><p style="font-size:0.82rem;color:var(--gray);">Apply for a task or propose a project to start!</p></div>'
+  ].join('');
+}
+
+async function loadCommunityLeaderboard() {
+  const container = document.getElementById('community-section-leaderboard');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading champions...</div>';
+  let snap;
+  try {
+    snap = await getDocs(query(collection(db, 'communityImpact'), orderBy('totalReach', 'desc')));
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state"><p>Error loading leaderboard.</p></div>';
+    return;
+  }
+  let html = '';
+  snap.docs.forEach(function(d, i) {
+    const m = d.data();
+    const medals = ['1st', '2nd', '3rd'];
+    const medal = i < 3 ? medals[i] : (i + 1) + 'th';
+    html += [
+      '<div style="display:flex;align-items:center;gap:1rem;background:' + (i < 3 ? 'rgba(245,166,35,0.06)' : 'var(--white)') + ';border-radius:12px;padding:1rem;margin-bottom:0.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);">',
+      '<div style="font-size:0.9rem;font-weight:900;color:var(--navy);width:36px;text-align:center;">' + medal + '</div>',
+      '<div style="flex:1;"><p style="font-size:0.92rem;font-weight:700;color:var(--navy);">' + sanitize(m.userName) + '</p>',
+      '<p style="font-size:0.75rem;color:var(--gray);">' + (m.totalHours || 0) + ' hours · ' + (m.totalReach || 0) + ' people reached</p></div>',
+      '<div style="text-align:right;"><div style="font-family:Playfair Display,serif;font-size:1.2rem;font-weight:900;color:var(--gold);">' + (m.totalReach || 0) + '</div>',
+      '<div style="font-size:0.68rem;color:var(--gray);">people reached</div></div>',
+      '</div>'
+    ].join('');
+  });
+  container.innerHTML = [
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Community Champions</h3>',
+    '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:1.25rem;">Members ranked by people reached through projects and tasks.</p>',
+    snap.empty ? '<div class="empty-state"><p>No champions yet. Be the first!</p></div>' : html
+  ].join('');
+}
+
+async function loadCommunityManage() {
+  const container = document.getElementById('community-section-manage');
+  if (!container) return;
+  let reportsSnap;
+  try {
+    reportsSnap = await getDocs(query(collection(db, 'communityReports'), where('status', '==', 'pending'), orderBy('createdAt', 'desc')));
+  } catch(e) {
+    reportsSnap = {size: 0, docs: []};
+  }
+
+  let pendingHtml = reportsSnap.size === 0 ? '<p style="color:var(--gray);font-size:0.85rem;">No pending reports.</p>' : '';
+  reportsSnap.docs.forEach(function(d) {
+    const r = d.data();
+    pendingHtml += [
+      '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">',
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;">',
+      '<div style="flex:1;">',
+      '<strong style="font-size:0.88rem;color:var(--navy);">' + sanitize(r.userName) + '</strong>',
+      '<span style="font-size:0.72rem;color:var(--gray);margin-left:0.5rem;">' + (r.type === 'task' ? 'Task Report' : 'Project Report') + '</span>',
+      '<p style="font-size:0.82rem;color:var(--gray);margin:0.35rem 0;">' + sanitize(r.description) + '</p>',
+      '<span style="font-size:0.75rem;color:var(--gray);">' + (r.hoursSpent || 0) + ' hours · ' + (r.peopleReached || 0) + ' people reached</span>',
+      '</div>',
+      '<div style="display:flex;gap:0.5rem;">',
+      '<button class="btn-sm btn-navy" onclick="approveCommunityReport(\'' + d.id + '\',\'' + (r.userId || '') + '\',\'' + sanitize(r.userName) + '\',\'' + (r.type || 'task') + '\')">Approve & Issue Certificate</button>',
+      '<button class="btn-sm btn-red" onclick="rejectCommunityReport(\'' + d.id + '\')">Reject</button>',
+      '</div></div></div>'
+    ].join('');
+  });
+
+  container.innerHTML = [
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">Manage Community Hub</h3>',
+    '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">',
+    '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Post a YAN Task</h4>',
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">',
+    '<div class="form-group"><label>Task Title *</label><input type="text" id="new-task-title" placeholder="e.g. Manage YAN Instagram"></div>',
+    '<div class="form-group"><label>Category *</label><select id="new-task-category"><option>Communications</option><option>Design</option><option>Technology</option><option>Events</option><option>Writing</option><option>Research</option><option>Finance</option><option>Other</option></select></div>',
+    '<div class="form-group"><label>Duration</label><input type="text" id="new-task-duration" placeholder="e.g. 1 month"></div>',
+    '<div class="form-group"><label>Spots Available</label><input type="number" id="new-task-spots" value="1" min="1"></div>',
+    '<div class="form-group"><label>Skills Needed</label><input type="text" id="new-task-skills" placeholder="e.g. Graphic design"></div>',
+    '<div class="form-group" style="grid-column:1/-1;"><label>Description *</label><textarea id="new-task-desc" rows="4" placeholder="What will the volunteer do?"></textarea></div>',
+    '</div>',
+    '<button class="btn-primary" onclick="postCommunityTask()">Post Task</button>',
+    '</div>',
+    '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">',
+    '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Pending Reports (' + reportsSnap.size + ')</h4>',
+    pendingHtml,
+    '</div>'
+  ].join('');
+}
+
+async function postCommunityTask() {
+  const title = (document.getElementById('new-task-title') || {}).value.trim();
+  const category = (document.getElementById('new-task-category') || {}).value;
+  const duration = (document.getElementById('new-task-duration') || {}).value.trim();
+  const spots = parseInt((document.getElementById('new-task-spots') || {}).value) || 1;
+  const skills = (document.getElementById('new-task-skills') || {}).value.trim();
+  const desc = (document.getElementById('new-task-desc') || {}).value.trim();
+  if (!title || !desc) return showToast('Fill all required fields', 'error');
+  await addDoc(collection(db, 'communityTasks'), {
+    title: title, category: category, duration: duration, spots: spots,
+    skills: skills, description: desc, postedBy: currentUserData.name,
+    postedById: currentUser.uid, applicants: 0, appliedBy: [], assignedTo: [],
+    createdAt: serverTimestamp(), active: true
+  });
+  showToast('Task posted!');
+  document.getElementById('new-task-title').value = '';
+  document.getElementById('new-task-desc').value = '';
+  loadCommunityManage();
+}
+
+async function approveCommunityReport(reportId, userId, userName, type) {
+  await updateDoc(doc(db, 'communityReports', reportId), {
+    status: 'approved', reviewedBy: currentUserData.name, reviewedAt: serverTimestamp()
+  });
+  await addDoc(collection(db, 'certificates'), {
+    userId: userId, userName: userName, type: 'community', department: 'community',
+    title: type === 'project' ? 'Community Champion Certificate' : 'Community Service Certificate',
+    status: 'approved', issuedBy: currentUserData.name,
+    issuedAt: serverTimestamp(), requestedAt: serverTimestamp()
+  });
+  await addDoc(collection(db, 'notifications'), {
+    title: 'Certificate Issued!',
+    message: 'Congratulations ' + userName + '! Your ' + (type === 'project' ? 'Community Champion' : 'Community Service') + ' Certificate has been issued. Check your Achievements!',
+    type: 'announcement', postedBy: currentUserData.name,
+    createdAt: serverTimestamp(), readBy: []
+  });
+  showToast('Report approved and certificate issued!');
+  loadCommunityManage();
+}
+
+async function rejectCommunityReport(reportId) {
+  await updateDoc(doc(db, 'communityReports', reportId), {
+    status: 'rejected', reviewedBy: currentUserData.name, reviewedAt: serverTimestamp()
+  });
+  showToast('Report rejected');
+  loadCommunityManage();
+}
+
+window.loadCommunityHub = loadCommunityHub;
+window.showCommunitySection = showCommunitySection;
+window.loadCommunityTasks = loadCommunityTasks;
+window.applyForTask = applyForTask;
+window.submitTaskReport = submitTaskReport;
+window.saveTaskReport = saveTaskReport;
+window.deleteCommunityTask = deleteCommunityTask;
+window.loadCommunityProjects = loadCommunityProjects;
+window.toggleProjectForm = toggleProjectForm;
+window.submitCommunityProject = submitCommunityProject;
+window.reviewCommunityProject = reviewCommunityProject;
+window.deleteCommunityProject = deleteCommunityProject;
+window.submitProjectReport = submitProjectReport;
+window.saveProjectReport = saveProjectReport;
+window.loadCommunityResources = loadCommunityResources;
+window.loadMyImpact = loadMyImpact;
+window.loadCommunityLeaderboard = loadCommunityLeaderboard;
+window.loadCommunityManage = loadCommunityManage;
+window.postCommunityTask = postCommunityTask;
+window.approveCommunityReport = approveCommunityReport;
+window.rejectCommunityReport = rejectCommunityReport;
+
 window.loadCareerHub = loadCareerHub;
 window.showCareerSection = showCareerSection;
 window.loadCareerPaths = loadCareerPaths;
@@ -4986,6 +5608,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <button class="tab-btn" data-tab="ai" onclick="showTab('ai')"><span class="tab-icon">—</span> YAN Guide</button>
       <button class="tab-btn" data-tab="scholarships" onclick="showTab('scholarships')"><span class="tab-icon">—</span> Scholarships</button>
       <button class="tab-btn" data-tab="career" onclick="showTab('career')"><span class="tab-icon">—</span> Career & Public Speaking</button>
+      <button class="tab-btn" data-tab="community-impact" onclick="showTab('community-impact')"><span class="tab-icon">—</span> Community Impact & Volunteering</button>
       <button class="tab-btn" data-tab="magazine" onclick="showTab('magazine')"><span class="tab-icon">—</span> Magazine</button>
       <button class="tab-btn" data-tab="achievements" onclick="showTab('achievements')"><span class="tab-icon">—</span> Achievements</button>
       <button class="tab-btn" data-tab="resources" onclick="showTab('resources')"><span class="tab-icon">—</span> Resources</button>
@@ -5052,6 +5675,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <div class="tab-panel" id="tab-ai"><div id="ai-container"></div></div>
     <div class="tab-panel" id="tab-scholarships"><div id="scholarships-container"></div></div>
     <div class="tab-panel" id="tab-career"><div id="career-container"></div></div>
+    <div class="tab-panel" id="tab-community-impact"><div id="community-impact-container"></div></div>
     <div class="tab-panel" id="tab-magazine"><div id="magazine-container"></div></div>
     <div class="tab-panel" id="tab-achievements"><div id="achievements-container"></div></div>
     <div class="tab-panel" id="tab-resources"><div id="resources-container"></div></div>
