@@ -3069,7 +3069,7 @@ async function loadAdminModeration() {
       return '<div class="moderation-row"><div><strong>' + sanitize(p.authorName) + '</strong>' +
         '<p>' + sanitize(p.content?.substring(0,100)) + '...</p>' +
         '<small>' + timeAgo(p.createdAt) + '</small></div>' +
-        '<button class="btn-sm btn-red" onclick="deletePost('' + d.id + '')">Delete</button></div>';
+        '<button class="btn-sm btn-red" onclick="deletePost(\'' + d.id + '\')">Delete</button></div>';
     }).join('');
 }
 
@@ -3658,7 +3658,7 @@ async function loadHeadMeetings(dept) {
       return '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--light);border-radius:8px;padding:0.6rem 0.85rem;margin-bottom:0.4rem;flex-wrap:wrap;gap:0.5rem;">' +
         '<div><div style="font-size:0.82rem;font-weight:600;color:var(--navy);">' + sanitize(m.title) + '</div>' +
         '<div style="font-size:0.7rem;color:var(--gray);">' + dateStr + '</div></div>' +
-        '<button class="btn-sm btn-navy" onclick="joinMeeting('' + sanitize(m.roomUrl) + '','' + sanitize(m.title) + '')">Join</button>' +
+        '<button class="btn-sm btn-navy" onclick="joinMeeting(\'' + sanitize(m.roomUrl) + '\',\'' + sanitize(m.title) + '\')">Join</button>' +
         '</div>';
     }).join('');
 }
@@ -3782,7 +3782,7 @@ function renderCalendar() {
           const color = e.type === 'meeting' ? 'var(--navy)' : 'var(--gold)';
           const bg = e.type === 'meeting' ? 'rgba(27,42,107,0.1)' : 'rgba(245,166,35,0.15)';
           const time = e.date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-          return '<div onclick="showCalendarEvent(\'' + e.id + '\')"' style="background:' + bg + ';color:' + color + ';border-radius:4px;padding:0.15rem 0.4rem;font-size:0.62rem;font-weight:600;margin-top:0.2rem;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" title="' + e.title + '">' + time + ' ' + e.title + '</div>';
+          return '<div onclick="showCalendarEvent(\'' + e.id + '\')" style="background:' + bg + ';color:' + color + ';border-radius:4px;padding:0.15rem 0.4rem;font-size:0.62rem;font-weight:600;margin-top:0.2rem;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" title="' + e.title + '">' + time + ' ' + e.title + '</div>';
         }).join('');
         const moreText = dayEvents.length > 3 ? '<div style="font-size:0.6rem;color:var(--gray);margin-top:0.2rem;">+' + (dayEvents.length-3) + ' more</div>' : '';
         gridHTML += '<div style="background:' + (isToday ? 'rgba(230,51,41,0.05)' : 'var(--white)') + ';border-radius:10px;padding:0.5rem;min-height:80px;border:' + (isToday ? '2px solid var(--red)' : '1px solid rgba(27,42,107,0.07)') + ';transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow=\'0 2px 8px rgba(0,0,0,0.08)\'" onmouseout="this.style.boxShadow=\'none\'">' +
@@ -3807,11 +3807,11 @@ function renderCalendar() {
         const icon = e.type === 'meeting' ? '🎥' : '📅';
         const dateStr = e.date.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
         const timeStr = e.date.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
-        return '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--white);border-radius:10px;margin-bottom:0.5rem;box-shadow:0 1px 6px rgba(0,0,0,0.05);cursor:pointer;" onclick="showCalendarEvent('' + e.id + '')">' +
+        return '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--white);border-radius:10px;margin-bottom:0.5rem;box-shadow:0 1px 6px rgba(0,0,0,0.05);cursor:pointer;" onclick="showCalendarEvent(\'' + e.id + '\')">' +
           '<div style="width:44px;height:44px;border-radius:10px;background:rgba(27,42,107,0.07);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">' + icon + '</div>' +
           '<div style="flex:1;min-width:0;"><div style="font-size:0.85rem;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + sanitize(e.title) + '</div>' +
           '<div style="font-size:0.72rem;color:var(--gray);">' + dateStr + ' · ' + timeStr + (e.createdBy ? ' · By ' + sanitize(e.createdBy) : '') + '</div></div>' +
-          (e.roomUrl ? '<button class="btn-sm btn-navy" onclick="event.stopPropagation();joinMeeting('' + sanitize(e.roomUrl) + '','' + sanitize(e.title) + '')">Join</button>' : '') +
+          (e.roomUrl ? '<button class="btn-sm btn-navy" onclick="event.stopPropagation();joinMeeting(\'' + sanitize(e.roomUrl) + '\',\'' + sanitize(e.title) + '\')">Join</button>' : '') +
           '</div>';
       }).join('');
 
@@ -3862,7 +3862,7 @@ function showCalendarEvent(id) {
     '<p style="font-size:0.82rem;color:var(--navy);margin-bottom:0.3rem;">⏰ ' + timeStr + '</p>' +
     (e.createdBy ? '<p style="font-size:0.82rem;color:var(--gray);">👤 By ' + sanitize(e.createdBy) + '</p>' : '') +
     '</div>' +
-    (e.roomUrl ? '<button class="btn-primary" onclick="joinMeeting('' + sanitize(e.roomUrl) + '','' + sanitize(e.title) + '');this.closest('[style*=fixed]').remove()">🎥 Join Meeting</button>' : '') +
+    (e.roomUrl ? '<button class="btn-primary" onclick="joinMeeting(\'' + sanitize(e.roomUrl) + '\',\'' + sanitize(e.title) + '\');this.closest(\'[style*=fixed]\').remove()">🎥 Join Meeting</button>' : '') +
     '<button onclick="this.closest(\'[style*=fixed]\').remove()" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:\'Poppins\',sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer;width:100%;margin-top:0.5rem;">Close</button>' +
     '</div>';
   document.body.appendChild(modal);
@@ -4013,7 +4013,23 @@ window.showAdminSection=showAdminSection; window.toggleRole=toggleRole; window.r
 window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteTeamMember=deleteTeamMember; window.addTeamMember=addTeamMember; window.toggleDeptField=toggleDeptField; window.previewTeamPhoto=previewTeamPhoto; window.deleteQuiz=deleteQuiz; window.viewMemberProgress=viewMemberProgress; window.issueCertificate=issueCertificate; window.sendBulkEmail=sendBulkEmail; window.sendNewsletter=sendNewsletter; window.deleteTeamMember=deleteTeamMember; 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script>emailjs.init('NyhRgF1xCbrxy7XEG');</script>
+<script>
+emailjs.init('NyhRgF1xCbrxy7XEG');
+function safeShowScreen(id) {
+  if (typeof window.showScreen === 'function') {
+    window.showScreen(id);
+  } else {
+    setTimeout(function() { safeShowScreen(id); }, 100);
+  }
+}
+function safeShowTab(tab) {
+  if (typeof window.showTab === 'function') {
+    window.showTab(tab);
+  } else {
+    setTimeout(function() { safeShowTab(tab); }, 100);
+  }
+}
+</script>
 
 <style>
 :root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;--green:#27AE60;--sidebar:260px;}
