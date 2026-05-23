@@ -12,6 +12,13 @@
 <meta name="twitter:site" content="@YoungAfricanNet">
 <link rel="canonical" href="https://youngafricansnetwork.org/community.html">
 <link rel="icon" href="/images/logo.jpeg" type="image/jpeg">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1B2A6B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="YAN">
+<link rel="apple-touch-icon" href="/images/logo.jpeg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
@@ -4459,6 +4466,15 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
   const ref = params.get('ref');
   if (ref) localStorage.setItem('yan_referral', ref);
 })();
+
+// REGISTER SERVICE WORKER
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js')
+      .then(function(reg) { console.log('YAN SW registered:', reg.scope); })
+      .catch(function(e) { console.log('SW registration failed:', e); });
+  });
+}
 
 document.addEventListener('click', function(e) {
   const sidebar = document.getElementById('sidebar');
