@@ -98,6 +98,29 @@ async function verifyCertId(certId) {
     // Extract ID fragment
     const uidFragment = certId.replace('YAN-', '').toUpperCase();
 
+    // First check memberIds collection (Member ID cards)
+    try {
+      const memberDoc = await getDoc(doc(db, 'memberIds', uidFragment));
+      if (memberDoc.exists()) {
+        const m = memberDoc.data();
+        const dept = DEPARTMENTS.find(d => d.id === m.department);
+        result.innerHTML = `
+          <div class="status-valid">
+            <div class="status-icon">✅</div>
+            <div style="margin-top:1rem;">
+              <div class="detail-row"><span class="detail-label">Full Name</span><span class="detail-value">${m.name}</span></div>
+              <div class="detail-row"><span class="detail-label">Role</span><span class="detail-value">${m.role}</span></div>
+              <div class="detail-row"><span class="detail-label">Department</span><span class="detail-value">${dept?.icon||''} ${dept?.name||m.department}</span></div>
+              <div class="detail-row"><span class="detail-label">Country</span><span class="detail-value">${m.country}</span></div>
+              <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value" style="color:var(--green);">✅ Active YAN Member</span></div>
+              <div class="detail-row"><span class="detail-label">Organization</span><span class="detail-value">Young Africans Network</span></div>
+            </div>
+            <div class="cert-id">Member ID: ${certId}</div>
+          </div>`;
+        return;
+      }
+    } catch(e) { console.log('memberIds check:', e.message); }
+
     // Search certificates collection
     const snap = await getDocs(collection(db, 'certificates'));
     let certs = [];
