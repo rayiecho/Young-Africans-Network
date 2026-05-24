@@ -346,6 +346,7 @@ function loadTabContent(tab) {
   if (tab === 'mental-health') loadMentalHealthHub();
   if (tab === 'programs-hub') loadProgramsHub();
   if (tab === 'comms-hub') loadCommsHub();
+  if (tab === 'partnerships-hub') loadPartnershipsHub();
   if (tab === 'magazine') loadMagazine();
   if (tab === 'achievements') loadAchievements();
   if (tab === 'resources') loadResources();
@@ -7142,6 +7143,414 @@ function approveSubmission(btn) {
 }
 window.approveSubmission = approveSubmission;
 
+async function loadPartnershipsHub() {
+  const container = document.getElementById('partnerships-hub-container');
+  if (!container) return;
+  const isAdminOrHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'partnerships'));
+
+  if (!document.getElementById('partnerships-hub-styles')) {
+    const style = document.createElement('style');
+    style.id = 'partnerships-hub-styles';
+    style.textContent = '.part-nav-btn{background:rgba(255,255,255,0.15);color:#fff;border:1.5px solid rgba(255,255,255,0.3);padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;} .part-nav-btn:hover,.part-nav-btn.active{background:#fff;color:#1ABC9C;} .partner-hub-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid #1ABC9C;} .opportunity-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid var(--gold);} .proposal-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid var(--navy);}';
+    document.head.appendChild(style);
+  }
+
+  const manageBtn = isAdminOrHead ? '<button class="part-nav-btn" onclick="showPartnershipsSection(\'manage\')">Manage</button>' : '';
+
+  container.innerHTML = '<div style="max-width:900px;margin:0 auto;">'
+    + '<div style="background:linear-gradient(135deg,#1ABC9C,#16A085);border-radius:20px;padding:2rem;margin-bottom:1.5rem;color:#fff;">'
+    + '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">'
+    + '<div style="width:70px;height:70px;border-radius:12px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;border:3px solid var(--gold);font-size:2rem;">🤝</div>'
+    + '<div><h2 style="font-family:Playfair Display,serif;font-size:1.8rem;font-weight:900;margin-bottom:0.25rem;">Partnerships & External Relations Hub</h2>'
+    + '<p style="color:rgba(255,255,255,0.75);font-size:0.88rem;">Build alliances. Create opportunities. Connect YAN to the world.</p>'
+    + '</div></div>'
+    + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem;">'
+    + '<button class="part-nav-btn active" onclick="showPartnershipsSection(\'partners\')">Active Partners</button>'
+    + '<button class="part-nav-btn" onclick="showPartnershipsSection(\'opportunities\')">Opportunities</button>'
+    + '<button class="part-nav-btn" onclick="showPartnershipsSection(\'proposals\')">Proposals</button>'
+    + '<button class="part-nav-btn" onclick="showPartnershipsSection(\'resources\')">Resources</button>'
+    + manageBtn
+    + '</div></div>'
+    + '<div id="partnerships-section-partners"></div>'
+    + '<div id="partnerships-section-opportunities" style="display:none;"></div>'
+    + '<div id="partnerships-section-proposals" style="display:none;"></div>'
+    + '<div id="partnerships-section-resources" style="display:none;"></div>'
+    + '<div id="partnerships-section-manage" style="display:none;"></div>'
+    + '</div>';
+
+  loadActivePartners();
+}
+
+function showPartnershipsSection(section) {
+  const sections = ['partners','opportunities','proposals','resources','manage'];
+  document.querySelectorAll('.part-nav-btn').forEach(function(b, i) {
+    b.classList.toggle('active', sections[i] === section);
+  });
+  sections.forEach(function(s) {
+    const el = document.getElementById('partnerships-section-' + s);
+    if (el) el.style.display = s === section ? 'block' : 'none';
+  });
+  if (section === 'partners') loadActivePartners();
+  if (section === 'opportunities') loadPartnershipOpportunities();
+  if (section === 'proposals') loadPartnershipProposals();
+  if (section === 'resources') loadPartnershipResources();
+  if (section === 'manage') loadPartnershipsManage();
+}
+
+async function loadActivePartners() {
+  const container = document.getElementById('partnerships-section-partners');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading partners...</div>';
+  const isAdminOrHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'partnerships'));
+  let snap;
+  try { snap = await getDocs(query(collection(db, 'yanPartners'), orderBy('createdAt', 'desc'))); }
+  catch(e) { container.innerHTML = '<div class="empty-state"><p>Error loading partners.</p></div>'; return; }
+
+  const PARTNER_TYPES = {'NGO':'#27AE60','University':'#1B2A6B','Company':'#0A66C2','Government':'#E63329','Foundation':'#9B59B6','Media':'#E67E22','Other':'#6B7280'};
+
+  let partnersHtml = '';
+  if (snap.empty) {
+    partnersHtml = '<div class="empty-state"><p>No active partners yet.</p><p style="font-size:0.82rem;color:var(--gray);">YAN is actively building partnerships. Propose one today!</p></div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const p = Object.assign({id: d.id}, d.data());
+      const color = PARTNER_TYPES[p.type] || '#1ABC9C';
+      const canDelete = isAdminOrHead;
+      partnersHtml += '<div class="partner-hub-card">'
+        + '<div style="display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;">'
+        + (p.logoUrl ? '<img src="' + sanitize(p.logoUrl) + '" style="width:60px;height:60px;object-fit:contain;border-radius:10px;border:1.5px solid rgba(27,42,107,0.1);flex-shrink:0;">'
+          : '<div style="width:60px;height:60px;border-radius:10px;background:' + color + '18;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.5rem;color:' + color + ';flex-shrink:0;">' + (p.name||'?')[0] + '</div>')
+        + '<div style="flex:1;">'
+        + '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">'
+        + '<span style="background:' + color + '18;color:' + color + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + sanitize(p.type || 'Partner') + '</span>'
+        + '<span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;">' + sanitize(p.country || '') + '</span>'
+        + '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">Active</span>'
+        + '</div>'
+        + '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(p.name) + '</h3>'
+        + '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;margin-bottom:0.35rem;">' + sanitize(p.description) + '</p>'
+        + (p.focus ? '<p style="font-size:0.78rem;color:var(--navy);"><strong>Focus:</strong> ' + sanitize(p.focus) + '</p>' : '')
+        + (p.benefits ? '<p style="font-size:0.78rem;color:var(--navy);margin-top:0.25rem;"><strong>Benefits to YAN:</strong> ' + sanitize(p.benefits) + '</p>' : '')
+        + (p.website ? '<a href="' + sanitize(p.website) + '" target="_blank" style="font-size:0.78rem;color:#1ABC9C;font-weight:600;display:inline-block;margin-top:0.35rem;">Visit Website</a>' : '')
+        + '</div>'
+        + (canDelete ? '<button class="btn-sm btn-red" onclick="deletePartner(\''+p.id+'\')">' + 'Delete</button>' : '')
+        + '</div></div>';
+    });
+  }
+
+  container.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">'
+    + '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">Active Partners</h3>'
+    + (isAdminOrHead ? '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="showPartnershipsSection(\'manage\')">Add Partner</button>' : '')
+    + '</div>'
+    + partnersHtml;
+}
+
+async function deletePartner(id) {
+  if (!confirm('Delete this partner?')) return;
+  await deleteDoc(doc(db, 'yanPartners', id));
+  showToast('Deleted');
+  loadActivePartners();
+}
+
+async function loadPartnershipOpportunities() {
+  const container = document.getElementById('partnerships-section-opportunities');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading opportunities...</div>';
+  let snap;
+  try { snap = await getDocs(query(collection(db, 'partnershipOpportunities'), orderBy('createdAt', 'desc'))); }
+  catch(e) { container.innerHTML = '<div class="empty-state"><p>Error loading.</p></div>'; return; }
+
+  let html = '';
+  if (snap.empty) {
+    html = '<div class="empty-state"><p>No opportunities posted yet.</p></div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const o = Object.assign({id: d.id}, d.data());
+      const canDelete = o.postedById === currentUser.uid || (currentUserData && currentUserData.isAdmin);
+      html += '<div class="opportunity-card">'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">'
+        + '<div style="flex:1;">'
+        + '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">'
+        + '<span style="background:rgba(245,166,35,0.1);color:#b37800;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + sanitize(o.type || 'Opportunity') + '</span>'
+        + (o.deadline ? '<span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;">Deadline: ' + sanitize(o.deadline) + '</span>' : '')
+        + '</div>'
+        + '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(o.title) + '</h3>'
+        + '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;">' + sanitize(o.description) + '</p>'
+        + (o.organization ? '<p style="font-size:0.78rem;color:var(--navy);margin-top:0.35rem;"><strong>Organization:</strong> ' + sanitize(o.organization) + '</p>' : '')
+        + (o.value ? '<p style="font-size:0.78rem;color:var(--navy);"><strong>Value/Benefit:</strong> ' + sanitize(o.value) + '</p>' : '')
+        + '<p style="font-size:0.72rem;color:var(--gray);margin-top:0.25rem;">Posted by ' + sanitize(o.postedBy || '') + '</p>'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:0.5rem;">'
+        + (o.link ? '<a href="' + sanitize(o.link) + '" target="_blank" class="btn-sm btn-navy" style="text-decoration:none;">Apply Now</a>' : '')
+        + (canDelete ? '<button class="btn-sm btn-red" onclick="deleteOpportunity(\''+o.id+'\')">' + 'Delete</button>' : '')
+        + '</div></div></div>';
+    });
+  }
+
+  const typeOpts = ['Sponsorship','Grant','MOU','Collaboration','Event Partnership','Media Partnership','Other'].map(function(t) { return '<option>' + t + '</option>'; }).join('');
+
+  container.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">'
+    + '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">Partnership Opportunities</h3>'
+    + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="toggleOppForm()">Post Opportunity</button>'
+    + '</div>'
+    + '<div id="opp-form" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">'
+    + '<div class="form-group"><label>Title *</label><input type="text" id="opp-title" placeholder="e.g. Google.org Grant Application"></div>'
+    + '<div class="form-group"><label>Type *</label><select id="opp-type">' + typeOpts + '</select></div>'
+    + '<div class="form-group"><label>Organization</label><input type="text" id="opp-org" placeholder="e.g. Google.org"></div>'
+    + '<div class="form-group"><label>Deadline</label><input type="date" id="opp-deadline"></div>'
+    + '<div class="form-group"><label>Value/Benefit</label><input type="text" id="opp-value" placeholder="e.g. $10,000 grant"></div>'
+    + '<div class="form-group"><label>Application Link</label><input type="text" id="opp-link" placeholder="https://..."></div>'
+    + '<div class="form-group" style="grid-column:1/-1;"><label>Description *</label><textarea id="opp-desc" rows="3" placeholder="Describe this opportunity..."></textarea></div>'
+    + '</div>'
+    + '<div style="display:flex;gap:0.75rem;margin-top:1rem;">'
+    + '<button class="btn-primary" onclick="postOpportunity()">Post</button>'
+    + '<button class="btn-outline" onclick="toggleOppForm()">Cancel</button>'
+    + '</div></div>'
+    + html;
+}
+
+function toggleOppForm() {
+  const form = document.getElementById('opp-form');
+  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function postOpportunity() {
+  const title = (document.getElementById('opp-title') || {}).value.trim();
+  const type = (document.getElementById('opp-type') || {}).value;
+  const org = (document.getElementById('opp-org') || {}).value.trim();
+  const deadline = (document.getElementById('opp-deadline') || {}).value;
+  const value = (document.getElementById('opp-value') || {}).value.trim();
+  const link = (document.getElementById('opp-link') || {}).value.trim();
+  const desc = (document.getElementById('opp-desc') || {}).value.trim();
+  if (!title || !desc) return showToast('Fill all required fields', 'error');
+  await addDoc(collection(db, 'partnershipOpportunities'), {
+    title: title, type: type, organization: org, deadline: deadline,
+    value: value, link: link, description: desc,
+    postedBy: currentUserData.name, postedById: currentUser.uid,
+    createdAt: serverTimestamp()
+  });
+  await addDoc(collection(db, 'notifications'), {
+    title: 'New Partnership Opportunity: ' + title,
+    message: 'A new ' + type + ' opportunity has been posted in the Partnerships Hub. Check it out!',
+    type: 'opportunity', postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
+  });
+  showToast('Opportunity posted!');
+  toggleOppForm();
+  loadPartnershipOpportunities();
+}
+
+async function deleteOpportunity(id) {
+  if (!confirm('Delete?')) return;
+  await deleteDoc(doc(db, 'partnershipOpportunities', id));
+  showToast('Deleted');
+  loadPartnershipOpportunities();
+}
+
+async function loadPartnershipProposals() {
+  const container = document.getElementById('partnerships-section-proposals');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading proposals...</div>';
+  const isAdminOrHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'partnerships'));
+  let snap;
+  try { snap = await getDocs(query(collection(db, 'partnershipProposals'), orderBy('createdAt', 'desc'))); }
+  catch(e) { container.innerHTML = '<div class="empty-state"><p>Error loading.</p></div>'; return; }
+
+  const STATUS_COLORS = {pending:'#F5A623', approved:'#27AE60', rejected:'#E63329', 'in-progress':'#0A66C2'};
+
+  let html = '';
+  if (snap.empty) {
+    html = '<div class="empty-state"><p>No proposals yet.</p><p style="font-size:0.82rem;color:var(--gray);">Know an organization YAN should partner with? Propose it!</p></div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const p = Object.assign({id: d.id}, d.data());
+      const color = STATUS_COLORS[p.status] || '#1B2A6B';
+      const isOwner = p.proposedById === currentUser.uid;
+      const canDelete = isOwner || isAdminOrHead;
+      html += '<div class="proposal-card">'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">'
+        + '<div style="flex:1;">'
+        + '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">'
+        + '<span style="background:' + color + '18;color:' + color + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + (p.status || 'pending').toUpperCase() + '</span>'
+        + '<span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;">' + sanitize(p.partnerType || '') + '</span>'
+        + '</div>'
+        + '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(p.orgName) + '</h3>'
+        + '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;">' + sanitize(p.description) + '</p>'
+        + '<p style="font-size:0.78rem;color:var(--navy);margin-top:0.35rem;"><strong>Why partner:</strong> ' + sanitize(p.reason) + '</p>'
+        + (p.contact ? '<p style="font-size:0.78rem;color:var(--gray);"><strong>Contact:</strong> ' + sanitize(p.contact) + '</p>' : '')
+        + '<p style="font-size:0.72rem;color:var(--gray);margin-top:0.25rem;">Proposed by ' + sanitize(p.proposedBy || '') + '</p>'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:0.5rem;">'
+        + (isAdminOrHead && p.status === 'pending' ? '<button class="btn-sm btn-navy" onclick="reviewProposal(\''+p.id+'\',\'approved\')">' + 'Approve</button>' : '')
+        + (isAdminOrHead && p.status === 'pending' ? '<button class="btn-sm btn-red" onclick="reviewProposal(\''+p.id+'\',\'rejected\')">' + 'Reject</button>' : '')
+        + (canDelete ? '<button class="btn-sm btn-outline" onclick="deleteProposal(\''+p.id+'\')">' + 'Delete</button>' : '')
+        + '</div></div></div>';
+    });
+  }
+
+  container.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">'
+    + '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">Partnership Proposals</h3>'
+    + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="toggleProposalForm()">Propose Partner</button>'
+    + '</div>'
+    + '<div style="background:rgba(26,188,156,0.06);border:1px solid rgba(26,188,156,0.2);border-radius:12px;padding:1rem;margin-bottom:1.25rem;">'
+    + '<p style="font-size:0.82rem;color:#16A085;font-weight:600;margin-bottom:0.25rem;">Know a potential partner?</p>'
+    + '<p style="font-size:0.82rem;color:var(--gray);line-height:1.7;">If you know an organization — NGO, company, university or foundation — that could partner with YAN, propose it here. The Partnerships Head will review and reach out.</p>'
+    + '</div>'
+    + '<div id="proposal-form" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">'
+    + '<div class="form-group"><label>Organization Name *</label><input type="text" id="prop-org" placeholder="e.g. Mastercard Foundation"></div>'
+    + '<div class="form-group"><label>Type *</label><select id="prop-type"><option>NGO</option><option>University</option><option>Company</option><option>Government</option><option>Foundation</option><option>Media</option><option>Other</option></select></div>'
+    + '<div class="form-group"><label>Country/Region</label><input type="text" id="prop-country" placeholder="e.g. Kenya, Pan-Africa"></div>'
+    + '<div class="form-group"><label>Contact Person/Email</label><input type="text" id="prop-contact" placeholder="e.g. john@org.com"></div>'
+    + '<div class="form-group"><label>Website</label><input type="text" id="prop-website" placeholder="https://..."></div>'
+    + '<div class="form-group" style="grid-column:1/-1;"><label>What do they do? *</label><textarea id="prop-desc" rows="3" placeholder="Describe the organization..."></textarea></div>'
+    + '<div class="form-group" style="grid-column:1/-1;"><label>Why should YAN partner with them? *</label><textarea id="prop-reason" rows="3" placeholder="What value would this partnership bring to YAN and our members?"></textarea></div>'
+    + '</div>'
+    + '<div style="display:flex;gap:0.75rem;margin-top:1rem;">'
+    + '<button class="btn-primary" onclick="submitProposal()">Submit Proposal</button>'
+    + '<button class="btn-outline" onclick="toggleProposalForm()">Cancel</button>'
+    + '</div></div>'
+    + html;
+}
+
+function toggleProposalForm() {
+  const form = document.getElementById('proposal-form');
+  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function submitProposal() {
+  const orgName = (document.getElementById('prop-org') || {}).value.trim();
+  const partnerType = (document.getElementById('prop-type') || {}).value;
+  const country = (document.getElementById('prop-country') || {}).value.trim();
+  const contact = (document.getElementById('prop-contact') || {}).value.trim();
+  const website = (document.getElementById('prop-website') || {}).value.trim();
+  const desc = (document.getElementById('prop-desc') || {}).value.trim();
+  const reason = (document.getElementById('prop-reason') || {}).value.trim();
+  if (!orgName || !desc || !reason) return showToast('Fill all required fields', 'error');
+  await addDoc(collection(db, 'partnershipProposals'), {
+    orgName: orgName, partnerType: partnerType, country: country,
+    contact: contact, website: website, description: desc, reason: reason,
+    proposedBy: currentUserData.name, proposedById: currentUser.uid,
+    status: 'pending', createdAt: serverTimestamp()
+  });
+  await addDoc(collection(db, 'notifications'), {
+    title: 'New Partnership Proposal: ' + orgName,
+    message: currentUserData.name + ' has proposed a partnership with ' + orgName + '. Review in Partnerships Hub.',
+    type: 'announcement', postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
+  });
+  showToast('Proposal submitted!');
+  toggleProposalForm();
+  loadPartnershipProposals();
+}
+
+async function reviewProposal(proposalId, status) {
+  await updateDoc(doc(db, 'partnershipProposals', proposalId), {
+    status: status, reviewedBy: currentUserData.name, reviewedAt: serverTimestamp()
+  });
+  showToast(status === 'approved' ? 'Proposal approved!' : 'Proposal rejected');
+  loadPartnershipProposals();
+}
+
+async function deleteProposal(id) {
+  if (!confirm('Delete?')) return;
+  await deleteDoc(doc(db, 'partnershipProposals', id));
+  showToast('Deleted');
+  loadPartnershipProposals();
+}
+
+function loadPartnershipResources() {
+  const container = document.getElementById('partnerships-section-resources');
+  if (!container) return;
+  const resources = [
+    {icon:'🤝', title:'Partnership Proposal Template', desc:'A professional template for proposing a partnership with YAN.', tag:'Template', color:'#1ABC9C', q:'Give me a professional partnership proposal template for a pan-African youth NGO called Young Africans Network.'},
+    {icon:'📄', title:'MOU Template', desc:'A Memorandum of Understanding template for formalizing partnerships.', tag:'Template', color:'#1B2A6B', q:'Give me a Memorandum of Understanding (MOU) template for a partnership between a youth NGO and another organization in Africa.'},
+    {icon:'💰', title:'Sponsorship Package Guide', desc:'How to create attractive sponsorship packages that companies will fund.', tag:'Guide', color:'#F5A623', q:'How do I create an attractive sponsorship package for a pan-African youth organization? Give me a complete guide.'},
+    {icon:'📧', title:'Cold Outreach Email Template', desc:'Professional email templates for reaching out to potential partners.', tag:'Template', color:'#E63329', q:'Give me professional cold outreach email templates for approaching potential partners and sponsors for a youth NGO in Africa.'},
+    {icon:'🎯', title:'Partnership Strategy Guide', desc:'How to identify, approach and retain the right partners for YAN.', tag:'Guide', color:'#9B59B6', q:'Give me a partnership strategy guide for a pan-African youth organization — how to identify, approach and retain partners.'},
+    {icon:'📊', title:'Impact Report Template', desc:'A template for reporting YAN impact to partners and sponsors.', tag:'Template', color:'#27AE60', q:'Give me an impact report template for a youth NGO to share with partners and funders.'},
+    {icon:'🌍', title:'African Funding Landscape', desc:'Major foundations, funds and organizations that support African youth.', tag:'Guide', color:'#E67E22', q:'What are the major foundations, funds and organizations that support African youth organizations? Give me a comprehensive list.'},
+    {icon:'🏆', title:'Grant Writing Guide', desc:'Step-by-step guide to writing successful grant proposals for YAN.', tag:'Guide', color:'#0A66C2', q:'Give me a step-by-step guide to writing successful grant proposals for a pan-African youth NGO.'}
+  ];
+  let html = '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">Partnership Resources</h3>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;">';
+  resources.forEach(function(r) {
+    const q = r.q.replace(/'/g, "\\'");
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-top:4px solid ' + r.color + ';">'
+      + '<div style="font-size:2rem;margin-bottom:0.75rem;">' + r.icon + '</div>'
+      + '<span style="background:' + r.color + '18;color:' + r.color + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.68rem;font-weight:700;">' + r.tag + '</span>'
+      + '<h4 style="font-size:0.92rem;font-weight:700;color:var(--navy);margin:0.5rem 0;">' + r.title + '</h4>'
+      + '<p style="font-size:0.78rem;color:var(--gray);line-height:1.6;margin-bottom:1rem;">' + r.desc + '</p>'
+      + '<button class="btn-sm btn-navy" onclick="showAIHelp(\''+q+'\')">' + 'Get with AI</button>'
+      + '</div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+async function loadPartnershipsManage() {
+  const container = document.getElementById('partnerships-section-manage');
+  if (!container) return;
+
+  container.innerHTML = '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">Manage Partnerships Hub</h3>'
+    + '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
+    + '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Add Active Partner</h4>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">'
+    + '<div class="form-group"><label>Organization Name *</label><input type="text" id="new-partner-name" placeholder="e.g. UNICEF Kenya"></div>'
+    + '<div class="form-group"><label>Type *</label><select id="new-partner-type"><option>NGO</option><option>University</option><option>Company</option><option>Government</option><option>Foundation</option><option>Media</option><option>Other</option></select></div>'
+    + '<div class="form-group"><label>Country/Region</label><input type="text" id="new-partner-country" placeholder="e.g. Kenya, Pan-Africa"></div>'
+    + '<div class="form-group"><label>Website</label><input type="text" id="new-partner-website" placeholder="https://..."></div>'
+    + '<div class="form-group"><label>Logo URL (optional)</label><input type="text" id="new-partner-logo" placeholder="https://..."></div>'
+    + '<div class="form-group"><label>Focus Area</label><input type="text" id="new-partner-focus" placeholder="e.g. Youth Education, Digital Skills"></div>'
+    + '<div class="form-group" style="grid-column:1/-1;"><label>Description *</label><textarea id="new-partner-desc" rows="3" placeholder="What does this organization do?"></textarea></div>'
+    + '<div class="form-group" style="grid-column:1/-1;"><label>Benefits to YAN</label><textarea id="new-partner-benefits" rows="2" placeholder="What does this partnership bring to YAN members?"></textarea></div>'
+    + '</div>'
+    + '<button class="btn-primary" onclick="addActivePartner()">Add Partner</button>'
+    + '</div>';
+}
+
+async function addActivePartner() {
+  const name = (document.getElementById('new-partner-name') || {}).value.trim();
+  const type = (document.getElementById('new-partner-type') || {}).value;
+  const country = (document.getElementById('new-partner-country') || {}).value.trim();
+  const website = (document.getElementById('new-partner-website') || {}).value.trim();
+  const logo = (document.getElementById('new-partner-logo') || {}).value.trim();
+  const focus = (document.getElementById('new-partner-focus') || {}).value.trim();
+  const desc = (document.getElementById('new-partner-desc') || {}).value.trim();
+  const benefits = (document.getElementById('new-partner-benefits') || {}).value.trim();
+  if (!name || !desc) return showToast('Fill all required fields', 'error');
+  await addDoc(collection(db, 'yanPartners'), {
+    name: name, type: type, country: country, website: website,
+    logoUrl: logo, focus: focus, description: desc, benefits: benefits,
+    addedBy: currentUserData.name, createdAt: serverTimestamp(), status: 'active'
+  });
+  await addDoc(collection(db, 'notifications'), {
+    title: 'New YAN Partner: ' + name,
+    message: 'YAN has a new partner: ' + name + '. Check the Partnerships Hub for details!',
+    type: 'announcement', postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
+  });
+  showToast('Partner added!');
+  document.getElementById('new-partner-name').value = '';
+  document.getElementById('new-partner-desc').value = '';
+  loadActivePartners();
+  showPartnershipsSection('partners');
+}
+
+window.loadPartnershipsHub = loadPartnershipsHub;
+window.showPartnershipsSection = showPartnershipsSection;
+window.loadActivePartners = loadActivePartners;
+window.deletePartner = deletePartner;
+window.loadPartnershipOpportunities = loadPartnershipOpportunities;
+window.toggleOppForm = toggleOppForm;
+window.postOpportunity = postOpportunity;
+window.deleteOpportunity = deleteOpportunity;
+window.loadPartnershipProposals = loadPartnershipProposals;
+window.toggleProposalForm = toggleProposalForm;
+window.submitProposal = submitProposal;
+window.reviewProposal = reviewProposal;
+window.deleteProposal = deleteProposal;
+window.loadPartnershipResources = loadPartnershipResources;
+window.loadPartnershipsManage = loadPartnershipsManage;
+window.addActivePartner = addActivePartner;
+
 window.loadCommsHub = loadCommsHub;
 window.showCommsSection = showCommsSection;
 window.loadSocialCalendar = loadSocialCalendar;
@@ -7703,6 +8112,7 @@ h2,h3{position:relative;}
       <button class="tab-btn" data-tab="mental-health" onclick="showTab('mental-health')"><span class="tab-icon">—</span> Mental Health & Wellbeing</button>
       <button class="tab-btn" data-tab="programs-hub" onclick="showTab('programs-hub')"><span class="tab-icon">—</span> YAN Tech & Skills Academy</button>
       <button class="tab-btn" data-tab="comms-hub" onclick="showTab('comms-hub')"><span class="tab-icon">—</span> Communications & Media</button>
+      <button class="tab-btn" data-tab="partnerships-hub" onclick="showTab('partnerships-hub')"><span class="tab-icon">—</span> Partnerships & External Relations</button>
       <button class="tab-btn" data-tab="magazine" onclick="showTab('magazine')"><span class="tab-icon">—</span> Magazine</button>
       <button class="tab-btn" data-tab="achievements" onclick="showTab('achievements')"><span class="tab-icon">—</span> Achievements</button>
       <button class="tab-btn" data-tab="resources" onclick="showTab('resources')"><span class="tab-icon">—</span> Resources</button>
@@ -7773,6 +8183,7 @@ h2,h3{position:relative;}
     <div class="tab-panel" id="tab-mental-health"><div id="mental-container"></div></div>
     <div class="tab-panel" id="tab-programs-hub"><div id="programs-hub-container"></div></div>
     <div class="tab-panel" id="tab-comms-hub"><div id="comms-hub-container"></div></div>
+    <div class="tab-panel" id="tab-partnerships-hub"><div id="partnerships-hub-container"></div></div>
     <div class="tab-panel" id="tab-magazine"><div id="magazine-container"></div></div>
     <div class="tab-panel" id="tab-achievements"><div id="achievements-container"></div></div>
     <div class="tab-panel" id="tab-resources"><div id="resources-container"></div></div>

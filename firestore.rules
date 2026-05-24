@@ -415,6 +415,31 @@ service cloud.firestore {
       );
     }
 
+
+    match /yanPartners/{partnerId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow delete: if isAdminOrHead() || isSystemAdmin();
+      allow update: if isAdminOrHead() || isSystemAdmin();
+    }
+
+    match /partnershipOpportunities/{oppId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow delete: if isLoggedIn() && (
+        resource.data.postedById == request.auth.uid || isAdmin()
+      );
+    }
+
+    match /partnershipProposals/{propId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isAdminOrHead() || isSystemAdmin();
+      allow delete: if isLoggedIn() && (
+        resource.data.proposedById == request.auth.uid || isAdmin()
+      );
+    }
+
     match /moderation_log/{logId} {
       allow read: if isAdmin();
       allow create: if isLoggedIn();
