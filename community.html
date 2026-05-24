@@ -199,7 +199,16 @@ async function doRegister() {
       isAdmin: false, isDeptHead: false, isExec: false,
       profileComplete: true
     });
-    showToast('Account created! Welcome to YAN! 🎉');
+    // Auto-create memberIds entry for verification
+    await setDoc(doc(db, 'memberIds', cred.user.uid.substring(0,8).toUpperCase()), {
+      name: name,
+      role: role || 'Member',
+      department: dept || '',
+      country: country || '',
+      status: 'active',
+      memberId: 'YAN-' + cred.user.uid.substring(0,8).toUpperCase()
+    });
+    showToast('Account created! Welcome to YAN!');
     // Increment referrer's count
     const refCode = localStorage.getItem('yan_referral');
     if (refCode) {

@@ -316,7 +316,7 @@ service cloud.firestore {
 
     match /memberIds/{memberId} {
       allow read: if true;
-      allow write: if isSystemAdmin();
+      allow write: if isSystemAdmin() || isLoggedIn();
     }
 
     match /moderation_log/{logId} {
