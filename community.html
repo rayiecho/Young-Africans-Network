@@ -344,6 +344,7 @@ function loadTabContent(tab) {
   if (tab === 'career') loadCareerHub();
   if (tab === 'community-impact') loadCommunityHub();
   if (tab === 'mental-health') loadMentalHealthHub();
+  if (tab === 'programs-hub') loadProgramsHub();
   if (tab === 'magazine') loadMagazine();
   if (tab === 'achievements') loadAchievements();
   if (tab === 'resources') loadResources();
@@ -5852,6 +5853,700 @@ async function closePeerRequest(requestId) {
   loadMentalManage();
 }
 
+async function loadProgramsHub() {
+  const container = document.getElementById('programs-hub-container');
+  if (!container) return;
+  const isAdminOrHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'programs'));
+
+  if (!document.getElementById('programs-hub-styles')) {
+    const style = document.createElement('style');
+    style.id = 'programs-hub-styles';
+    style.textContent = [
+      '.prog-nav-btn{background:rgba(255,255,255,0.15);color:#fff;border:1.5px solid rgba(255,255,255,0.3);padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;}',
+      '.prog-nav-btn:hover,.prog-nav-btn.active{background:#fff;color:#0A66C2;}',
+      '.program-hub-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid #0A66C2;}',
+      '.partner-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-top:4px solid var(--gold);}',
+      '.session-prog-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid var(--navy);}',
+      '.learning-stat{background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.05);}'
+    ].join('');
+    document.head.appendChild(style);
+  }
+
+  const manageBtn = isAdminOrHead
+    ? '<button class="prog-nav-btn" onclick="showProgramsSection(\'manage\')">Manage</button>'
+    : '';
+
+  container.innerHTML = [
+    '<div style="max-width:900px;margin:0 auto;">',
+    '<div style="background:linear-gradient(135deg,#0A66C2,#1B2A6B);border-radius:20px;padding:2rem;margin-bottom:1.5rem;color:#fff;">',
+    '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">',
+    '<img src="images/Digital.jpg" alt="Tech & Skills" style="width:70px;height:70px;object-fit:cover;border-radius:12px;border:3px solid var(--gold);">',
+    '<div>',
+    '<h2 style="font-family:Playfair Display,serif;font-size:1.8rem;font-weight:900;margin-bottom:0.25rem;">YAN Tech & Skills Academy</h2>',
+    '<p style="color:rgba(255,255,255,0.75);font-size:0.88rem;">Build digital skills, earn certificates and access world-class training programs.</p>',
+    '</div></div>',
+    '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem;">',
+    '<button class="prog-nav-btn active" onclick="showProgramsSection(\'programs\')">All Programs</button>',
+    '<button class="prog-nav-btn" onclick="showProgramsSection(\'partners\')">Partner Organizations</button>',
+    '<button class="prog-nav-btn" onclick="showProgramsSection(\'sessions\')">Live Sessions</button>',
+    '<button class="prog-nav-btn" onclick="showProgramsSection(\'resources\')">Digital Resources</button>',
+    '<button class="prog-nav-btn" onclick="showProgramsSection(\'mylearning\')">My Learning</button>',
+    manageBtn,
+    '</div></div>',
+    '<div id="programs-section-programs"></div>',
+    '<div id="programs-section-partners" style="display:none;"></div>',
+    '<div id="programs-section-sessions" style="display:none;"></div>',
+    '<div id="programs-section-resources" style="display:none;"></div>',
+    '<div id="programs-section-mylearning" style="display:none;"></div>',
+    '<div id="programs-section-manage" style="display:none;"></div>',
+    '</div>'
+  ].join('');
+
+  loadAllPrograms();
+}
+
+function showProgramsSection(section) {
+  const sections = ['programs','partners','sessions','resources','mylearning','manage'];
+  document.querySelectorAll('.prog-nav-btn').forEach(function(b, i) {
+    b.classList.toggle('active', sections[i] === section);
+  });
+  sections.forEach(function(s) {
+    const el = document.getElementById('programs-section-' + s);
+    if (el) el.style.display = s === section ? 'block' : 'none';
+  });
+  if (section === 'programs') loadAllPrograms();
+  if (section === 'partners') loadPartnerOrgs();
+  if (section === 'sessions') loadTrainingSessions();
+  if (section === 'resources') loadDigitalResources();
+  if (section === 'mylearning') loadMyLearning();
+  if (section === 'manage') loadProgramsManage();
+}
+
+// ── ALL PROGRAMS ───────────────────────────────
+async function loadAllPrograms() {
+  const container = document.getElementById('programs-section-programs');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading programs...</div>';
+  const isAdminOrHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'programs'));
+
+  let snap;
+  try {
+    snap = await getDocs(query(collection(db, 'trainingPrograms'), orderBy('createdAt', 'desc')));
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state"><p>Error loading programs.</p></div>';
+    return;
+  }
+
+  const CATEGORIES = ['IT Basics','AI Tools','Online Safety','Digital Entrepreneurship','Coding','Data Skills','Other'];
+  const catColors = {'IT Basics':'#0A66C2','AI Tools':'#9B59B6','Online Safety':'#E63329','Digital Entrepreneurship':'#27AE60','Coding':'#E67E22','Data Skills':'#1ABC9C','Other':'#6B7280'};
+
+  let programsHtml = '';
+  if (snap.empty) {
+    programsHtml = '<div class="empty-state"><p>No programs posted yet.</p><p style="font-size:0.82rem;color:var(--gray);">Check back soon for exciting training programs!</p></div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const p = Object.assign({id: d.id}, d.data());
+      const color = catColors[p.category] || '#0A66C2';
+      const enrolled = p.enrolledBy && p.enrolledBy.includes(currentUser.uid);
+      const isPartner = p.isPartner;
+      programsHtml += [
+        '<div class="program-hub-card" style="border-left-color:' + color + ';">',
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">',
+        '<div style="flex:1;">',
+        '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">',
+        '<span style="background:' + color + '18;color:' + color + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + (p.category || 'Training') + '</span>',
+        '<span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;">' + (p.duration || 'Self-paced') + '</span>',
+        '<span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;">' + (p.level || 'Beginner') + '</span>',
+        isPartner ? '<span style="background:rgba(245,166,35,0.15);color:#b37800;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">Partner Program</span>' : '',
+        '</div>',
+        '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(p.title) + '</h3>',
+        '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;margin-bottom:0.35rem;">' + sanitize(p.description) + '</p>',
+        isPartner && p.partnerName ? '<p style="font-size:0.78rem;color:var(--navy);"><strong>Partner:</strong> ' + sanitize(p.partnerName) + '</p>' : '',
+        p.modules ? '<p style="font-size:0.75rem;color:var(--gray);margin-top:0.25rem;">' + p.modules + ' modules · ' + (p.enrolledBy ? p.enrolledBy.length : 0) + ' enrolled</p>' : '',
+        '</div>',
+        '<div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">',
+        enrolled
+          ? '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;">Enrolled</span>'
+          : '<button class="btn-sm btn-navy" onclick="enrollInProgram(\'' + p.id + '\')">Enroll Now</button>',
+        enrolled ? '<button class="btn-sm btn-navy" onclick="openProgram(\'' + p.id + '\')">Continue</button>' : '',
+        isAdminOrHead ? '<button class="btn-sm btn-red" onclick="deleteTrainingProgram(\'' + p.id + '\')">Delete</button>' : '',
+        '</div></div>',
+        '<div id="program-modules-' + p.id + '" style="display:none;margin-top:0.75rem;"></div>',
+        '</div>'
+      ].join('');
+    });
+  }
+
+  const postBtn = isAdminOrHead
+    ? '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="showProgramsSection(\'manage\')">Post Program</button>'
+    : '';
+
+  container.innerHTML = [
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">',
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">All Training Programs</h3>',
+    postBtn,
+    '</div>',
+    programsHtml
+  ].join('');
+}
+
+async function enrollInProgram(programId) {
+  if (!confirm('Enroll in this program?')) return;
+  const ref = doc(db, 'trainingPrograms', programId);
+  const snap = await getDoc(ref);
+  const data = snap.data();
+  const enrolledBy = data.enrolledBy || [];
+  if (enrolledBy.includes(currentUser.uid)) return showToast('Already enrolled!', 'error');
+  enrolledBy.push(currentUser.uid);
+  await updateDoc(ref, {enrolledBy: enrolledBy});
+  await setDoc(doc(db, 'learningProgress', currentUser.uid + '_' + programId), {
+    userId: currentUser.uid, programId: programId,
+    programTitle: data.title, status: 'enrolled',
+    progress: 0, enrolledAt: serverTimestamp()
+  }, {merge: true});
+  showToast('Enrolled successfully!');
+  loadAllPrograms();
+}
+
+async function openProgram(programId) {
+  const box = document.getElementById('program-modules-' + programId);
+  if (!box) return;
+  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
+  box.innerHTML = '<div class="loading">Loading modules...</div>';
+  box.style.display = 'block';
+
+  const snap = await getDocs(query(collection(db, 'trainingPrograms', programId, 'modules'), orderBy('order', 'asc')));
+  if (snap.empty) {
+    box.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;"><p style="font-size:0.85rem;color:var(--gray);">No modules yet. Check back soon!</p></div>';
+    return;
+  }
+
+  let modulesHtml = '<div style="background:var(--light);border-radius:12px;padding:1rem;">';
+  modulesHtml += '<h4 style="font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">Program Modules</h4>';
+  snap.docs.forEach(function(d, i) {
+    const m = Object.assign({id: d.id}, d.data());
+    modulesHtml += [
+      '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid rgba(27,42,107,0.08);">',
+      '<div style="width:28px;height:28px;border-radius:50%;background:#0A66C2;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;font-weight:700;flex-shrink:0;">' + (i+1) + '</div>',
+      '<div style="flex:1;">',
+      '<p style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + sanitize(m.title) + '</p>',
+      '<p style="font-size:0.72rem;color:var(--gray);">' + (m.type === 'video' ? 'Video' : m.type === 'article' ? 'Article' : 'Assignment') + ' · ' + (m.duration || '10 min') + '</p>',
+      '</div>',
+      m.type === 'video' && m.url ? '<button class="btn-sm btn-navy" onclick="playProgramVideo(\'' + m.id + '\',\'' + m.url.replace(/'/g,"\\'") + '\',\'' + programId + '\')">Watch</button>' : '',
+      m.type === 'article' && m.url ? '<a href="' + sanitize(m.url) + '" target="_blank" class="btn-sm btn-outline" style="text-decoration:none;">Read</a>' : '',
+      m.type === 'assignment' ? '<button class="btn-sm btn-gold" onclick="openProgramAssignment(\'' + m.id + '\',\'' + programId + '\')">Submit</button>' : '',
+      '<button class="btn-sm btn-outline" onclick="markModuleDone(\'' + m.id + '\',\'' + programId + '\')">Done</button>',
+      '</div>',
+      '<div id="prog-video-' + m.id + '" style="display:none;margin-top:0.5rem;"></div>',
+      '<div id="prog-assign-' + m.id + '" style="display:none;margin-top:0.5rem;"></div>'
+    ].join('');
+  });
+  modulesHtml += '</div>';
+  box.innerHTML = modulesHtml;
+}
+
+function playProgramVideo(moduleId, url, programId) {
+  const box = document.getElementById('prog-video-' + moduleId);
+  if (!box) return;
+  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  if (match) {
+    box.innerHTML = '<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;"><iframe src="https://www.youtube.com/embed/' + match[1] + '" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"></iframe></div>';
+  }
+  box.style.display = 'block';
+  markModuleDone(moduleId, programId);
+}
+
+function openProgramAssignment(moduleId, programId) {
+  const box = document.getElementById('prog-assign-' + moduleId);
+  if (!box) return;
+  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
+  box.innerHTML = [
+    '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-top:0.5rem;">',
+    '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Submit Assignment</p>',
+    '<textarea id="prog-assign-input-' + moduleId + '" rows="4" placeholder="Write your assignment here..." style="width:100%;background:var(--white);border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.85rem;outline:none;resize:vertical;box-sizing:border-box;"></textarea>',
+    '<div style="display:flex;gap:0.5rem;margin-top:0.5rem;">',
+    '<button class="btn-sm btn-navy" onclick="submitProgramAssignment(\'' + moduleId + '\',\'' + programId + '\')">Submit</button>',
+    '<button class="btn-sm btn-outline" onclick="document.getElementById(\'prog-assign-' + moduleId + '\').style.display=\'none\'">Cancel</button>',
+    '</div></div>'
+  ].join('');
+  box.style.display = 'block';
+}
+
+async function submitProgramAssignment(moduleId, programId) {
+  const input = document.getElementById('prog-assign-input-' + moduleId);
+  const submission = input ? input.value.trim() : '';
+  if (!submission) return showToast('Write your assignment first', 'error');
+  await addDoc(collection(db, 'programAssignments'), {
+    userId: currentUser.uid, userName: currentUserData.name,
+    moduleId: moduleId, programId: programId,
+    submission: submission, status: 'pending',
+    submittedAt: serverTimestamp()
+  });
+  showToast('Assignment submitted!');
+  document.getElementById('prog-assign-' + moduleId).style.display = 'none';
+}
+
+async function markModuleDone(moduleId, programId) {
+  await setDoc(doc(db, 'moduleProgress', currentUser.uid + '_' + moduleId), {
+    userId: currentUser.uid, moduleId: moduleId,
+    programId: programId, completed: true,
+    completedAt: serverTimestamp()
+  }, {merge: true});
+  showToast('Module completed!');
+}
+
+async function deleteTrainingProgram(id) {
+  if (!confirm('Delete this program?')) return;
+  await deleteDoc(doc(db, 'trainingPrograms', id));
+  showToast('Deleted');
+  loadAllPrograms();
+}
+
+// ── PARTNER ORGANIZATIONS ──────────────────────
+async function loadPartnerOrgs() {
+  const container = document.getElementById('programs-section-partners');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading partners...</div>';
+  const isAdminOrHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'programs'));
+
+  let snap;
+  try {
+    snap = await getDocs(query(collection(db, 'trainingPartners'), orderBy('createdAt', 'desc')));
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state"><p>Error loading partners.</p></div>';
+    return;
+  }
+
+  let partnersHtml = '';
+  if (snap.empty) {
+    partnersHtml = '<div class="empty-state"><p>No partner organizations yet.</p><p style="font-size:0.82rem;color:var(--gray);">YAN is actively seeking training partners. Check back soon!</p></div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const p = Object.assign({id: d.id}, d.data());
+      partnersHtml += [
+        '<div class="partner-card">',
+        '<div style="display:flex;align-items:flex-start;gap:1rem;margin-bottom:0.75rem;flex-wrap:wrap;">',
+        p.logoUrl
+          ? '<img src="' + sanitize(p.logoUrl) + '" alt="' + sanitize(p.name) + '" style="width:60px;height:60px;object-fit:contain;border-radius:10px;border:1.5px solid rgba(27,42,107,0.1);flex-shrink:0;">'
+          : '<div style="width:60px;height:60px;border-radius:10px;background:linear-gradient(135deg,#0A66C2,#1B2A6B);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:1.2rem;flex-shrink:0;">' + (p.name||'?')[0] + '</div>',
+        '<div style="flex:1;">',
+        '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(p.name) + '</h3>',
+        '<p style="font-size:0.78rem;color:var(--gray);margin-bottom:0.25rem;">' + sanitize(p.type || '') + ' · ' + sanitize(p.country || '') + '</p>',
+        '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;">' + sanitize(p.description) + '</p>',
+        p.website ? '<a href="' + sanitize(p.website) + '" target="_blank" style="font-size:0.78rem;color:#0A66C2;font-weight:600;">Visit Website →</a>' : '',
+        '</div>',
+        isAdminOrHead ? '<button class="btn-sm btn-red" onclick="deletePartnerOrg(\'' + p.id + '\')">Delete</button>' : '',
+        '</div>',
+        p.programs ? '<div style="background:var(--light);border-radius:10px;padding:0.75rem;margin-top:0.5rem;"><p style="font-size:0.78rem;color:var(--navy);font-weight:600;margin-bottom:0.25rem;">Programs Offered:</p><p style="font-size:0.78rem;color:var(--gray);">' + sanitize(p.programs) + '</p></div>' : '',
+        '</div>'
+      ].join('');
+    });
+  }
+
+  const postBtn = isAdminOrHead
+    ? '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="showProgramsSection(\'manage\')">Add Partner</button>'
+    : '';
+
+  container.innerHTML = [
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">',
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">Partner Organizations</h3>',
+    postBtn,
+    '</div>',
+    '<div style="background:rgba(10,102,194,0.06);border:1px solid rgba(10,102,194,0.2);border-radius:12px;padding:1rem;margin-bottom:1.25rem;">',
+    '<p style="font-size:0.82rem;color:#0A66C2;font-weight:600;margin-bottom:0.25rem;">About YAN Training Partners</p>',
+    '<p style="font-size:0.82rem;color:var(--gray);line-height:1.7;">YAN partners with organizations to bring world-class training to African youth. Partner programs come with joint YAN + Partner certificates recognized by both organizations.</p>',
+    '</div>',
+    partnersHtml
+  ].join('');
+}
+
+async function deletePartnerOrg(id) {
+  if (!confirm('Delete this partner?')) return;
+  await deleteDoc(doc(db, 'trainingPartners', id));
+  showToast('Deleted');
+  loadPartnerOrgs();
+}
+
+// ── LIVE SESSIONS ──────────────────────────────
+async function loadTrainingSessions() {
+  const container = document.getElementById('programs-section-sessions');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading sessions...</div>';
+  const isAdminOrHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'programs'));
+
+  let snap;
+  try {
+    snap = await getDocs(query(collection(db, 'trainingSessions'), orderBy('createdAt', 'desc')));
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state"><p>Error loading sessions.</p></div>';
+    return;
+  }
+
+  let sessionsHtml = '';
+  if (snap.empty) {
+    sessionsHtml = '<div class="empty-state"><p>No live sessions scheduled yet.</p></div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const s = Object.assign({id: d.id}, d.data());
+      const registered = s.registeredBy && s.registeredBy.includes(currentUser.uid);
+      sessionsHtml += [
+        '<div class="session-prog-card">',
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">',
+        '<div style="flex:1;">',
+        '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">',
+        '<span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + sanitize(s.category || 'Training') + '</span>',
+        s.sessionDate ? '<span style="background:rgba(245,166,35,0.1);color:#b37800;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:600;">' + sanitize(s.sessionDate) + ' at ' + sanitize(s.sessionTime || '') + '</span>' : '',
+        s.isPartner ? '<span style="background:rgba(245,166,35,0.15);color:#b37800;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">Partner Session</span>' : '',
+        '</div>',
+        '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(s.title) + '</h3>',
+        '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;">' + sanitize(s.description) + '</p>',
+        s.facilitator ? '<p style="font-size:0.78rem;color:var(--navy);margin-top:0.35rem;"><strong>Facilitator:</strong> ' + sanitize(s.facilitator) + (s.organization ? ' · ' + sanitize(s.organization) : '') + '</p>' : '',
+        (s.registeredBy ? '<p style="font-size:0.75rem;color:var(--gray);margin-top:0.25rem;">' + (s.registeredBy.length || 0) + ' registered</p>' : ''),
+        '</div>',
+        '<div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">',
+        registered
+          ? '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;">Registered</span>'
+          : '<button class="btn-sm btn-navy" onclick="registerForTrainingSession(\'' + s.id + '\')">Register</button>',
+        s.roomUrl ? '<a href="' + sanitize(s.roomUrl) + '" target="_blank" class="btn-sm btn-navy" style="text-decoration:none;">Join Session</a>' : '',
+        s.recordingUrl ? '<a href="' + sanitize(s.recordingUrl) + '" target="_blank" class="btn-sm btn-outline" style="text-decoration:none;">Watch Recording</a>' : '',
+        isAdminOrHead ? '<button class="btn-sm btn-red" onclick="deleteTrainingSession(\'' + s.id + '\')">Delete</button>' : '',
+        '</div></div>',
+        '</div>'
+      ].join('');
+    });
+  }
+
+  const postBtn = isAdminOrHead
+    ? '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="showProgramsSection(\'manage\')">Schedule Session</button>'
+    : '';
+
+  container.innerHTML = [
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">',
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">Live Training Sessions</h3>',
+    postBtn,
+    '</div>',
+    sessionsHtml
+  ].join('');
+}
+
+async function registerForTrainingSession(sessionId) {
+  const ref = doc(db, 'trainingSessions', sessionId);
+  const snap = await getDoc(ref);
+  const data = snap.data();
+  const registeredBy = data.registeredBy || [];
+  if (registeredBy.includes(currentUser.uid)) return showToast('Already registered!', 'error');
+  registeredBy.push(currentUser.uid);
+  await updateDoc(ref, {registeredBy: registeredBy});
+  showToast('Registered! You will be notified before the session.');
+  loadTrainingSessions();
+}
+
+async function deleteTrainingSession(id) {
+  if (!confirm('Delete this session?')) return;
+  await deleteDoc(doc(db, 'trainingSessions', id));
+  showToast('Deleted');
+  loadTrainingSessions();
+}
+
+// ── DIGITAL RESOURCES ──────────────────────────
+function loadDigitalResources() {
+  const container = document.getElementById('programs-section-resources');
+  if (!container) return;
+  const resources = [
+    {icon:'💻', title:'Computer Basics Guide', desc:'Introduction to computers, operating systems and essential software for beginners.', tag:'IT Basics', color:'#0A66C2', q:'Give me a comprehensive computer basics guide for beginners in Africa.'},
+    {icon:'🤖', title:'AI Tools for Productivity', desc:'How to use ChatGPT, Claude, Gemini and other AI tools to boost your productivity.', tag:'AI Tools', color:'#9B59B6', q:'Explain how to use AI tools like ChatGPT and Claude for productivity as a young African professional.'},
+    {icon:'🔒', title:'Online Safety Guide', desc:'How to stay safe online — passwords, scams, privacy and cybersecurity basics.', tag:'Online Safety', color:'#E63329', q:'Give me a comprehensive online safety guide for young Africans including passwords, scams and privacy.'},
+    {icon:'🚀', title:'Digital Entrepreneurship 101', desc:'How to start and grow a digital business as a young African entrepreneur.', tag:'Entrepreneurship', color:'#27AE60', q:'How can a young African start and grow a digital business? Give me a practical guide.'},
+    {icon:'📊', title:'Data Skills Basics', desc:'Introduction to data analysis, Excel and Google Sheets for career advancement.', tag:'Data Skills', color:'#1ABC9C', q:'Give me an introduction to data analysis and Excel for young African professionals.'},
+    {icon:'🌐', title:'Building Your Online Presence', desc:'How to build a professional online presence on LinkedIn, GitHub and personal websites.', tag:'Digital Skills', color:'#E67E22', q:'How can a young African build a strong professional online presence? Guide me step by step.'},
+    {icon:'📱', title:'Mobile Money & Fintech', desc:'Understanding mobile money, fintech tools and digital payments in Africa.', tag:'Fintech', color:'#F5A623', q:'Explain mobile money, fintech tools and digital payments in Africa for young people.'},
+    {icon:'🎓', title:'Free Online Learning Platforms', desc:'Best free platforms to learn digital skills — Coursera, edX, Google, Microsoft and more.', tag:'Learning', color:'#1B2A6B', q:'What are the best free platforms for young Africans to learn digital skills online?'}
+  ];
+
+  let html = '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">Digital Resources</h3>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;">';
+  resources.forEach(function(r) {
+    const q = r.q.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    html += [
+      '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-top:4px solid ' + r.color + ';">',
+      '<div style="font-size:2rem;margin-bottom:0.75rem;">' + r.icon + '</div>',
+      '<span style="background:' + r.color + '18;color:' + r.color + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.68rem;font-weight:700;">' + r.tag + '</span>',
+      '<h4 style="font-size:0.92rem;font-weight:700;color:var(--navy);margin:0.5rem 0;">' + r.title + '</h4>',
+      '<p style="font-size:0.78rem;color:var(--gray);line-height:1.6;margin-bottom:1rem;">' + r.desc + '</p>',
+      '<button class="btn-sm btn-navy" onclick="showAIHelp(\'' + q + '\')">Get with AI</button>',
+      '</div>'
+    ].join('');
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// ── MY LEARNING ────────────────────────────────
+async function loadMyLearning() {
+  const container = document.getElementById('programs-section-mylearning');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading your learning...</div>';
+
+  const enrolledSnap = await getDocs(query(collection(db, 'learningProgress'), where('userId', '==', currentUser.uid)));
+  const moduleSnap = await getDocs(query(collection(db, 'moduleProgress'), where('userId', '==', currentUser.uid)));
+  const assignSnap = await getDocs(query(collection(db, 'programAssignments'), where('userId', '==', currentUser.uid)));
+
+  const enrolled = enrolledSnap.size;
+  const modulesCompleted = moduleSnap.size;
+  const assignments = assignSnap.size;
+  const approved = assignSnap.docs.filter(function(d) { return d.data().status === 'approved'; }).length;
+
+  let programsHtml = '';
+  enrolledSnap.docs.forEach(function(d) {
+    const p = d.data();
+    programsHtml += [
+      '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">',
+      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">',
+      '<div>',
+      '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(p.programTitle || 'Program') + '</p>',
+      '<p style="font-size:0.75rem;color:var(--gray);">Enrolled ' + timeAgo(p.enrolledAt) + '</p>',
+      '</div>',
+      '<span style="background:rgba(10,102,194,0.1);color:#0A66C2;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (p.status || 'enrolled').toUpperCase() + '</span>',
+      '</div></div>'
+    ].join('');
+  });
+
+  container.innerHTML = [
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">My Learning</h3>',
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;">',
+    '<div class="learning-stat"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:#0A66C2;">' + enrolled + '</div><div style="font-size:0.72rem;color:var(--gray);">Programs Enrolled</div></div>',
+    '<div class="learning-stat"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--navy);">' + modulesCompleted + '</div><div style="font-size:0.72rem;color:var(--gray);">Modules Done</div></div>',
+    '<div class="learning-stat"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + assignments + '</div><div style="font-size:0.72rem;color:var(--gray);">Assignments</div></div>',
+    '<div class="learning-stat"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:#27AE60;">' + approved + '</div><div style="font-size:0.72rem;color:var(--gray);">Approved</div></div>',
+    '</div>',
+    enrolled > 0
+      ? '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);"><h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">My Programs</h4>' + programsHtml + '</div>'
+      : '<div class="empty-state"><p>No programs enrolled yet.</p><p style="font-size:0.82rem;color:var(--gray);">Browse All Programs and enroll today!</p></div>'
+  ].join('');
+}
+
+// ── MANAGE ─────────────────────────────────────
+async function loadProgramsManage() {
+  const container = document.getElementById('programs-section-manage');
+  if (!container) return;
+
+  const assignSnap = await getDocs(query(collection(db, 'programAssignments'), where('status', '==', 'pending'), orderBy('submittedAt', 'desc')));
+
+  let pendingHtml = assignSnap.size === 0
+    ? '<p style="color:var(--gray);font-size:0.85rem;">No pending assignments.</p>'
+    : '';
+
+  assignSnap.docs.forEach(function(d) {
+    const a = d.data();
+    pendingHtml += [
+      '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">',
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;">',
+      '<div style="flex:1;">',
+      '<strong style="font-size:0.88rem;color:var(--navy);">' + sanitize(a.userName) + '</strong>',
+      '<p style="font-size:0.82rem;color:var(--gray);margin:0.35rem 0;">' + sanitize(a.submission) + '</p>',
+      '<small style="font-size:0.72rem;color:var(--gray);">' + timeAgo(a.submittedAt) + '</small>',
+      '</div>',
+      '<div style="display:flex;gap:0.5rem;">',
+      '<button class="btn-sm btn-navy" onclick="approveProgramAssignment(\'' + d.id + '\',\'' + (a.userId||'') + '\',\'' + sanitize(a.userName) + '\',\'' + (a.programId||'') + '\')">Approve</button>',
+      '<button class="btn-sm btn-red" onclick="rejectProgramAssignment(\'' + d.id + '\')">Reject</button>',
+      '</div></div></div>'
+    ].join('');
+  });
+
+  container.innerHTML = [
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">Manage YAN Tech & Skills Academy</h3>',
+
+    // Post Program
+    '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">',
+    '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Post a Training Program</h4>',
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">',
+    '<div class="form-group"><label>Program Title *</label><input type="text" id="prog-title" placeholder="e.g. IT Fundamentals for Africa"></div>',
+    '<div class="form-group"><label>Category *</label><select id="prog-category"><option>IT Basics</option><option>AI Tools</option><option>Online Safety</option><option>Digital Entrepreneurship</option><option>Coding</option><option>Data Skills</option><option>Other</option></select></div>',
+    '<div class="form-group"><label>Level</label><select id="prog-level"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></div>',
+    '<div class="form-group"><label>Duration</label><input type="text" id="prog-duration" placeholder="e.g. 4 weeks, Self-paced"></div>',
+    '<div class="form-group"><label>Number of Modules</label><input type="number" id="prog-modules" placeholder="e.g. 5" min="1"></div>',
+    '<div class="form-group"><label>Is Partner Program?</label><select id="prog-is-partner"><option value="false">No — YAN Internal</option><option value="true">Yes — Partner Program</option></select></div>',
+    '<div class="form-group" id="prog-partner-field" style="display:none;"><label>Partner Organization Name</label><input type="text" id="prog-partner-name" placeholder="e.g. Google, UNICEF"></div>',
+    '<div class="form-group" style="grid-column:1/-1;"><label>Description *</label><textarea id="prog-desc" rows="3" placeholder="What will members learn?"></textarea></div>',
+    '</div>',
+    '<button class="btn-primary" onclick="postTrainingProgram()">Post Program</button>',
+    '</div>',
+
+    // Add Partner
+    '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">',
+    '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Add Partner Organization</h4>',
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">',
+    '<div class="form-group"><label>Organization Name *</label><input type="text" id="partner-name" placeholder="e.g. Google for Africa"></div>',
+    '<div class="form-group"><label>Type</label><select id="partner-type"><option>NGO</option><option>Tech Company</option><option>University</option><option>Government</option><option>Foundation</option><option>Other</option></select></div>',
+    '<div class="form-group"><label>Country/Region</label><input type="text" id="partner-country" placeholder="e.g. Kenya, Pan-Africa"></div>',
+    '<div class="form-group"><label>Website</label><input type="text" id="partner-website" placeholder="https://..."></div>',
+    '<div class="form-group"><label>Logo URL (optional)</label><input type="text" id="partner-logo" placeholder="https://..."></div>',
+    '<div class="form-group" style="grid-column:1/-1;"><label>Programs They Offer</label><input type="text" id="partner-programs" placeholder="e.g. Digital skills, AI training, Scholarships"></div>',
+    '<div class="form-group" style="grid-column:1/-1;"><label>Description *</label><textarea id="partner-desc" rows="3" placeholder="Who are they and what do they offer YAN members?"></textarea></div>',
+    '</div>',
+    '<button class="btn-primary" onclick="addPartnerOrg()">Add Partner</button>',
+    '</div>',
+
+    // Schedule Session
+    '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">',
+    '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Schedule Live Session</h4>',
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">',
+    '<div class="form-group"><label>Session Title *</label><input type="text" id="tsess-title" placeholder="e.g. Introduction to Python"></div>',
+    '<div class="form-group"><label>Category *</label><select id="tsess-category"><option>IT Basics</option><option>AI Tools</option><option>Online Safety</option><option>Digital Entrepreneurship</option><option>Coding</option><option>Data Skills</option><option>Other</option></select></div>',
+    '<div class="form-group"><label>Facilitator *</label><input type="text" id="tsess-facilitator" placeholder="e.g. John Kamau"></div>',
+    '<div class="form-group"><label>Organization</label><input type="text" id="tsess-org" placeholder="e.g. YAN / Google Africa"></div>',
+    '<div class="form-group"><label>Date *</label><input type="date" id="tsess-date"></div>',
+    '<div class="form-group"><label>Time *</label><input type="time" id="tsess-time"></div>',
+    '<div class="form-group"><label>Room URL</label><input type="text" id="tsess-room" placeholder="Daily.co or Zoom link"></div>',
+    '<div class="form-group"><label>Partner Session?</label><select id="tsess-partner"><option value="false">No</option><option value="true">Yes</option></select></div>',
+    '<div class="form-group" style="grid-column:1/-1;"><label>Description *</label><textarea id="tsess-desc" rows="3" placeholder="What will be covered?"></textarea></div>',
+    '</div>',
+    '<button class="btn-primary" onclick="postTrainingSession()">Schedule Session</button>',
+    '</div>',
+
+    // Pending Assignments
+    '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">',
+    '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Pending Assignments (' + assignSnap.size + ')</h4>',
+    pendingHtml,
+    '</div>'
+  ].join('');
+
+  // Toggle partner field
+  const partnerSelect = document.getElementById('prog-is-partner');
+  if (partnerSelect) {
+    partnerSelect.addEventListener('change', function() {
+      const field = document.getElementById('prog-partner-field');
+      if (field) field.style.display = this.value === 'true' ? 'block' : 'none';
+    });
+  }
+}
+
+async function postTrainingProgram() {
+  const title = (document.getElementById('prog-title') || {}).value.trim();
+  const category = (document.getElementById('prog-category') || {}).value;
+  const level = (document.getElementById('prog-level') || {}).value;
+  const duration = (document.getElementById('prog-duration') || {}).value.trim();
+  const modules = parseInt((document.getElementById('prog-modules') || {}).value) || 0;
+  const isPartner = (document.getElementById('prog-is-partner') || {}).value === 'true';
+  const partnerName = (document.getElementById('prog-partner-name') || {}).value.trim();
+  const desc = (document.getElementById('prog-desc') || {}).value.trim();
+  if (!title || !desc) return showToast('Fill all required fields', 'error');
+  await addDoc(collection(db, 'trainingPrograms'), {
+    title: title, category: category, level: level,
+    duration: duration, modules: modules, isPartner: isPartner,
+    partnerName: isPartner ? partnerName : '',
+    description: desc, postedBy: currentUserData.name,
+    postedById: currentUser.uid, enrolledBy: [],
+    createdAt: serverTimestamp(), active: true
+  });
+  await addDoc(collection(db, 'notifications'), {
+    title: 'New Training Program: ' + title,
+    message: 'A new ' + category + ' program has been added to YAN Tech & Skills Academy. Check it out!',
+    type: 'announcement', postedBy: currentUserData.name,
+    createdAt: serverTimestamp(), readBy: []
+  });
+  showToast('Program posted!');
+  document.getElementById('prog-title').value = '';
+  document.getElementById('prog-desc').value = '';
+  loadProgramsManage();
+}
+
+async function addPartnerOrg() {
+  const name = (document.getElementById('partner-name') || {}).value.trim();
+  const type = (document.getElementById('partner-type') || {}).value;
+  const country = (document.getElementById('partner-country') || {}).value.trim();
+  const website = (document.getElementById('partner-website') || {}).value.trim();
+  const logo = (document.getElementById('partner-logo') || {}).value.trim();
+  const programs = (document.getElementById('partner-programs') || {}).value.trim();
+  const desc = (document.getElementById('partner-desc') || {}).value.trim();
+  if (!name || !desc) return showToast('Fill all required fields', 'error');
+  await addDoc(collection(db, 'trainingPartners'), {
+    name: name, type: type, country: country,
+    website: website, logoUrl: logo, programs: programs,
+    description: desc, addedBy: currentUserData.name,
+    createdAt: serverTimestamp()
+  });
+  showToast('Partner added!');
+  document.getElementById('partner-name').value = '';
+  document.getElementById('partner-desc').value = '';
+  loadProgramsManage();
+}
+
+async function postTrainingSession() {
+  const title = (document.getElementById('tsess-title') || {}).value.trim();
+  const category = (document.getElementById('tsess-category') || {}).value;
+  const facilitator = (document.getElementById('tsess-facilitator') || {}).value.trim();
+  const org = (document.getElementById('tsess-org') || {}).value.trim();
+  const date = (document.getElementById('tsess-date') || {}).value;
+  const time = (document.getElementById('tsess-time') || {}).value;
+  const room = (document.getElementById('tsess-room') || {}).value.trim();
+  const isPartner = (document.getElementById('tsess-partner') || {}).value === 'true';
+  const desc = (document.getElementById('tsess-desc') || {}).value.trim();
+  if (!title || !facilitator || !date || !desc) return showToast('Fill all required fields', 'error');
+  await addDoc(collection(db, 'trainingSessions'), {
+    title: title, category: category, facilitator: facilitator,
+    organization: org, sessionDate: date, sessionTime: time,
+    roomUrl: room, isPartner: isPartner, description: desc,
+    postedBy: currentUserData.name, postedById: currentUser.uid,
+    registeredBy: [], createdAt: serverTimestamp()
+  });
+  await addDoc(collection(db, 'notifications'), {
+    title: 'Live Session: ' + title,
+    message: 'A new training session by ' + facilitator + ' is scheduled for ' + date + '. Register in YAN Tech & Skills Academy!',
+    type: 'announcement', postedBy: currentUserData.name,
+    createdAt: serverTimestamp(), readBy: []
+  });
+  showToast('Session scheduled!');
+  loadProgramsManage();
+}
+
+async function approveProgramAssignment(assignId, userId, userName, programId) {
+  await updateDoc(doc(db, 'programAssignments', assignId), {
+    status: 'approved', reviewedBy: currentUserData.name, reviewedAt: serverTimestamp()
+  });
+  await addDoc(collection(db, 'notifications'), {
+    title: 'Assignment Approved!',
+    message: 'Your assignment in YAN Tech & Skills Academy has been approved by ' + currentUserData.name + '. Keep up the great work!',
+    type: 'announcement', postedBy: currentUserData.name,
+    createdAt: serverTimestamp(), readBy: []
+  });
+  showToast('Assignment approved!');
+  loadProgramsManage();
+}
+
+async function rejectProgramAssignment(assignId) {
+  await updateDoc(doc(db, 'programAssignments', assignId), {
+    status: 'rejected', reviewedBy: currentUserData.name, reviewedAt: serverTimestamp()
+  });
+  showToast('Assignment rejected');
+  loadProgramsManage();
+}
+
+window.loadProgramsHub = loadProgramsHub;
+window.showProgramsSection = showProgramsSection;
+window.loadAllPrograms = loadAllPrograms;
+window.enrollInProgram = enrollInProgram;
+window.openProgram = openProgram;
+window.playProgramVideo = playProgramVideo;
+window.openProgramAssignment = openProgramAssignment;
+window.submitProgramAssignment = submitProgramAssignment;
+window.markModuleDone = markModuleDone;
+window.deleteTrainingProgram = deleteTrainingProgram;
+window.loadPartnerOrgs = loadPartnerOrgs;
+window.deletePartnerOrg = deletePartnerOrg;
+window.loadTrainingSessions = loadTrainingSessions;
+window.registerForTrainingSession = registerForTrainingSession;
+window.deleteTrainingSession = deleteTrainingSession;
+window.loadDigitalResources = loadDigitalResources;
+window.loadMyLearning = loadMyLearning;
+window.loadProgramsManage = loadProgramsManage;
+window.postTrainingProgram = postTrainingProgram;
+window.addPartnerOrg = addPartnerOrg;
+window.postTrainingSession = postTrainingSession;
+window.approveProgramAssignment = approveProgramAssignment;
+window.rejectProgramAssignment = rejectProgramAssignment;
+
 window.loadMentalHealthHub = loadMentalHealthHub;
 window.showMentalSection = showMentalSection;
 window.loadMentalFeed = loadMentalFeed;
@@ -6355,6 +7050,7 @@ h2,h3{position:relative;}
       <button class="tab-btn" data-tab="career" onclick="showTab('career')"><span class="tab-icon">—</span> Career & Public Speaking</button>
       <button class="tab-btn" data-tab="community-impact" onclick="showTab('community-impact')"><span class="tab-icon">—</span> Community Impact & Volunteering</button>
       <button class="tab-btn" data-tab="mental-health" onclick="showTab('mental-health')"><span class="tab-icon">—</span> Mental Health & Wellbeing</button>
+      <button class="tab-btn" data-tab="programs-hub" onclick="showTab('programs-hub')"><span class="tab-icon">—</span> YAN Tech & Skills Academy</button>
       <button class="tab-btn" data-tab="magazine" onclick="showTab('magazine')"><span class="tab-icon">—</span> Magazine</button>
       <button class="tab-btn" data-tab="achievements" onclick="showTab('achievements')"><span class="tab-icon">—</span> Achievements</button>
       <button class="tab-btn" data-tab="resources" onclick="showTab('resources')"><span class="tab-icon">—</span> Resources</button>
@@ -6423,6 +7119,7 @@ h2,h3{position:relative;}
     <div class="tab-panel" id="tab-career"><div id="career-container"></div></div>
     <div class="tab-panel" id="tab-community-impact"><div id="community-impact-container"></div></div>
     <div class="tab-panel" id="tab-mental-health"><div id="mental-container"></div></div>
+    <div class="tab-panel" id="tab-programs-hub"><div id="programs-hub-container"></div></div>
     <div class="tab-panel" id="tab-magazine"><div id="magazine-container"></div></div>
     <div class="tab-panel" id="tab-achievements"><div id="achievements-container"></div></div>
     <div class="tab-panel" id="tab-resources"><div id="resources-container"></div></div>
