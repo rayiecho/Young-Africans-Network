@@ -332,7 +332,7 @@ function loadTabContent(tab) {
   unsubscribers.forEach(u => u());
   unsubscribers = [];
   if (tab === 'feed') loadFeed();
-  if (tab === 'department') loadDepartment();
+  if (tab === 'hubs') loadYANHubs();
   if (tab === 'meetings') loadMeetings();
   if (tab === 'profile') loadProfile();
   if (tab === 'head') loadHeadPanel();
@@ -7654,6 +7654,83 @@ window.postCommunityTask = postCommunityTask;
 window.approveCommunityReport = approveCommunityReport;
 window.rejectCommunityReport = rejectCommunityReport;
 
+
+function loadYANHubs() {
+  const container = document.getElementById('hubs-container');
+  if (!container) return;
+
+  const hubs = [
+    {
+      id: 'career', name: 'Career & Public Speaking', dept: 'career',
+      desc: 'Build your career, master public speaking and access job opportunities across Africa.',
+      img: 'images/Leadership.jpg', color: '#1B2A6B', fn: 'loadCareerHub', cont: 'career-container'
+    },
+    {
+      id: 'community', name: 'Community Impact & Volunteering', dept: 'community',
+      desc: 'Take action, create impact and build Africa one community at a time.',
+      img: 'images/Community.jpg', color: '#27AE60', fn: 'loadCommunityHub', cont: 'community-impact-container'
+    },
+    {
+      id: 'mental', name: 'Mental Health & Wellbeing', dept: 'mental',
+      desc: 'A safe space to heal, grow and support one another. You are not alone.',
+      img: 'images/health.jpg', color: '#16A085', fn: 'loadMentalHealthHub', cont: 'mental-container'
+    },
+    {
+      id: 'programs', name: 'YAN Tech & Skills Academy', dept: 'programs',
+      desc: 'Build digital skills, earn certificates and access world-class training programs.',
+      img: 'images/Digital.jpg', color: '#0A66C2', fn: 'loadProgramsHub', cont: 'programs-hub-container'
+    },
+    {
+      id: 'communications', name: 'Communications & Media', dept: 'communications',
+      desc: 'Tell YAN story. Create content. Build our brand across Africa.',
+      img: 'images/Media.jpg', color: '#E63329', fn: 'loadCommsHub', cont: 'comms-hub-container'
+    },
+    {
+      id: 'partnerships', name: 'Partnerships & External Relations', dept: 'partnerships',
+      desc: 'Build alliances. Create opportunities. Connect YAN to the world.',
+      img: 'images/yan T-shirt.jpg', color: '#1ABC9C', fn: 'loadPartnershipsHub', cont: 'partnerships-hub-container'
+    }
+  ];
+
+  container.innerHTML = '<div style="max-width:900px;margin:0 auto;">'
+    + '<div style="background:linear-gradient(135deg,var(--navy),#2D3F7B);border-radius:20px;padding:2rem;margin-bottom:1.5rem;color:#fff;">'
+    + '<h2 style="font-family:Playfair Display,serif;font-size:1.8rem;font-weight:900;margin-bottom:0.5rem;">YAN Hubs</h2>'
+    + '<p style="color:rgba(255,255,255,0.75);font-size:0.88rem;">Your departments, your community, your growth. Choose a hub to get started.</p>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;" id="hubs-grid">'
+    + hubs.map(function(h) {
+        return '<div style="background:var(--white);border-radius:20px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.07);cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 30px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 16px rgba(0,0,0,0.07)'">'
+          + '<div style="height:130px;overflow:hidden;position:relative;">'
+          + '<img src="' + h.img + '" alt="' + h.name + '" style="width:100%;height:100%;object-fit:cover;">'
+          + '<div style="position:absolute;inset:0;background:linear-gradient(to bottom,' + h.color + '40,' + h.color + 'CC);"></div>'
+          + '<div style="position:absolute;bottom:0.75rem;left:0.75rem;right:0.75rem;">'
+          + '<h3 style="font-family:Playfair Display,serif;font-size:1rem;font-weight:900;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.3);">' + h.name + '</h3>'
+          + '</div></div>'
+          + '<div style="padding:1.25rem;">'
+          + '<p style="font-size:0.82rem;color:var(--gray);line-height:1.6;margin-bottom:1rem;">' + h.desc + '</p>'
+          + '<button class="btn-primary" style="width:100%;" onclick="openHub('' + h.fn + '','' + h.cont + '')">Open Hub</button>'
+          + '</div></div>';
+      }).join('')
+    + '</div></div>';
+}
+
+function openHub(fnName, containerId) {
+  const container = document.getElementById('hubs-container');
+  if (!container) return;
+  container.innerHTML = '<div id="' + containerId + '"></div>';
+  if (window[fnName]) window[fnName]();
+  // Add back button
+  const backBtn = document.createElement('button');
+  backBtn.className = 'btn-outline';
+  backBtn.style.cssText = 'margin:1rem 0 0 0;';
+  backBtn.textContent = '← Back to YAN Hubs';
+  backBtn.onclick = loadYANHubs;
+  container.insertBefore(backBtn, container.firstChild);
+}
+
+window.loadYANHubs = loadYANHubs;
+window.openHub = openHub;
+
 window.loadCareerHub = loadCareerHub;
 window.showCareerSection = showCareerSection;
 window.loadCareerPaths = loadCareerPaths;
@@ -8101,18 +8178,11 @@ h2,h3{position:relative;}
     </div>
     <nav class="sidebar-nav">
       <button class="tab-btn active" data-tab="feed" onclick="showTab('feed')"><span class="tab-icon">—</span> Main Feed</button>
-      <button class="tab-btn" data-tab="department" onclick="showTab('department')"><span class="tab-icon">—</span> My Department</button>
+      <button class="tab-btn" data-tab="hubs" onclick="showTab('hubs')"><span class="tab-icon">—</span> YAN Hubs</button>
       <button class="tab-btn" data-tab="meetings" onclick="showTab('meetings')"><span class="tab-icon">—</span> Meetings</button>
       <button class="tab-btn" data-tab="profile" onclick="showTab('profile')"><span class="tab-icon">—</span> My Profile</button>
       <button class="tab-btn" data-tab="directory" onclick="showTab('directory')"><span class="tab-icon">—</span> Directory</button>
-      <button class="tab-btn" data-tab="ai" onclick="showTab('ai')"><span class="tab-icon">—</span> YAN Guide</button>
       <button class="tab-btn" data-tab="scholarships" onclick="showTab('scholarships')"><span class="tab-icon">—</span> Scholarships</button>
-      <button class="tab-btn" data-tab="career" onclick="showTab('career')"><span class="tab-icon">—</span> Career & Public Speaking</button>
-      <button class="tab-btn" data-tab="community-impact" onclick="showTab('community-impact')"><span class="tab-icon">—</span> Community Impact & Volunteering</button>
-      <button class="tab-btn" data-tab="mental-health" onclick="showTab('mental-health')"><span class="tab-icon">—</span> Mental Health & Wellbeing</button>
-      <button class="tab-btn" data-tab="programs-hub" onclick="showTab('programs-hub')"><span class="tab-icon">—</span> YAN Tech & Skills Academy</button>
-      <button class="tab-btn" data-tab="comms-hub" onclick="showTab('comms-hub')"><span class="tab-icon">—</span> Communications & Media</button>
-      <button class="tab-btn" data-tab="partnerships-hub" onclick="showTab('partnerships-hub')"><span class="tab-icon">—</span> Partnerships & External Relations</button>
       <button class="tab-btn" data-tab="magazine" onclick="showTab('magazine')"><span class="tab-icon">—</span> Magazine</button>
       <button class="tab-btn" data-tab="achievements" onclick="showTab('achievements')"><span class="tab-icon">—</span> Achievements</button>
       <button class="tab-btn" data-tab="resources" onclick="showTab('resources')"><span class="tab-icon">—</span> Resources</button>
@@ -8169,7 +8239,7 @@ h2,h3{position:relative;}
       <div id="feed-posts"></div>
     </div>
 
-    <div class="tab-panel" id="tab-department"><div id="dept-container"></div></div>
+    <div class="tab-panel" id="tab-hubs"><div id="hubs-container"></div></div>
     <div class="tab-panel" id="tab-meetings"><div id="meetings-container"></div></div>
     <div class="tab-panel" id="tab-profile"><div id="profile-container"></div></div>
     <div class="tab-panel" id="tab-head"><div id="head-container"></div></div>
