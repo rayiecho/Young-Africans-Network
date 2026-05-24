@@ -3703,8 +3703,11 @@ async function loadHeadMembers(dept) {
         '<div style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + sanitize(m.name||'') + '</div>' +
         '<div style="font-size:0.72rem;color:var(--gray);">' + sanitize(m.role||'Member') + ' · ' + sanitize(m.country||'') + '</div>' +
         '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:0.35rem;align-items:flex-end;">' +
         '<span style="font-size:0.68rem;background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.5rem;border-radius:50px;font-weight:600;">' +
         (m.isAdmin ? 'Admin' : m.isDeptHead ? 'Head' : 'Member') + '</span>' +
+        '<button class="btn-sm btn-navy" onclick="viewMemberProgress(''+m.id+'',''+sanitize(m.name)+'')">' + 'Progress</button>' +
+        '</div>' +
         '</div>';
     }).join('');
 }
