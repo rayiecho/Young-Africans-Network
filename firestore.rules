@@ -314,6 +314,11 @@ service cloud.firestore {
       allow update: if isAdminOrHead() || isSystemAdmin();
     }
 
+    match /memberIds/{memberId} {
+      allow read: if true;
+      allow write: if isSystemAdmin();
+    }
+
     match /moderation_log/{logId} {
       allow read: if isAdmin();
       allow create: if isLoggedIn();

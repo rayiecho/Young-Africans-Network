@@ -54,7 +54,7 @@ body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,var(--na
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",
@@ -95,8 +95,8 @@ async function verifyCertId(certId) {
   result.innerHTML = '<div class="status-loading"><div class="status-icon">🔍</div><div class="status-title">Verifying...</div></div>';
 
   try {
-    // Extract userId from certId (YAN-XXXXXXXX)
-    const uidFragment = certId.replace('YAN-', '').toLowerCase();
+    // Extract ID fragment
+    const uidFragment = certId.replace('YAN-', '').toUpperCase();
 
     // Search certificates collection
     const snap = await getDocs(collection(db, 'certificates'));
