@@ -2675,8 +2675,23 @@ async function postMaterial(dept) {
 }
 async function loadHeadMaterials(dept) {
   const sel = document.getElementById('head-quiz-material'); if (!sel) return;
-  const snap = await getDocs(collection(db, 'departments', dept, 'materials'));
-  sel.innerHTML = snap.docs.map(d => '<option value="' + d.id + '">' + d.data().title + '<\/option>').join('') || '<option>No materials yet<\/option>';
+  const hubCollections = {
+    career: 'careerMaterials',
+    programs: 'trainingPrograms',
+    community: 'communityTasks',
+    mental: 'mentalSessions',
+    communications: 'contentTasks',
+    partnerships: 'partnershipOpportunities'
+  };
+  const colName = hubCollections[dept] || 'careerMaterials';
+  try {
+    const snap = await getDocs(collection(db, colName));
+    sel.innerHTML = snap.docs.map(function(d) {
+      return '<option value="' + d.id + '">' + sanitize(d.data().title || 'Untitled') + '<\/option>';
+    }).join('') || '<option>No materials yet<\/option>';
+  } catch(e) {
+    sel.innerHTML = '<option>No materials yet<\/option>';
+  }
 }
 window.quizQuestionsData = [];
 function addQuizQuestion(type) {
