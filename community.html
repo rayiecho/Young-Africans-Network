@@ -7778,7 +7778,10 @@ function loadHeadHubPostForm(dept) {
       + '<div class="form-group"><label>Title *</label><input type="text" id="hub-post-title" placeholder="e.g. Managing Anxiety Session"></div>'
       + '<div class="form-group"><label>Type</label><select id="hub-post-type"><option value="session">Professional Session</option><option value="visitation">Visitation</option></select></div>'
       + '<div class="form-group"><label>Professional/Location *</label><input type="text" id="hub-post-professional" placeholder="Dr. Jane / Kenyatta Hospital"></div>'
+      + '<div class="form-group"><label>Organization</label><input type="text" id="hub-post-org" placeholder="e.g. Nairobi Counseling Center"></div>'
       + '<div class="form-group"><label>Date *</label><input type="date" id="hub-post-date"></div>'
+      + '<div class="form-group"><label>Time</label><input type="time" id="hub-post-time"></div>'
+      + '<div class="form-group"><label>Room/Meeting URL</label><input type="text" id="hub-post-url" placeholder="Daily.co or Zoom link"></div>'
       + '<div class="form-group"><label>Description *</label><textarea id="hub-post-desc" rows="3" placeholder="What will happen?"></textarea></div>'
       + '<button class="btn-primary" onclick="postToMentalHub()">Post to Mental Health Hub</button>',
 
@@ -7786,7 +7789,9 @@ function loadHeadHubPostForm(dept) {
       + '<div class="form-group"><label>Title *</label><input type="text" id="hub-post-title" placeholder="e.g. IT Fundamentals"></div>'
       + '<div class="form-group"><label>Category</label><select id="hub-post-category"><option>IT Basics</option><option>AI Tools</option><option>Online Safety</option><option>Digital Entrepreneurship</option><option>Coding</option><option>Data Skills</option><option>Other</option></select></div>'
       + '<div class="form-group"><label>Level</label><select id="hub-post-level"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></div>'
-      + '<div class="form-group"><label>Duration</label><input type="text" id="hub-post-duration" placeholder="e.g. 4 weeks"></div>'
+      + '<div class="form-group"><label>Duration</label><input type="text" id="hub-post-duration" placeholder="e.g. 4 weeks, Self-paced"></div>'
+      + '<div class="form-group"><label>Source URL (video/article/course link)</label><input type="text" id="hub-post-url" placeholder="https://youtube.com/... or https://coursera.org/..."></div>'
+      + '<div class="form-group"><label>Number of Modules</label><input type="number" id="hub-post-modules" placeholder="e.g. 5" min="1"></div>'
       + '<div class="form-group"><label>Description *</label><textarea id="hub-post-desc" rows="3" placeholder="What will members learn?"></textarea></div>'
       + '<button class="btn-primary" onclick="postToProgramsHub()">Post to Tech Academy</button>',
 
@@ -7845,13 +7850,17 @@ async function postToMentalHub() {
   const title = (document.getElementById('hub-post-title')||{}).value.trim();
   const type = (document.getElementById('hub-post-type')||{}).value;
   const professional = (document.getElementById('hub-post-professional')||{}).value.trim();
+  const org = (document.getElementById('hub-post-org')||{}).value.trim();
   const date = (document.getElementById('hub-post-date')||{}).value;
+  const time = (document.getElementById('hub-post-time')||{}).value;
+  const roomUrl = (document.getElementById('hub-post-url')||{}).value.trim();
   const desc = (document.getElementById('hub-post-desc')||{}).value.trim();
   if (!title || !professional || !desc) return showToast('Fill all required fields','error');
   if (type === 'session') {
     await addDoc(collection(db, 'mentalSessions'), {
-      title: title, professionalName: professional, description: desc,
-      sessionDate: date, postedBy: currentUserData.name, postedById: currentUser.uid,
+      title: title, professionalName: professional, organization: org,
+      description: desc, sessionDate: date, sessionTime: time, roomUrl: roomUrl,
+      postedBy: currentUserData.name, postedById: currentUser.uid,
       registeredBy: [], createdAt: serverTimestamp()
     });
   } else {
@@ -7871,10 +7880,13 @@ async function postToProgramsHub() {
   const category = (document.getElementById('hub-post-category')||{}).value;
   const level = (document.getElementById('hub-post-level')||{}).value;
   const duration = (document.getElementById('hub-post-duration')||{}).value.trim();
+  const url = (document.getElementById('hub-post-url')||{}).value.trim();
+  const modules = parseInt((document.getElementById('hub-post-modules')||{}).value)||0;
   const desc = (document.getElementById('hub-post-desc')||{}).value.trim();
   if (!title || !desc) return showToast('Fill all required fields','error');
   await addDoc(collection(db, 'trainingPrograms'), {
     title: title, category: category, level: level, duration: duration,
+    sourceUrl: url, modules: modules,
     description: desc, postedBy: currentUserData.name, postedById: currentUser.uid,
     enrolledBy: [], createdAt: serverTimestamp(), active: true
   });
