@@ -1103,6 +1103,16 @@ function loadProfile() {
         ${u.isExec?'<span class="badge-exec">⭐ Executive</span>':''}
       </div>
     </div>
+    <div style="background:var(--white);border-radius:16px;padding:1.25rem;margin-bottom:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+        <p style="font-size:0.88rem;font-weight:700;color:var(--navy);">Profile Completion</p>
+        <span style="font-size:0.88rem;font-weight:700;color:var(--gold);" id="profile-pct">0%</span>
+      </div>
+      <div style="background:var(--light);border-radius:50px;height:8px;overflow:hidden;">
+        <div id="profile-bar" style="height:100%;background:linear-gradient(90deg,var(--navy),var(--gold));border-radius:50px;width:0%;transition:width 0.5s;"></div>
+      </div>
+      <p id="profile-nudge" style="font-size:0.78rem;color:var(--gray);margin-top:0.5rem;"></p>
+    </div>
     <div class="profile-edit-form">
       <h3>Edit Profile</h3>
       <div class="form-row-2">
@@ -1117,6 +1127,28 @@ function loadProfile() {
     <div id="cert-section" class="cert-section"></div>`;
   loadProfileCerts();
   loadReferralSection();
+
+  // Profile completion
+  const u2 = currentUserData;
+  const checks = [
+    { field: u2.name, tip: 'Add your full name' },
+    { field: u2.country, tip: 'Add your country' },
+    { field: u2.bio, tip: 'Add a bio to tell your story' },
+    { field: u2.photoUrl, tip: 'Add a profile photo' },
+    { field: u2.whatsapp, tip: 'Add your WhatsApp number' },
+    { field: u2.role, tip: 'Set your role' },
+    { field: u2.department, tip: 'Join a department' },
+    { field: u2.referralCode, tip: 'Get your referral link' },
+  ];
+  const filled = checks.filter(c => c.field).length;
+  const pct = Math.round((filled / checks.length) * 100);
+  const missing = checks.filter(c => !c.field).map(c => c.tip);
+  const bar = document.getElementById('profile-bar');
+  const pctEl = document.getElementById('profile-pct');
+  const nudge = document.getElementById('profile-nudge');
+  if (bar) bar.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+  if (nudge) nudge.textContent = pct === 100 ? 'Your profile is complete!' : 'To complete: ' + missing[0];
 }
 
 async function saveProfile() {

@@ -419,16 +419,16 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
       </div>
       <div class="hero-stats">
         <div>
+          <div class="hero-stat-num" id="hero-member-count">15+</div>
+          <div class="hero-stat-label">Members</div>
+        </div>
+        <div>
           <div class="hero-stat-num">8+</div>
           <div class="hero-stat-label">Countries</div>
         </div>
         <div>
           <div class="hero-stat-num">8</div>
           <div class="hero-stat-label">Departments</div>
-        </div>
-        <div>
-          <div class="hero-stat-num">2026</div>
-          <div class="hero-stat-label">Founded</div>
         </div>
       </div>
     </div>
@@ -525,20 +525,20 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
 <div class="stats">
   <div class="stats-inner">
     <div>
-      <div class="stat-num">8+</div>
+      <div class="stat-num" id="stat-members">15+</div>
+      <div class="stat-label">Active Members</div>
+    </div>
+    <div>
+      <div class="stat-num" id="stat-countries">8+</div>
       <div class="stat-label">African Countries</div>
+    </div>
+    <div>
+      <div class="stat-num" id="stat-certs">0+</div>
+      <div class="stat-label">Certificates Issued</div>
     </div>
     <div>
       <div class="stat-num">8</div>
       <div class="stat-label">Departments</div>
-    </div>
-    <div>
-      <div class="stat-num">20+</div>
-      <div class="stat-label">Team Members</div>
-    </div>
-    <div>
-      <div class="stat-num">6</div>
-      <div class="stat-label">Core Programs</div>
     </div>
   </div>
 </div>
@@ -851,5 +851,48 @@ window.sendYANGuideMessage = async function() {
 </script>
 <!-- END YAN GUIDE -->
 
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",
+  authDomain: "young-africans-network.firebaseapp.com",
+  projectId: "young-africans-network"
+});
+const db = getFirestore(app);
+
+async function loadLiveStats() {
+  try {
+    const [usersSnap, certsSnap] = await Promise.all([
+      getDocs(collection(db, 'users')),
+      getDocs(collection(db, 'certificates'))
+    ]);
+
+    const members = usersSnap.size;
+    const countries = new Set(usersSnap.docs.map(d => d.data().country).filter(Boolean)).size;
+    const certs = certsSnap.docs.filter(d => d.data().status === 'approved').length;
+
+    // Update hero
+    const heroCount = document.getElementById('hero-member-count');
+    if (heroCount) heroCount.textContent = members + '+';
+
+    // Update stats section
+    const statMembers = document.getElementById('stat-members');
+    const statCountries = document.getElementById('stat-countries');
+    const statCerts = document.getElementById('stat-certs');
+
+    if (statMembers) statMembers.textContent = members + '+';
+    if (statCountries) statCountries.textContent = countries + '+';
+    if (statCerts) statCerts.textContent = certs + '+';
+
+  } catch(e) {
+    console.log('Stats load error:', e);
+  }
+}
+
+loadLiveStats();
+</script>
 </body>
 </html>
