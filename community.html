@@ -345,6 +345,7 @@ function loadTabContent(tab) {
   if (tab === 'community-impact') loadCommunityHub();
   if (tab === 'mental-health') loadMentalHealthHub();
   if (tab === 'programs-hub') loadProgramsHub();
+  if (tab === 'comms-hub') loadCommsHub();
   if (tab === 'magazine') loadMagazine();
   if (tab === 'achievements') loadAchievements();
   if (tab === 'resources') loadResources();
@@ -6523,6 +6524,656 @@ async function rejectProgramAssignment(assignId) {
   loadProgramsManage();
 }
 
+async function loadCommsHub() {
+  const container = document.getElementById('comms-hub-container');
+  if (!container) return;
+  const isAdminOrHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'communications'));
+
+  if (!document.getElementById('comms-hub-styles')) {
+    const style = document.createElement('style');
+    style.id = 'comms-hub-styles';
+    style.textContent = '.comms-nav-btn{background:rgba(255,255,255,0.15);color:#fff;border:1.5px solid rgba(255,255,255,0.3);padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;} .comms-nav-btn:hover,.comms-nav-btn.active{background:#fff;color:#E63329;} .content-task-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid #E63329;} .news-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid var(--navy);} .media-card{background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);text-align:center;} .cal-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid var(--gold);} .newsletter-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid #9B59B6;}';
+    document.head.appendChild(style);
+  }
+
+  const manageBtn = isAdminOrHead ? '<button class="comms-nav-btn" onclick="showCommsSection(\'manage\')">Manage</button>' : '';
+
+  container.innerHTML = '<div style="max-width:900px;margin:0 auto;">'
+    + '<div style="background:linear-gradient(135deg,#E63329,#B71C1C);border-radius:20px;padding:2rem;margin-bottom:1.5rem;color:#fff;">'
+    + '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">'
+    + '<div style="width:70px;height:70px;border-radius:12px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;border:3px solid var(--gold);font-size:2rem;">📢</div>'
+    + '<div><h2 style="font-family:Playfair Display,serif;font-size:1.8rem;font-weight:900;margin-bottom:0.25rem;">Communications & Media Hub</h2>'
+    + '<p style="color:rgba(255,255,255,0.75);font-size:0.88rem;">Tell YAN story. Create content. Build our brand across Africa.</p>'
+    + '</div></div>'
+    + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem;">'
+    + '<button class="comms-nav-btn active" onclick="showCommsSection(\'calendar\')">Social Calendar</button>'
+    + '<button class="comms-nav-btn" onclick="showCommsSection(\'tasks\')">Content Tasks</button>'
+    + '<button class="comms-nav-btn" onclick="showCommsSection(\'newsroom\')">Newsroom</button>'
+    + '<button class="comms-nav-btn" onclick="showCommsSection(\'media\')">Media Library</button>'
+    + '<button class="comms-nav-btn" onclick="showCommsSection(\'newsletter\')">Newsletter Studio</button>'
+    + '<button class="comms-nav-btn" onclick="showCommsSection(\'brand\')">Brand Guidelines</button>'
+    + manageBtn
+    + '</div></div>'
+    + '<div id="comms-section-calendar"></div>'
+    + '<div id="comms-section-tasks" style="display:none;"></div>'
+    + '<div id="comms-section-newsroom" style="display:none;"></div>'
+    + '<div id="comms-section-media" style="display:none;"></div>'
+    + '<div id="comms-section-newsletter" style="display:none;"></div>'
+    + '<div id="comms-section-brand" style="display:none;"></div>'
+    + '<div id="comms-section-manage" style="display:none;"></div>'
+    + '</div>';
+
+  loadSocialCalendar();
+}
+
+function showCommsSection(section) {
+  const sections = ['calendar','tasks','newsroom','media','newsletter','brand','manage'];
+  document.querySelectorAll('.comms-nav-btn').forEach(function(b, i) {
+    b.classList.toggle('active', sections[i] === section);
+  });
+  sections.forEach(function(s) {
+    const el = document.getElementById('comms-section-' + s);
+    if (el) el.style.display = s === section ? 'block' : 'none';
+  });
+  if (section === 'calendar') loadSocialCalendar();
+  if (section === 'tasks') loadContentTasks();
+  if (section === 'newsroom') loadNewsroom();
+  if (section === 'media') loadMediaLibrary();
+  if (section === 'newsletter') loadNewsletterStudio();
+  if (section === 'brand') loadBrandGuidelines();
+  if (section === 'manage') loadCommsManage();
+}
+
+async function loadSocialCalendar() {
+  const container = document.getElementById('comms-section-calendar');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading calendar...</div>';
+  const isAdminOrHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'communications'));
+  const PLATFORMS = ['Facebook','Instagram','X (Twitter)','LinkedIn','YouTube','WhatsApp','All Platforms'];
+  const platformColors = {'Facebook':'#1877F2','Instagram':'#E1306C','X (Twitter)':'#000000','LinkedIn':'#0A66C2','YouTube':'#FF0000','WhatsApp':'#25D366','All Platforms':'#1B2A6B'};
+  let snap;
+  try { snap = await getDocs(query(collection(db, 'socialCalendar'), orderBy('scheduledDate', 'asc'))); }
+  catch(e) { container.innerHTML = '<div class="empty-state"><p>Error loading.</p></div>'; return; }
+  let calHtml = '';
+  if (snap.empty) {
+    calHtml = '<div class="empty-state"><p>No posts scheduled yet.</p></div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const p = Object.assign({id: d.id}, d.data());
+      const color = platformColors[p.platform] || '#1B2A6B';
+      const today = new Date().toISOString().split('T')[0];
+      const isPast = p.scheduledDate < today;
+      const canDelete = p.postedById === currentUser.uid || (currentUserData && currentUserData.isAdmin);
+      calHtml += '<div class="cal-card" style="opacity:' + (isPast ? '0.6' : '1') + ';">'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">'
+        + '<div style="flex:1;">'
+        + '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">'
+        + '<span style="background:' + color + ';color:#fff;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + sanitize(p.platform) + '</span>'
+        + '<span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;">' + sanitize(p.scheduledDate) + (p.scheduledTime ? ' at ' + sanitize(p.scheduledTime) : '') + '</span>'
+        + (p.status === 'posted' ? '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">Posted</span>' : '<span style="background:rgba(245,166,35,0.1);color:#b37800;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">Scheduled</span>')
+        + '</div>'
+        + '<h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(p.title) + '</h3>'
+        + '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;">' + sanitize(p.content) + '</p>'
+        + (p.link ? '<a href="' + sanitize(p.link) + '" target="_blank" style="font-size:0.78rem;color:#0A66C2;">View Post</a>' : '')
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:0.5rem;">'
+        + (p.status !== 'posted' && canDelete ? '<button class="btn-sm btn-navy" onclick="markPostDone(\''+p.id+'\')">' + 'Mark Posted</button>' : '')
+        + (canDelete ? '<button class="btn-sm btn-red" onclick="deleteCalendarPost(\''+p.id+'\')">' + 'Delete</button>' : '')
+        + '</div></div></div>';
+    });
+  }
+  const platformOpts = PLATFORMS.map(function(p) { return '<option>' + p + '</option>'; }).join('');
+  container.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">'
+    + '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">Social Media Calendar</h3>'
+    + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="toggleCalForm()">Schedule Post</button>'
+    + '</div>'
+    + '<div id="cal-form" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
+    + '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Schedule a Post</h4>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">'
+    + '<div class="form-group"><label>Post Title *</label><input type="text" id="cal-title" placeholder="e.g. YAN Launch Announcement"></div>'
+    + '<div class="form-group"><label>Platform *</label><select id="cal-platform">' + platformOpts + '</select></div>'
+    + '<div class="form-group"><label>Scheduled Date *</label><input type="date" id="cal-date"></div>'
+    + '<div class="form-group"><label>Scheduled Time</label><input type="time" id="cal-time"></div>'
+    + '<div class="form-group" style="grid-column:1/-1;"><label>Post Content *</label><textarea id="cal-content" rows="4" placeholder="Write your post content here..."></textarea></div>'
+    + '<div class="form-group" style="grid-column:1/-1;"><label>Post Link (after publishing)</label><input type="text" id="cal-link" placeholder="https://..."></div>'
+    + '</div>'
+    + '<div style="display:flex;gap:0.75rem;margin-top:1rem;">'
+    + '<button class="btn-primary" onclick="schedulePost()">Schedule</button>'
+    + '<button class="btn-outline" onclick="toggleCalForm()">Cancel</button>'
+    + '</div></div>'
+    + calHtml;
+}
+
+function toggleCalForm() {
+  const form = document.getElementById('cal-form');
+  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function schedulePost() {
+  const title = (document.getElementById('cal-title') || {}).value.trim();
+  const platform = (document.getElementById('cal-platform') || {}).value;
+  const date = (document.getElementById('cal-date') || {}).value;
+  const time = (document.getElementById('cal-time') || {}).value;
+  const content = (document.getElementById('cal-content') || {}).value.trim();
+  const link = (document.getElementById('cal-link') || {}).value.trim();
+  if (!title || !date || !content) return showToast('Fill all required fields', 'error');
+  await addDoc(collection(db, 'socialCalendar'), {
+    title: title, platform: platform, scheduledDate: date,
+    scheduledTime: time, content: content, link: link,
+    status: 'scheduled', postedBy: currentUserData.name,
+    postedById: currentUser.uid, createdAt: serverTimestamp()
+  });
+  showToast('Post scheduled!');
+  toggleCalForm();
+  loadSocialCalendar();
+}
+
+async function markPostDone(postId) {
+  await updateDoc(doc(db, 'socialCalendar', postId), {status: 'posted', postedAt: serverTimestamp()});
+  showToast('Marked as posted!');
+  loadSocialCalendar();
+}
+
+async function deleteCalendarPost(id) {
+  if (!confirm('Delete this scheduled post?')) return;
+  await deleteDoc(doc(db, 'socialCalendar', id));
+  showToast('Deleted');
+  loadSocialCalendar();
+}
+
+async function loadContentTasks() {
+  const container = document.getElementById('comms-section-tasks');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading tasks...</div>';
+  const TASK_TYPES = ['Graphic Design','Video Editing','Photography','Copywriting','Social Media Post','Blog Article','Newsletter','Press Release','Other'];
+  const typeColors = {'Graphic Design':'#E63329','Video Editing':'#9B59B6','Photography':'#E67E22','Copywriting':'#1B2A6B','Social Media Post':'#1877F2','Blog Article':'#27AE60','Newsletter':'#F5A623','Press Release':'#1ABC9C','Other':'#6B7280'};
+  let snap;
+  try { snap = await getDocs(query(collection(db, 'contentTasks'), orderBy('createdAt', 'desc'))); }
+  catch(e) { container.innerHTML = '<div class="empty-state"><p>Error loading tasks.</p></div>'; return; }
+  let tasksHtml = '';
+  if (snap.empty) {
+    tasksHtml = '<div class="empty-state"><p>No content tasks yet.</p></div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const t = Object.assign({id: d.id}, d.data());
+      const color = typeColors[t.type] || '#E63329';
+      const claimed = t.claimedBy && t.claimedBy.includes(currentUser.uid);
+      const canDelete = t.postedById === currentUser.uid || (currentUserData && currentUserData.isAdmin);
+      tasksHtml += '<div class="content-task-card" style="border-left-color:' + color + ';">'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">'
+        + '<div style="flex:1;">'
+        + '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">'
+        + '<span style="background:' + color + '18;color:' + color + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + sanitize(t.type) + '</span>'
+        + (t.deadline ? '<span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;">Due: ' + sanitize(t.deadline) + '</span>' : '')
+        + '</div>'
+        + '<h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(t.title) + '</h3>'
+        + '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;">' + sanitize(t.description) + '</p>'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">'
+        + (claimed ? '<span style="background:rgba(245,166,35,0.1);color:var(--gold);padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;">Claimed</span>' : '<button class="btn-sm btn-navy" onclick="claimContentTask(\''+t.id+'\')">' + 'Claim Task</button>')
+        + (claimed ? '<button class="btn-sm btn-gold" onclick="submitContentTask(\''+t.id+'\')">' + 'Submit Work</button>' : '')
+        + (canDelete ? '<button class="btn-sm btn-red" onclick="deleteContentTask(\''+t.id+'\')">' + 'Delete</button>' : '')
+        + '</div></div>'
+        + '<div id="content-submit-' + t.id + '" style="display:none;margin-top:0.75rem;"></div>'
+        + '</div>';
+    });
+  }
+  const typeOpts = TASK_TYPES.map(function(t) { return '<option>' + t + '</option>'; }).join('');
+  container.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">'
+    + '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">Content Creation Board</h3>'
+    + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="toggleTaskForm()">Post Task</button>'
+    + '</div>'
+    + '<div id="task-form-comms" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
+    + '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Post a Content Task</h4>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">'
+    + '<div class="form-group"><label>Task Title *</label><input type="text" id="ctask-title" placeholder="e.g. Design June Newsletter Header"></div>'
+    + '<div class="form-group"><label>Type *</label><select id="ctask-type">' + typeOpts + '</select></div>'
+    + '<div class="form-group"><label>Deadline</label><input type="date" id="ctask-deadline"></div>'
+    + '<div class="form-group"><label>Priority</label><select id="ctask-priority"><option>Normal</option><option>Urgent</option><option>Low</option></select></div>'
+    + '<div class="form-group" style="grid-column:1/-1;"><label>Description *</label><textarea id="ctask-desc" rows="3" placeholder="What needs to be created?"></textarea></div>'
+    + '</div>'
+    + '<div style="display:flex;gap:0.75rem;margin-top:1rem;">'
+    + '<button class="btn-primary" onclick="postContentTask()">Post Task</button>'
+    + '<button class="btn-outline" onclick="toggleTaskForm()">Cancel</button>'
+    + '</div></div>'
+    + tasksHtml;
+}
+
+function toggleTaskForm() {
+  const form = document.getElementById('task-form-comms');
+  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function postContentTask() {
+  const title = (document.getElementById('ctask-title') || {}).value.trim();
+  const type = (document.getElementById('ctask-type') || {}).value;
+  const deadline = (document.getElementById('ctask-deadline') || {}).value;
+  const priority = (document.getElementById('ctask-priority') || {}).value;
+  const desc = (document.getElementById('ctask-desc') || {}).value.trim();
+  if (!title || !desc) return showToast('Fill all required fields', 'error');
+  await addDoc(collection(db, 'contentTasks'), {
+    title: title, type: type, deadline: deadline, priority: priority,
+    description: desc, postedBy: currentUserData.name, postedById: currentUser.uid,
+    claimedBy: [], status: 'open', createdAt: serverTimestamp()
+  });
+  showToast('Task posted!');
+  toggleTaskForm();
+  loadContentTasks();
+}
+
+async function claimContentTask(taskId) {
+  if (!confirm('Claim this task?')) return;
+  const ref = doc(db, 'contentTasks', taskId);
+  const snap = await getDoc(ref);
+  const data = snap.data();
+  const claimedBy = data.claimedBy || [];
+  if (claimedBy.includes(currentUser.uid)) return showToast('Already claimed!', 'error');
+  claimedBy.push(currentUser.uid);
+  await updateDoc(ref, {claimedBy: claimedBy});
+  showToast('Task claimed!');
+  loadContentTasks();
+}
+
+function submitContentTask(taskId) {
+  const box = document.getElementById('content-submit-' + taskId);
+  if (!box) return;
+  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
+  box.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;">'
+    + '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">Submit Your Work</p>'
+    + '<div class="form-group"><label>Work Link *</label><input type="text" id="work-link-' + taskId + '" placeholder="Google Drive, Canva, YouTube link..."></div>'
+    + '<div class="form-group"><label>Notes</label><textarea id="work-notes-' + taskId + '" rows="3" placeholder="Describe what you created..."></textarea></div>'
+    + '<div style="display:flex;gap:0.5rem;margin-top:0.5rem;">'
+    + '<button class="btn-sm btn-navy" onclick="saveContentSubmission(\''+taskId+'\')">' + 'Submit</button>'
+    + '<button class="btn-sm btn-outline" onclick="document.getElementById(\'content-submit-\''+taskId+'\').style.display=\'none\'">' + 'Cancel</button>'
+    + '</div></div>';
+  box.style.display = 'block';
+}
+
+async function saveContentSubmission(taskId) {
+  const link = (document.getElementById('work-link-' + taskId) || {}).value.trim();
+  const notes = (document.getElementById('work-notes-' + taskId) || {}).value.trim();
+  if (!link) return showToast('Add a link to your work', 'error');
+  await addDoc(collection(db, 'contentSubmissions'), {
+    taskId: taskId, userId: currentUser.uid, userName: currentUserData.name,
+    workLink: link, notes: notes, status: 'pending', submittedAt: serverTimestamp()
+  });
+  await updateDoc(doc(db, 'contentTasks', taskId), {status: 'in-review'});
+  showToast('Work submitted!');
+  document.getElementById('content-submit-' + taskId).style.display = 'none';
+  loadContentTasks();
+}
+
+async function deleteContentTask(id) {
+  if (!confirm('Delete this task?')) return;
+  await deleteDoc(doc(db, 'contentTasks', id));
+  showToast('Deleted');
+  loadContentTasks();
+}
+
+async function loadNewsroom() {
+  const container = document.getElementById('comms-section-newsroom');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading newsroom...</div>';
+  const NEWS_TYPES = ['Announcement','Press Release','Media Mention','Member Story','Event Report','Other'];
+  const newsColors = {'Announcement':'#1B2A6B','Press Release':'#E63329','Media Mention':'#F5A623','Member Story':'#27AE60','Event Report':'#9B59B6','Other':'#6B7280'};
+  let snap;
+  try { snap = await getDocs(query(collection(db, 'newsroom'), orderBy('createdAt', 'desc'))); }
+  catch(e) { container.innerHTML = '<div class="empty-state"><p>Error loading newsroom.</p></div>'; return; }
+  let newsHtml = '';
+  if (snap.empty) {
+    newsHtml = '<div class="empty-state"><p>No news yet.</p></div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const n = Object.assign({id: d.id}, d.data());
+      const color = newsColors[n.type] || '#1B2A6B';
+      const canDelete = n.postedById === currentUser.uid || (currentUserData && currentUserData.isAdmin);
+      newsHtml += '<div class="news-card">'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">'
+        + '<div style="flex:1;">'
+        + '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">'
+        + '<span style="background:' + color + '18;color:' + color + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + sanitize(n.type) + '</span>'
+        + '<span style="font-size:0.72rem;color:var(--gray);">' + timeAgo(n.createdAt) + '</span>'
+        + '</div>'
+        + '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(n.title) + '</h3>'
+        + '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;">' + sanitize(n.content) + '</p>'
+        + (n.link ? '<a href="' + sanitize(n.link) + '" target="_blank" style="font-size:0.78rem;color:#0A66C2;font-weight:600;display:inline-block;margin-top:0.5rem;">Read More</a>' : '')
+        + '</div>'
+        + (canDelete ? '<button class="btn-sm btn-red" onclick="deleteNewsItem(\''+n.id+'\')">' + 'Delete</button>' : '')
+        + '</div></div>';
+    });
+  }
+  const typeOpts = NEWS_TYPES.map(function(t) { return '<option>' + t + '</option>'; }).join('');
+  container.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">'
+    + '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">YAN Newsroom</h3>'
+    + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="toggleNewsForm()">Post News</button>'
+    + '</div>'
+    + '<div id="news-form" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">'
+    + '<div class="form-group"><label>Title *</label><input type="text" id="news-title" placeholder="e.g. YAN Launches in Rwanda"></div>'
+    + '<div class="form-group"><label>Type *</label><select id="news-type">' + typeOpts + '</select></div>'
+    + '<div class="form-group" style="grid-column:1/-1;"><label>Content *</label><textarea id="news-content" rows="5" placeholder="Write your news content..."></textarea></div>'
+    + '<div class="form-group" style="grid-column:1/-1;"><label>External Link</label><input type="text" id="news-link" placeholder="https://..."></div>'
+    + '</div>'
+    + '<div style="display:flex;gap:0.75rem;margin-top:1rem;">'
+    + '<button class="btn-primary" onclick="postNewsItem()">Publish</button>'
+    + '<button class="btn-outline" onclick="toggleNewsForm()">Cancel</button>'
+    + '</div></div>'
+    + newsHtml;
+}
+
+function toggleNewsForm() {
+  const form = document.getElementById('news-form');
+  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function postNewsItem() {
+  const title = (document.getElementById('news-title') || {}).value.trim();
+  const type = (document.getElementById('news-type') || {}).value;
+  const content = (document.getElementById('news-content') || {}).value.trim();
+  const link = (document.getElementById('news-link') || {}).value.trim();
+  if (!title || !content) return showToast('Fill all required fields', 'error');
+  await addDoc(collection(db, 'newsroom'), {
+    title: title, type: type, content: content, link: link,
+    postedBy: currentUserData.name, postedById: currentUser.uid, createdAt: serverTimestamp()
+  });
+  showToast('Published!');
+  toggleNewsForm();
+  loadNewsroom();
+}
+
+async function deleteNewsItem(id) {
+  if (!confirm('Delete?')) return;
+  await deleteDoc(doc(db, 'newsroom', id));
+  showToast('Deleted');
+  loadNewsroom();
+}
+
+async function loadMediaLibrary() {
+  const container = document.getElementById('comms-section-media');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading media...</div>';
+  const MEDIA_TYPES = ['Logo','Photo','Graphic','Video','Document','Template','Other'];
+  const mediaColors = {'Logo':'#F5A623','Photo':'#1B2A6B','Graphic':'#E63329','Video':'#9B59B6','Document':'#27AE60','Template':'#0A66C2','Other':'#6B7280'};
+  let snap;
+  try { snap = await getDocs(query(collection(db, 'mediaLibrary'), orderBy('createdAt', 'desc'))); }
+  catch(e) { container.innerHTML = '<div class="empty-state"><p>Error loading media.</p></div>'; return; }
+  let mediaHtml = '';
+  if (snap.empty) {
+    mediaHtml = '<div class="empty-state" style="grid-column:1/-1;"><p>No media yet.</p></div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const m = Object.assign({id: d.id}, d.data());
+      const color = mediaColors[m.type] || '#1B2A6B';
+      const canDelete = m.uploadedById === currentUser.uid || (currentUserData && currentUserData.isAdmin);
+      const icon = m.type === 'Logo' ? '🏷️' : m.type === 'Photo' ? '📸' : m.type === 'Video' ? '🎥' : m.type === 'Document' ? '📄' : '🎨';
+      mediaHtml += '<div class="media-card">'
+        + (m.previewUrl ? '<img src="' + sanitize(m.previewUrl) + '" alt="' + sanitize(m.title) + '" style="width:100%;height:120px;object-fit:cover;border-radius:10px;margin-bottom:0.75rem;">' : '<div style="width:100%;height:120px;background:' + color + '18;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:0.75rem;">' + icon + '</div>')
+        + '<span style="background:' + color + '18;color:' + color + ';padding:0.15rem 0.5rem;border-radius:50px;font-size:0.65rem;font-weight:700;">' + sanitize(m.type) + '</span>'
+        + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin:0.4rem 0 0.2rem;">' + sanitize(m.title) + '</p>'
+        + '<p style="font-size:0.72rem;color:var(--gray);margin-bottom:0.75rem;">' + sanitize(m.description || '') + '</p>'
+        + '<div style="display:flex;gap:0.4rem;justify-content:center;flex-wrap:wrap;">'
+        + (m.fileUrl ? '<a href="' + sanitize(m.fileUrl) + '" target="_blank" class="btn-sm btn-navy" style="text-decoration:none;">Download</a>' : '')
+        + (canDelete ? '<button class="btn-sm btn-red" onclick="deleteMediaItem(\''+m.id+'\')">' + 'Delete</button>' : '')
+        + '</div></div>';
+    });
+  }
+  const typeOpts = MEDIA_TYPES.map(function(t) { return '<option>' + t + '</option>'; }).join('');
+  container.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">'
+    + '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">Media Library</h3>'
+    + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="toggleMediaForm()">Upload Media</button>'
+    + '</div>'
+    + '<div id="media-form" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">'
+    + '<div class="form-group"><label>Title *</label><input type="text" id="media-title" placeholder="e.g. YAN Logo Navy Blue"></div>'
+    + '<div class="form-group"><label>Type *</label><select id="media-type">' + typeOpts + '</select></div>'
+    + '<div class="form-group" style="grid-column:1/-1;"><label>File URL *</label><input type="text" id="media-url" placeholder="https://..."></div>'
+    + '<div class="form-group" style="grid-column:1/-1;"><label>Preview Image URL (optional)</label><input type="text" id="media-preview" placeholder="https://..."></div>'
+    + '<div class="form-group" style="grid-column:1/-1;"><label>Description</label><textarea id="media-desc" rows="2" placeholder="Brief description..."></textarea></div>'
+    + '</div>'
+    + '<div style="display:flex;gap:0.75rem;margin-top:1rem;">'
+    + '<button class="btn-primary" onclick="uploadMediaItem()">Add to Library</button>'
+    + '<button class="btn-outline" onclick="toggleMediaForm()">Cancel</button>'
+    + '</div></div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;">'
+    + mediaHtml + '</div>';
+}
+
+function toggleMediaForm() {
+  const form = document.getElementById('media-form');
+  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function uploadMediaItem() {
+  const title = (document.getElementById('media-title') || {}).value.trim();
+  const type = (document.getElementById('media-type') || {}).value;
+  const url = (document.getElementById('media-url') || {}).value.trim();
+  const preview = (document.getElementById('media-preview') || {}).value.trim();
+  const desc = (document.getElementById('media-desc') || {}).value.trim();
+  if (!title || !url) return showToast('Fill all required fields', 'error');
+  await addDoc(collection(db, 'mediaLibrary'), {
+    title: title, type: type, fileUrl: url, previewUrl: preview,
+    description: desc, uploadedBy: currentUserData.name,
+    uploadedById: currentUser.uid, createdAt: serverTimestamp()
+  });
+  showToast('Added to media library!');
+  toggleMediaForm();
+  loadMediaLibrary();
+}
+
+async function deleteMediaItem(id) {
+  if (!confirm('Delete?')) return;
+  await deleteDoc(doc(db, 'mediaLibrary', id));
+  showToast('Deleted');
+  loadMediaLibrary();
+}
+
+async function loadNewsletterStudio() {
+  const container = document.getElementById('comms-section-newsletter');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading...</div>';
+  let snap;
+  try { snap = await getDocs(query(collection(db, 'newsletters'), orderBy('createdAt', 'desc'))); }
+  catch(e) { container.innerHTML = '<div class="empty-state"><p>Error loading.</p></div>'; return; }
+  let nlHtml = '';
+  if (snap.empty) {
+    nlHtml = '<div class="empty-state"><p>No newsletters yet.</p></div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const n = Object.assign({id: d.id}, d.data());
+      const canDelete = n.createdById === currentUser.uid || (currentUserData && currentUserData.isAdmin);
+      nlHtml += '<div class="newsletter-card">'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">'
+        + '<div style="flex:1;">'
+        + '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">'
+        + (n.sent ? '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">Sent</span>' : '<span style="background:rgba(245,166,35,0.1);color:#b37800;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">Draft</span>')
+        + '<span style="font-size:0.72rem;color:var(--gray);">' + timeAgo(n.createdAt) + '</span>'
+        + '</div>'
+        + '<h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(n.subject) + '</h3>'
+        + '<p style="font-size:0.82rem;color:var(--gray);">' + sanitize((n.content || '').substring(0, 150)) + '...</p>'
+        + (n.sentTo ? '<p style="font-size:0.72rem;color:var(--gray);margin-top:0.25rem;">Sent to ' + n.sentTo + ' members</p>' : '')
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:0.5rem;">'
+        + (n.sent === false ? '<button class="btn-sm btn-navy" onclick="sendNewsletter2(\''+n.id+'\')">' + 'Send Now</button>' : '')
+        + (canDelete ? '<button class="btn-sm btn-red" onclick="deleteNewsletter(\''+n.id+'\')">' + 'Delete</button>' : '')
+        + '</div></div></div>';
+    });
+  }
+  container.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">'
+    + '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">Newsletter Studio</h3>'
+    + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="toggleNewsletterForm()">Draft Newsletter</button>'
+    + '</div>'
+    + '<div id="newsletter-draft-form" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
+    + '<div class="form-group"><label>Subject *</label><input type="text" id="nl-subject" placeholder="e.g. YAN Newsletter June 2026"></div>'
+    + '<div class="form-group"><label>Content *</label><textarea id="nl-content" rows="10" placeholder="Write your newsletter here..."></textarea></div>'
+    + '<div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap;">'
+    + '<button class="btn-primary" onclick="saveNewsletterDraft()">Save Draft</button>'
+    + '<button class="btn-outline" onclick="toggleNewsletterForm()">Cancel</button>'
+    + '</div></div>'
+    + nlHtml;
+}
+
+function toggleNewsletterForm() {
+  const form = document.getElementById('newsletter-draft-form');
+  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function saveNewsletterDraft() {
+  const subject = (document.getElementById('nl-subject') || {}).value.trim();
+  const content = (document.getElementById('nl-content') || {}).value.trim();
+  if (!subject || !content) return showToast('Fill all required fields', 'error');
+  await addDoc(collection(db, 'newsletters'), {
+    subject: subject, content: content, sent: false,
+    createdBy: currentUserData.name, createdById: currentUser.uid, createdAt: serverTimestamp()
+  });
+  showToast('Draft saved!');
+  toggleNewsletterForm();
+  loadNewsletterStudio();
+}
+
+async function sendNewsletter2(newsletterId) {
+  const nlSnap = await getDoc(doc(db, 'newsletters', newsletterId));
+  const nl = nlSnap.data();
+  if (!confirm('Send "' + nl.subject + '" to ALL members?')) return;
+  try {
+    const usersSnap = await getDocs(collection(db, 'users'));
+    let sent = 0;
+    for (const d of usersSnap.docs) {
+      const u = d.data();
+      if (!u.email) continue;
+      try {
+        await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
+          to_email: u.email, name: u.name, subject: nl.subject, message: nl.content
+        });
+        sent++;
+      } catch(e) {}
+    }
+    await updateDoc(doc(db, 'newsletters', newsletterId), {sent: true, sentTo: sent, sentAt: serverTimestamp()});
+    showToast('Newsletter sent to ' + sent + ' members!');
+    loadNewsletterStudio();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+async function deleteNewsletter(id) {
+  if (!confirm('Delete?')) return;
+  await deleteDoc(doc(db, 'newsletters', id));
+  showToast('Deleted');
+  loadNewsletterStudio();
+}
+
+function loadBrandGuidelines() {
+  const container = document.getElementById('comms-section-brand');
+  if (!container) return;
+  container.innerHTML = '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">YAN Brand Guidelines</h3>'
+    + '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
+    + '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Brand Colors</h4>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:1rem;">'
+    + '<div style="text-align:center;"><div style="width:100%;height:80px;background:#1B2A6B;border-radius:12px;margin-bottom:0.5rem;"></div><p style="font-size:0.82rem;font-weight:700;color:var(--navy);">Navy Blue</p><p style="font-size:0.72rem;color:var(--gray);">#1B2A6B — Primary</p></div>'
+    + '<div style="text-align:center;"><div style="width:100%;height:80px;background:#F5A623;border-radius:12px;margin-bottom:0.5rem;"></div><p style="font-size:0.82rem;font-weight:700;color:var(--navy);">Gold</p><p style="font-size:0.72rem;color:var(--gray);">#F5A623 — Accent</p></div>'
+    + '<div style="text-align:center;"><div style="width:100%;height:80px;background:#E63329;border-radius:12px;margin-bottom:0.5rem;"></div><p style="font-size:0.82rem;font-weight:700;color:var(--navy);">Red</p><p style="font-size:0.72rem;color:var(--gray);">#E63329 — Highlights</p></div>'
+    + '<div style="text-align:center;"><div style="width:100%;height:80px;background:#F8F9FF;border-radius:12px;border:1px solid rgba(27,42,107,0.1);margin-bottom:0.5rem;"></div><p style="font-size:0.82rem;font-weight:700;color:var(--navy);">Light</p><p style="font-size:0.72rem;color:var(--gray);">#F8F9FF — Background</p></div>'
+    + '</div></div>'
+    + '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
+    + '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Typography</h4>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">'
+    + '<div><p style="font-family:Playfair Display,serif;font-size:1.8rem;font-weight:900;color:var(--navy);margin-bottom:0.25rem;">Playfair Display</p><p style="font-size:0.82rem;color:var(--gray);">Headings — Bold, Authoritative. Use for titles, section headings, certificates.</p></div>'
+    + '<div><p style="font-family:Poppins,sans-serif;font-size:1.2rem;font-weight:600;color:var(--navy);margin-bottom:0.25rem;">Poppins</p><p style="font-size:0.82rem;color:var(--gray);">Body — Clean, Modern. Use for body text, buttons, labels, navigation.</p></div>'
+    + '</div></div>'
+    + '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
+    + '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">YAN Tone of Voice</h4>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;">'
+    + '<div style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1rem;text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Pan-African</p><p style="font-size:0.78rem;color:var(--gray);">Celebrate African identity in all content</p></div>'
+    + '<div style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1rem;text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Empowering</p><p style="font-size:0.78rem;color:var(--gray);">Uplift and inspire. Focus on possibilities</p></div>'
+    + '<div style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1rem;text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Inclusive</p><p style="font-size:0.78rem;color:var(--gray);">Speak to all young Africans everywhere</p></div>'
+    + '<div style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1rem;text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Action-Oriented</p><p style="font-size:0.78rem;color:var(--gray);">Always move people towards action</p></div>'
+    + '</div></div>';
+}
+
+async function loadCommsManage() {
+  const container = document.getElementById('comms-section-manage');
+  if (!container) return;
+  let submissionsSnap;
+  try { submissionsSnap = await getDocs(query(collection(db, 'contentSubmissions'), where('status', '==', 'pending'), orderBy('submittedAt', 'desc'))); }
+  catch(e) { submissionsSnap = {size: 0, docs: []}; }
+  let submissionsHtml = submissionsSnap.size === 0 ? '<p style="color:var(--gray);font-size:0.85rem;">No pending submissions.</p>' : '';
+  submissionsSnap.docs.forEach(function(d) {
+    const s = d.data();
+    submissionsHtml += '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;">'
+      + '<div style="flex:1;"><strong style="font-size:0.88rem;color:var(--navy);">' + sanitize(s.userName) + '</strong>'
+      + '<p style="font-size:0.82rem;color:var(--gray);margin:0.25rem 0;">' + sanitize(s.notes || '') + '</p>'
+      + (s.workLink ? '<a href="' + sanitize(s.workLink) + '" target="_blank" style="font-size:0.78rem;color:#0A66C2;font-weight:600;">View Work</a>' : '')
+      + '</div>'
+      + '<div style="display:flex;gap:0.5rem;">'
+      + '<button class="btn-sm btn-navy" onclick="approveSubmission(this)" data-id="'+d.id+'" data-task="'+(s.taskId||'')+'" data-user="'+(s.userId||'')+'" data-name="'+sanitize(s.userName)+'">' + 'Approve</button>'
+      + '<button class="btn-sm btn-red" onclick="rejectContentSubmission(\''+d.id+'\')">' + 'Reject</button>'
+      + '</div></div></div>';
+  });
+  container.innerHTML = '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">Manage Communications Hub</h3>'
+    + '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
+    + '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Content Submissions (' + submissionsSnap.size + ')</h4>'
+    + submissionsHtml + '</div>';
+}
+
+async function approveContentSubmission(submissionId, taskId, userId, userName) {
+  await updateDoc(doc(db, 'contentSubmissions', submissionId), {status: 'approved', reviewedBy: currentUserData.name, reviewedAt: serverTimestamp()});
+  if (taskId) await updateDoc(doc(db, 'contentTasks', taskId), {status: 'completed'});
+  await addDoc(collection(db, 'notifications'), {
+    title: 'Content Approved!',
+    message: 'Your content submission has been approved by ' + currentUserData.name + '. Great work ' + userName + '!',
+    type: 'announcement', postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
+  });
+  showToast('Approved!');
+  loadCommsManage();
+}
+
+async function rejectContentSubmission(submissionId) {
+  await updateDoc(doc(db, 'contentSubmissions', submissionId), {status: 'rejected', reviewedBy: currentUserData.name, reviewedAt: serverTimestamp()});
+  showToast('Rejected');
+  loadCommsManage();
+}
+
+
+function approveSubmission(btn) {
+  const id = btn.dataset.id;
+  const task = btn.dataset.task;
+  const user = btn.dataset.user;
+  const name = btn.dataset.name;
+  approveContentSubmission(id, task, user, name);
+}
+window.approveSubmission = approveSubmission;
+
+window.loadCommsHub = loadCommsHub;
+window.showCommsSection = showCommsSection;
+window.loadSocialCalendar = loadSocialCalendar;
+window.toggleCalForm = toggleCalForm;
+window.schedulePost = schedulePost;
+window.markPostDone = markPostDone;
+window.deleteCalendarPost = deleteCalendarPost;
+window.loadContentTasks = loadContentTasks;
+window.toggleTaskForm = toggleTaskForm;
+window.postContentTask = postContentTask;
+window.claimContentTask = claimContentTask;
+window.submitContentTask = submitContentTask;
+window.saveContentSubmission = saveContentSubmission;
+window.deleteContentTask = deleteContentTask;
+window.loadNewsroom = loadNewsroom;
+window.toggleNewsForm = toggleNewsForm;
+window.postNewsItem = postNewsItem;
+window.deleteNewsItem = deleteNewsItem;
+window.loadMediaLibrary = loadMediaLibrary;
+window.toggleMediaForm = toggleMediaForm;
+window.uploadMediaItem = uploadMediaItem;
+window.deleteMediaItem = deleteMediaItem;
+window.loadNewsletterStudio = loadNewsletterStudio;
+window.toggleNewsletterForm = toggleNewsletterForm;
+window.saveNewsletterDraft = saveNewsletterDraft;
+window.sendNewsletter2 = sendNewsletter2;
+window.deleteNewsletter = deleteNewsletter;
+window.loadBrandGuidelines = loadBrandGuidelines;
+window.loadCommsManage = loadCommsManage;
+window.approveContentSubmission = approveContentSubmission;
+window.rejectContentSubmission = rejectContentSubmission;
+
 window.loadProgramsHub = loadProgramsHub;
 window.showProgramsSection = showProgramsSection;
 window.loadAllPrograms = loadAllPrograms;
@@ -7051,6 +7702,7 @@ h2,h3{position:relative;}
       <button class="tab-btn" data-tab="community-impact" onclick="showTab('community-impact')"><span class="tab-icon">—</span> Community Impact & Volunteering</button>
       <button class="tab-btn" data-tab="mental-health" onclick="showTab('mental-health')"><span class="tab-icon">—</span> Mental Health & Wellbeing</button>
       <button class="tab-btn" data-tab="programs-hub" onclick="showTab('programs-hub')"><span class="tab-icon">—</span> YAN Tech & Skills Academy</button>
+      <button class="tab-btn" data-tab="comms-hub" onclick="showTab('comms-hub')"><span class="tab-icon">—</span> Communications & Media</button>
       <button class="tab-btn" data-tab="magazine" onclick="showTab('magazine')"><span class="tab-icon">—</span> Magazine</button>
       <button class="tab-btn" data-tab="achievements" onclick="showTab('achievements')"><span class="tab-icon">—</span> Achievements</button>
       <button class="tab-btn" data-tab="resources" onclick="showTab('resources')"><span class="tab-icon">—</span> Resources</button>
@@ -7120,6 +7772,7 @@ h2,h3{position:relative;}
     <div class="tab-panel" id="tab-community-impact"><div id="community-impact-container"></div></div>
     <div class="tab-panel" id="tab-mental-health"><div id="mental-container"></div></div>
     <div class="tab-panel" id="tab-programs-hub"><div id="programs-hub-container"></div></div>
+    <div class="tab-panel" id="tab-comms-hub"><div id="comms-hub-container"></div></div>
     <div class="tab-panel" id="tab-magazine"><div id="magazine-container"></div></div>
     <div class="tab-panel" id="tab-achievements"><div id="achievements-container"></div></div>
     <div class="tab-panel" id="tab-resources"><div id="resources-container"></div></div>
