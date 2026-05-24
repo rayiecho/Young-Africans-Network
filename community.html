@@ -209,6 +209,18 @@ async function doRegister() {
       memberId: 'YAN-' + cred.user.uid.substring(0,8).toUpperCase()
     });
     showToast('Account created! Welcome to YAN!');
+    // Notify referrer
+    if (refCode) {
+      const refSnap2 = await getDocs(query(collection(db,"users"), where("referralCode","==",refCode)));
+      if (refSnap2.size > 0) {
+        await addDoc(collection(db,"notifications"), {
+          title: "Your referral worked!",
+          message: name + " from " + country + " just joined YAN using your referral link. Keep sharing!",
+          type: "announcement", postedBy: "YAN System",
+          createdAt: serverTimestamp(), readBy: []
+        });
+      }
+    }
     // Increment referrer's count
     const refCode = localStorage.getItem('yan_referral');
     if (refCode) {
