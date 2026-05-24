@@ -539,5 +539,101 @@ mobileMenu.querySelectorAll('.mobile-submenu a, .mobile-join').forEach(link => {
   });
 });
 </script>
+
+<!-- YAN GUIDE FLOATING BUTTON -->
+<div id="yan-guide-widget" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;">
+  <div id="yan-guide-chat" style="display:none;width:340px;height:480px;background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,0.15);flex-direction:column;overflow:hidden;border:2px solid var(--gold);">
+    <div style="background:var(--navy);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <img src="/images/AI.jpg" alt="YAN Guide" style="width:36px;height:36px;border-radius:50%;border:2px solid var(--gold);object-fit:cover;">
+        <div>
+          <div style="color:#fff;font-weight:700;font-size:0.85rem;font-family:Poppins,sans-serif;">Young Africans Network Guide</div>
+          <div style="color:rgba(255,255,255,0.6);font-size:0.68rem;font-family:Poppins,sans-serif;">Always here to help</div>
+        </div>
+      </div>
+      <button onclick="toggleYANGuide()" style="background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;">✕</button>
+    </div>
+    <div id="yan-guide-messages" style="flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.75rem;background:#F8F9FF;">
+      <div style="display:flex;gap:0.5rem;align-items:flex-start;">
+        <img src="/images/AI.jpg" alt="YAN" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+        <div style="background:#fff;border-radius:12px;padding:0.65rem 0.85rem;max-width:85%;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <p style="font-size:0.8rem;color:#1B2A6B;line-height:1.6;font-family:Poppins,sans-serif;">Hello! I am your Young Africans Network Guide. Ask me anything about YAN, scholarships, career advice or African opportunities!</p>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0.75rem;background:#fff;border-top:1px solid rgba(27,42,107,0.08);">
+      <div style="display:flex;gap:0.5rem;">
+        <input type="text" id="yan-guide-input" placeholder="Ask anything..." onkeydown="if(event.key==='Enter')sendYANGuideMessage()" style="flex:1;background:#F8F9FF;border:1.5px solid rgba(27,42,107,0.15);color:#1B2A6B;padding:0.6rem 0.85rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.8rem;outline:none;">
+        <button onclick="sendYANGuideMessage()" style="background:var(--gold);color:var(--navy);border:none;padding:0.6rem 1rem;border-radius:50px;font-weight:700;font-size:0.8rem;cursor:pointer;font-family:Poppins,sans-serif;white-space:nowrap;">Send</button>
+      </div>
+      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.5rem;">
+        <button onclick="askYANGuide('What scholarships are available for African youth?')" style="background:rgba(27,42,107,0.06);border:1px solid rgba(27,42,107,0.12);color:#1B2A6B;padding:0.25rem 0.6rem;border-radius:50px;font-size:0.68rem;cursor:pointer;font-family:Poppins,sans-serif;">Scholarships</button>
+        <button onclick="askYANGuide('How do I join YAN?')" style="background:rgba(27,42,107,0.06);border:1px solid rgba(27,42,107,0.12);color:#1B2A6B;padding:0.25rem 0.6rem;border-radius:50px;font-size:0.68rem;cursor:pointer;font-family:Poppins,sans-serif;">Join YAN</button>
+        <button onclick="askYANGuide('What programs does YAN offer?')" style="background:rgba(27,42,107,0.06);border:1px solid rgba(27,42,107,0.12);color:#1B2A6B;padding:0.25rem 0.6rem;border-radius:50px;font-size:0.68rem;cursor:pointer;font-family:Poppins,sans-serif;">Programs</button>
+      </div>
+    </div>
+  </div>
+  <button onclick="toggleYANGuide()" id="yan-guide-btn" style="width:56px;height:56px;border-radius:50%;background:var(--navy);border:3px solid var(--gold);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(27,42,107,0.3);transition:transform 0.2s;margin-left:auto;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+    <img src="/images/AI.jpg" alt="Ask YAN Guide" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+  </button>
+  <div style="text-align:center;margin-top:0.35rem;">
+    <span style="background:var(--navy);color:var(--gold);font-size:0.62rem;font-weight:700;font-family:Poppins,sans-serif;padding:0.2rem 0.6rem;border-radius:50px;">Ask YAN Guide</span>
+  </div>
+</div>
+
+<script>
+var yanGuideOpen = false;
+function toggleYANGuide() {
+  yanGuideOpen = !yanGuideOpen;
+  var chat = document.getElementById('yan-guide-chat');
+  if (chat) chat.style.display = yanGuideOpen ? 'flex' : 'none';
+}
+function askYANGuide(question) {
+  var input = document.getElementById('yan-guide-input');
+  if (input) { input.value = question; sendYANGuideMessage(); }
+}
+async function sendYANGuideMessage() {
+  var input = document.getElementById('yan-guide-input');
+  var message = input ? input.value.trim() : '';
+  if (!message) return;
+  input.value = '';
+  var messages = document.getElementById('yan-guide-messages');
+  if (!messages) return;
+
+  // Add user message
+  messages.innerHTML += '<div style="display:flex;justify-content:flex-end;"><div style="background:var(--navy);color:#fff;border-radius:12px;padding:0.65rem 0.85rem;max-width:85%;font-size:0.8rem;font-family:Poppins,sans-serif;line-height:1.6;">' + message + '</div></div>';
+  messages.scrollTop = messages.scrollHeight;
+
+  // Add typing
+  var typingId = 'typing-' + Date.now();
+  messages.innerHTML += '<div id="' + typingId + '" style="display:flex;gap:0.5rem;align-items:flex-start;"><img src="/images/AI.jpg" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;"><div style="background:#fff;border-radius:12px;padding:0.65rem 0.85rem;font-size:0.8rem;color:#6B7280;font-family:Poppins,sans-serif;">Thinking...</div></div>';
+  messages.scrollTop = messages.scrollHeight;
+
+  try {
+    var response = await fetch('https://yan-ai-worker.youngafricansn.workers.dev', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        contents: [{role:'user', parts:[{text: 'You are the Young Africans Network Guide. Help with YAN info, scholarships, career advice and African opportunities. Be warm and concise. User asks: ' + message}]}],
+        generationConfig: {maxOutputTokens: 400, temperature: 0.7}
+      })
+    });
+    var data = await response.json();
+    var reply = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] ? data.candidates[0].content.parts[0].text : 'Sorry, I could not connect. Please try again!';
+    var typing = document.getElementById(typingId);
+    if (typing) typing.remove();
+    messages.innerHTML += '<div style="display:flex;gap:0.5rem;align-items:flex-start;"><img src="/images/AI.jpg" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;"><div style="background:#fff;border-radius:12px;padding:0.65rem 0.85rem;max-width:85%;font-size:0.8rem;color:#1B2A6B;line-height:1.6;font-family:Poppins,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,0.06);">' + reply.replace(/
+/g,'<br>') + '</div></div>';
+    messages.scrollTop = messages.scrollHeight;
+  } catch(e) {
+    var typing = document.getElementById(typingId);
+    if (typing) typing.remove();
+    messages.innerHTML += '<div style="display:flex;gap:0.5rem;align-items:flex-start;"><img src="/images/AI.jpg" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;"><div style="background:#fff;border-radius:12px;padding:0.65rem 0.85rem;max-width:85%;font-size:0.8rem;color:#E63329;font-family:Poppins,sans-serif;">Sorry, connection error. Try again!</div></div>';
+    messages.scrollTop = messages.scrollHeight;
+  }
+}
+</script>
+<!-- END YAN GUIDE -->
+
 </body>
 </html>
