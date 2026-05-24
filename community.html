@@ -2613,17 +2613,17 @@ async function loadHeadPanel() {
         <h3>➕ Post to Your Hub</h3>
         <div id="head-hub-post-form"><div class="loading">Loading form...</div></div>
       </div>
-      <div class="head-section">
-        <h3>📝 Create Quiz</h3>
-        <div class="form-group" style="position:relative;z-index:9999;overflow:visible;"><label>Select Material</label><select id="head-quiz-material" style="position:absolute;z-index:9999;width:100%;background:#fff;"></select><div style="height:38px;"></div></div>
-        <div id="quiz-questions-list"></div>
-        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
-          <button class="btn-sm btn-outline" onclick="addQuizQuestion('short')">+ Short Answer</button>
-          <button class="btn-sm btn-outline" onclick="addQuizQuestion('mcq')">+ MCQ</button>
-        </div>
-        <button class="btn-primary" onclick="saveQuiz('${dept}')">Save Quiz</button>
-<button class="btn-sm btn-red" style="margin-top:0.5rem;width:100%;" onclick="deleteQuiz('${dept}')">🗑️ Delete Quiz</button>
+    </div>
+    <div class="head-section" style="margin-top:1.5rem;">
+      <h3>📝 Create Quiz</h3>
+      <div class="form-group"><label>Select Material</label><select id="head-quiz-material" style="width:100%;background:#fff;border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem;border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;"></select></div>
+      <div id="quiz-questions-list"></div>
+      <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
+        <button class="btn-sm btn-outline" onclick="addQuizQuestion('short')">+ Short Answer</button>
+        <button class="btn-sm btn-outline" onclick="addQuizQuestion('mcq')">+ MCQ</button>
       </div>
+      <button class="btn-primary" onclick="saveQuiz('${dept}')">Save Quiz</button>
+      <button class="btn-sm btn-red" style="margin-top:0.5rem;width:100%;" onclick="deleteQuiz('${dept}')">Delete Quiz</button>
     </div>
     <div class="head-section"><h3>📊 Engagement</h3><div id="head-engagement"></div></div>
     <div class="head-section" style="margin-top:1.5rem;">
