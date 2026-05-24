@@ -7724,6 +7724,184 @@ function openHub(fnName, containerId) {
 window.loadYANHubs = loadYANHubs;
 window.openHub = openHub;
 
+
+function loadHeadHubPostForm(dept) {
+  const container = document.getElementById('head-hub-post-form');
+  if (!container) return;
+  const forms = {
+    career: '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:1rem;">Post a career material to the Career Hub.</p>'
+      + '<div class="form-group"><label>Title *</label><input type="text" id="hub-post-title" placeholder="e.g. CV Writing Guide"></div>'
+      + '<div class="form-group"><label>Type</label><select id="hub-post-type"><option value="video">Video</option><option value="article">Article</option><option value="guide">Guide</option></select></div>'
+      + '<div class="form-group"><label>URL/Link</label><input type="text" id="hub-post-url" placeholder="https://..."></div>'
+      + '<div class="form-group"><label>Description *</label><textarea id="hub-post-desc" rows="3" placeholder="What will members learn?"></textarea></div>'
+      + '<button class="btn-primary" onclick="postToCareerHub()">Post to Career Hub</button>',
+
+    community: '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:1rem;">Post a YAN task to the Community Hub.</p>'
+      + '<div class="form-group"><label>Task Title *</label><input type="text" id="hub-post-title" placeholder="e.g. Manage YAN Instagram"></div>'
+      + '<div class="form-group"><label>Category</label><select id="hub-post-category"><option>Communications</option><option>Design</option><option>Technology</option><option>Events</option><option>Writing</option><option>Research</option><option>Other</option></select></div>'
+      + '<div class="form-group"><label>Duration</label><input type="text" id="hub-post-duration" placeholder="e.g. 1 month"></div>'
+      + '<div class="form-group"><label>Spots</label><input type="number" id="hub-post-spots" value="1" min="1"></div>'
+      + '<div class="form-group"><label>Description *</label><textarea id="hub-post-desc" rows="3" placeholder="What will the volunteer do?"></textarea></div>'
+      + '<button class="btn-primary" onclick="postToCommunityHub()">Post Task</button>',
+
+    mental: '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:1rem;">Post a session or visitation to Mental Health Hub.</p>'
+      + '<div class="form-group"><label>Title *</label><input type="text" id="hub-post-title" placeholder="e.g. Managing Anxiety Session"></div>'
+      + '<div class="form-group"><label>Type</label><select id="hub-post-type"><option value="session">Professional Session</option><option value="visitation">Visitation</option></select></div>'
+      + '<div class="form-group"><label>Professional/Location *</label><input type="text" id="hub-post-professional" placeholder="Dr. Jane / Kenyatta Hospital"></div>'
+      + '<div class="form-group"><label>Date *</label><input type="date" id="hub-post-date"></div>'
+      + '<div class="form-group"><label>Description *</label><textarea id="hub-post-desc" rows="3" placeholder="What will happen?"></textarea></div>'
+      + '<button class="btn-primary" onclick="postToMentalHub()">Post to Mental Health Hub</button>',
+
+    programs: '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:1rem;">Post a training program to YAN Tech Academy.</p>'
+      + '<div class="form-group"><label>Title *</label><input type="text" id="hub-post-title" placeholder="e.g. IT Fundamentals"></div>'
+      + '<div class="form-group"><label>Category</label><select id="hub-post-category"><option>IT Basics</option><option>AI Tools</option><option>Online Safety</option><option>Digital Entrepreneurship</option><option>Coding</option><option>Data Skills</option><option>Other</option></select></div>'
+      + '<div class="form-group"><label>Level</label><select id="hub-post-level"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></div>'
+      + '<div class="form-group"><label>Duration</label><input type="text" id="hub-post-duration" placeholder="e.g. 4 weeks"></div>'
+      + '<div class="form-group"><label>Description *</label><textarea id="hub-post-desc" rows="3" placeholder="What will members learn?"></textarea></div>'
+      + '<button class="btn-primary" onclick="postToProgramsHub()">Post to Tech Academy</button>',
+
+    communications: '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:1rem;">Post a content task or news to Comms Hub.</p>'
+      + '<div class="form-group"><label>Title *</label><input type="text" id="hub-post-title" placeholder="e.g. Design June Newsletter"></div>'
+      + '<div class="form-group"><label>Type</label><select id="hub-post-type"><option value="task">Content Task</option><option value="news">News Item</option></select></div>'
+      + '<div class="form-group"><label>Deadline</label><input type="date" id="hub-post-deadline"></div>'
+      + '<div class="form-group"><label>Description *</label><textarea id="hub-post-desc" rows="3" placeholder="Describe what needs to be done..."></textarea></div>'
+      + '<button class="btn-primary" onclick="postToCommsHub()">Post to Comms Hub</button>',
+
+    partnerships: '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:1rem;">Post a partnership opportunity.</p>'
+      + '<div class="form-group"><label>Title *</label><input type="text" id="hub-post-title" placeholder="e.g. Google.org Grant"></div>'
+      + '<div class="form-group"><label>Type</label><select id="hub-post-type"><option>Sponsorship</option><option>Grant</option><option>MOU</option><option>Collaboration</option><option>Other</option></select></div>'
+      + '<div class="form-group"><label>Organization</label><input type="text" id="hub-post-org" placeholder="e.g. Google.org"></div>'
+      + '<div class="form-group"><label>Deadline</label><input type="date" id="hub-post-deadline"></div>'
+      + '<div class="form-group"><label>Description *</label><textarea id="hub-post-desc" rows="3" placeholder="Describe this opportunity..."></textarea></div>'
+      + '<button class="btn-primary" onclick="postToPartnershipsHub()">Post to Partnerships Hub</button>'
+  };
+  container.innerHTML = forms[dept] || '<p style="color:var(--gray);font-size:0.85rem;">No hub posting available for your department.</p>';
+}
+
+async function postToCareerHub() {
+  const title = (document.getElementById('hub-post-title')||{}).value.trim();
+  const type = (document.getElementById('hub-post-type')||{}).value;
+  const url = (document.getElementById('hub-post-url')||{}).value.trim();
+  const desc = (document.getElementById('hub-post-desc')||{}).value.trim();
+  if (!title || !desc) return showToast('Fill all required fields','error');
+  await addDoc(collection(db, 'careerMaterials'), {
+    title: title, type: type, url: url, description: desc,
+    postedBy: currentUserData.name, postedById: currentUser.uid,
+    createdAt: serverTimestamp(), active: true
+  });
+  showToast('Posted to Career Hub!');
+  document.getElementById('hub-post-title').value = '';
+  document.getElementById('hub-post-desc').value = '';
+}
+
+async function postToCommunityHub() {
+  const title = (document.getElementById('hub-post-title')||{}).value.trim();
+  const category = (document.getElementById('hub-post-category')||{}).value;
+  const duration = (document.getElementById('hub-post-duration')||{}).value.trim();
+  const spots = parseInt((document.getElementById('hub-post-spots')||{}).value)||1;
+  const desc = (document.getElementById('hub-post-desc')||{}).value.trim();
+  if (!title || !desc) return showToast('Fill all required fields','error');
+  await addDoc(collection(db, 'communityTasks'), {
+    title: title, category: category, duration: duration, spots: spots,
+    description: desc, postedBy: currentUserData.name, postedById: currentUser.uid,
+    applicants: 0, appliedBy: [], assignedTo: [], createdAt: serverTimestamp(), active: true
+  });
+  showToast('Task posted to Community Hub!');
+  document.getElementById('hub-post-title').value = '';
+  document.getElementById('hub-post-desc').value = '';
+}
+
+async function postToMentalHub() {
+  const title = (document.getElementById('hub-post-title')||{}).value.trim();
+  const type = (document.getElementById('hub-post-type')||{}).value;
+  const professional = (document.getElementById('hub-post-professional')||{}).value.trim();
+  const date = (document.getElementById('hub-post-date')||{}).value;
+  const desc = (document.getElementById('hub-post-desc')||{}).value.trim();
+  if (!title || !professional || !desc) return showToast('Fill all required fields','error');
+  if (type === 'session') {
+    await addDoc(collection(db, 'mentalSessions'), {
+      title: title, professionalName: professional, description: desc,
+      sessionDate: date, postedBy: currentUserData.name, postedById: currentUser.uid,
+      registeredBy: [], createdAt: serverTimestamp()
+    });
+  } else {
+    await addDoc(collection(db, 'mentalVisitations'), {
+      title: title, location: professional, description: desc,
+      visitDate: date, postedBy: currentUserData.name, postedById: currentUser.uid,
+      joinedBy: [], createdAt: serverTimestamp()
+    });
+  }
+  showToast('Posted to Mental Health Hub!');
+  document.getElementById('hub-post-title').value = '';
+  document.getElementById('hub-post-desc').value = '';
+}
+
+async function postToProgramsHub() {
+  const title = (document.getElementById('hub-post-title')||{}).value.trim();
+  const category = (document.getElementById('hub-post-category')||{}).value;
+  const level = (document.getElementById('hub-post-level')||{}).value;
+  const duration = (document.getElementById('hub-post-duration')||{}).value.trim();
+  const desc = (document.getElementById('hub-post-desc')||{}).value.trim();
+  if (!title || !desc) return showToast('Fill all required fields','error');
+  await addDoc(collection(db, 'trainingPrograms'), {
+    title: title, category: category, level: level, duration: duration,
+    description: desc, postedBy: currentUserData.name, postedById: currentUser.uid,
+    enrolledBy: [], createdAt: serverTimestamp(), active: true
+  });
+  showToast('Posted to Tech Academy!');
+  document.getElementById('hub-post-title').value = '';
+  document.getElementById('hub-post-desc').value = '';
+}
+
+async function postToCommsHub() {
+  const title = (document.getElementById('hub-post-title')||{}).value.trim();
+  const type = (document.getElementById('hub-post-type')||{}).value;
+  const deadline = (document.getElementById('hub-post-deadline')||{}).value;
+  const desc = (document.getElementById('hub-post-desc')||{}).value.trim();
+  if (!title || !desc) return showToast('Fill all required fields','error');
+  if (type === 'task') {
+    await addDoc(collection(db, 'contentTasks'), {
+      title: title, deadline: deadline, description: desc, type: 'Content Task',
+      postedBy: currentUserData.name, postedById: currentUser.uid,
+      claimedBy: [], status: 'open', createdAt: serverTimestamp()
+    });
+  } else {
+    await addDoc(collection(db, 'newsroom'), {
+      title: title, type: 'Announcement', content: desc,
+      postedBy: currentUserData.name, postedById: currentUser.uid,
+      createdAt: serverTimestamp()
+    });
+  }
+  showToast('Posted to Comms Hub!');
+  document.getElementById('hub-post-title').value = '';
+  document.getElementById('hub-post-desc').value = '';
+}
+
+async function postToPartnershipsHub() {
+  const title = (document.getElementById('hub-post-title')||{}).value.trim();
+  const type = (document.getElementById('hub-post-type')||{}).value;
+  const org = (document.getElementById('hub-post-org')||{}).value.trim();
+  const deadline = (document.getElementById('hub-post-deadline')||{}).value;
+  const desc = (document.getElementById('hub-post-desc')||{}).value.trim();
+  if (!title || !desc) return showToast('Fill all required fields','error');
+  await addDoc(collection(db, 'partnershipOpportunities'), {
+    title: title, type: type, organization: org, deadline: deadline,
+    description: desc, postedBy: currentUserData.name, postedById: currentUser.uid,
+    createdAt: serverTimestamp()
+  });
+  showToast('Posted to Partnerships Hub!');
+  document.getElementById('hub-post-title').value = '';
+  document.getElementById('hub-post-desc').value = '';
+}
+
+window.loadHeadHubPostForm = loadHeadHubPostForm;
+window.postToCareerHub = postToCareerHub;
+window.postToCommunityHub = postToCommunityHub;
+window.postToMentalHub = postToMentalHub;
+window.postToProgramsHub = postToProgramsHub;
+window.postToCommsHub = postToCommsHub;
+window.postToPartnershipsHub = postToPartnershipsHub;
+
 window.loadCareerHub = loadCareerHub;
 window.showCareerSection = showCareerSection;
 window.loadCareerPaths = loadCareerPaths;
