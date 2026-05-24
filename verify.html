@@ -100,40 +100,44 @@ async function verifyCertId(certId) {
 
     // Search certificates collection
     const snap = await getDocs(collection(db, 'certificates'));
-    let found = null;
+    let certs = [];
     snap.forEach(d => {
       const data = d.data();
       if (data.userId && data.userId.substring(0,8).toUpperCase() === uidFragment.toUpperCase() && data.status === 'approved') {
-        found = { id: d.id, ...data };
+        certs.push({ id: d.id, ...data });
       }
     });
 
-    if (!found) {
+    if (certs.length === 0) {
       result.innerHTML = `
         <div class="status-invalid">
           <div class="status-icon">❌</div>
           <div class="status-title">Certificate Not Found</div>
-          <p style="color:#721c24;font-size:0.85rem;margin-top:0.5rem;">This certificate ID is not valid or has not been approved.</p>
+          <p style="color:#721c24;font-size:0.85rem;margin-top:0.5rem;">This certificate ID is not valid or has not been approved yet.</p>
         </div>`;
       return;
     }
 
-    const dept = DEPARTMENTS.find(d => d.id === found.department);
-    const issuedDate = found.approvedAt?.toDate ? found.approvedAt.toDate().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) : 'N/A';
+    const certsHtml = certs.map(found => {
+      const dept = DEPARTMENTS.find(d => d.id === found.department);
+      const issuedDate = found.approvedAt?.toDate ? found.approvedAt.toDate().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) : found.issuedAt?.toDate ? found.issuedAt.toDate().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) : 'N/A';
+      return `
+        <div class="status-valid" style="margin-bottom:1rem;">
+          <div class="status-icon">✅</div>
+          <div class="status-title">Certificate Verified!</div>
+          <div style="margin-top:1rem;">
+            <div class="detail-row"><span class="detail-label">Member Name</span><span class="detail-value">${found.userName}</span></div>
+            <div class="detail-row"><span class="detail-label">Department</span><span class="detail-value">${dept?.icon||''} ${dept?.name||found.department}</span></div>
+            <div class="detail-row"><span class="detail-label">Certificate</span><span class="detail-value">${found.title || 'YAN Certificate'}</span></div>
+            <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value" style="color:var(--green);">✅ Approved & Valid</span></div>
+            <div class="detail-row"><span class="detail-label">Issued By</span><span class="detail-value">Young Africans Network</span></div>
+            <div class="detail-row"><span class="detail-label">Date Issued</span><span class="detail-value">${issuedDate}</span></div>
+          </div>
+          <div class="cert-id">Certificate ID: ${certId}</div>
+        </div>`;
+    }).join('');
 
-    result.innerHTML = `
-      <div class="status-valid">
-        <div class="status-icon">✅</div>
-        <div class="status-title">Certificate is Valid!</div>
-        <div style="margin-top:1rem;">
-          <div class="detail-row"><span class="detail-label">Member Name</span><span class="detail-value">${found.userName}</span></div>
-          <div class="detail-row"><span class="detail-label">Department</span><span class="detail-value">${dept?.icon||''} ${dept?.name||found.department}</span></div>
-          <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value" style="color:var(--green);">✅ Approved</span></div>
-          <div class="detail-row"><span class="detail-label">Issued By</span><span class="detail-value">YAN Administration</span></div>
-          <div class="detail-row"><span class="detail-label">Date Issued</span><span class="detail-value">${issuedDate}</span></div>
-        </div>
-        <div class="cert-id">Certificate ID: ${certId}</div>
-      </div>`;
+    result.innerHTML = certsHtml;
   } catch(e) {
     result.innerHTML = `<div class="status-invalid"><div class="status-icon">⚠️</div><div class="status-title">Verification Error</div><p style="color:#721c24;font-size:0.85rem;margin-top:0.5rem;">${e.message}</p></div>`;
   }
