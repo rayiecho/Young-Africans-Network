@@ -744,7 +744,7 @@ async function loadMembers(c) {
                 <option value="community" ${u.department==='community'?'selected':''}>🌍 Community</option>
                 <option value="mental" ${u.department==='mental'?'selected':''}>💚 Mental Health</option>
               </select>
-              <button class="btn-delete" onclick="adminRemoveMember('${d.id}')">Remove</button>
+              ${u.status === 'deleted' ? `<button class="btn-success" onclick="adminRestoreMember('${d.id}')">Restore</button><button class="btn-delete" onclick="adminPermanentDelete('${d.id}')">Permanent Delete</button>` : `<button class="btn-delete" onclick="adminRemoveMember('${d.id}')">Remove</button>`}
             </span>
           </div>`;
         }).join('')}
@@ -770,9 +770,23 @@ window.adminToggleRole = async function(userId, role, value) {
   }
 };
 window.adminRemoveMember = async function(userId) {
-  if (!confirm('Remove this member from the community?')) return;
+  if (!confirm('Remove this member? They can be restored later.')) return;
+  await updateDoc(doc(db, 'users', userId), {status: 'deleted', deletedAt: serverTimestamp(), deletedBy: currentUser.uid});
+  showToast('Member removed. You can restore them from Removed Members.');
+  loadSection('members');
+};
+
+window.adminRestoreMember = async function(userId) {
+  if (!confirm('Restore this member?')) return;
+  await updateDoc(doc(db, 'users', userId), {status: 'active', restoredAt: serverTimestamp()});
+  showToast('Member restored!');
+  loadSection('members');
+};
+
+window.adminPermanentDelete = async function(userId) {
+  if (!confirm('PERMANENTLY delete? Cannot be undone!')) return;
   await deleteDoc(doc(db, 'users', userId));
-  showToast('Member removed');
+  showToast('Member permanently deleted');
   loadSection('members');
 };
 
