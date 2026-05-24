@@ -322,6 +322,7 @@ function loadTabContent(tab) {
   if (tab === 'scholarships') loadScholarships();
   if (tab === 'career') loadCareerHub();
   if (tab === 'community-impact') loadCommunityHub();
+  if (tab === 'mental-health') loadMentalHealthHub();
   if (tab === 'magazine') loadMagazine();
   if (tab === 'achievements') loadAchievements();
   if (tab === 'resources') loadResources();
@@ -5150,6 +5151,711 @@ async function rejectCommunityReport(reportId) {
   loadCommunityManage();
 }
 
+async function loadMentalHealthHub() {
+  const container = document.getElementById('mental-container');
+  if (!container) return;
+  const isAdminOrHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'mental'));
+
+  if (!document.getElementById('mental-hub-styles')) {
+    const style = document.createElement('style');
+    style.id = 'mental-hub-styles';
+    style.textContent = [
+      '.mental-nav-btn{background:rgba(255,255,255,0.15);color:#fff;border:1.5px solid rgba(255,255,255,0.3);padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;}',
+      '.mental-nav-btn:hover,.mental-nav-btn.active{background:#fff;color:#27AE60;}',
+      '.safe-post{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid #27AE60;}',
+      '.peer-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid var(--gold);}',
+      '.session-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid var(--navy);}',
+      '.visit-card{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid #E67E22;}',
+      '.mood-btn{background:var(--white);border:2px solid rgba(27,42,107,0.1);border-radius:12px;padding:0.75rem;cursor:pointer;text-align:center;transition:all 0.2s;font-family:Poppins,sans-serif;}',
+      '.mood-btn:hover,.mood-btn.selected{border-color:#27AE60;background:rgba(39,174,96,0.05);}'
+    ].join('');
+    document.head.appendChild(style);
+  }
+
+  const manageBtn = isAdminOrHead
+    ? '<button class="mental-nav-btn" onclick="showMentalSection(\'manage\')">Manage</button>'
+    : '';
+
+  container.innerHTML = [
+    '<div style="max-width:900px;margin:0 auto;">',
+    '<div style="background:linear-gradient(135deg,#1a5c35,#27AE60);border-radius:20px;padding:2rem;margin-bottom:1.5rem;color:#fff;">',
+    '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">',
+    '<img src="images/health.jpg" alt="Mental Health" style="width:70px;height:70px;object-fit:cover;border-radius:12px;border:3px solid var(--gold);">',
+    '<div>',
+    '<h2 style="font-family:Playfair Display,serif;font-size:1.8rem;font-weight:900;margin-bottom:0.25rem;">Mental Health & Wellbeing Hub</h2>',
+    '<p style="color:rgba(255,255,255,0.75);font-size:0.88rem;">A safe space to heal, grow and support one another. You are not alone.</p>',
+    '</div></div>',
+    '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem;">',
+    '<button class="mental-nav-btn active" onclick="showMentalSection(\'feed\')">Safe Space</button>',
+    '<button class="mental-nav-btn" onclick="showMentalSection(\'checkin\')">Mood Check-in</button>',
+    '<button class="mental-nav-btn" onclick="showMentalSection(\'sessions\')">Professional Sessions</button>',
+    '<button class="mental-nav-btn" onclick="showMentalSection(\'visitations\')">Visitations</button>',
+    '<button class="mental-nav-btn" onclick="showMentalSection(\'peers\')">Peer Support</button>',
+    '<button class="mental-nav-btn" onclick="showMentalSection(\'resources\')">Resources</button>',
+    '<button class="mental-nav-btn" onclick="showMentalSection(\'crisis\')">Crisis Help</button>',
+    manageBtn,
+    '</div></div>',
+    '<div id="mental-section-feed"></div>',
+    '<div id="mental-section-checkin" style="display:none;"></div>',
+    '<div id="mental-section-sessions" style="display:none;"></div>',
+    '<div id="mental-section-visitations" style="display:none;"></div>',
+    '<div id="mental-section-peers" style="display:none;"></div>',
+    '<div id="mental-section-resources" style="display:none;"></div>',
+    '<div id="mental-section-crisis" style="display:none;"></div>',
+    '<div id="mental-section-manage" style="display:none;"></div>',
+    '</div>'
+  ].join('');
+
+  loadMentalFeed();
+}
+
+function showMentalSection(section) {
+  const sections = ['feed','checkin','sessions','visitations','peers','resources','crisis','manage'];
+  document.querySelectorAll('.mental-nav-btn').forEach(function(b, i) {
+    b.classList.toggle('active', sections[i] === section);
+  });
+  sections.forEach(function(s) {
+    const el = document.getElementById('mental-section-' + s);
+    if (el) el.style.display = s === section ? 'block' : 'none';
+  });
+  if (section === 'feed') loadMentalFeed();
+  if (section === 'checkin') loadMoodCheckin();
+  if (section === 'sessions') loadProfessionalSessions();
+  if (section === 'visitations') loadVisitations();
+  if (section === 'peers') loadPeerSupport();
+  if (section === 'resources') loadMentalResources();
+  if (section === 'crisis') loadCrisisResources();
+  if (section === 'manage') loadMentalManage();
+}
+
+// ── SAFE SPACE FEED ────────────────────────────
+async function loadMentalFeed() {
+  const container = document.getElementById('mental-section-feed');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading...</div>';
+
+  let snap;
+  try {
+    snap = await getDocs(query(collection(db, 'mentalPosts'), orderBy('createdAt', 'desc')));
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state"><p>Error loading posts.</p></div>';
+    return;
+  }
+
+  let postsHtml = '';
+  if (snap.empty) {
+    postsHtml = '<div class="empty-state"><p>No posts yet. Be the first to share.</p></div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const p = Object.assign({id: d.id}, d.data());
+      const canDelete = p.userId === currentUser.uid || (currentUserData && currentUserData.isAdmin);
+      postsHtml += [
+        '<div class="safe-post">',
+        '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">',
+        '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#27AE60,#1a5c35);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.9rem;flex-shrink:0;">' + (p.userName || '?')[0].toUpperCase() + '</div>',
+        '<div>',
+        '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(p.userName) + '</p>',
+        '<p style="font-size:0.72rem;color:var(--gray);">' + timeAgo(p.createdAt) + '</p>',
+        '</div>',
+        canDelete ? '<button class="btn-sm btn-red" style="margin-left:auto;" onclick="deleteMentalPost(\'' + p.id + '\')">Delete</button>' : '',
+        '</div>',
+        '<p style="font-size:0.88rem;color:var(--navy);line-height:1.8;">' + sanitize(p.content) + '</p>',
+        p.mood ? '<div style="margin-top:0.5rem;"><span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:600;">Feeling: ' + sanitize(p.mood) + '</span></div>' : '',
+        '</div>'
+      ].join('');
+    });
+  }
+
+  container.innerHTML = [
+    '<div style="background:rgba(39,174,96,0.06);border:1px solid rgba(39,174,96,0.2);border-radius:12px;padding:1rem;margin-bottom:1.25rem;">',
+    '<p style="font-size:0.85rem;color:#1a5c35;font-weight:600;margin-bottom:0.25rem;">This is a Safe Space</p>',
+    '<p style="font-size:0.82rem;color:var(--gray);line-height:1.7;">Share how you are feeling, seek support or encourage others. Be kind, be real, be human. Everything shared here stays within YAN.</p>',
+    '</div>',
+    '<div style="background:var(--white);border-radius:16px;padding:1.25rem;margin-bottom:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">',
+    '<textarea id="mental-post-input" rows="3" placeholder="Share how you are feeling today..." style="width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.1);border-radius:12px;padding:0.85rem;font-family:Poppins,sans-serif;font-size:0.88rem;outline:none;resize:none;box-sizing:border-box;"></textarea>',
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.75rem;flex-wrap:wrap;gap:0.5rem;">',
+    '<select id="mental-post-mood" style="background:var(--light);border:1.5px solid rgba(27,42,107,0.1);color:var(--navy);padding:0.5rem 0.75rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;">',
+    '<option value="">How are you feeling?</option>',
+    '<option>Grateful</option><option>Hopeful</option><option>Anxious</option><option>Overwhelmed</option>',
+    '<option>Lonely</option><option>Motivated</option><option>Stressed</option><option>At peace</option>',
+    '</select>',
+    '<button class="btn-primary" style="width:auto;padding:0.6rem 1.5rem;" onclick="submitMentalPost()">Share</button>',
+    '</div></div>',
+    postsHtml
+  ].join('');
+}
+
+async function submitMentalPost() {
+  const content = (document.getElementById('mental-post-input') || {}).value.trim();
+  const mood = (document.getElementById('mental-post-mood') || {}).value;
+  if (!content) return showToast('Write something to share', 'error');
+  await addDoc(collection(db, 'mentalPosts'), {
+    userId: currentUser.uid, userName: currentUserData.name,
+    content: content, mood: mood,
+    createdAt: serverTimestamp()
+  });
+  showToast('Shared. You are not alone.');
+  loadMentalFeed();
+}
+
+async function deleteMentalPost(id) {
+  if (!confirm('Delete this post?')) return;
+  await deleteDoc(doc(db, 'mentalPosts', id));
+  showToast('Deleted');
+  loadMentalFeed();
+}
+
+// ── MOOD CHECK-IN ──────────────────────────────
+async function loadMoodCheckin() {
+  const container = document.getElementById('mental-section-checkin');
+  if (!container) return;
+
+  const today = new Date().toISOString().split('T')[0];
+  const checkinRef = doc(db, 'moodCheckins', currentUser.uid + '_' + today);
+  const existing = await getDoc(checkinRef);
+
+  const moods = [
+    {emoji:'😊', label:'Great', color:'#27AE60'},
+    {emoji:'🙂', label:'Good', color:'#3498DB'},
+    {emoji:'😐', label:'Okay', color:'#F5A623'},
+    {emoji:'😔', label:'Low', color:'#E67E22'},
+    {emoji:'😢', label:'Struggling', color:'#E63329'}
+  ];
+
+  let checkinHtml = '';
+  if (existing.exists()) {
+    const data = existing.data();
+    checkinHtml = [
+      '<div style="text-align:center;padding:2rem;">',
+      '<div style="font-size:3rem;margin-bottom:0.75rem;">' + (moods.find(function(m) { return m.label === data.mood; }) || {emoji:'😊'}).emoji + '</div>',
+      '<p style="font-size:1rem;font-weight:700;color:var(--navy);">You checked in today feeling: <strong>' + sanitize(data.mood) + '</strong></p>',
+      '<p style="font-size:0.82rem;color:var(--gray);margin-top:0.5rem;">Come back tomorrow for your next check-in.</p>',
+      data.note ? '<p style="font-size:0.85rem;color:var(--gray);margin-top:1rem;font-style:italic;">"' + sanitize(data.note) + '"</p>' : '',
+      '</div>'
+    ].join('');
+  } else {
+    const moodBtns = moods.map(function(m) {
+      return [
+        '<div class="mood-btn" onclick="selectMood(\'' + m.label + '\',\'' + m.color + '\')" id="mood-' + m.label + '">',
+        '<div style="font-size:2rem;margin-bottom:0.35rem;">' + m.emoji + '</div>',
+        '<div style="font-size:0.78rem;font-weight:600;color:var(--navy);">' + m.label + '</div>',
+        '</div>'
+      ].join('');
+    }).join('');
+
+    checkinHtml = [
+      '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">How are you feeling today?</h3>',
+      '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:1.5rem;">Your daily check-in helps YAN understand how our community is doing. It is anonymous and private.</p>',
+      '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:1.5rem;">',
+      moodBtns,
+      '</div>',
+      '<input type="hidden" id="selected-mood" value="">',
+      '<div class="form-group"><label>Anything you want to add? (optional)</label>',
+      '<textarea id="mood-note" rows="3" placeholder="Share a thought, worry or gratitude..."></textarea></div>',
+      '<button class="btn-primary" onclick="submitMoodCheckin()">Submit Check-in</button>'
+    ].join('');
+  }
+
+  container.innerHTML = [
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">Daily Mood Check-in</h3>',
+    '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">',
+    checkinHtml,
+    '</div>'
+  ].join('');
+}
+
+function selectMood(mood, color) {
+  document.querySelectorAll('.mood-btn').forEach(function(b) { b.classList.remove('selected'); });
+  const btn = document.getElementById('mood-' + mood);
+  if (btn) { btn.classList.add('selected'); btn.style.borderColor = color; }
+  const input = document.getElementById('selected-mood');
+  if (input) input.value = mood;
+}
+
+async function submitMoodCheckin() {
+  const mood = (document.getElementById('selected-mood') || {}).value;
+  const note = (document.getElementById('mood-note') || {}).value.trim();
+  if (!mood) return showToast('Select your mood first', 'error');
+  const today = new Date().toISOString().split('T')[0];
+  await setDoc(doc(db, 'moodCheckins', currentUser.uid + '_' + today), {
+    userId: currentUser.uid, mood: mood, note: note,
+    date: today, createdAt: serverTimestamp()
+  });
+  showToast('Check-in submitted. Thank you for sharing.');
+  loadMoodCheckin();
+}
+
+// ── PROFESSIONAL SESSIONS ──────────────────────
+async function loadProfessionalSessions() {
+  const container = document.getElementById('mental-section-sessions');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading sessions...</div>';
+  const isAdminOrHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'mental'));
+
+  let snap;
+  try {
+    snap = await getDocs(query(collection(db, 'mentalSessions'), orderBy('createdAt', 'desc')));
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state"><p>Error loading sessions.</p></div>';
+    return;
+  }
+
+  let sessionsHtml = '';
+  if (snap.empty) {
+    sessionsHtml = '<div class="empty-state"><p>No professional sessions scheduled yet.</p><p style="font-size:0.82rem;color:var(--gray);">Check back soon!</p></div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const s = Object.assign({id: d.id}, d.data());
+      const registered = s.registeredBy && s.registeredBy.includes(currentUser.uid);
+      const canDelete = isAdminOrHead;
+      sessionsHtml += [
+        '<div class="session-card">',
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">',
+        '<div style="flex:1;">',
+        '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">',
+        '<span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + sanitize(s.specialty || 'Wellness') + '</span>',
+        s.sessionDate ? '<span style="background:rgba(245,166,35,0.1);color:#b37800;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:600;">' + sanitize(s.sessionDate) + ' at ' + sanitize(s.sessionTime || '') + '</span>' : '',
+        '</div>',
+        '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(s.title) + '</h3>',
+        '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;margin-bottom:0.35rem;">' + sanitize(s.description) + '</p>',
+        '<p style="font-size:0.78rem;color:var(--navy);"><strong>Professional:</strong> ' + sanitize(s.professionalName) + ' · ' + sanitize(s.organization || '') + '</p>',
+        (s.registeredBy ? '<p style="font-size:0.75rem;color:var(--gray);margin-top:0.25rem;">' + (s.registeredBy.length || 0) + ' registered</p>' : ''),
+        '</div>',
+        '<div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">',
+        registered
+          ? '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;">Registered</span>'
+          : '<button class="btn-sm btn-navy" onclick="registerForSession(\'' + s.id + '\')">Register</button>',
+        s.roomUrl ? '<a href="' + sanitize(s.roomUrl) + '" target="_blank" class="btn-sm btn-navy" style="text-decoration:none;">Join Session</a>' : '',
+        canDelete ? '<button class="btn-sm btn-red" onclick="deleteMentalSession(\'' + s.id + '\')">Delete</button>' : '',
+        '</div></div>',
+        '</div>'
+      ].join('');
+    });
+  }
+
+  const postBtn = isAdminOrHead
+    ? '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="showMentalSection(\'manage\')">Invite Professional</button>'
+    : '';
+
+  container.innerHTML = [
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">',
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">Professional Sessions</h3>',
+    postBtn,
+    '</div>',
+    '<div style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1rem;margin-bottom:1.25rem;">',
+    '<p style="font-size:0.82rem;color:var(--navy);font-weight:600;margin-bottom:0.25rem;">About Professional Sessions</p>',
+    '<p style="font-size:0.82rem;color:var(--gray);line-height:1.7;">YAN invites qualified mental health professionals, counselors, coaches and wellness experts to run live sessions for our members. All sessions are free for YAN members.</p>',
+    '</div>',
+    sessionsHtml
+  ].join('');
+}
+
+async function registerForSession(sessionId) {
+  const ref = doc(db, 'mentalSessions', sessionId);
+  const snap = await getDoc(ref);
+  const data = snap.data();
+  const registeredBy = data.registeredBy || [];
+  if (registeredBy.includes(currentUser.uid)) return showToast('Already registered!', 'error');
+  registeredBy.push(currentUser.uid);
+  await updateDoc(ref, {registeredBy: registeredBy});
+  showToast('Registered! You will be notified before the session.');
+  loadProfessionalSessions();
+}
+
+async function deleteMentalSession(id) {
+  if (!confirm('Delete this session?')) return;
+  await deleteDoc(doc(db, 'mentalSessions', id));
+  showToast('Deleted');
+  loadProfessionalSessions();
+}
+
+// ── VISITATIONS ────────────────────────────────
+async function loadVisitations() {
+  const container = document.getElementById('mental-section-visitations');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading visitations...</div>';
+  const isAdminOrHead = currentUserData && (currentUserData.isAdmin || (currentUserData.isDeptHead && currentUserData.department === 'mental'));
+
+  let snap;
+  try {
+    snap = await getDocs(query(collection(db, 'mentalVisitations'), orderBy('createdAt', 'desc')));
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state"><p>Error loading visitations.</p></div>';
+    return;
+  }
+
+  let visitsHtml = '';
+  if (snap.empty) {
+    visitsHtml = '<div class="empty-state"><p>No visitations posted yet.</p></div>';
+  } else {
+    snap.docs.forEach(function(d) {
+      const v = Object.assign({id: d.id}, d.data());
+      const joined = v.joinedBy && v.joinedBy.includes(currentUser.uid);
+      const isOwner = v.postedById === currentUser.uid;
+      const canDelete = isOwner || isAdminOrHead;
+      visitsHtml += [
+        '<div class="visit-card">',
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">',
+        '<div style="flex:1;">',
+        '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">',
+        '<span style="background:rgba(230,126,34,0.1);color:#E67E22;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + sanitize(v.type || 'Visitation') + '</span>',
+        v.visitDate ? '<span style="background:rgba(245,166,35,0.1);color:#b37800;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:600;">' + sanitize(v.visitDate) + '</span>' : '',
+        '</div>',
+        '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(v.title) + '</h3>',
+        '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;">' + sanitize(v.description) + '</p>',
+        '<p style="font-size:0.78rem;color:var(--navy);margin-top:0.35rem;"><strong>Location:</strong> ' + sanitize(v.location || '') + ' · <strong>Posted by:</strong> ' + sanitize(v.postedBy || '') + '</p>',
+        (v.joinedBy ? '<p style="font-size:0.75rem;color:var(--gray);margin-top:0.25rem;">' + (v.joinedBy.length || 0) + ' joining</p>' : ''),
+        '</div>',
+        '<div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">',
+        joined
+          ? '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;">Joined</span>'
+          : '<button class="btn-sm btn-navy" onclick="joinVisitation(\'' + v.id + '\')">Join</button>',
+        canDelete ? '<button class="btn-sm btn-red" onclick="deleteVisitation(\'' + v.id + '\')">Delete</button>' : '',
+        '</div></div>',
+        '</div>'
+      ].join('');
+    });
+  }
+
+  container.innerHTML = [
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">',
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">Community Visitations</h3>',
+    '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="toggleVisitForm()">Post Visitation</button>',
+    '</div>',
+    '<div id="visit-form" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">',
+    '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Post a Visitation</h4>',
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">',
+    '<div class="form-group"><label>Title *</label><input type="text" id="visit-title" placeholder="e.g. Hospital Ward Visit"></div>',
+    '<div class="form-group"><label>Type *</label><select id="visit-type"><option>Hospital Visit</option><option>School Outreach</option><option>Community Session</option><option>Home Visit</option><option>Other</option></select></div>',
+    '<div class="form-group"><label>Location *</label><input type="text" id="visit-location" placeholder="e.g. Kenyatta Hospital, Nairobi"></div>',
+    '<div class="form-group"><label>Visit Date *</label><input type="date" id="visit-date"></div>',
+    '<div class="form-group" style="grid-column:1/-1;"><label>Description *</label><textarea id="visit-desc" rows="3" placeholder="What will you do and who will you visit?"></textarea></div>',
+    '</div>',
+    '<div style="display:flex;gap:0.75rem;margin-top:1rem;">',
+    '<button class="btn-primary" onclick="submitVisitation()">Post Visitation</button>',
+    '<button class="btn-outline" onclick="toggleVisitForm()">Cancel</button>',
+    '</div></div>',
+    visitsHtml
+  ].join('');
+}
+
+function toggleVisitForm() {
+  const form = document.getElementById('visit-form');
+  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function submitVisitation() {
+  const title = (document.getElementById('visit-title') || {}).value.trim();
+  const type = (document.getElementById('visit-type') || {}).value;
+  const location = (document.getElementById('visit-location') || {}).value.trim();
+  const date = (document.getElementById('visit-date') || {}).value;
+  const desc = (document.getElementById('visit-desc') || {}).value.trim();
+  if (!title || !location || !date || !desc) return showToast('Fill all required fields', 'error');
+  await addDoc(collection(db, 'mentalVisitations'), {
+    title: title, type: type, location: location, visitDate: date,
+    description: desc, postedBy: currentUserData.name,
+    postedById: currentUser.uid, joinedBy: [],
+    createdAt: serverTimestamp()
+  });
+  showToast('Visitation posted!');
+  toggleVisitForm();
+  loadVisitations();
+}
+
+async function joinVisitation(visitId) {
+  const ref = doc(db, 'mentalVisitations', visitId);
+  const snap = await getDoc(ref);
+  const data = snap.data();
+  const joinedBy = data.joinedBy || [];
+  if (joinedBy.includes(currentUser.uid)) return showToast('Already joined!', 'error');
+  joinedBy.push(currentUser.uid);
+  await updateDoc(ref, {joinedBy: joinedBy});
+  showToast('You have joined this visitation!');
+  loadVisitations();
+}
+
+async function deleteVisitation(id) {
+  if (!confirm('Delete this visitation?')) return;
+  await deleteDoc(doc(db, 'mentalVisitations', id));
+  showToast('Deleted');
+  loadVisitations();
+}
+
+// ── PEER SUPPORT ───────────────────────────────
+async function loadPeerSupport() {
+  const container = document.getElementById('mental-section-peers');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading...</div>';
+
+  const peersSnap = await getDocs(query(collection(db, 'users'), where('isPeerSupporter', '==', true)));
+  const myRequestSnap = await getDocs(query(collection(db, 'peerRequests'), where('requesterId', '==', currentUser.uid)));
+
+  let peersHtml = '';
+  if (peersSnap.empty) {
+    peersHtml = '<div class="empty-state"><p>No peer supporters assigned yet.</p><p style="font-size:0.82rem;color:var(--gray);">The Mental Health head will assign peer supporters soon.</p></div>';
+  } else {
+    peersSnap.docs.forEach(function(d) {
+      const p = d.data();
+      const alreadyRequested = myRequestSnap.docs.some(function(r) { return r.data().peerId === d.id; });
+      peersHtml += [
+        '<div class="peer-card">',
+        '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">',
+        p.photoUrl
+          ? '<img src="' + sanitize(p.photoUrl) + '" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);">'
+          : '<div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#27AE60,#1a5c35);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:1.1rem;flex-shrink:0;">' + (p.name || '?')[0].toUpperCase() + '</div>',
+        '<div style="flex:1;">',
+        '<p style="font-size:0.92rem;font-weight:700;color:var(--navy);">' + sanitize(p.name) + '</p>',
+        '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize(p.country || '') + '</p>',
+        '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.15rem 0.6rem;border-radius:50px;font-size:0.68rem;font-weight:700;">Peer Supporter</span>',
+        '</div>',
+        alreadyRequested
+          ? '<span style="background:rgba(245,166,35,0.1);color:var(--gold);padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;">Request Sent</span>'
+          : '<button class="btn-sm btn-navy" onclick="requestPeerSupport(\'' + d.id + '\',\'' + sanitize(p.name) + '\')">Request Support</button>',
+        '</div>',
+        p.bio ? '<p style="font-size:0.82rem;color:var(--gray);line-height:1.6;margin-top:0.5rem;">' + sanitize(p.bio) + '</p>' : '',
+        '</div>'
+      ].join('');
+    });
+  }
+
+  container.innerHTML = [
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Peer Support</h3>',
+    '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:1.25rem;">Our trained peer supporters are here to listen. Request support and they will reach out to you privately.</p>',
+    peersHtml
+  ].join('');
+}
+
+async function requestPeerSupport(peerId, peerName) {
+  if (!confirm('Send a support request to ' + peerName + '?')) return;
+  await addDoc(collection(db, 'peerRequests'), {
+    requesterId: currentUser.uid, requesterName: currentUserData.name,
+    peerId: peerId, peerName: peerName,
+    status: 'pending', createdAt: serverTimestamp()
+  });
+  await addDoc(collection(db, 'notifications'), {
+    title: 'Peer Support Request',
+    message: currentUserData.name + ' has requested peer support from ' + peerName + '. Please reach out to them.',
+    type: 'urgent', postedBy: 'System', createdAt: serverTimestamp(), readBy: []
+  });
+  showToast('Request sent! ' + peerName + ' will reach out to you soon.');
+  loadPeerSupport();
+}
+
+// ── RESOURCES ──────────────────────────────────
+function loadMentalResources() {
+  const container = document.getElementById('mental-section-resources');
+  if (!container) return;
+  const resources = [
+    {icon:'🧘', title:'Breathing Exercise', desc:'A simple 4-7-8 breathing technique to calm anxiety instantly.', tag:'Exercise', color:'#27AE60', q:'Guide me through a 4-7-8 breathing exercise for anxiety relief.'},
+    {icon:'📖', title:'Understanding Anxiety', desc:'What anxiety is, why it happens and how to manage it as a young African.', tag:'Guide', color:'#3498DB', q:'Explain anxiety in simple terms and give practical tips for managing it as a young African.'},
+    {icon:'💪', title:'Building Resilience', desc:'Practical strategies for building emotional resilience in challenging times.', tag:'Guide', color:'#9B59B6', q:'Give me practical strategies for building emotional resilience as a young African.'},
+    {icon:'😴', title:'Sleep & Mental Health', desc:'How sleep affects your mental health and tips for better sleep.', tag:'Guide', color:'#1B2A6B', q:'How does sleep affect mental health and what are tips for better sleep for young Africans?'},
+    {icon:'🤝', title:'Supporting a Friend', desc:'How to support someone struggling with mental health without harming yourself.', tag:'Guide', color:'#E67E22', q:'How do I support a friend struggling with mental health without burning myself out?'},
+    {icon:'📝', title:'Journaling for Wellness', desc:'How journaling can improve your mental health and prompts to get started.', tag:'Exercise', color:'#E63329', q:'How does journaling help mental health and give me 10 prompts to get started.'},
+    {icon:'🌍', title:'African Mental Health Context', desc:'Understanding mental health in the African cultural context and how to seek help.', tag:'Guide', color:'#1ABC9C', q:'Explain mental health in the African cultural context and how young Africans can seek help without stigma.'},
+    {icon:'💬', title:'Talking About It', desc:'How to start a conversation about mental health with family or friends in Africa.', tag:'Guide', color:'#F5A623', q:'How do I talk to my African family about mental health struggles without being dismissed?'}
+  ];
+  let html = '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">Wellness Resources</h3>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;">';
+  resources.forEach(function(r) {
+    const q = r.q.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    html += [
+      '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-top:4px solid ' + r.color + ';">',
+      '<div style="font-size:2rem;margin-bottom:0.75rem;">' + r.icon + '</div>',
+      '<span style="background:' + r.color + '18;color:' + r.color + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.68rem;font-weight:700;">' + r.tag + '</span>',
+      '<h4 style="font-size:0.92rem;font-weight:700;color:var(--navy);margin:0.5rem 0;">' + r.title + '</h4>',
+      '<p style="font-size:0.78rem;color:var(--gray);line-height:1.6;margin-bottom:1rem;">' + r.desc + '</p>',
+      '<button class="btn-sm btn-navy" onclick="showAIHelp(\'' + q + '\')">Get with AI</button>',
+      '</div>'
+    ].join('');
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// ── CRISIS RESOURCES ───────────────────────────
+function loadCrisisResources() {
+  const container = document.getElementById('mental-section-crisis');
+  if (!container) return;
+
+  const crisisLines = [
+    {country:'Kenya', flag:'🇰🇪', hotline:'112', org:'Emergency Services', note:'National emergency line. Can be changed to local mental health line.', color:'#006600'},
+    {country:'Rwanda', flag:'🇷🇼', hotline:'112', org:'Emergency Services', note:'National emergency number.', color:'#00A1DE'},
+    {country:'Nigeria', flag:'🇳🇬', hotline:'08096777690', org:'SURPIN Nigeria', note:'Suicide Research & Prevention Initiative.', color:'#008751'},
+    {country:'Ghana', flag:'🇬🇭', hotline:'0800-111-222', org:'Mental Health Authority', note:'Ghana Mental Health Authority helpline.', color:'#006B3F'},
+    {country:'South Africa', flag:'🇿🇦', hotline:'0800 567 567', org:'SADAG', note:'South African Depression & Anxiety Group.', color:'#007A4D'},
+    {country:'Tanzania', flag:'🇹🇿', hotline:'112', org:'Emergency Services', note:'National emergency number.', color:'#1EB53A'},
+    {country:'Uganda', flag:'🇺🇬', hotline:'0800 212 121', org:'Ministry of Health', note:'Uganda mental health support line.', color:'#FCDC04'},
+    {country:'Cameroon', flag:'🇨🇲', hotline:'112', org:'Emergency Services', note:'National emergency number.', color:'#007A5E'},
+  ];
+
+  let html = [
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Crisis Resources</h3>',
+    '<div style="background:rgba(230,51,41,0.06);border:1px solid rgba(230,51,41,0.2);border-radius:12px;padding:1rem;margin-bottom:1.25rem;">',
+    '<p style="font-size:0.88rem;color:var(--red);font-weight:700;margin-bottom:0.25rem;">If you are in immediate danger</p>',
+    '<p style="font-size:0.82rem;color:var(--gray);line-height:1.7;">Please call your local emergency number immediately. You can also reach out to a peer supporter on this platform or message the YAN Mental Health team.</p>',
+    '</div>',
+    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;">'
+  ].join('');
+
+  crisisLines.forEach(function(c) {
+    html += [
+      '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-top:4px solid ' + c.color + ';">',
+      '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">',
+      '<span style="font-size:1.5rem;">' + c.flag + '</span>',
+      '<strong style="font-size:0.88rem;color:var(--navy);">' + c.country + '</strong>',
+      '</div>',
+      '<div style="font-family:Playfair Display,serif;font-size:1.5rem;font-weight:900;color:' + c.color + ';margin-bottom:0.25rem;">' + c.hotline + '</div>',
+      '<p style="font-size:0.78rem;font-weight:600;color:var(--navy);margin-bottom:0.25rem;">' + c.org + '</p>',
+      '<p style="font-size:0.72rem;color:var(--gray);line-height:1.5;">' + c.note + '</p>',
+      '<a href="tel:' + c.hotline.replace(/\s/g,'') + '" style="display:inline-block;margin-top:0.75rem;background:' + c.color + ';color:#fff;padding:0.4rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:700;text-decoration:none;">Call Now</a>',
+      '</div>'
+    ].join('');
+  });
+
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// ── MANAGE ─────────────────────────────────────
+async function loadMentalManage() {
+  const container = document.getElementById('mental-section-manage');
+  if (!container) return;
+
+  const peerRequestsSnap = await getDocs(query(collection(db, 'peerRequests'), where('status', '==', 'pending'), orderBy('createdAt', 'desc')));
+
+  let peerRequestsHtml = peerRequestsSnap.size === 0
+    ? '<p style="color:var(--gray);font-size:0.85rem;">No pending peer support requests.</p>'
+    : '';
+
+  peerRequestsSnap.docs.forEach(function(d) {
+    const r = d.data();
+    peerRequestsHtml += [
+      '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">',
+      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">',
+      '<div>',
+      '<strong style="font-size:0.88rem;color:var(--navy);">' + sanitize(r.requesterName) + '</strong>',
+      '<p style="font-size:0.78rem;color:var(--gray);">Requested support from: ' + sanitize(r.peerName) + '</p>',
+      '<p style="font-size:0.72rem;color:var(--gray);">' + timeAgo(r.createdAt) + '</p>',
+      '</div>',
+      '<button class="btn-sm btn-navy" onclick="closePeerRequest(\'' + d.id + '\')">Mark Resolved</button>',
+      '</div></div>'
+    ].join('');
+  });
+
+  container.innerHTML = [
+    '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;">Manage Mental Health Hub</h3>',
+
+    // Invite Professional
+    '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">',
+    '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Invite a Professional</h4>',
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">',
+    '<div class="form-group"><label>Session Title *</label><input type="text" id="sess-title" placeholder="e.g. Managing Anxiety as a Student"></div>',
+    '<div class="form-group"><label>Professional Name *</label><input type="text" id="sess-prof-name" placeholder="e.g. Dr. Jane Wanjiku"></div>',
+    '<div class="form-group"><label>Organization</label><input type="text" id="sess-org" placeholder="e.g. Nairobi Counseling Center"></div>',
+    '<div class="form-group"><label>Specialty *</label><input type="text" id="sess-specialty" placeholder="e.g. Anxiety & Depression"></div>',
+    '<div class="form-group"><label>Session Date *</label><input type="date" id="sess-date"></div>',
+    '<div class="form-group"><label>Session Time *</label><input type="time" id="sess-time"></div>',
+    '<div class="form-group"><label>Room URL</label><input type="text" id="sess-room" placeholder="Daily.co or Zoom link"></div>',
+    '<div class="form-group" style="grid-column:1/-1;"><label>Description *</label><textarea id="sess-desc" rows="3" placeholder="What will this session cover?"></textarea></div>',
+    '</div>',
+    '<button class="btn-primary" onclick="postProfessionalSession()">Post Session</button>',
+    '</div>',
+
+    // Peer Requests
+    '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">',
+    '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Peer Support Requests (' + peerRequestsSnap.size + ')</h4>',
+    peerRequestsHtml,
+    '</div>',
+
+    // Assign Peer Supporter
+    '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">',
+    '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Assign Peer Supporter</h4>',
+    '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:1rem;">Enter the member email to assign them as a peer supporter.</p>',
+    '<div style="display:flex;gap:0.75rem;flex-wrap:wrap;">',
+    '<input type="text" id="peer-assign-email" placeholder="Member email address" style="flex:1;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.75rem 1rem;border-radius:12px;font-family:Poppins,sans-serif;font-size:0.88rem;outline:none;min-width:200px;">',
+    '<button class="btn-primary" style="width:auto;" onclick="assignPeerSupporter()">Assign</button>',
+    '</div></div>'
+  ].join('');
+}
+
+async function postProfessionalSession() {
+  const title = (document.getElementById('sess-title') || {}).value.trim();
+  const profName = (document.getElementById('sess-prof-name') || {}).value.trim();
+  const org = (document.getElementById('sess-org') || {}).value.trim();
+  const specialty = (document.getElementById('sess-specialty') || {}).value.trim();
+  const date = (document.getElementById('sess-date') || {}).value;
+  const time = (document.getElementById('sess-time') || {}).value;
+  const room = (document.getElementById('sess-room') || {}).value.trim();
+  const desc = (document.getElementById('sess-desc') || {}).value.trim();
+  if (!title || !profName || !specialty || !date || !desc) return showToast('Fill all required fields', 'error');
+  await addDoc(collection(db, 'mentalSessions'), {
+    title: title, professionalName: profName, organization: org,
+    specialty: specialty, sessionDate: date, sessionTime: time,
+    roomUrl: room, description: desc,
+    postedBy: currentUserData.name, postedById: currentUser.uid,
+    registeredBy: [], createdAt: serverTimestamp()
+  });
+  await addDoc(collection(db, 'notifications'), {
+    title: 'New Professional Session: ' + title,
+    message: 'A new wellness session with ' + profName + ' has been scheduled for ' + date + '. Register in the Mental Health Hub!',
+    type: 'announcement', postedBy: currentUserData.name,
+    createdAt: serverTimestamp(), readBy: []
+  });
+  showToast('Session posted and members notified!');
+  loadMentalManage();
+}
+
+async function assignPeerSupporter() {
+  const email = (document.getElementById('peer-assign-email') || {}).value.trim();
+  if (!email) return showToast('Enter member email', 'error');
+  const usersSnap = await getDocs(query(collection(db, 'users'), where('email', '==', email)));
+  if (usersSnap.empty) return showToast('Member not found', 'error');
+  const userId = usersSnap.docs[0].id;
+  await updateDoc(doc(db, 'users', userId), {isPeerSupporter: true});
+  await addDoc(collection(db, 'notifications'), {
+    title: 'You are now a YAN Peer Supporter!',
+    message: 'You have been assigned as a Peer Supporter for the Mental Health & Wellbeing department. Members may reach out to you for support. Thank you for stepping up!',
+    type: 'announcement', postedBy: currentUserData.name,
+    createdAt: serverTimestamp(), readBy: []
+  });
+  showToast('Peer supporter assigned!');
+  document.getElementById('peer-assign-email').value = '';
+}
+
+async function closePeerRequest(requestId) {
+  await updateDoc(doc(db, 'peerRequests', requestId), {
+    status: 'resolved', resolvedBy: currentUserData.name, resolvedAt: serverTimestamp()
+  });
+  showToast('Marked as resolved');
+  loadMentalManage();
+}
+
+window.loadMentalHealthHub = loadMentalHealthHub;
+window.showMentalSection = showMentalSection;
+window.loadMentalFeed = loadMentalFeed;
+window.submitMentalPost = submitMentalPost;
+window.deleteMentalPost = deleteMentalPost;
+window.loadMoodCheckin = loadMoodCheckin;
+window.selectMood = selectMood;
+window.submitMoodCheckin = submitMoodCheckin;
+window.loadProfessionalSessions = loadProfessionalSessions;
+window.registerForSession = registerForSession;
+window.deleteMentalSession = deleteMentalSession;
+window.loadVisitations = loadVisitations;
+window.toggleVisitForm = toggleVisitForm;
+window.submitVisitation = submitVisitation;
+window.joinVisitation = joinVisitation;
+window.deleteVisitation = deleteVisitation;
+window.loadPeerSupport = loadPeerSupport;
+window.requestPeerSupport = requestPeerSupport;
+window.loadMentalResources = loadMentalResources;
+window.loadCrisisResources = loadCrisisResources;
+window.loadMentalManage = loadMentalManage;
+window.postProfessionalSession = postProfessionalSession;
+window.assignPeerSupporter = assignPeerSupporter;
+window.closePeerRequest = closePeerRequest;
+
 window.loadCommunityHub = loadCommunityHub;
 window.showCommunitySection = showCommunitySection;
 window.loadCommunityTasks = loadCommunityTasks;
@@ -5627,6 +6333,7 @@ h2,h3{position:relative;}
       <button class="tab-btn" data-tab="scholarships" onclick="showTab('scholarships')"><span class="tab-icon">—</span> Scholarships</button>
       <button class="tab-btn" data-tab="career" onclick="showTab('career')"><span class="tab-icon">—</span> Career & Public Speaking</button>
       <button class="tab-btn" data-tab="community-impact" onclick="showTab('community-impact')"><span class="tab-icon">—</span> Community Impact & Volunteering</button>
+      <button class="tab-btn" data-tab="mental-health" onclick="showTab('mental-health')"><span class="tab-icon">—</span> Mental Health & Wellbeing</button>
       <button class="tab-btn" data-tab="magazine" onclick="showTab('magazine')"><span class="tab-icon">—</span> Magazine</button>
       <button class="tab-btn" data-tab="achievements" onclick="showTab('achievements')"><span class="tab-icon">—</span> Achievements</button>
       <button class="tab-btn" data-tab="resources" onclick="showTab('resources')"><span class="tab-icon">—</span> Resources</button>
@@ -5694,6 +6401,7 @@ h2,h3{position:relative;}
     <div class="tab-panel" id="tab-scholarships"><div id="scholarships-container"></div></div>
     <div class="tab-panel" id="tab-career"><div id="career-container"></div></div>
     <div class="tab-panel" id="tab-community-impact"><div id="community-impact-container"></div></div>
+    <div class="tab-panel" id="tab-mental-health"><div id="mental-container"></div></div>
     <div class="tab-panel" id="tab-magazine"><div id="magazine-container"></div></div>
     <div class="tab-panel" id="tab-achievements"><div id="achievements-container"></div></div>
     <div class="tab-panel" id="tab-resources"><div id="resources-container"></div></div>

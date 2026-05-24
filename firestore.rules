@@ -276,6 +276,46 @@ service cloud.firestore {
       allow write: if isLoggedIn() && isOwner(userId);
     }
 
+
+    match /mentalPosts/{postId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow delete: if isLoggedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+    }
+
+    match /moodCheckins/{checkinId} {
+      allow read: if isLoggedIn() && (
+        resource.data.userId == request.auth.uid || isAdminOrHead()
+      );
+      allow create, update: if isLoggedIn();
+    }
+
+    match /mentalSessions/{sessionId} {
+      allow read: if isLoggedIn();
+      allow create: if isAdminOrHead() || isSystemAdmin();
+      allow update: if isLoggedIn();
+      allow delete: if isAdminOrHead() || isSystemAdmin();
+    }
+
+    match /mentalVisitations/{visitId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn();
+      allow delete: if isLoggedIn() && (
+        resource.data.postedById == request.auth.uid || isAdminOrHead()
+      );
+    }
+
+    match /peerRequests/{reqId} {
+      allow read: if isLoggedIn() && (
+        resource.data.requesterId == request.auth.uid || isAdminOrHead()
+      );
+      allow create: if isLoggedIn();
+      allow update: if isAdminOrHead() || isSystemAdmin();
+    }
+
     match /moderation_log/{logId} {
       allow read: if isAdmin();
       allow create: if isLoggedIn();
