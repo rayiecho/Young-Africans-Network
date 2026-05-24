@@ -622,17 +622,17 @@ contactForm.addEventListener('submit', async function(e) {
 </div>
 
 <script>
-var yanGuideOpen = false;
-function toggleYANGuide() {
-  yanGuideOpen = !yanGuideOpen;
+window.yanGuideOpen = false;
+window.toggleYANGuide = function() {
+  window.yanGuideOpen = !window.yanGuideOpen;
   var chat = document.getElementById('yan-guide-chat');
   if (chat) chat.style.display = yanGuideOpen ? 'flex' : 'none';
 }
-function askYANGuide(question) {
+window.askYANGuide = function(question) {
   var input = document.getElementById('yan-guide-input');
   if (input) { input.value = question; sendYANGuideMessage(); }
 }
-async function sendYANGuideMessage() {
+window.sendYANGuideMessage = async function() {
   var input = document.getElementById('yan-guide-input');
   var message = input ? input.value.trim() : '';
   if (!message) return;
