@@ -2610,15 +2610,8 @@ async function loadHeadPanel() {
     <p style="color:var(--gray);margin-bottom:1.5rem;"><strong>${DEPARTMENTS.find(d=>d.id===dept)?.name||dept}</strong></p>
     <div class="head-sections">
       <div class="head-section">
-        <h3>➕ Post Training Material</h3>
-        <div class="form-group"><label>Title *</label><input type="text" id="head-mat-title" placeholder="Material title"></div>
-        <div class="form-group"><label>Type</label><select id="head-mat-type" onchange="toggleMaterialFields()"><option value="video">📹 Video</option><option value="article">📄 Article</option></select></div>
-        <div id="head-video-field" class="form-group"><label>YouTube URL</label><input type="text" id="head-mat-url" placeholder="https://youtube.com/watch?v=..."></div>
-        <div id="head-article-fields" style="display:none;">
-          <div class="form-group"><label>Article Link</label><input type="text" id="head-mat-link" placeholder="https://..."></div>
-          <div class="form-group"><label>Article Text</label><textarea id="head-mat-text" rows="3"></textarea></div>
-        </div>
-        <button class="btn-primary" onclick="postMaterial('${dept}')">Post Material</button>
+        <h3>➕ Post to Your Hub</h3>
+        <div id="head-hub-post-form"><div class="loading">Loading form...</div></div>
       </div>
       <div class="head-section">
         <h3>📝 Create Quiz</h3>
@@ -2661,7 +2654,7 @@ async function loadHeadPanel() {
       <h3>👥 Department Members</h3>
       <div id="head-members-list"><div class="loading">Loading...</div></div>
     </div>`;
-  loadHeadMaterials(dept); loadHeadEngagement(dept); loadHeadMembers(dept); loadHeadMeetings(dept);
+  loadHeadHubPostForm(dept); loadHeadEngagement(dept); loadHeadMembers(dept); loadHeadMeetings(dept);
 }
 
 function toggleMaterialFields() {
