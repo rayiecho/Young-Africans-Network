@@ -119,11 +119,14 @@ window.loadSection = async function(section) {
     materials: '📚 Training Materials',
     certificates: '🏆 Certificate Manager',
     members: '👥 Members Manager',
-    moderation: '🛡️ Community Moderation'
+    moderation: '🛡️ Community Moderation',
+    hubs: '🏢 YAN Hubs Manager',
+    partnerships: '🤝 Partnerships Manager',
+    newsletters: '📧 Newsletter Manager'
   }[section] || section;
   const container = document.getElementById('content-area');
   container.innerHTML = '<div class="loading">Loading...</div>';
-  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration };
+  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin };
   if (fns[section]) await fns[section](container);
 };
 
@@ -1024,6 +1027,9 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <button class="nav-item" data-section="certificates" onclick="loadSection('certificates')"><span class="nav-icon">🏆</span> Certificates</button>
       <button class="nav-item" data-section="members" onclick="loadSection('members')"><span class="nav-icon">🌍</span> Members</button>
       <button class="nav-item" data-section="moderation" onclick="loadSection('moderation')"><span class="nav-icon">🛡️</span> Moderation</button>
+      <button class="nav-item" data-section="hubs" onclick="loadSection('hubs')"><span class="nav-icon">🏢</span> YAN Hubs</button>
+      <button class="nav-item" data-section="partnerships" onclick="loadSection('partnerships')"><span class="nav-icon">🤝</span> Partnerships</button>
+      <button class="nav-item" data-section="newsletters" onclick="loadSection('newsletters')"><span class="nav-icon">📧</span> Newsletters</button>
     </nav>
     <div class="admin-sidebar-footer">
       <button class="btn-logout-admin" onclick="doAdminLogout()">🚪 Sign Out</button>
@@ -1061,4 +1067,106 @@ document.addEventListener('click', function(e) {
 });
 </script>
 </body>
-</html>
+</html><script>
+async function loadHubsAdmin(c) {
+  const hubs = [
+    {name:'Career & Public Speaking', col:'careerMaterials'},
+    {name:'Community Impact', col:'communityTasks'},
+    {name:'Mental Health', col:'mentalSessions'},
+    {name:'YAN Tech Academy', col:'trainingPrograms'},
+    {name:'Communications & Media', col:'contentTasks'},
+    {name:'Partnerships', col:'partnershipOpportunities'},
+    {name:'Scholarships', col:'scholarshipOpportunities'}
+  ];
+
+  let html = '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1.5rem;">YAN Hubs Overview</h3>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-bottom:2rem;">';
+
+  for (const hub of hubs) {
+    try {
+      const snap = await getDocs(collection(db, hub.col));
+      html += '<div class="section-card" style="text-align:center;padding:1.25rem;">'
+        + '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">' + hub.name + '</p>'
+        + '<p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + snap.size + '</p>'
+        + '<p style="font-size:0.72rem;color:var(--gray);">items</p>'
+        + '</div>';
+    } catch(e) {
+      html += '<div class="section-card" style="text-align:center;padding:1.25rem;">'
+        + '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + hub.name + '</p>'
+        + '<p style="font-size:0.72rem;color:var(--gray);">Error loading</p>'
+        + '</div>';
+    }
+  }
+  html += '</div>';
+  c.innerHTML = html;
+}
+
+async function loadPartnershipsAdmin(c) {
+  const [partnersSnap, proposalsSnap, oppsSnap] = await Promise.all([
+    getDocs(collection(db, 'yanPartners')),
+    getDocs(query(collection(db, 'partnershipProposals'), where('status', '==', 'pending'))),
+    getDocs(collection(db, 'partnershipOpportunities'))
+  ]);
+
+  let html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;">'
+    + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Active Partners</p><p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + partnersSnap.size + '</p></div>'
+    + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Pending Proposals</p><p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--red);">' + proposalsSnap.size + '</p></div>'
+    + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Opportunities</p><p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--navy);">' + oppsSnap.size + '</p></div>'
+    + '</div>';
+
+  html += '<div class="section-card"><h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Pending Proposals</h4>';
+  if (proposalsSnap.empty) {
+    html += '<p style="color:var(--gray);font-size:0.85rem;">No pending proposals.</p>';
+  } else {
+    proposalsSnap.docs.forEach(d => {
+      const p = d.data();
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;border-bottom:1px solid var(--light);flex-wrap:wrap;gap:0.5rem;">'
+        + '<div><strong style="font-size:0.88rem;color:var(--navy);">' + (p.orgName||'') + '</strong>'
+        + '<p style="font-size:0.75rem;color:var(--gray);">Proposed by ' + (p.proposedBy||'') + '</p></div>'
+        + '<div style="display:flex;gap:0.5rem;">'
+        + '<button class="btn-sm btn-navy" onclick="approveProposalAdmin(\'' + d.id + '\')">Approve</button>'
+        + '<button class="btn-sm btn-red" onclick="rejectProposalAdmin(\'' + d.id + '\')">Reject</button>'
+        + '</div></div>';
+    });
+  }
+  html += '</div>';
+  c.innerHTML = html;
+}
+
+async function approveProposalAdmin(id) {
+  await updateDoc(doc(db, 'partnershipProposals', id), {status: 'approved'});
+  showToast('Proposal approved!');
+  loadSection('partnerships');
+}
+
+async function rejectProposalAdmin(id) {
+  await updateDoc(doc(db, 'partnershipProposals', id), {status: 'rejected'});
+  showToast('Proposal rejected');
+  loadSection('partnerships');
+}
+
+async function loadNewslettersAdmin(c) {
+  const snap = await getDocs(query(collection(db, 'newsletters'), orderBy('createdAt', 'desc')));
+  let html = '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Newsletters</h3>';
+  if (snap.empty) {
+    html += '<p style="color:var(--gray);">No newsletters yet.</p>';
+  } else {
+    snap.docs.forEach(d => {
+      const n = d.data();
+      html += '<div class="section-card" style="margin-bottom:1rem;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">'
+        + '<div><strong style="font-size:0.92rem;color:var(--navy);">' + (n.subject||'') + '</strong>'
+        + '<p style="font-size:0.78rem;color:var(--gray);margin-top:0.25rem;">' + (n.sent ? 'Sent to ' + (n.sentTo||0) + ' members' : 'Draft') + ' · ' + (n.createdBy||'') + '</p></div>'
+        + '<span style="background:' + (n.sent ? 'rgba(39,174,96,0.1)' : 'rgba(245,166,35,0.1)') + ';color:' + (n.sent ? '#27AE60' : '#b37800') + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (n.sent ? 'Sent' : 'Draft') + '</span>'
+        + '</div></div>';
+    });
+  }
+  c.innerHTML = html;
+}
+
+window.loadHubsAdmin = loadHubsAdmin;
+window.loadPartnershipsAdmin = loadPartnershipsAdmin;
+window.approveProposalAdmin = approveProposalAdmin;
+window.rejectProposalAdmin = rejectProposalAdmin;
+window.loadNewslettersAdmin = loadNewslettersAdmin;
+</script>
