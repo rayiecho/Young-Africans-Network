@@ -139,6 +139,12 @@ function showTab(tab) {
 }
 
 // AUTH
+// Show loading screen immediately on page load
+document.addEventListener('DOMContentLoaded', function() {
+  const loading = document.getElementById('screen-loading');
+  if (loading) { loading.classList.add('active'); loading.style.display = 'flex'; }
+});
+
 onAuthStateChanged(auth, async user => {
   if (user) {
     currentUser = user;
@@ -8291,6 +8297,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 h2,h3{position:relative;}
 /* ── END GOLD LINE ── */
 
+@keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
