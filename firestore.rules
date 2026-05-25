@@ -99,7 +99,7 @@ service cloud.firestore {
 
     match /scholarships/{schId} {
       allow read: if isLoggedIn();
-      allow create, update: if isAdminOrHead();
+      allow create, update: if isAdminOrHead() || request.auth == null;
       allow delete: if isAdminOrHead();
     }
 
