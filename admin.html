@@ -125,7 +125,7 @@ async function loadHubsAdmin(c) {
         getDocs(collection(db, hub.col)),
         getDocs(query(collection(db,'users'), where('department','==',hub.dept)))
       ]);
-      html += '<div class="section-card" style="padding:1.25rem;cursor:pointer;" onclick="loadHubDetail(''+hub.id+'')">'
+      html += '<div class="section-card" style="padding:1.25rem;cursor:pointer;" onclick="loadHubDetail(\'' + hub.id + '\')">'
         + '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">'
         + '<span style="font-size:1.5rem;">'+hub.icon+'</span>'
         + '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);">'+hub.name+'</p></div>'
@@ -140,7 +140,7 @@ async function loadHubsAdmin(c) {
         + '<button class="btn-primary" style="margin-top:0.75rem;padding:0.5rem;font-size:0.78rem;width:100%;">Manage Hub →</button>'
         + '</div>';
     } catch(e) {
-      html += '<div class="section-card" style="padding:1.25rem;cursor:pointer;" onclick="loadHubDetail(''+hub.id+'')">'
+      html += '<div class="section-card" style="padding:1.25rem;cursor:pointer;" onclick="loadHubDetail(\'' + hub.id + '\')">'
         + '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);">'+hub.icon+' '+hub.name+'</p>'
         + '<p style="font-size:0.72rem;color:var(--gray);">Click to manage</p></div>';
     }
@@ -190,7 +190,7 @@ async function loadHubDetail(hubId) {
       + '<div class="form-group"><label>Category/Level</label><input type="text" id="hub-mat-category" placeholder="e.g. Beginner"></div>'
       + '</div>'
       + '<div class="form-group"><label>Description</label><textarea id="hub-mat-desc" rows="2" placeholder="What will members learn?"></textarea></div>'
-      + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.5rem;" onclick="postToHubAdmin(''+hub.id+'',''+hub.col+'')">Post to Hub</button>'
+      + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.5rem;" onclick="postToHubAdmin(\'' + hub.id + '\',\'' + hub.col + '\')">Post to Hub</button>'
       + '</div>';
 
     if (hubId === 'scholarships' && recsSnap.docs.length > 0) {
@@ -205,8 +205,8 @@ async function loadHubDetail(hubId) {
           + '<p style="font-size:0.75rem;color:var(--gray);">Purpose: '+(r.purpose||r.message||'')+'</p>'
           + '</div>'
           + '<div style="display:flex;gap:0.5rem;">'
-          + '<button class="btn-sm btn-navy" onclick="approveRecLetter(''+d.id+'',''+r.memberName+'',''+r.scholarship+'')">Approve</button>'
-          + '<button class="btn-sm btn-red" onclick="rejectRecLetter(''+d.id+'')">Reject</button>'
+          + '<button class="btn-sm btn-navy" onclick="approveRecLetter(\'' + d.id + '\',\'' + r.memberName + '\',\'' + r.scholarship + '\')">Approve</button>'
+          + '<button class="btn-sm btn-red" onclick="rejectRecLetter(\'' + d.id + '\')">Reject</button>'
           + '</div></div>';
       });
       html += '</div>';
@@ -226,7 +226,7 @@ async function loadHubDetail(hubId) {
           + '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);">'+(u.name||'')+'</p>'
           + '<p style="font-size:0.72rem;color:var(--gray);">'+(u.role||'Member')+' · '+(u.country||'')+'</p>'
           + '</div>'
-          + '<button class="btn-sm btn-navy" onclick="viewMemberProgress(''+d.id+'',''+sanitize(u.name)+'')">Progress</button>'
+          + '<button class="btn-sm btn-navy" onclick="viewMemberProgress(\'' + d.id + '\',\'' + sanitize(u.name) + '\')">Progress</button>'
           + '</div>';
       });
     }
@@ -245,7 +245,7 @@ async function loadHubDetail(hubId) {
           + '<p style="font-size:0.72rem;color:var(--gray);">'+(m.type||'')+' · '+(m.postedBy||m.postedByName||'')+'</p>'
           + (m.sourceUrl||m.url ? '<a href="'+(m.sourceUrl||m.url)+'" target="_blank" style="font-size:0.72rem;color:var(--navy);">View →</a>' : '')
           + '</div>'
-          + '<button class="btn-sm btn-red" onclick="deleteHubMaterial(''+hub.col+'',''+d.id+'',''+hub.id+'')">Delete</button>'
+          + '<button class="btn-sm btn-red" onclick="deleteHubMaterial(\'' + hub.col + '\',\'' + d.id + '\',\'' + hub.id + '\')">Delete</button>'
           + '</div>';
       });
     }
