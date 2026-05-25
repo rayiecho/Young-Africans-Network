@@ -553,6 +553,15 @@ form.addEventListener('submit', async function(e) {
     const formObj = {};
     data.forEach((v,k) => formObj[k] = v);
     await addDoc(collection(db, 'joinRequests'), {...formObj, submittedAt: serverTimestamp(), status: 'pending', source: 'join.html'});
+    // Send auto-response email
+    try {
+      await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
+        to_email: formObj.email || formObj['email'] || '',
+        name: formObj.name || formObj['full-name'] || 'Applicant',
+        subject: 'Application Received — Young Africans Network',
+        message: 'Thank you for applying to join the Young Africans Network! We have received your application and our team will review it within 48 hours. We are excited about your interest in being part of our pan-African community.\n\nWarm regards,\nYAN Administration Office\nyoungafricansnetwork.org'
+      });
+    } catch(emailErr) { console.log('Email error:', emailErr); }
     if (true) {
       successMsg.style.display = 'block';
       form.reset();
@@ -667,5 +676,8 @@ window.sendYANGuideMessage = async function() {
 </script>
 <!-- END YAN GUIDE -->
 
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>emailjs.init('NyhRgF1xCbrxy7XEG');</script>
 </body>
 </html>
