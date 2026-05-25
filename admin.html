@@ -292,6 +292,80 @@ async function rejectRecLetter(recId) {
   loadHubDetail('scholarships');
 }
 
+
+async function loadFormsAdmin(c) {
+  try {
+    const [joinSnap, contactSnap] = await Promise.all([
+      getDocs(query(collection(db, 'joinRequests'), orderBy('submittedAt', 'desc'))),
+      getDocs(query(collection(db, 'contactSubmissions'), orderBy('submittedAt', 'desc')))
+    ]);
+
+    let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">'
+      + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Join Requests</p>'
+      + '<p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + joinSnap.size + '</p></div>'
+      + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Contact Messages</p>'
+      + '<p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--navy);">' + contactSnap.size + '</p></div>'
+      + '</div>';
+
+    // Join Requests
+    html += '<div class="section-card" style="margin-bottom:1.5rem;">'
+      + '<h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">📋 Join Requests (' + joinSnap.size + ')</h3>';
+    if (joinSnap.empty) {
+      html += '<p style="color:var(--gray);font-size:0.85rem;">No join requests yet.</p>';
+    } else {
+      joinSnap.docs.forEach(d => {
+        const r = d.data();
+        const date = r.submittedAt?.toDate?.().toLocaleDateString() || '';
+        html += '<div style="padding:1rem 0;border-bottom:1px solid var(--light);">'
+          + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">'
+          + '<div>'
+          + '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + (r.name||r['full-name']||'Unknown') + '</p>'
+          + '<p style="font-size:0.75rem;color:var(--gray);">' + (r.email||'') + ' · ' + (r.country||'') + '</p>'
+          + '<p style="font-size:0.75rem;color:var(--gray);">Role: ' + (r.role||'') + ' · Dept: ' + (r.department||'') + '</p>'
+          + '<p style="font-size:0.72rem;color:var(--gray);">' + date + '</p>'
+          + '</div>'
+          + '<span style="background:' + (r.status === 'pending' ? 'rgba(245,166,35,0.1)' : 'rgba(39,174,96,0.1)') + ';color:' + (r.status === 'pending' ? '#b37800' : '#27AE60') + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (r.status||'pending') + '</span>'
+          + '</div></div>';
+      });
+    }
+    html += '</div>';
+
+    // Contact Messages
+    html += '<div class="section-card">'
+      + '<h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">✉️ Contact Messages (' + contactSnap.size + ')</h3>';
+    if (contactSnap.empty) {
+      html += '<p style="color:var(--gray);font-size:0.85rem;">No contact messages yet.</p>';
+    } else {
+      contactSnap.docs.forEach(d => {
+        const m = d.data();
+        const date = m.submittedAt?.toDate?.().toLocaleDateString() || '';
+        html += '<div style="padding:1rem 0;border-bottom:1px solid var(--light);">'
+          + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">'
+          + '<div style="flex:1;">'
+          + '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + (m.name||'Unknown') + '</p>'
+          + '<p style="font-size:0.75rem;color:var(--gray);">' + (m.email||'') + ' · ' + date + '</p>'
+          + '<p style="font-size:0.82rem;color:var(--navy);margin-top:0.35rem;line-height:1.6;">' + (m.message||m.subject||'') + '</p>'
+          + '</div>'
+          + '<span style="background:' + (m.status === 'unread' ? 'rgba(230,51,41,0.1)' : 'rgba(39,174,96,0.1)') + ';color:' + (m.status === 'unread' ? 'var(--red)' : '#27AE60') + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;cursor:pointer;" onclick="markContactRead('' + d.id + '')">' + (m.status === 'unread' ? 'Unread' : 'Read') + '</span>'
+          + '</div></div>';
+      });
+    }
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) {
+    c.innerHTML = '<p style="color:var(--gray);">Error: ' + e.message + '</p>';
+  }
+}
+
+async function markContactRead(id) {
+  await updateDoc(doc(db, 'contactSubmissions', id), {status: 'read'});
+  showToast('Marked as read');
+  loadSection('forms');
+}
+
+window.loadFormsAdmin = loadFormsAdmin;
+window.markContactRead = markContactRead;
+
 window.loadHubsAdmin = loadHubsAdmin;
 window.loadHubDetail = loadHubDetail;
 window.postToHubAdmin = postToHubAdmin;
@@ -388,13 +462,14 @@ window.loadSection = async function(section) {
     certificates: '🏆 Certificate Manager',
     members: '👥 Members Manager',
     moderation: '🛡️ Community Moderation',
+    forms: '📬 Form Submissions',
     hubs: '🏢 YAN Hubs Manager',
     partnerships: '🤝 Partnerships Manager',
     newsletters: '📧 Newsletter Manager'
   }[section] || section;
   const container = document.getElementById('content-area');
   container.innerHTML = '<div class="loading">Loading...</div>';
-  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin };
+  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin };
   if (fns[section]) await fns[section](container);
 };
 
@@ -1297,6 +1372,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <button class="nav-item" data-section="certificates" onclick="loadSection('certificates')"><span class="nav-icon">🏆</span> Certificates</button>
       <button class="nav-item" data-section="members" onclick="loadSection('members')"><span class="nav-icon">🌍</span> Members</button>
       <button class="nav-item" data-section="moderation" onclick="loadSection('moderation')"><span class="nav-icon">🛡️</span> Moderation</button>
+      <button class="nav-item" data-section="forms" onclick="loadSection('forms')"><span class="nav-icon">📬</span> Form Submissions</button>
       <button class="nav-item" data-section="hubs" onclick="loadSection('hubs')"><span class="nav-icon">🏢</span> YAN Hubs</button>
       <button class="nav-item" data-section="partnerships" onclick="loadSection('partnerships')"><span class="nav-icon">🤝</span> Partnerships</button>
       <button class="nav-item" data-section="newsletters" onclick="loadSection('newsletters')"><span class="nav-icon">📧</span> Newsletters</button>
