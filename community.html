@@ -196,6 +196,7 @@ async function doRegister() {
       const data = await res.json();
       photoUrl = data.secure_url || '';
     }
+    const refCode = localStorage.getItem('yan_referral');
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     await sendEmailVerification(cred.user);
     await setDoc(doc(db, 'users', cred.user.uid), {
@@ -228,7 +229,6 @@ async function doRegister() {
       }
     }
     // Increment referrer's count
-    const refCode = localStorage.getItem('yan_referral');
     if (refCode) {
       const refSnap = await getDocs(query(collection(db,'users'), where('referralCode','==',refCode)));
       if (!refSnap.empty) {
