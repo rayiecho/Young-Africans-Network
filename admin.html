@@ -347,6 +347,7 @@ async function loadFormsAdmin(c) {
           + '<p style="font-size:0.82rem;color:var(--navy);margin-top:0.35rem;line-height:1.6;">' + (m.message||m.subject||'') + '</p>'
           + '</div>'
           + '<span style="background:' + (m.status === 'unread' ? 'rgba(230,51,41,0.1)' : 'rgba(39,174,96,0.1)') + ';color:' + (m.status === 'unread' ? 'var(--red)' : '#27AE60') + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;cursor:pointer;" onclick="markContactRead(\'' + d.id + '\')" >' + (m.status === 'unread' ? 'Unread' : 'Read') + '</span>'
+          + '<button class="btn-sm btn-navy" style="margin-left:0.5rem;" onclick="replyToContact(\'' + (m.email||'') + '\',\'' + (m.name||'') + '\')">Reply</button>'
           + '</div></div>';
       });
     }
@@ -365,6 +366,25 @@ async function markContactRead(id) {
 
 window.loadFormsAdmin = loadFormsAdmin;
 window.markContactRead = markContactRead;
+
+async function replyToContact(email, name) {
+  if (!email) return showToast('No email address found', 'error');
+  const message = prompt('Type your reply to ' + name + ':');
+  if (!message) return;
+  try {
+    await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
+      to_email: email,
+      name: name || 'Visitor',
+      subject: 'Reply from Young Africans Network',
+      message: message + '\n\nWarm regards,\nYAN Administration Office\nyoungafricansnetwork.org'
+    });
+    showToast('Reply sent to ' + name + '!');
+  } catch(e) {
+    showToast('Failed to send reply: ' + e.message, 'error');
+  }
+}
+window.replyToContact = replyToContact;
+
 
 window.loadHubsAdmin = loadHubsAdmin;
 window.loadHubDetail = loadHubDetail;
@@ -1417,5 +1437,7 @@ document.addEventListener('click', function(e) {
 
 
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>emailjs.init('NyhRgF1xCbrxy7XEG');</script>
 </body>
 </html>
