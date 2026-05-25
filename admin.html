@@ -106,103 +106,199 @@ async function uploadToCloudinary(file) {
 }
 
 // ===== NAVIGATION =====
+const HUB_CONFIG = [
+  {id:'career', name:'Career & Public Speaking', icon:'💼', col:'careerMaterials', dept:'career'},
+  {id:'community', name:'Community Impact', icon:'🌍', col:'communityTasks', dept:'community'},
+  {id:'mental', name:'Mental Health', icon:'💚', col:'mentalSessions', dept:'mental'},
+  {id:'programs', name:'YAN Tech Academy', icon:'💻', col:'trainingPrograms', dept:'programs'},
+  {id:'communications', name:'Communications & Media', icon:'📢', col:'contentTasks', dept:'communications'},
+  {id:'partnerships', name:'Partnerships', icon:'🤝', col:'partnershipOpportunities', dept:'partnerships'},
+  {id:'scholarships', name:'Scholarships', icon:'🎓', col:'scholarshipOpportunities', dept:'scholarships'}
+];
+
 async function loadHubsAdmin(c) {
-  const hubs = [
-    {name:'Career & Public Speaking', col:'careerMaterials'},
-    {name:'Community Impact', col:'communityTasks'},
-    {name:'Mental Health', col:'mentalSessions'},
-    {name:'YAN Tech Academy', col:'trainingPrograms'},
-    {name:'Communications & Media', col:'contentTasks'},
-    {name:'Partnerships', col:'partnershipOpportunities'},
-    {name:'Scholarships', col:'scholarshipOpportunities'}
-  ];
-
-  let html = '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1.5rem;">YAN Hubs Overview</h3>';
+  let html = '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1.5rem;">YAN Hubs — Click a hub to manage it</h3>';
   html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-bottom:2rem;">';
-
-  for (const hub of hubs) {
+  for (const hub of HUB_CONFIG) {
     try {
-      const snap = await getDocs(collection(db, hub.col));
-      html += '<div class="section-card" style="text-align:center;padding:1.25rem;">'
-        + '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">' + hub.name + '</p>'
-        + '<p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + snap.size + '</p>'
-        + '<p style="font-size:0.72rem;color:var(--gray);">items</p>'
+      const [matsSnap, membersSnap] = await Promise.all([
+        getDocs(collection(db, hub.col)),
+        getDocs(query(collection(db,'users'), where('department','==',hub.dept)))
+      ]);
+      html += '<div class="section-card" style="padding:1.25rem;cursor:pointer;" onclick="loadHubDetail(''+hub.id+'')">'
+        + '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">'
+        + '<span style="font-size:1.5rem;">'+hub.icon+'</span>'
+        + '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);">'+hub.name+'</p></div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">'
+        + '<div style="background:var(--light);border-radius:8px;padding:0.5rem;text-align:center;">'
+        + '<p style="font-size:1.2rem;font-weight:900;color:var(--gold);">'+membersSnap.size+'</p>'
+        + '<p style="font-size:0.65rem;color:var(--gray);">Members</p></div>'
+        + '<div style="background:var(--light);border-radius:8px;padding:0.5rem;text-align:center;">'
+        + '<p style="font-size:1.2rem;font-weight:900;color:var(--navy);">'+matsSnap.size+'</p>'
+        + '<p style="font-size:0.65rem;color:var(--gray);">Materials</p></div>'
+        + '</div>'
+        + '<button class="btn-primary" style="margin-top:0.75rem;padding:0.5rem;font-size:0.78rem;width:100%;">Manage Hub →</button>'
         + '</div>';
     } catch(e) {
-      html += '<div class="section-card" style="text-align:center;padding:1.25rem;">'
-        + '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + hub.name + '</p>'
-        + '<p style="font-size:0.72rem;color:var(--gray);">Error loading</p>'
-        + '</div>';
+      html += '<div class="section-card" style="padding:1.25rem;cursor:pointer;" onclick="loadHubDetail(''+hub.id+'')">'
+        + '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);">'+hub.icon+' '+hub.name+'</p>'
+        + '<p style="font-size:0.72rem;color:var(--gray);">Click to manage</p></div>';
     }
   }
   html += '</div>';
   c.innerHTML = html;
 }
 
-async function loadPartnershipsAdmin(c) {
-  const [partnersSnap, proposalsSnap, oppsSnap] = await Promise.all([
-    getDocs(collection(db, 'yanPartners')),
-    getDocs(query(collection(db, 'partnershipProposals'), where('status', '==', 'pending'))),
-    getDocs(collection(db, 'partnershipOpportunities'))
-  ]);
+async function loadHubDetail(hubId) {
+  const hub = HUB_CONFIG.find(h => h.id === hubId);
+  if (!hub) return;
+  const container = document.getElementById('content-area');
+  container.innerHTML = '<div class="loading">Loading '+hub.name+'...</div>';
+  try {
+    const [matsSnap, membersSnap, recsSnap] = await Promise.all([
+      getDocs(query(collection(db, hub.col), orderBy('createdAt','desc'))),
+      getDocs(query(collection(db,'users'), where('department','==',hub.dept))),
+      hubId === 'scholarships'
+        ? getDocs(query(collection(db,'recommendations'), where('status','==','pending')))
+        : Promise.resolve({docs:[], empty:true, size:0})
+    ]);
 
-  let html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;">'
-    + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Active Partners</p><p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + partnersSnap.size + '</p></div>'
-    + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Pending Proposals</p><p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--red);">' + proposalsSnap.size + '</p></div>'
-    + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Opportunities</p><p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--navy);">' + oppsSnap.size + '</p></div>'
-    + '</div>';
+    let html = '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">'
+      + '<button class="btn-outline" onclick="loadSection('hubs')">← Back to Hubs</button>'
+      + '<h2 style="font-size:1.2rem;font-weight:900;color:var(--navy);">'+hub.icon+' '+hub.name+'</h2>'
+      + '</div>';
 
-  html += '<div class="section-card"><h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Pending Proposals</h4>';
-  if (proposalsSnap.empty) {
-    html += '<p style="color:var(--gray);font-size:0.85rem;">No pending proposals.</p>';
-  } else {
-    proposalsSnap.docs.forEach(d => {
-      const p = d.data();
-      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;border-bottom:1px solid var(--light);flex-wrap:wrap;gap:0.5rem;">'
-        + '<div><strong style="font-size:0.88rem;color:var(--navy);">' + (p.orgName||'') + '</strong>'
-        + '<p style="font-size:0.75rem;color:var(--gray);">Proposed by ' + (p.proposedBy||'') + '</p></div>'
-        + '<div style="display:flex;gap:0.5rem;">'
-        + '<button class="btn-sm btn-navy" onclick="approveProposalAdmin(\'' + d.id + '\')">Approve</button>'
-        + '<button class="btn-sm btn-red" onclick="rejectProposalAdmin(\'' + d.id + '\')">Reject</button>'
-        + '</div></div>';
-    });
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1rem;margin-bottom:1.5rem;">'
+      + '<div class="section-card" style="text-align:center;padding:1rem;">'
+      + '<p style="font-size:1.8rem;font-weight:900;color:var(--gold);">'+membersSnap.size+'</p>'
+      + '<p style="font-size:0.78rem;color:var(--gray);">Members</p></div>'
+      + '<div class="section-card" style="text-align:center;padding:1rem;">'
+      + '<p style="font-size:1.8rem;font-weight:900;color:var(--navy);">'+matsSnap.size+'</p>'
+      + '<p style="font-size:0.78rem;color:var(--gray);">Materials</p></div>'
+      + (hubId === 'scholarships'
+        ? '<div class="section-card" style="text-align:center;padding:1rem;">'
+        + '<p style="font-size:1.8rem;font-weight:900;color:var(--red);">'+recsSnap.docs.length+'</p>'
+        + '<p style="font-size:0.78rem;color:var(--gray);">Pending Rec Letters</p></div>' : '')
+      + '</div>';
+
+    html += '<div class="section-card" style="margin-bottom:1.5rem;">'
+      + '<h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">➕ Post to '+hub.name+'</h3>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">'
+      + '<div class="form-group"><label>Title *</label><input type="text" id="hub-mat-title" placeholder="Material title"></div>'
+      + '<div class="form-group"><label>Type</label><select id="hub-mat-type"><option value="video">Video</option><option value="article">Article</option><option value="guide">Guide</option><option value="opportunity">Opportunity</option></select></div>'
+      + '<div class="form-group"><label>URL/Link</label><input type="text" id="hub-mat-url" placeholder="https://..."></div>'
+      + '<div class="form-group"><label>Category/Level</label><input type="text" id="hub-mat-category" placeholder="e.g. Beginner"></div>'
+      + '</div>'
+      + '<div class="form-group"><label>Description</label><textarea id="hub-mat-desc" rows="2" placeholder="What will members learn?"></textarea></div>'
+      + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.5rem;" onclick="postToHubAdmin(''+hub.id+'',''+hub.col+'')">Post to Hub</button>'
+      + '</div>';
+
+    if (hubId === 'scholarships' && recsSnap.docs.length > 0) {
+      html += '<div class="section-card" style="margin-bottom:1.5rem;">'
+        + '<h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">📝 Recommendation Letter Requests</h3>';
+      recsSnap.docs.forEach(d => {
+        const r = d.data();
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:1rem 0;border-bottom:1px solid var(--light);flex-wrap:wrap;gap:0.75rem;">'
+          + '<div>'
+          + '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);">'+(r.memberName||'')+'</p>'
+          + '<p style="font-size:0.75rem;color:var(--gray);">Scholarship: '+(r.scholarship||'')+'</p>'
+          + '<p style="font-size:0.75rem;color:var(--gray);">Purpose: '+(r.purpose||r.message||'')+'</p>'
+          + '</div>'
+          + '<div style="display:flex;gap:0.5rem;">'
+          + '<button class="btn-sm btn-navy" onclick="approveRecLetter(''+d.id+'',''+r.memberName+'',''+r.scholarship+'')">Approve</button>'
+          + '<button class="btn-sm btn-red" onclick="rejectRecLetter(''+d.id+'')">Reject</button>'
+          + '</div></div>';
+      });
+      html += '</div>';
+    }
+
+    html += '<div class="section-card" style="margin-bottom:1.5rem;">'
+      + '<h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">👥 Members ('+membersSnap.size+')</h3>';
+    if (membersSnap.empty) {
+      html += '<p style="color:var(--gray);font-size:0.85rem;">No members in this department yet.</p>';
+    } else {
+      membersSnap.docs.forEach(d => {
+        const u = d.data();
+        html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--light);">'
+          + (u.photoUrl ? '<img src="'+u.photoUrl+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">'
+            : '<div style="width:36px;height:36px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:0.85rem;">'+(u.name||'?')[0]+'</div>')
+          + '<div style="flex:1;">'
+          + '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);">'+(u.name||'')+'</p>'
+          + '<p style="font-size:0.72rem;color:var(--gray);">'+(u.role||'Member')+' · '+(u.country||'')+'</p>'
+          + '</div>'
+          + '<button class="btn-sm btn-navy" onclick="viewMemberProgress(''+d.id+'',''+sanitize(u.name)+'')">Progress</button>'
+          + '</div>';
+      });
+    }
+    html += '</div>';
+
+    html += '<div class="section-card">'
+      + '<h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">📚 Materials ('+matsSnap.size+')</h3>';
+    if (matsSnap.empty) {
+      html += '<p style="color:var(--gray);font-size:0.85rem;">No materials posted yet.</p>';
+    } else {
+      matsSnap.docs.forEach(d => {
+        const m = d.data();
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;border-bottom:1px solid var(--light);flex-wrap:wrap;gap:0.5rem;">'
+          + '<div>'
+          + '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);">'+(m.title||'')+'</p>'
+          + '<p style="font-size:0.72rem;color:var(--gray);">'+(m.type||'')+' · '+(m.postedBy||m.postedByName||'')+'</p>'
+          + (m.sourceUrl||m.url ? '<a href="'+(m.sourceUrl||m.url)+'" target="_blank" style="font-size:0.72rem;color:var(--navy);">View →</a>' : '')
+          + '</div>'
+          + '<button class="btn-sm btn-red" onclick="deleteHubMaterial(''+hub.col+'',''+d.id+'',''+hub.id+'')">Delete</button>'
+          + '</div>';
+      });
+    }
+    html += '</div>';
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<p style="color:var(--gray);">Error: '+e.message+'</p>';
+    console.error(e);
   }
-  html += '</div>';
-  c.innerHTML = html;
 }
 
-async function approveProposalAdmin(id) {
-  await updateDoc(doc(db, 'partnershipProposals', id), {status: 'approved'});
-  showToast('Proposal approved!');
-  loadSection('partnerships');
+async function postToHubAdmin(hubId, colName) {
+  const title = document.getElementById('hub-mat-title').value.trim();
+  const type = document.getElementById('hub-mat-type').value;
+  const url = document.getElementById('hub-mat-url').value.trim();
+  const category = document.getElementById('hub-mat-category').value.trim();
+  const desc = document.getElementById('hub-mat-desc').value.trim();
+  if (!title) return showToast('Enter a title', 'error');
+  await addDoc(collection(db, colName), {
+    title, type, sourceUrl: url, url, category,
+    description: desc, postedBy: 'Admin', postedByName: 'Admin',
+    createdAt: serverTimestamp(), active: true
+  });
+  showToast('Posted to hub!');
+  loadHubDetail(hubId);
 }
 
-async function rejectProposalAdmin(id) {
-  await updateDoc(doc(db, 'partnershipProposals', id), {status: 'rejected'});
-  showToast('Proposal rejected');
-  loadSection('partnerships');
+async function deleteHubMaterial(colName, docId, hubId) {
+  if (!confirm('Delete this material?')) return;
+  await deleteDoc(doc(db, colName, docId));
+  showToast('Deleted!');
+  loadHubDetail(hubId);
 }
 
-async function loadNewslettersAdmin(c) {
-  const snap = await getDocs(query(collection(db, 'newsletters'), orderBy('createdAt', 'desc')));
-  let html = '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Newsletters</h3>';
-  if (snap.empty) {
-    html += '<p style="color:var(--gray);">No newsletters yet.</p>';
-  } else {
-    snap.docs.forEach(d => {
-      const n = d.data();
-      html += '<div class="section-card" style="margin-bottom:1rem;">'
-        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">'
-        + '<div><strong style="font-size:0.92rem;color:var(--navy);">' + (n.subject||'') + '</strong>'
-        + '<p style="font-size:0.78rem;color:var(--gray);margin-top:0.25rem;">' + (n.sent ? 'Sent to ' + (n.sentTo||0) + ' members' : 'Draft') + ' · ' + (n.createdBy||'') + '</p></div>'
-        + '<span style="background:' + (n.sent ? 'rgba(39,174,96,0.1)' : 'rgba(245,166,35,0.1)') + ';color:' + (n.sent ? '#27AE60' : '#b37800') + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (n.sent ? 'Sent' : 'Draft') + '</span>'
-        + '</div></div>';
-    });
-  }
-  c.innerHTML = html;
+async function approveRecLetter(recId, memberName, scholarship) {
+  await updateDoc(doc(db,'recommendations',recId), {status:'approved', approvedAt: serverTimestamp()});
+  showToast('Approved for '+memberName);
+  loadHubDetail('scholarships');
+}
+
+async function rejectRecLetter(recId) {
+  await updateDoc(doc(db,'recommendations',recId), {status:'rejected'});
+  showToast('Rejected');
+  loadHubDetail('scholarships');
 }
 
 window.loadHubsAdmin = loadHubsAdmin;
+window.loadHubDetail = loadHubDetail;
+window.postToHubAdmin = postToHubAdmin;
+window.deleteHubMaterial = deleteHubMaterial;
+window.approveRecLetter = approveRecLetter;
+window.rejectRecLetter = rejectRecLetter;
+
 window.loadPartnershipsAdmin = loadPartnershipsAdmin;
 window.approveProposalAdmin = approveProposalAdmin;
 window.rejectProposalAdmin = rejectProposalAdmin;
