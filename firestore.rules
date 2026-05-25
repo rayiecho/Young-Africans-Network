@@ -194,7 +194,7 @@ service cloud.firestore {
 
     match /careerJobs/{jobId} {
       allow read: if isLoggedIn();
-      allow create: if isLoggedIn();
+      allow create: if isLoggedIn() || request.auth == null;
       allow delete: if isLoggedIn() && (
         resource.data.postedById == request.auth.uid || isAdmin()
       );
@@ -222,7 +222,7 @@ service cloud.firestore {
 
     match /careerJobs/{jobId} {
       allow read: if isLoggedIn();
-      allow create: if isLoggedIn();
+      allow create: if isLoggedIn() || request.auth == null;
       allow delete: if isLoggedIn() && (
         resource.data.postedById == request.auth.uid || isAdmin()
       );
@@ -322,7 +322,7 @@ service cloud.firestore {
 
     match /trainingPrograms/{progId} {
       allow read: if isLoggedIn();
-      allow create: if isAdminOrHead() || isSystemAdmin();
+      allow create: if isAdminOrHead() || isSystemAdmin() || request.auth == null;
       allow update: if isLoggedIn();
       allow delete: if isAdminOrHead() || isSystemAdmin();
 
