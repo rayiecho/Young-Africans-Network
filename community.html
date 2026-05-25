@@ -6187,7 +6187,20 @@ async function loadAllPrograms() {
 }
 
 async function enrollInProgram(programId) {
-  if (!confirm('Enroll in this program?')) return;
+  if (!confirm('Enroll in this program? You can only be enrolled in one program at a time.')) return;
+
+  // Check if already enrolled in another program
+  const activeSnap = await getDocs(query(
+    collection(db, 'learningProgress'),
+    where('userId', '==', currentUser.uid),
+    where('status', '==', 'enrolled')
+  ));
+
+  if (!activeSnap.empty) {
+    const active = activeSnap.docs[0].data();
+    return showToast('You are already enrolled in "' + (active.programTitle||'a program') + '". Complete it first before enrolling in another.', 'error');
+  }
+
   const ref = doc(db, 'trainingPrograms', programId);
   const snap = await getDoc(ref);
   const data = snap.data();
@@ -6198,9 +6211,9 @@ async function enrollInProgram(programId) {
   await setDoc(doc(db, 'learningProgress', currentUser.uid + '_' + programId), {
     userId: currentUser.uid, programId: programId,
     programTitle: data.title, status: 'enrolled',
-    progress: 0, enrolledAt: serverTimestamp()
+    progress: 0, modulesCompleted: [], enrolledAt: serverTimestamp()
   }, {merge: true});
-  showToast('Enrolled successfully!');
+  showToast('Enrolled successfully! Go to My Learning to start.');
   loadAllPrograms();
 }
 
@@ -6216,10 +6229,28 @@ async function openProgram(programId) {
     box.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;"><p style="font-size:0.85rem;color:var(--gray);">No modules yet. Check back soon!</p></div>';
     return;
   }
-
+  const progressSnap = await getDoc(doc(db, 'learningProgress', currentUser.uid + '_' + programId));
+  const progressData = progressSnap.exists() ? progressSnap.data() : {};
+  const modulesCompleted = progressData.modulesCompleted || [];
   let modulesHtml = '<div style="background:var(--light);border-radius:12px;padding:1rem;">';
   modulesHtml += '<h4 style="font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">Program Modules</h4>';
+  modulesHtml += '<div style="background:white;border-radius:8px;padding:0.5rem 1rem;margin-bottom:0.75rem;font-size:0.78rem;color:var(--gray);">Progress: <strong style="color:var(--navy);">' + modulesCompleted.length + ' / ' + snap.docs.length + ' completed</strong></div>';
   snap.docs.forEach(function(d, i) {
+    const m = Object.assign({id: d.id}, d.data());
+    const isCompleted = modulesCompleted.includes(d.id);
+    modulesHtml += [
+      '<div style="background:white;border-radius:12px;padding:1rem;margin-bottom:0.75rem;border-left:3px solid ' + (isCompleted ? '#27AE60' : '#0A66C2') + ';">',
+      '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">',
+      '<div style="width:28px;height:28px;border-radius:50%;background:' + (isCompleted ? '#27AE60' : '#0A66C2') + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;font-weight:700;flex-shrink:0;">' + (isCompleted ? '✓' : (i+1)) + '</div>',
+      '<div style="flex:1;">',
+      '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(m.title||'') + '</p>',
+      '<p style="font-size:0.72rem;color:var(--gray);">' + (m.duration||'15 min') + ' · ' + (isCompleted ? '✅ Completed' : 'Not started') + '</p>',
+      '</div>',
+      '<button class="btn-sm btn-navy" onclick="openModuleContent(\'' + programId + '\',\'' + d.id + '\')">' + (isCompleted ? 'Review' : 'Start') + '</button>',
+      '</div>',
+      '<div id="module-content-' + d.id + '" style="display:none;"></div>',
+      '</div>'
+    ].join('');
     const m = Object.assign({id: d.id}, d.data());
     modulesHtml += [
       '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid rgba(27,42,107,0.08);">',
@@ -7781,6 +7812,180 @@ window.loadProgramsHub = loadProgramsHub;
 window.showProgramsSection = showProgramsSection;
 window.loadAllPrograms = loadAllPrograms;
 window.enrollInProgram = enrollInProgram;
+
+async function openModuleContent(programId, moduleId) {
+  const box = document.getElementById('module-content-' + moduleId);
+  if (!box) return;
+  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
+  box.innerHTML = '<div class="loading">Loading module...</div>';
+  box.style.display = 'block';
+
+  try {
+    const modSnap = await getDoc(doc(db, 'trainingPrograms', programId, 'modules', moduleId));
+    if (!modSnap.exists()) { box.innerHTML = '<p>Module not found.</p>'; return; }
+    const m = modSnap.data();
+
+    let html = '<div style="margin-top:0.75rem;">';
+
+    // Reading section
+    if (m.reading) {
+      html += '<div style="background:rgba(10,102,194,0.05);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid #0A66C2;">';
+      html += '<p style="font-size:0.82rem;font-weight:700;color:#0A66C2;margin-bottom:0.75rem;">📖 Reading Material</p>';
+      html += '<div style="font-size:0.88rem;color:var(--navy);line-height:1.9;">' + m.reading.split('
+').join('<br>') + '</div>';
+      html += '</div>';
+    }
+
+    // Video section
+    if (m.videoUrl) {
+      const videoId = m.videoUrl.includes('youtube.com/watch?v=') ? m.videoUrl.split('v=')[1].split('&')[0]
+        : m.videoUrl.includes('youtu.be/') ? m.videoUrl.split('youtu.be/')[1].split('?')[0] : '';
+      if (videoId) {
+        html += '<div style="margin-bottom:1rem;">';
+        html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">🎥 Video Lesson</p>';
+        html += '<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;">';
+        html += '<iframe src="https://www.youtube.com/embed/' + videoId + '" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:12px;" allowfullscreen></iframe>';
+        html += '</div></div>';
+      } else if (m.videoUrl) {
+        html += '<div style="margin-bottom:1rem;"><a href="' + m.videoUrl + '" target="_blank" class="btn-sm btn-navy">Watch Video →</a></div>';
+      }
+    }
+
+    // Quiz section
+    if (m.quiz && m.quiz.length > 0) {
+      html += '<div style="background:rgba(245,166,35,0.05);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--gold);">';
+      html += '<p style="font-size:0.82rem;font-weight:700;color:#b37800;margin-bottom:1rem;">✅ Module Quiz (70% to pass · 3 attempts)</p>';
+      html += '<div id="quiz-' + moduleId + '">';
+      m.quiz.forEach(function(q, qi) {
+        html += '<div style="margin-bottom:1rem;">';
+        html += '<p style="font-size:0.85rem;font-weight:600;color:var(--navy);margin-bottom:0.5rem;">' + (qi+1) + '. ' + sanitize(q.question) + '</p>';
+        q.options.forEach(function(opt, oi) {
+          html += '<label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.35rem;font-size:0.82rem;cursor:pointer;">';
+          html += '<input type="radio" name="q' + moduleId + '_' + qi + '" value="' + oi + '"> ' + sanitize(opt);
+          html += '</label>';
+        });
+        html += '</div>';
+      });
+      html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="submitModuleQuiz('' + programId + '','' + moduleId + '',' + JSON.stringify(m.quiz).replace(/'/g, "\'") + ')">Submit Quiz</button>';
+      html += '</div></div>';
+    }
+
+    // Assignment section
+    if (m.assignment) {
+      html += '<div style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--navy);">';
+      html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">📝 Assignment</p>';
+      html += '<p style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;line-height:1.7;">' + sanitize(m.assignment) + '</p>';
+      html += '<textarea id="assignment-' + moduleId + '" rows="5" style="width:100%;background:white;border:1.5px solid rgba(27,42,107,0.12);border-radius:10px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;" placeholder="Write your assignment response here..."></textarea>';
+      html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;margin-top:0.75rem;" onclick="submitAssignment('' + programId + '','' + moduleId + '')">Submit Assignment</button>';
+      html += '<div id="assignment-result-' + moduleId + '" style="margin-top:0.75rem;"></div>';
+      html += '</div>';
+    }
+
+    html += '</div>';
+    box.innerHTML = html;
+
+  } catch(e) {
+    box.innerHTML = '<p style="color:var(--gray);">Error loading module: ' + e.message + '</p>';
+  }
+}
+
+async function submitModuleQuiz(programId, moduleId, quiz) {
+  let correct = 0;
+  quiz.forEach(function(q, qi) {
+    const selected = document.querySelector('input[name="q' + moduleId + '_' + qi + '"]:checked');
+    if (selected && parseInt(selected.value) === q.correctIndex) correct++;
+  });
+  const score = Math.round((correct / quiz.length) * 100);
+  const passed = score >= 70;
+
+  // Check attempts
+  const attemptsRef = doc(db, 'learningProgress', currentUser.uid + '_' + programId + '_quiz_' + moduleId);
+  const attemptsSnap = await getDoc(attemptsRef);
+  const attempts = attemptsSnap.exists() ? (attemptsSnap.data().attempts || 0) : 0;
+
+  if (attempts >= 3 && !passed) {
+    return showToast('You have used all 3 attempts. Contact your department head for assistance.', 'error');
+  }
+
+  await setDoc(attemptsRef, {attempts: attempts + 1, lastScore: score, passed: passed}, {merge: true});
+
+  if (passed) {
+    showToast('Quiz passed! Score: ' + score + '%');
+    // Mark module complete
+    const progressRef = doc(db, 'learningProgress', currentUser.uid + '_' + programId);
+    const progressSnap = await getDoc(progressRef);
+    const progressData = progressSnap.exists() ? progressSnap.data() : {};
+    const modulesCompleted = progressData.modulesCompleted || [];
+    if (!modulesCompleted.includes(moduleId)) {
+      modulesCompleted.push(moduleId);
+      await updateDoc(progressRef, {modulesCompleted: modulesCompleted, progress: modulesCompleted.length});
+    }
+    openProgram(programId);
+  } else {
+    showToast('Score: ' + score + '%. Need 70% to pass. Attempt ' + (attempts+1) + ' of 3.', 'error');
+  }
+}
+
+async function submitAssignment(programId, moduleId) {
+  const text = document.getElementById('assignment-' + moduleId).value.trim();
+  if (!text) return showToast('Please write your assignment first', 'error');
+
+  const btn = event.target;
+  const resultDiv = document.getElementById('assignment-result-' + moduleId);
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  // Save to Firestore
+  await addDoc(collection(db, 'programAssignments'), {
+    userId: currentUser.uid,
+    userName: currentUserData.name,
+    programId: programId,
+    moduleId: moduleId,
+    response: text,
+    status: 'pending',
+    submittedAt: serverTimestamp()
+  });
+
+  // AI grades the assignment
+  try {
+    const modSnap = await getDoc(doc(db, 'trainingPrograms', programId, 'modules', moduleId));
+    const assignment = modSnap.exists() ? modSnap.data().assignment : '';
+
+    const prompt = 'You are an AI academic reviewer for YAN Tech Academy. '
+      + 'Assignment question: "' + assignment + '". '
+      + 'Student response: "' + text + '". '
+      + 'Grade this assignment out of 100. Provide: 1) Score (number) 2) What was done well 3) What can be improved 4) Overall feedback. '
+      + 'Be encouraging but honest. Keep feedback concise.';
+
+    const response = await fetch('https://yan-ai-worker.youngafricansn.workers.dev', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({contents: [{role: 'user', parts: [{text: prompt}]}]})
+    });
+    const data = await response.json();
+    let feedback = 'Assignment submitted! Your head of department will review it.';
+    try { feedback = data.candidates[0].content.parts[0].text; } catch(e) {}
+
+    resultDiv.innerHTML = '<div style="background:rgba(39,174,96,0.06);border-radius:12px;padding:1rem;border-left:3px solid #27AE60;">'
+      + '<p style="font-size:0.78rem;font-weight:700;color:#27AE60;margin-bottom:0.5rem;">AI Preliminary Grade</p>'
+      + '<p style="font-size:0.85rem;color:var(--navy);line-height:1.8;">' + feedback.split('
+').join('<br>') + '</p>'
+      + '<p style="font-size:0.72rem;color:var(--gray);margin-top:0.5rem;">Your department head will review and confirm your grade.</p>'
+      + '</div>';
+  } catch(e) {
+    resultDiv.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;">'
+      + '<p style="font-size:0.85rem;color:var(--navy);">Assignment submitted successfully! Your head of department will review it shortly.</p>'
+      + '</div>';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Submit Assignment';
+}
+
+window.openModuleContent = openModuleContent;
+window.submitModuleQuiz = submitModuleQuiz;
+window.submitAssignment = submitAssignment;
+
 window.openProgram = openProgram;
 window.playProgramVideo = playProgramVideo;
 window.openProgramAssignment = openProgramAssignment;
