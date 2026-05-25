@@ -331,7 +331,12 @@ async function loadFormsAdmin(c) {
           + '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + name + '</p>'
           + '<p style="font-size:0.75rem;color:var(--gray);">' + (r.email||'') + ' · ' + (r.country||'') + ' · Age: ' + (r.age||'') + '</p>'
           + '<p style="font-size:0.75rem;color:var(--gray);">Profession: ' + (r.profession||'') + ' · WhatsApp: ' + (r.whatsapp_number||'') + '</p>'
-          + '<p style="font-size:0.72rem;color:var(--gray);">' + date + '</p>'
+          + '<p style="font-size:0.75rem;color:var(--gray);">Department: ' + (r.department||'') + '</p>'
+          + (r.motivation ? '<div style="background:var(--light);border-radius:8px;padding:0.75rem;margin-top:0.5rem;border-left:3px solid var(--gold);">'
+          + '<p style="font-size:0.72rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Motivation:</p>'
+          + '<p style="font-size:0.78rem;color:var(--gray);line-height:1.6;">' + (r.motivation||'') + '</p>'
+          + '</div>' : '')
+          + '<p style="font-size:0.72rem;color:var(--gray);margin-top:0.35rem;">' + date + '</p>'
           + '</div>'
           + '<div style="display:flex;flex-direction:column;gap:0.4rem;align-items:flex-end;">'
           + '<span style="background:' + (isPending ? 'rgba(245,166,35,0.1)' : r.status === 'approved' ? 'rgba(39,174,96,0.1)' : 'rgba(230,51,41,0.1)') + ';color:' + (isPending ? '#b37800' : r.status === 'approved' ? '#27AE60' : 'var(--red)') + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (r.status||'pending') + '</span>'
@@ -355,12 +360,16 @@ async function loadFormsAdmin(c) {
       contactSnap.docs.forEach(d => {
         const m = d.data();
         const date = m.submittedAt?.toDate?.().toLocaleDateString() || '';
+        const fullName = ((m.firstName||'') + ' ' + (m.lastName||m.name||'')).trim() || 'Unknown';
         html += '<div style="padding:1rem 0;border-bottom:1px solid var(--light);">'
           + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">'
           + '<div style="flex:1;">'
-          + '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + (m.name||'Unknown') + '</p>'
+          + '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + fullName + '</p>'
           + '<p style="font-size:0.75rem;color:var(--gray);">' + (m.email||'') + ' · ' + date + '</p>'
-          + '<p style="font-size:0.82rem;color:var(--navy);margin-top:0.35rem;line-height:1.6;">' + (m.message||m.subject||'') + '</p>'
+          + (m.subject ? '<p style="font-size:0.75rem;font-weight:600;color:var(--navy);margin-top:0.25rem;">Subject: ' + (m.subject||'') + '</p>' : '')
+          + '<div style="background:var(--light);border-radius:8px;padding:0.75rem;margin-top:0.5rem;border-left:3px solid var(--navy);">'
+          + '<p style="font-size:0.82rem;color:var(--navy);line-height:1.6;">' + (m.message||'') + '</p>'
+          + '</div>'
           + '</div>'
           + '<span style="background:' + (m.status === 'unread' ? 'rgba(230,51,41,0.1)' : 'rgba(39,174,96,0.1)') + ';color:' + (m.status === 'unread' ? 'var(--red)' : '#27AE60') + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;cursor:pointer;" onclick="markContactRead(\'' + d.id + '\')" >' + (m.status === 'unread' ? 'Unread' : 'Read') + '</span>'
           + '<button class="btn-sm btn-navy" style="margin-left:0.5rem;" onclick="replyToContact(\'' + (m.email||'') + '\',\'' + (m.name||'') + '\')">Reply</button>'
