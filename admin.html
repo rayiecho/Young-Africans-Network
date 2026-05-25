@@ -299,6 +299,76 @@ window.deleteHubMaterial = deleteHubMaterial;
 window.approveRecLetter = approveRecLetter;
 window.rejectRecLetter = rejectRecLetter;
 
+
+async function loadPartnershipsAdmin(c) {
+  try {
+    const [partnersSnap, proposalsSnap, oppsSnap] = await Promise.all([
+      getDocs(collection(db, 'yanPartners')),
+      getDocs(query(collection(db, 'partnershipProposals'), where('status', '==', 'pending'))),
+      getDocs(collection(db, 'partnershipOpportunities'))
+    ]);
+    let html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;">'
+      + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Active Partners</p><p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + partnersSnap.size + '</p></div>'
+      + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Pending Proposals</p><p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--red);">' + proposalsSnap.size + '</p></div>'
+      + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Opportunities</p><p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--navy);">' + oppsSnap.size + '</p></div>'
+      + '</div>';
+    html += '<div class="section-card"><h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Pending Proposals</h4>';
+    if (proposalsSnap.empty) {
+      html += '<p style="color:var(--gray);font-size:0.85rem;">No pending proposals.</p>';
+    } else {
+      proposalsSnap.docs.forEach(d => {
+        const p = d.data();
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;border-bottom:1px solid var(--light);flex-wrap:wrap;gap:0.5rem;">'
+          + '<div><strong style="font-size:0.88rem;color:var(--navy);">' + (p.orgName||'') + '</strong>'
+          + '<p style="font-size:0.75rem;color:var(--gray);">Proposed by ' + (p.proposedBy||'') + '</p></div>'
+          + '<div style="display:flex;gap:0.5rem;">'
+          + '<button class="btn-sm btn-navy" onclick="approveProposalAdmin(\'' + d.id + '\')">Approve</button>'
+          + '<button class="btn-sm btn-red" onclick="rejectProposalAdmin(\'' + d.id + '\')">Reject</button>'
+          + '</div></div>';
+      });
+    }
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) {
+    c.innerHTML = '<p style="color:var(--gray);">Error loading partnerships: ' + e.message + '</p>';
+  }
+}
+
+async function loadNewslettersAdmin(c) {
+  try {
+    const snap = await getDocs(query(collection(db, 'newsletters'), orderBy('createdAt', 'desc')));
+    let html = '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Newsletters</h3>';
+    if (snap.empty) {
+      html += '<p style="color:var(--gray);">No newsletters yet.</p>';
+    } else {
+      snap.docs.forEach(d => {
+        const n = d.data();
+        html += '<div class="section-card" style="margin-bottom:1rem;">'
+          + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">'
+          + '<div><strong style="font-size:0.92rem;color:var(--navy);">' + (n.subject||'') + '</strong>'
+          + '<p style="font-size:0.78rem;color:var(--gray);margin-top:0.25rem;">' + (n.sent ? 'Sent to ' + (n.sentTo||0) + ' members' : 'Draft') + ' · ' + (n.createdBy||'') + '</p></div>'
+          + '<span style="background:' + (n.sent ? 'rgba(39,174,96,0.1)' : 'rgba(245,166,35,0.1)') + ';color:' + (n.sent ? '#27AE60' : '#b37800') + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (n.sent ? 'Sent' : 'Draft') + '</span>'
+          + '</div></div>';
+      });
+    }
+    c.innerHTML = html;
+  } catch(e) {
+    c.innerHTML = '<p style="color:var(--gray);">Error loading newsletters.</p>';
+  }
+}
+
+async function approveProposalAdmin(id) {
+  await updateDoc(doc(db, 'partnershipProposals', id), {status: 'approved'});
+  showToast('Proposal approved!');
+  loadSection('partnerships');
+}
+
+async function rejectProposalAdmin(id) {
+  await updateDoc(doc(db, 'partnershipProposals', id), {status: 'rejected'});
+  showToast('Proposal rejected');
+  loadSection('partnerships');
+}
+
 window.loadPartnershipsAdmin = loadPartnershipsAdmin;
 window.approveProposalAdmin = approveProposalAdmin;
 window.rejectProposalAdmin = rejectProposalAdmin;
