@@ -1677,7 +1677,7 @@ function previewScholarship() {
           <span style="background:${funding==='Fully Funded'?'rgba(39,174,96,0.1)':'rgba(245,166,35,0.1)'};color:${funding==='Fully Funded'?'#27AE60':'#b37800'};padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">${funding}</span>
           <span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">${level}</span>
           ${isUrgent ? `<span style="background:rgba(230,51,41,0.1);color:var(--red);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">🔥 ${daysLeft} days left</span>` :
-          deadline !== 'TBD' ? `<span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">📅 ${daysLeft} days left</span>` : ''}
+          isValidDate ? `<span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">📅 ${daysLeft} days left</span>` : '<span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">📅 Check website</span>'}
         </div>
       </div>
       <p style="font-size:0.85rem;color:var(--gray);line-height:1.7;margin-bottom:1rem;">${sanitize(desc?.substring(0,200))}${desc?.length>200?'...':''}</p>
@@ -1765,9 +1765,11 @@ async function loadScholarshipOpportunities() {
   const today = new Date();
   container.innerHTML = snap.docs.map(d => {
     const s = d.data();
-    const deadline = new Date(s.deadline);
-    const daysLeft = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
-    const isExpired = daysLeft < 0;
+    const deadlineRaw = s.deadline || '';
+    const deadline = new Date(deadlineRaw);
+    const isValidDate = !isNaN(deadline.getTime());
+    const daysLeft = isValidDate ? Math.ceil((deadline - today) / (1000 * 60 * 60 * 24)) : 999;
+    const isExpired = isValidDate && daysLeft < 0;
     const isUrgent = daysLeft <= 7 && daysLeft >= 0;
     return `
     <div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid ${isExpired?'var(--gray)':isUrgent?'var(--red)':'var(--gold)'};">
