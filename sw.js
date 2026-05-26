@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yan-cache-v2';
+const CACHE_NAME = 'yan-cache-v3';
 const STATIC_ASSETS = [
   '/',
   '/community.html',
@@ -38,6 +38,8 @@ self.addEventListener('fetch', function(event) {
   const url = event.request.url;
   if (url.includes('firestore.googleapis.com') ||
       url.includes('firebase') ||
+      url.includes('gstatic.com') ||
+      url.includes('googleapis.com') ||
       url.includes('cloudinary') ||
       url.includes('emailjs') ||
       url.includes('daily.co') ||
