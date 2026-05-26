@@ -7818,8 +7818,7 @@ async function openModuleContent(programId, moduleId) {
     if (m.reading) {
       html += '<div style="background:rgba(10,102,194,0.05);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid #0A66C2;">';
       html += '<p style="font-size:0.82rem;font-weight:700;color:#0A66C2;margin-bottom:0.75rem;">📖 Reading Material</p>';
-      html += '<div style="font-size:0.88rem;color:var(--navy);line-height:1.9;">' + m.reading.split('\n')
-').join('<br>') + '</div>';
+      html += '<div style="font-size:0.88rem;color:var(--navy);line-height:1.9;">' + m.reading.split('\n').join('<br>') + '</div>';
       html += '</div>';
     }
 
@@ -7853,7 +7852,7 @@ async function openModuleContent(programId, moduleId) {
         });
         html += '</div>';
       });
-      html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="submitModuleQuiz('' + programId + '','' + moduleId + '',' + JSON.stringify(m.quiz).replace(/'/g, "\'") + ')">Submit Quiz</button>';
+      html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="submitModuleQuiz(\'' + programId + '\',\'' + moduleId + '\',' + JSON.stringify(m.quiz).replace(/'/g, "\'") + ')">Submit Quiz</button>';
       html += '</div></div>';
     }
 
@@ -7863,7 +7862,7 @@ async function openModuleContent(programId, moduleId) {
       html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">📝 Assignment</p>';
       html += '<p style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;line-height:1.7;">' + sanitize(m.assignment) + '</p>';
       html += '<textarea id="assignment-' + moduleId + '" rows="5" style="width:100%;background:white;border:1.5px solid rgba(27,42,107,0.12);border-radius:10px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;" placeholder="Write your assignment response here..."></textarea>';
-      html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;margin-top:0.75rem;" onclick="submitAssignment('' + programId + '','' + moduleId + '')">Submit Assignment</button>';
+      html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;margin-top:0.75rem;" onclick="submitAssignment(\'' + programId + '\',\'' + moduleId + '\')">Submit Assignment</button>';
       html += '<div id="assignment-result-' + moduleId + '" style="margin-top:0.75rem;"></div>';
       html += '</div>';
     }
@@ -8450,8 +8449,7 @@ async function openCareerModuleContent(programId, moduleId) {
   if (m.reading) {
     html += '<div style="background:rgba(27,42,107,0.05);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--navy);">'
       + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">📖 Reading</p>'
-      + '<div style="font-size:0.88rem;color:var(--navy);line-height:1.9;">' + m.reading.split('\n')\n')
-').join('<br>') + '</div>'
+      + '<div style="font-size:0.88rem;color:var(--navy);line-height:1.9;">' + m.reading.split('\n').join('<br>') + '</div>'
       + '</div>';
   }
 
