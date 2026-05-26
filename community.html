@@ -6254,6 +6254,7 @@ async function openProgram(programId) {
       '<div id="module-content-' + d.id + '" style="display:none;"></div>',
       '</div>'
     ].join('');
+  });                        // ← closes forEach
   modulesHtml += '</div>';
   box.innerHTML = modulesHtml;
 }
@@ -7117,7 +7118,7 @@ async function loadMediaLibrary() {
       const m = Object.assign({id: d.id}, d.data());
       const color = mediaColors[m.type] || '#1B2A6B';
       const canDelete = m.uploadedById === currentUser.uid || (currentUserData && currentUserData.isAdmin);
-      const icon = m.type === 'Logo' ? '🏷️' : m.type === 'Photo' ? '📸' : m.type === 'Video' ? '🎥' : m.type === 'Document' ? '📄' : '🎨';
+      const icon = m.type === 'Logo' ? '🔖' : m.type === 'Photo' ? '📸' : m.type === 'Video' ? '🎥' : m.type === 'Document' ? '📄' : '🎨';
       mediaHtml += '<div class="media-card">'
         + (m.previewUrl ? '<img src="' + sanitize(m.previewUrl) + '" alt="' + sanitize(m.title) + '" style="width:100%;height:120px;object-fit:cover;border-radius:10px;margin-bottom:0.75rem;">' : '<div style="width:100%;height:120px;background:' + color + '18;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:0.75rem;">' + icon + '</div>')
         + '<span style="background:' + color + '18;color:' + color + ';padding:0.15rem 0.5rem;border-radius:50px;font-size:0.65rem;font-weight:700;">' + sanitize(m.type) + '</span>'
@@ -7817,7 +7818,7 @@ async function openModuleContent(programId, moduleId) {
     if (m.reading) {
       html += '<div style="background:rgba(10,102,194,0.05);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid #0A66C2;">';
       html += '<p style="font-size:0.82rem;font-weight:700;color:#0A66C2;margin-bottom:0.75rem;">📖 Reading Material</p>';
-      html += '<div style="font-size:0.88rem;color:var(--navy);line-height:1.9;">' + m.reading.split('
+      html += '<div style="font-size:0.88rem;color:var(--navy);line-height:1.9;">' + m.reading.split('\n')
 ').join('<br>') + '</div>';
       html += '</div>';
     }
@@ -7954,8 +7955,7 @@ async function submitAssignment(programId, moduleId) {
 
     resultDiv.innerHTML = '<div style="background:rgba(39,174,96,0.06);border-radius:12px;padding:1rem;border-left:3px solid #27AE60;">'
       + '<p style="font-size:0.78rem;font-weight:700;color:#27AE60;margin-bottom:0.5rem;">AI Preliminary Grade</p>'
-      + '<p style="font-size:0.85rem;color:var(--navy);line-height:1.8;">' + feedback.split('
-').join('<br>') + '</p>'
+      + '<p style="font-size:0.85rem;color:var(--navy);line-height:1.8;">' + feedback.split('\n').join('<br>') + '</p>'
       + '<p style="font-size:0.72rem;color:var(--gray);margin-top:0.5rem;">Your department head will review and confirm your grade.</p>'
       + '</div>';
   } catch(e) {
@@ -8351,8 +8351,8 @@ async function loadCareerPrograms() {
           + '</div>'
           + '<div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">'
           + (isOpen && enrolled ? '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;">Enrolled</span>' : '')
-          + (isOpen && enrolled ? '<button class="btn-sm btn-navy" onclick="openCareerProgram('' + p.id + '')">Continue →</button>' : '')
-          + (isOpen && !enrolled ? '<button class="btn-sm btn-navy" onclick="enrollCareerProgram('' + p.id + '')">Enroll Now</button>' : '')
+          + (isOpen && enrolled ? '<button class="btn-sm btn-navy" onclick="openCareerProgram(\'' + p.id + '\')">Continue →</button>' : '')
+          + (isOpen && !enrolled ? '<button class="btn-sm btn-navy" onclick="enrollCareerProgram(\'' + p.id + '\')">Enroll Now</button>' : '')
           + (!isOpen ? '<span style="background:var(--light);color:var(--gray);padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;">Coming Soon</span>' : '')
           + '</div>'
           + '</div>'
@@ -8425,7 +8425,7 @@ async function openCareerProgram(programId) {
       + '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(m.title||'') + '</p>'
       + '<p style="font-size:0.72rem;color:var(--gray);">' + (m.duration||'30 min') + ' · ' + (done ? '✅ Completed' : 'Not started') + '</p>'
       + '</div>'
-      + '<button class="btn-sm btn-navy" onclick="openCareerModuleContent('' + programId + '','' + d.id + '')">' + (done ? 'Review' : 'Start') + '</button>'
+      + '<button class="btn-sm btn-navy" onclick="openCareerModuleContent(\'' + programId + '\',\'' + d.id + '\')">' + (done ? 'Review' : 'Start') + '</button>'
       + '</div>'
       + '<div id="career-module-' + d.id + '" style="display:none;"></div>'
       + '</div>';
@@ -8450,7 +8450,7 @@ async function openCareerModuleContent(programId, moduleId) {
   if (m.reading) {
     html += '<div style="background:rgba(27,42,107,0.05);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--navy);">'
       + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">📖 Reading</p>'
-      + '<div style="font-size:0.88rem;color:var(--navy);line-height:1.9;">' + m.reading.split('
+      + '<div style="font-size:0.88rem;color:var(--navy);line-height:1.9;">' + m.reading.split('\n')\n')
 ').join('<br>') + '</div>'
       + '</div>';
   }
@@ -8479,7 +8479,7 @@ async function openCareerModuleContent(programId, moduleId) {
       });
       html += '</div>';
     });
-    html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="submitCareerQuiz('' + programId + '','' + moduleId + '',' + JSON.stringify(quiz).replace(/'/g,"\'") + ')">Submit Quiz</button>';
+    html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="submitCareerQuiz(\'' + programId + '\',\'' + moduleId + '\',' + JSON.stringify(quiz).replace(/'/g,"\\'") + ')">Submit Quiz</button>';
     html += '</div>';
   }
 
@@ -8488,7 +8488,7 @@ async function openCareerModuleContent(programId, moduleId) {
       + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">📝 Assignment</p>'
       + '<p style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;line-height:1.7;">' + sanitize(m.assignment) + '</p>'
       + '<textarea id="cassignment-' + moduleId + '" rows="4" style="width:100%;background:white;border:1.5px solid rgba(27,42,107,0.12);border-radius:10px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.85rem;" placeholder="Write your response here..."></textarea>'
-      + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;margin-top:0.75rem;" onclick="submitCareerAssignment('' + programId + '','' + moduleId + '')">Submit</button>'
+      + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;margin-top:0.75rem;" onclick="submitCareerAssignment(\'' + programId + '\',\'' + moduleId + '\')">Submit</button>'
       + '<div id="cassignment-result-' + moduleId + '" style="margin-top:0.75rem;"></div>'
       + '</div>';
   }
