@@ -9181,7 +9181,7 @@ window.sendYANGuideFloat = async function() {
     });
     var data = await response.json();
     var reply = 'Sorry, I could not connect. Please try again!';
-    try { reply = data.content[0].text; } catch(e) {}
+    try { reply = data.content[0].text; } catch(e) { console.log('AI parse error:', e, 'Data:', JSON.stringify(data)); }
     var typing = document.getElementById(typingId);
     if (typing) typing.remove();
     messages.innerHTML += '<div style="display:flex;gap:0.5rem;align-items:flex-start;"><img src="images/AI.jpg" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;"><div style="background:#fff;border-radius:12px;padding:0.65rem 0.85rem;max-width:85%;font-size:0.8rem;color:#1B2A6B;line-height:1.6;font-family:Poppins,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,0.06);">' + reply.split('\n').join('<br>') + '</div></div>';
