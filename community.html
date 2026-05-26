@@ -7952,10 +7952,9 @@ async function submitAssignment(programId, moduleId) {
   const text = document.getElementById('assignment-' + moduleId).value.trim();
   if (!text) return showToast('Please write your assignment first', 'error');
 
-  const btn = event.target;
+  const btn = event && event.target ? event.target : document.querySelector('[onclick*="submitAssignment"]');
   const resultDiv = document.getElementById('assignment-result-' + moduleId);
-  btn.disabled = true;
-  btn.textContent = 'Submitting...';
+  if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
 
   // Save to Firestore
   await addDoc(collection(db, 'programAssignments'), {
