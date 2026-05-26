@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yan-cache-v1';
+const CACHE_NAME = 'yan-cache-v2';
 const STATIC_ASSETS = [
   '/',
   '/community.html',
