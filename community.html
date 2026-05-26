@@ -6225,26 +6225,65 @@ async function openProgram(programId) {
   const progressSnap = await getDoc(doc(db, 'learningProgress', currentUser.uid + '_' + programId));
   const progressData = progressSnap.exists() ? progressSnap.data() : {};
   const modulesCompleted = progressData.modulesCompleted || [];
+  const completionDates = progressData.completionDates || {};
+  const now = Date.now();
+  const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+
+  function isModuleUnlocked(index, modules) {
+    if (index === 0) return true;
+    const prevId = modules[index - 1].id;
+    if (!modulesCompleted.includes(prevId)) return false;
+    const prevCompletedAt = completionDates[prevId];
+    if (!prevCompletedAt) return false;
+    return (now - prevCompletedAt) >= SEVEN_DAYS;
+  }
+
+  const moduleDocs = snap.docs.map(function(d) { return Object.assign({id: d.id}, d.data()); });
+
   let modulesHtml = '<div style="background:var(--light);border-radius:12px;padding:1rem;">';
   modulesHtml += '<h4 style="font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">Program Modules</h4>';
   modulesHtml += '<div style="background:white;border-radius:8px;padding:0.5rem 1rem;margin-bottom:0.75rem;font-size:0.78rem;color:var(--gray);">Progress: <strong style="color:var(--navy);">' + modulesCompleted.length + ' / ' + snap.docs.length + ' completed</strong></div>';
-  snap.docs.forEach(function(d, i) {
-    const m = Object.assign({id: d.id}, d.data());
-    const isCompleted = modulesCompleted.includes(d.id);
+
+  moduleDocs.forEach(function(m, i) {
+    const isCompleted = modulesCompleted.includes(m.id);
+    const unlocked = isModuleUnlocked(i, moduleDocs);
+
+    let unlockMsg = '';
+    if (!unlocked && i > 0) {
+      const prevId = moduleDocs[i-1].id;
+      const prevCompletedAt = completionDates[prevId];
+      if (prevCompletedAt) {
+        const daysLeft = Math.ceil((SEVEN_DAYS - (now - prevCompletedAt)) / (24 * 60 * 60 * 1000));
+        unlockMsg = 'Unlocks in ' + daysLeft + ' day' + (daysLeft !== 1 ? 's' : '');
+      } else {
+        unlockMsg = 'Complete Week ' + i + ' first';
+      }
+    }
+
+    const borderColor = isCompleted ? '#27AE60' : unlocked ? '#0A66C2' : '#ccc';
+    const circleColor = isCompleted ? '#27AE60' : unlocked ? '#0A66C2' : '#ccc';
+    const circleText = isCompleted ? '\u2713' : unlocked ? String(i+1) : '\uD83D\uDD12';
+    const statusText = isCompleted ? '\u2705 Completed' : unlocked ? 'Not started' : unlockMsg;
+    const actionBtn = isCompleted
+      ? '<button class="btn-sm btn-navy" onclick="openModuleContent(\'' + programId + '\',\'' + m.id + '\')">Review</button>'
+      : unlocked
+        ? '<button class="btn-sm btn-navy" onclick="openModuleContent(\'' + programId + '\',\'' + m.id + '\')">Start</button>'
+        : '<span style="background:var(--light);color:var(--gray);padding:0.3rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">\uD83D\uDD12 Locked</span>';
+
     modulesHtml += [
-      '<div style="background:white;border-radius:12px;padding:1rem;margin-bottom:0.75rem;border-left:3px solid ' + (isCompleted ? '#27AE60' : '#0A66C2') + ';">',
+      '<div style="background:white;border-radius:12px;padding:1rem;margin-bottom:0.75rem;border-left:3px solid ' + borderColor + ';opacity:' + (unlocked || isCompleted ? '1' : '0.6') + ';">',
       '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">',
-      '<div style="width:28px;height:28px;border-radius:50%;background:' + (isCompleted ? '#27AE60' : '#0A66C2') + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;font-weight:700;flex-shrink:0;">' + (isCompleted ? '✓' : (i+1)) + '</div>',
+      '<div style="width:28px;height:28px;border-radius:50%;background:' + circleColor + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;font-weight:700;flex-shrink:0;">' + circleText + '</div>',
       '<div style="flex:1;">',
       '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(m.title||'') + '</p>',
-      '<p style="font-size:0.72rem;color:var(--gray);">' + (m.duration||'15 min') + ' · ' + (isCompleted ? '✅ Completed' : 'Not started') + '</p>',
+      '<p style="font-size:0.72rem;color:var(--gray);">' + (m.duration||'15 min') + ' · ' + statusText + '</p>',
       '</div>',
-      '<button class="btn-sm btn-navy" onclick="openModuleContent(\'' + programId + '\',\'' + d.id + '\')">' + (isCompleted ? 'Review' : 'Start') + '</button>',
+      actionBtn,
       '</div>',
-      '<div id="module-content-' + d.id + '" style="display:none;"></div>',
+      '<div id="module-content-' + m.id + '" style="display:none;"></div>',
       '</div>'
     ].join('');
-  });                        // ← closes forEach
+  });
   modulesHtml += '</div>';
   box.innerHTML = modulesHtml;
 }
@@ -7895,7 +7934,13 @@ async function submitModuleQuiz(programId, moduleId, quiz) {
     const modulesCompleted = progressData.modulesCompleted || [];
     if (!modulesCompleted.includes(moduleId)) {
       modulesCompleted.push(moduleId);
-      await updateDoc(progressRef, {modulesCompleted: modulesCompleted, progress: modulesCompleted.length});
+      const completionDates = progressData.completionDates || {};
+      completionDates[moduleId] = Date.now();
+      await updateDoc(progressRef, {
+        modulesCompleted: modulesCompleted,
+        progress: modulesCompleted.length,
+        completionDates: completionDates
+      });
     }
     openProgram(programId);
   } else {
