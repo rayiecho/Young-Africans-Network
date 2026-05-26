@@ -4386,18 +4386,6 @@ async function openCareerAssignment(materialId) {
   box.style.display = 'block';
 }
 
-async function submitCareerAssignment(materialId) {
-  const input = document.getElementById('assign-input-' + materialId);
-  const submission = input ? input.value.trim() : '';
-  if (!submission) return showToast('Write your assignment first', 'error');
-  await setDoc(doc(db, 'careerAssignments', currentUser.uid + '_' + materialId), {
-    userId: currentUser.uid, userName: currentUserData.name,
-    materialId, submission, status: 'pending', feedback: '',
-    submittedAt: serverTimestamp()
-  });
-  showToast('Assignment submitted! ✅');
-  openCareerAssignment(materialId);
-}
 
 async function markCareerDone(materialId, pathId) {
   await setDoc(doc(db, 'careerProgress', currentUser.uid + '_' + materialId), {
