@@ -7826,11 +7826,12 @@ async function openModuleContent(programId, moduleId) {
     }
 
     // Quiz section
-    if (m.quiz && m.quiz.length > 0) {
+    const quiz = typeof m.quiz === 'string' ? JSON.parse(m.quiz) : m.quiz;
+    if (quiz && quiz.length > 0) {
       html += '<div style="background:rgba(245,166,35,0.05);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--gold);">';
       html += '<p style="font-size:0.82rem;font-weight:700;color:#b37800;margin-bottom:1rem;">✅ Module Quiz (70% to pass · 3 attempts)</p>';
       html += '<div id="quiz-' + moduleId + '">';
-      m.quiz.forEach(function(q, qi) {
+      quiz.forEach(function(q, qi) {
         html += '<div style="margin-bottom:1rem;">';
         html += '<p style="font-size:0.85rem;font-weight:600;color:var(--navy);margin-bottom:0.5rem;">' + (qi+1) + '. ' + sanitize(q.question) + '</p>';
         q.options.forEach(function(opt, oi) {
