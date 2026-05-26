@@ -6254,23 +6254,6 @@ async function openProgram(programId) {
       '<div id="module-content-' + d.id + '" style="display:none;"></div>',
       '</div>'
     ].join('');
-    const m = Object.assign({id: d.id}, d.data());
-    modulesHtml += [
-      '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid rgba(27,42,107,0.08);">',
-      '<div style="width:28px;height:28px;border-radius:50%;background:#0A66C2;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;font-weight:700;flex-shrink:0;">' + (i+1) + '</div>',
-      '<div style="flex:1;">',
-      '<p style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + sanitize(m.title) + '</p>',
-      '<p style="font-size:0.72rem;color:var(--gray);">' + (m.type === 'video' ? 'Video' : m.type === 'article' ? 'Article' : 'Assignment') + ' · ' + (m.duration || '10 min') + '</p>',
-      '</div>',
-      m.type === 'video' && m.url ? '<button class="btn-sm btn-navy" onclick="playProgramVideo(\'' + m.id + '\',\'' + m.url.replace(/'/g,"\\'") + '\',\'' + programId + '\')">Watch</button>' : '',
-      m.type === 'article' && m.url ? '<a href="' + sanitize(m.url) + '" target="_blank" class="btn-sm btn-outline" style="text-decoration:none;">Read</a>' : '',
-      m.type === 'assignment' ? '<button class="btn-sm btn-gold" onclick="openProgramAssignment(\'' + m.id + '\',\'' + programId + '\')">Submit</button>' : '',
-      '<button class="btn-sm btn-outline" onclick="markModuleDone(\'' + m.id + '\',\'' + programId + '\')">Done</button>',
-      '</div>',
-      '<div id="prog-video-' + m.id + '" style="display:none;margin-top:0.5rem;"></div>',
-      '<div id="prog-assign-' + m.id + '" style="display:none;margin-top:0.5rem;"></div>'
-    ].join('');
-  });
   modulesHtml += '</div>';
   box.innerHTML = modulesHtml;
 }
