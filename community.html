@@ -4255,6 +4255,7 @@ async function loadCareerHub() {
     + '<p style="color:rgba(255,255,255,0.75);font-size:0.88rem;">Master the skills that open doors — from CV writing to commanding any stage</p></div></div>'
     + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem;">'
     + '<button class="career-nav-btn active" onclick="showCareerSection(\'paths\')">🎯 Learning Paths</button>'
+    + '<button class="career-nav-btn" onclick="showCareerSection(\'programs\')">🎓 Programs</button>'
     + '<button class="career-nav-btn" onclick="showCareerSection(\'materials\')">📚 Materials</button>'
     + '<button class="career-nav-btn" onclick="showCareerSection(\'jobs\')">💼 Job Board</button>'
     + '<button class="career-nav-btn" onclick="showCareerSection(\'resources\')">📄 Resources</button>'
@@ -4262,6 +4263,7 @@ async function loadCareerHub() {
     + manageBtn
     + '</div></div>'
     + '<div id="career-section-paths"></div>'
+    + '<div id="career-section-programs" style="display:none;"></div>'
     + '<div id="career-section-materials" style="display:none;"></div>'
     + '<div id="career-section-jobs" style="display:none;"></div>'
     + '<div id="career-section-resources" style="display:none;"></div>'
@@ -4274,14 +4276,15 @@ async function loadCareerHub() {
 
 function showCareerSection(section) {
   document.querySelectorAll('.career-nav-btn').forEach(function(b, i) {
-    const sections = ['paths','materials','jobs','resources','progress','manage'];
+    const sections = ['paths','programs','materials','jobs','resources','progress','manage'];
     b.classList.toggle('active', sections[i] === section);
   });
-  ['paths','materials','jobs','resources','progress','manage'].forEach(function(s) {
+  ['paths','programs','materials','jobs','resources','progress','manage'].forEach(function(s) {
     const el = document.getElementById('career-section-' + s);
     if (el) el.style.display = s === section ? 'block' : 'none';
   });
   if (section === 'paths') loadCareerPaths();
+  if (section === 'programs') loadCareerPrograms();
   if (section === 'materials') loadCareerMaterials();
   if (section === 'jobs') loadJobBoard();
   if (section === 'resources') loadCareerResources();
@@ -8327,6 +8330,244 @@ window.postToCommsHub = postToCommsHub;
 window.postToPartnershipsHub = postToPartnershipsHub;
 
 window.loadCareerHub = loadCareerHub;
+
+async function loadCareerPrograms() {
+  const container = document.getElementById('career-section-programs');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading programs...</div>';
+
+  try {
+    const snap = await getDocs(query(collection(db, 'careerPrograms'), orderBy('openDate', 'asc')));
+    const today = new Date();
+
+    let html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.5rem;">'
+      + '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">🎓 Career Development Programs</h3>'
+      + '</div>';
+
+    if (snap.empty) {
+      html += '<div class="empty-state"><p>Programs coming soon! Check back on June 1st.</p></div>';
+    } else {
+      snap.docs.forEach(function(d) {
+        const p = Object.assign({id: d.id}, d.data());
+        const openDate = p.openDate ? new Date(p.openDate) : new Date();
+        const isOpen = openDate <= today;
+        const enrolled = p.enrolledBy && p.enrolledBy.includes(currentUser.uid);
+        const daysUntil = Math.ceil((openDate - today) / (1000 * 60 * 60 * 24));
+
+        html += '<div class="career-material-card" style="border-left:4px solid ' + (isOpen ? 'var(--navy)' : 'var(--gray)') + ';opacity:' + (isOpen ? '1' : '0.7') + ';">'
+          + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">'
+          + '<div style="flex:1;">'
+          + '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">'
+          + '<span style="background:' + (isOpen ? 'rgba(39,174,96,0.1)' : 'rgba(107,114,128,0.1)') + ';color:' + (isOpen ? '#27AE60' : 'var(--gray)') + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (isOpen ? '🟢 Open' : '🔒 Opens in ' + daysUntil + ' days') + '</span>'
+          + '<span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;">4 Weeks</span>'
+          + '<span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;">' + (p.level||'Beginner') + '</span>'
+          + '</div>'
+          + '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(p.title||'') + '</h3>'
+          + '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;">' + sanitize(p.description||'') + '</p>'
+          + '<p style="font-size:0.75rem;color:var(--gray);margin-top:0.35rem;">📅 Opens: ' + openDate.toLocaleDateString() + ' · ' + (p.enrolledBy ? p.enrolledBy.length : 0) + ' enrolled</p>'
+          + '</div>'
+          + '<div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">'
+          + (isOpen && enrolled ? '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;">Enrolled</span>' : '')
+          + (isOpen && enrolled ? '<button class="btn-sm btn-navy" onclick="openCareerProgram('' + p.id + '')">Continue →</button>' : '')
+          + (isOpen && !enrolled ? '<button class="btn-sm btn-navy" onclick="enrollCareerProgram('' + p.id + '')">Enroll Now</button>' : '')
+          + (!isOpen ? '<span style="background:var(--light);color:var(--gray);padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;">Coming Soon</span>' : '')
+          + '</div>'
+          + '</div>'
+          + '<div id="career-program-modules-' + p.id + '" style="display:none;"></div>'
+          + '</div>';
+      });
+    }
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<p style="color:var(--gray);">Error: ' + e.message + '</p>';
+  }
+}
+
+async function enrollCareerProgram(programId) {
+  if (!confirm('Enroll in this program? You can only be enrolled in one career program at a time.')) return;
+
+  const activeSnap = await getDocs(query(
+    collection(db, 'careerLearningProgress'),
+    where('userId', '==', currentUser.uid),
+    where('status', '==', 'enrolled')
+  ));
+  if (!activeSnap.empty) {
+    const active = activeSnap.docs[0].data();
+    return showToast('Already enrolled in "' + (active.programTitle||'a program') + '". Complete it first!', 'error');
+  }
+
+  const ref = doc(db, 'careerPrograms', programId);
+  const snap = await getDoc(ref);
+  const data = snap.data();
+  const enrolledBy = data.enrolledBy || [];
+  if (enrolledBy.includes(currentUser.uid)) return showToast('Already enrolled!', 'error');
+  enrolledBy.push(currentUser.uid);
+  await updateDoc(ref, {enrolledBy});
+  await setDoc(doc(db, 'careerLearningProgress', currentUser.uid + '_' + programId), {
+    userId: currentUser.uid, programId,
+    programTitle: data.title, status: 'enrolled',
+    modulesCompleted: [], enrolledAt: serverTimestamp()
+  }, {merge: true});
+  showToast('Enrolled! Go to Programs to start.');
+  loadCareerPrograms();
+}
+
+async function openCareerProgram(programId) {
+  const box = document.getElementById('career-program-modules-' + programId);
+  if (!box) return;
+  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
+  box.innerHTML = '<div class="loading">Loading modules...</div>';
+  box.style.display = 'block';
+
+  const snap = await getDocs(query(collection(db, 'careerPrograms', programId, 'modules'), orderBy('order', 'asc')));
+  const progressSnap = await getDoc(doc(db, 'careerLearningProgress', currentUser.uid + '_' + programId));
+  const progressData = progressSnap.exists() ? progressSnap.data() : {};
+  const modulesCompleted = progressData.modulesCompleted || [];
+
+  if (snap.empty) {
+    box.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;"><p style="font-size:0.85rem;color:var(--gray);">No modules yet. Check back soon!</p></div>';
+    return;
+  }
+
+  let html = '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-top:0.75rem;">';
+  html += '<p style="font-size:0.78rem;color:var(--gray);margin-bottom:0.75rem;">Progress: <strong>' + modulesCompleted.length + ' / ' + snap.docs.length + ' completed</strong></p>';
+
+  snap.docs.forEach(function(d, i) {
+    const m = Object.assign({id: d.id}, d.data());
+    const done = modulesCompleted.includes(d.id);
+    html += '<div style="background:white;border-radius:12px;padding:1rem;margin-bottom:0.75rem;border-left:3px solid ' + (done ? '#27AE60' : 'var(--navy)') + ';">'
+      + '<div style="display:flex;align-items:center;gap:0.75rem;">'
+      + '<div style="width:28px;height:28px;border-radius:50%;background:' + (done ? '#27AE60' : 'var(--navy)') + ';display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:700;">' + (done ? '✓' : (i+1)) + '</div>'
+      + '<div style="flex:1;">'
+      + '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(m.title||'') + '</p>'
+      + '<p style="font-size:0.72rem;color:var(--gray);">' + (m.duration||'30 min') + ' · ' + (done ? '✅ Completed' : 'Not started') + '</p>'
+      + '</div>'
+      + '<button class="btn-sm btn-navy" onclick="openCareerModuleContent('' + programId + '','' + d.id + '')">' + (done ? 'Review' : 'Start') + '</button>'
+      + '</div>'
+      + '<div id="career-module-' + d.id + '" style="display:none;"></div>'
+      + '</div>';
+  });
+  html += '</div>';
+  box.innerHTML = html;
+}
+
+async function openCareerModuleContent(programId, moduleId) {
+  const box = document.getElementById('career-module-' + moduleId);
+  if (!box) return;
+  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
+  box.innerHTML = '<div class="loading">Loading...</div>';
+  box.style.display = 'block';
+
+  const modSnap = await getDoc(doc(db, 'careerPrograms', programId, 'modules', moduleId));
+  if (!modSnap.exists()) { box.innerHTML = '<p>Module not found.</p>'; return; }
+  const m = modSnap.data();
+
+  let html = '<div style="margin-top:0.75rem;">';
+
+  if (m.reading) {
+    html += '<div style="background:rgba(27,42,107,0.05);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--navy);">'
+      + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">📖 Reading</p>'
+      + '<div style="font-size:0.88rem;color:var(--navy);line-height:1.9;">' + m.reading.split('
+').join('<br>') + '</div>'
+      + '</div>';
+  }
+
+  if (m.videoUrl) {
+    const videoId = m.videoUrl.includes('v=') ? m.videoUrl.split('v=')[1].split('&')[0]
+      : m.videoUrl.includes('youtu.be/') ? m.videoUrl.split('youtu.be/')[1].split('?')[0] : '';
+    if (videoId) {
+      html += '<div style="margin-bottom:1rem;">'
+        + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">🎥 Video</p>'
+        + '<div style="position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;">'
+        + '<iframe src="https://www.youtube.com/embed/' + videoId + '" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen></iframe>'
+        + '</div></div>';
+    }
+  }
+
+  if (m.quiz) {
+    const quiz = typeof m.quiz === 'string' ? JSON.parse(m.quiz) : m.quiz;
+    html += '<div style="background:rgba(245,166,35,0.05);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--gold);">'
+      + '<p style="font-size:0.82rem;font-weight:700;color:#b37800;margin-bottom:1rem;">✅ Quiz (70% to pass)</p>';
+    quiz.forEach(function(q, qi) {
+      html += '<div style="margin-bottom:1rem;"><p style="font-size:0.85rem;font-weight:600;color:var(--navy);margin-bottom:0.5rem;">' + (qi+1) + '. ' + sanitize(q.question) + '</p>';
+      q.options.forEach(function(opt, oi) {
+        html += '<label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.35rem;font-size:0.82rem;cursor:pointer;">'
+          + '<input type="radio" name="cq' + moduleId + '_' + qi + '" value="' + oi + '"> ' + sanitize(opt) + '</label>';
+      });
+      html += '</div>';
+    });
+    html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="submitCareerQuiz('' + programId + '','' + moduleId + '',' + JSON.stringify(quiz).replace(/'/g,"\'") + ')">Submit Quiz</button>';
+    html += '</div>';
+  }
+
+  if (m.assignment) {
+    html += '<div style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--navy);">'
+      + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">📝 Assignment</p>'
+      + '<p style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;line-height:1.7;">' + sanitize(m.assignment) + '</p>'
+      + '<textarea id="cassignment-' + moduleId + '" rows="4" style="width:100%;background:white;border:1.5px solid rgba(27,42,107,0.12);border-radius:10px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.85rem;" placeholder="Write your response here..."></textarea>'
+      + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;margin-top:0.75rem;" onclick="submitCareerAssignment('' + programId + '','' + moduleId + '')">Submit</button>'
+      + '<div id="cassignment-result-' + moduleId + '" style="margin-top:0.75rem;"></div>'
+      + '</div>';
+  }
+
+  html += '</div>';
+  box.innerHTML = html;
+}
+
+async function submitCareerQuiz(programId, moduleId, quiz) {
+  let correct = 0;
+  quiz.forEach(function(q, qi) {
+    const sel = document.querySelector('input[name="cq' + moduleId + '_' + qi + '"]:checked');
+    if (sel && parseInt(sel.value) === q.correctIndex) correct++;
+  });
+  const score = Math.round((correct / quiz.length) * 100);
+  const passed = score >= 70;
+
+  const attRef = doc(db, 'careerLearningProgress', currentUser.uid + '_' + programId + '_quiz_' + moduleId);
+  const attSnap = await getDoc(attRef);
+  const attempts = attSnap.exists() ? (attSnap.data().attempts||0) : 0;
+
+  if (attempts >= 3 && !passed) return showToast('3 attempts used. Contact your Career Hub head.', 'error');
+
+  await setDoc(attRef, {attempts: attempts+1, lastScore: score, passed}, {merge: true});
+
+  if (passed) {
+    showToast('Passed! Score: ' + score + '%');
+    const progRef = doc(db, 'careerLearningProgress', currentUser.uid + '_' + programId);
+    const progSnap = await getDoc(progRef);
+    const progData = progSnap.exists() ? progSnap.data() : {};
+    const done = progData.modulesCompleted || [];
+    if (!done.includes(moduleId)) {
+      done.push(moduleId);
+      await updateDoc(progRef, {modulesCompleted: done});
+    }
+    openCareerProgram(programId);
+  } else {
+    showToast('Score: ' + score + '%. Need 70%. Attempt ' + (attempts+1) + ' of 3.', 'error');
+  }
+}
+
+async function submitCareerAssignment(programId, moduleId) {
+  const text = document.getElementById('cassignment-' + moduleId).value.trim();
+  if (!text) return showToast('Write your assignment first', 'error');
+  const resultDiv = document.getElementById('cassignment-result-' + moduleId);
+  await addDoc(collection(db, 'careerAssignments'), {
+    userId: currentUser.uid, userName: currentUserData.name,
+    programId, moduleId, response: text,
+    status: 'pending', submittedAt: serverTimestamp()
+  });
+  resultDiv.innerHTML = '<div style="background:rgba(39,174,96,0.06);border-radius:12px;padding:1rem;border-left:3px solid #27AE60;">'
+    + '<p style="font-size:0.85rem;color:var(--navy);">✅ Assignment submitted! Your Career Hub head will review it shortly.</p>'
+    + '</div>';
+}
+
+window.loadCareerPrograms = loadCareerPrograms;
+window.enrollCareerProgram = enrollCareerProgram;
+window.openCareerProgram = openCareerProgram;
+window.openCareerModuleContent = openCareerModuleContent;
+window.submitCareerQuiz = submitCareerQuiz;
+window.submitCareerAssignment = submitCareerAssignment;
+
 window.showCareerSection = showCareerSection;
 window.loadCareerPaths = loadCareerPaths;
 window.openCareerPath = openCareerPath;
