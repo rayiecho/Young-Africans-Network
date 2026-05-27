@@ -6670,18 +6670,26 @@ async function loadProgramsManage() {
 
   assignSnap.docs.forEach(function(d) {
     const a = d.data();
+    const submissionText = a.submission || a.response || '(no text)';
     pendingHtml += [
-      '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">',
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;">',
+      '<div style="background:var(--white);border-radius:12px;padding:1.25rem;margin-bottom:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);border-left:4px solid var(--gold);">',
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">',
       '<div style="flex:1;">',
-      '<strong style="font-size:0.88rem;color:var(--navy);">' + sanitize(a.userName) + '</strong>',
-      '<p style="font-size:0.82rem;color:var(--gray);margin:0.35rem 0;">' + sanitize(a.submission) + '</p>',
+      '<strong style="font-size:0.92rem;color:var(--navy);">' + sanitize(a.userName||'Unknown') + '</strong>',
+      '<p style="font-size:0.75rem;color:var(--gray);">Program: ' + sanitize(a.programId||'') + ' · Module: ' + sanitize(a.moduleId||'') + '</p>',
       '<small style="font-size:0.72rem;color:var(--gray);">' + timeAgo(a.submittedAt) + '</small>',
       '</div>',
-      '<div style="display:flex;gap:0.5rem;">',
-      '<button class="btn-sm btn-navy" onclick="approveProgramAssignment(\'' + d.id + '\',\'' + (a.userId||'') + '\',\'' + sanitize(a.userName) + '\',\'' + (a.programId||'') + '\')">Approve</button>',
-      '<button class="btn-sm btn-red" onclick="rejectProgramAssignment(\'' + d.id + '\')">Reject</button>',
-      '</div></div></div>'
+      '<span style="background:rgba(245,166,35,0.1);color:#b37800;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">PENDING</span>',
+      '</div>',
+      '<div style="background:var(--light);border-radius:10px;padding:1rem;margin-bottom:0.75rem;">',
+      '<p style="font-size:0.78rem;font-weight:700;color:var(--navy);margin-bottom:0.35rem;">Submission:</p>',
+      '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;white-space:pre-wrap;">' + sanitize(submissionText) + '</p>',
+      '</div>',
+      '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">',
+      '<input type="text" id="feedback-' + d.id + '" placeholder="Feedback (optional)" style="flex:1;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);padding:0.5rem 0.75rem;border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;min-width:150px;">',
+      '<button class="btn-sm btn-navy" onclick="approveProgramAssignment(\'' + d.id + '\',\'' + (a.userId||'') + '\',\'' + sanitize(a.userName||'') + '\',\'' + (a.programId||'') + '\')">✅ Approve</button>',
+      '<button class="btn-sm btn-red" onclick="rejectProgramAssignment(\'' + d.id + '\')">❌ Reject</button>',
+      '</div></div>'
     ].join('');
   });
 
@@ -7941,16 +7949,22 @@ async function openModuleContent(programId, moduleId) {
 
     // Video section
     if (m.videoUrl) {
-      const videoId = m.videoUrl.includes('youtube.com/watch?v=') ? m.videoUrl.split('v=')[1].split('&')[0]
-        : m.videoUrl.includes('youtu.be/') ? m.videoUrl.split('youtu.be/')[1].split('?')[0] : '';
-      if (videoId) {
+      let embedUrl = '';
+      if (m.videoUrl.includes('youtube.com/embed/')) {
+        embedUrl = m.videoUrl;
+      } else if (m.videoUrl.includes('youtube.com/watch?v=')) {
+        const vid = m.videoUrl.split('v=')[1].split('&')[0];
+        embedUrl = 'https://www.youtube.com/embed/' + vid;
+      } else if (m.videoUrl.includes('youtu.be/')) {
+        const vid = m.videoUrl.split('youtu.be/')[1].split('?')[0];
+        embedUrl = 'https://www.youtube.com/embed/' + vid;
+      }
+      if (embedUrl) {
         html += '<div style="margin-bottom:1rem;">';
         html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">🎥 Video Lesson</p>';
         html += '<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;">';
-        html += '<iframe src="https://www.youtube.com/embed/' + videoId + '" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:12px;" allowfullscreen></iframe>';
+        html += '<iframe src="' + embedUrl + '" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:12px;" allowfullscreen></iframe>';
         html += '</div></div>';
-      } else if (m.videoUrl) {
-        html += '<div style="margin-bottom:1rem;"><p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">🎥 Video Lesson</p><div style="background:var(--light);border-radius:12px;padding:1rem;text-align:center;"><p style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;">Click to watch this lesson video</p><a href="' + m.videoUrl + '" target="_blank" class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;text-decoration:none;">▶ Watch Video</a></div></div>';
       }
     }
 
