@@ -6233,7 +6233,14 @@ async function enrollInProgram(programId) {
 
   if (!activeSnap.empty) {
     const active = activeSnap.docs[0].data();
-    return showToast('You are already enrolled in "' + (active.programTitle||'a program') + '". Complete it first before enrolling in another.', 'error');
+    // Check if the program still exists
+    const activeProgSnap = await getDoc(doc(db, 'trainingPrograms', active.programId));
+    if (activeProgSnap.exists()) {
+      return showToast('You are already enrolled in "' + (active.programTitle||'a program') + '". Complete it first before enrolling in another.', 'error');
+    } else {
+      // Program was deleted - clean up the stale enrollment
+      await deleteDoc(activeSnap.docs[0].ref);
+    }
   }
 
   const ref = doc(db, 'trainingPrograms', programId);
@@ -6275,8 +6282,10 @@ async function openProgram(programId) {
     if (index === 0) return true;
     const prevId = modules[index - 1].id;
     if (!modulesCompleted.includes(prevId)) return false;
+    // If already completed this module, always unlock next
+    if (modulesCompleted.includes(modules[index].id)) return true;
     const prevCompletedAt = completionDates[prevId];
-    if (!prevCompletedAt) return false;
+    if (!prevCompletedAt) return true; // No date stored = legacy member, unlock
     return (now - prevCompletedAt) >= SEVEN_DAYS;
   }
 
