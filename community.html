@@ -6344,7 +6344,7 @@ async function openLessonContent(programId, lessonId, colName) {
     return;
   }
   const progressCol = colName === 'careerPrograms' ? 'careerLearningProgress' : 'learningProgress';
-  const btn = document.querySelector('[onclick*="openLessonContent(\''+programId+'\',\''+lessonId+'\']');
+  const btn = document.querySelector('[onclick*="' + lessonId + '"]');
   const moduleCard = btn ? btn.closest('div[style*="border-radius:12px"]') : null;
   const contentDiv = document.createElement('div');
   contentDiv.id = 'lesson-content-' + lessonId;
