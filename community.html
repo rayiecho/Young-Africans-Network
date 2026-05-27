@@ -7914,7 +7914,8 @@ async function openModuleContent(programId, moduleId) {
         });
         html += '</div>';
       });
-      html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="submitModuleQuiz(\'' + programId + '\',\'' + moduleId + '\',' + JSON.stringify(m.quiz).replace(/'/g, "\'") + ')">Submit Quiz</button>';
+      window['quiz_' + moduleId] = typeof m.quiz === 'string' ? JSON.parse(m.quiz) : m.quiz;
+      html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="submitModuleQuiz(\'' + programId + '\',\'' + moduleId + '\')">Submit Quiz</button>';
       html += '</div></div>';
     }
 
@@ -7938,6 +7939,7 @@ async function openModuleContent(programId, moduleId) {
 }
 
 async function submitModuleQuiz(programId, moduleId, quiz) {
+  quiz = quiz || window['quiz_' + moduleId] || [];
   let correct = 0;
   quiz.forEach(function(q, qi) {
     const selected = document.querySelector('input[name="q' + moduleId + '_' + qi + '"]:checked');
