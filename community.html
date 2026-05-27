@@ -6345,16 +6345,15 @@ async function openLessonContent(programId, lessonId, colName) {
   }
   const progressCol = colName === 'careerPrograms' ? 'careerLearningProgress' : 'learningProgress';
   const btn = document.querySelector('[onclick*="openLessonContent(\''+programId+'\',\''+lessonId+'\']');
-  const parentRow = btn ? btn.closest('div[style*="display:flex"]') : null;
+  const moduleCard = btn ? btn.closest('div[style*="border-radius:12px"]') : null;
   const contentDiv = document.createElement('div');
   contentDiv.id = 'lesson-content-' + lessonId;
-  contentDiv.style.cssText = 'padding:0.75rem 0;';
+  contentDiv.style.cssText = 'padding:0.75rem 1rem;';
   contentDiv.innerHTML = '<div class="loading">Loading lesson...</div>';
-  if (parentRow && parentRow.parentNode) {
-    parentRow.parentNode.insertBefore(contentDiv, parentRow.nextSibling);
-  } else {
-    const fallback = document.getElementById('module-lessons-' + programId + '-1') || document.getElementById('career-module-lessons-' + programId + '-1');
-    if (fallback) fallback.appendChild(contentDiv);
+  if (moduleCard && moduleCard.parentNode) {
+    moduleCard.parentNode.insertBefore(contentDiv, moduleCard.nextSibling);
+  } else if (btn && btn.parentNode) {
+    btn.parentNode.appendChild(contentDiv);
   }
 
   const lessonSnap = await getDoc(doc(db, colName, programId, 'modules', lessonId));
