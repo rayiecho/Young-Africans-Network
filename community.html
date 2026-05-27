@@ -6262,112 +6262,62 @@ async function openProgram(programId) {
   if (box.style.display !== 'none') { box.style.display = 'none'; return; }
   box.innerHTML = '<div class="loading">Loading program...</div>';
   box.style.display = 'block';
-
-  // Load modules and lessons
+  try {
   const modulesSnap = await getDocs(query(collection(db, 'trainingPrograms', programId, 'modules'), orderBy('order', 'asc')));
-  const lessonsSnap = await getDocs(query(collection(db, 'trainingPrograms', programId, 'lessons'), orderBy('order', 'asc')));
-
-  if (modulesSnap.empty && lessonsSnap.empty) {
+  if (modulesSnap.empty) {
     box.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;"><p style="font-size:0.85rem;color:var(--gray);">No content yet. Check back soon!</p></div>';
     return;
   }
-
-  // Load progress
   const progressSnap = await getDoc(doc(db, 'learningProgress', currentUser.uid + '_' + programId));
   const progressData = progressSnap.exists() ? progressSnap.data() : {};
   const lessonsCompleted = progressData.lessonsCompleted || [];
-  const modulesCompleted = progressData.modulesCompleted || [];
   const completionDates = progressData.completionDates || {};
   const now = Date.now();
   const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
-
-  // Group lessons by module week
-  const lessonsByModule = {};
-  lessonsSnap.docs.forEach(function(d) {
-    const l = Object.assign({id: d.id}, d.data());
-    const week = l.moduleWeek || 1;
-    if (!lessonsByModule[week]) lessonsByModule[week] = [];
-    lessonsByModule[week].push(l);
-  });
-
-  // Sort lessons within each module
-  Object.keys(lessonsByModule).forEach(function(week) {
-    lessonsByModule[week].sort(function(a, b) { return (a.lessonNumber||0) - (b.lessonNumber||0); });
-  });
-
   const moduleDocs = modulesSnap.docs.map(function(d) { return Object.assign({id: d.id}, d.data()); });
-  const totalLessons = lessonsSnap.size;
-  const completedCount = lessonsCompleted.length;
-
+  const totalLessons = moduleDocs.length;
+  const completedCount = moduleDocs.filter(function(m) { return lessonsCompleted.includes(m.id); }).length;
   function isModuleUnlocked(index) {
     if (index === 0) return true;
     const prevModule = moduleDocs[index - 1];
     if (!prevModule) return false;
-    const prevWeek = prevModule.week || index;
-    const prevLessons = lessonsByModule[prevWeek] || [];
-    // Check all lessons of previous module completed
-    const allPrevCompleted = prevLessons.every(function(l) { return lessonsCompleted.includes(l.id); });
-    if (!allPrevCompleted) return false;
-    // Check 7 days passed since last lesson of prev module completed
-    const lastLesson = prevLessons[prevLessons.length - 1];
-    if (!lastLesson) return false;
-    const completedAt = completionDates[lastLesson.id];
+    if (!lessonsCompleted.includes(prevModule.id)) return false;
+    const completedAt = completionDates[prevModule.id];
     if (!completedAt) return true;
     return (now - completedAt) >= SEVEN_DAYS;
   }
-
   let html = '<div style="background:var(--light);border-radius:12px;padding:1rem;">';
   html += '<h4 style="font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Program Content</h4>';
   html += '<div style="background:white;border-radius:8px;padding:0.5rem 1rem;margin-bottom:0.75rem;font-size:0.78rem;color:var(--gray);">Progress: <strong style="color:var(--navy);">' + completedCount + ' / ' + totalLessons + ' lessons completed</strong></div>';
 
   moduleDocs.forEach(function(m, mi) {
-    const week = m.week || (mi + 1);
-    const lessons = lessonsByModule[week] || [];
     const unlocked = isModuleUnlocked(mi);
-    const allLessonsCompleted = lessons.length > 0 && lessons.every(function(l) { return lessonsCompleted.includes(l.id); });
-    const completedLessons = lessons.filter(function(l) { return lessonsCompleted.includes(l.id); }).length;
+    const isDone = lessonsCompleted.includes(m.id);
 
     let unlockMsg = '';
     if (!unlocked && mi > 0) {
-      const prevModule = moduleDocs[mi-1];
-      const prevWeek = prevModule.week || mi;
-      const prevLessons = lessonsByModule[prevWeek] || [];
-      const lastLesson = prevLessons[prevLessons.length-1];
-      if (lastLesson && completionDates[lastLesson.id]) {
-        const daysLeft = Math.ceil((SEVEN_DAYS - (now - completionDates[lastLesson.id])) / (24*60*60*1000));
+      const prevModule = moduleDocs[mi - 1];
+      const completedAt = completionDates[prevModule.id];
+      if (completedAt) {
+        const daysLeft = Math.ceil((SEVEN_DAYS - (now - completedAt)) / (24 * 60 * 60 * 1000));
         unlockMsg = 'Unlocks in ' + daysLeft + ' day' + (daysLeft !== 1 ? 's' : '');
       } else {
-        unlockMsg = 'Complete Module ' + (mi) + ' first';
+        unlockMsg = 'Complete Module ' + mi + ' first';
       }
     }
 
-    const borderColor = allLessonsCompleted ? '#27AE60' : unlocked ? '#0A66C2' : '#ccc';
+    const borderColor = isDone ? '#27AE60' : unlocked ? '#0A66C2' : '#ccc';
     const opacity = unlocked ? '1' : '0.6';
 
     html += '<div style="background:white;border-radius:12px;margin-bottom:0.75rem;border-left:3px solid ' + borderColor + ';opacity:' + opacity + ';">';
-    html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:1rem;cursor:' + (unlocked ? 'pointer' : 'default') + ';" onclick="' + (unlocked ? 'toggleModuleLessons(\'' + programId + '\',\'' + week + '\')' : '') + '">';
-    html += '<div style="width:32px;height:32px;border-radius:50%;background:' + borderColor + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.85rem;font-weight:700;flex-shrink:0;">' + (allLessonsCompleted ? '✓' : unlocked ? String(mi+1) : '🔒') + '</div>';
+    html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:1rem;">';
+    html += '<div style="width:32px;height:32px;border-radius:50%;background:' + borderColor + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.85rem;font-weight:700;flex-shrink:0;">' + (isDone ? '✓' : unlocked ? String(mi + 1) : '🔒') + '</div>';
     html += '<div style="flex:1;">';
-    html += '<p style="font-size:0.92rem;font-weight:700;color:var(--navy);">' + sanitize(m.title||'Module '+week) + '</p>';
-    html += '<p style="font-size:0.72rem;color:var(--gray);">' + (unlocked ? completedLessons + '/' + lessons.length + ' lessons · ' + (allLessonsCompleted ? '✅ Complete' : 'In progress') : unlockMsg) + '</p>';
+    html += '<p style="font-size:0.92rem;font-weight:700;color:var(--navy);">' + sanitize(m.title || 'Module ' + (mi + 1)) + '</p>';
+    html += '<p style="font-size:0.72rem;color:var(--gray);">' + (unlocked ? (isDone ? '✅ Complete' : 'In progress') : unlockMsg) + '</p>';
     html += '</div>';
-    html += unlocked ? '<span style="font-size:0.75rem;color:var(--gray);">▼</span>' : '';
-    html += '</div>';
-
-    // Lessons list (hidden by default, shown when module clicked)
-    html += '<div id="module-lessons-' + programId + '-' + week + '" style="display:none;padding:0 1rem 1rem;">';
-    if (unlocked && lessons.length > 0) {
-      lessons.forEach(function(l) {
-        const isDone = lessonsCompleted.includes(l.id);
-        html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0;border-bottom:1px solid var(--light);">';
-        html += '<div style="width:24px;height:24px;border-radius:50%;background:' + (isDone ? '#27AE60' : '#F5A623') + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.68rem;font-weight:700;flex-shrink:0;">' + (isDone ? '✓' : l.lessonNumber) + '</div>';
-        html += '<div style="flex:1;">';
-        html += '<p style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + sanitize(l.title||'Lesson '+l.lessonNumber) + '</p>';
-        html += '<p style="font-size:0.7rem;color:var(--gray);">' + (l.isLastLesson ? '📝 Includes assignment' : '') + (isDone ? ' · ✅ Done' : '') + '</p>';
-        html += '</div>';
-        html += '<button class="btn-sm btn-navy" onclick="openLessonContent(\'' + programId + '\',\'' + l.id + '\',\'trainingPrograms\')">' + (isDone ? 'Review' : 'Start') + '</button>';
-        html += '</div>';
-      });
+    if (unlocked) {
+      html += '<button class="btn-sm btn-navy" onclick="openLessonContent(\'' + programId + '\',\'' + m.id + '\',\'trainingPrograms\')">' + (isDone ? 'Review' : 'Start') + '</button>';
     }
     html += '</div>';
     html += '</div>';
@@ -6375,6 +6325,10 @@ async function openProgram(programId) {
 
   html += '</div>';
   box.innerHTML = html;
+  } catch(e) {
+    console.error('openProgram error:', e);
+    box.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;"><p style="font-size:0.85rem;color:var(--gray);">Error loading program. Please try again.</p></div>';
+  }
 }
 
 function toggleModuleLessons(programId, week) {
