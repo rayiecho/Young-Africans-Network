@@ -6260,81 +6260,362 @@ async function openProgram(programId) {
   const box = document.getElementById('program-modules-' + programId);
   if (!box) return;
   if (box.style.display !== 'none') { box.style.display = 'none'; return; }
-  box.innerHTML = '<div class="loading">Loading modules...</div>';
+  box.innerHTML = '<div class="loading">Loading program...</div>';
   box.style.display = 'block';
 
-  const snap = await getDocs(query(collection(db, 'trainingPrograms', programId, 'modules'), orderBy('order', 'asc')));
-  if (snap.empty) {
-    box.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;"><p style="font-size:0.85rem;color:var(--gray);">No modules yet. Check back soon!</p></div>';
+  // Load modules and lessons
+  const modulesSnap = await getDocs(query(collection(db, 'trainingPrograms', programId, 'modules'), orderBy('order', 'asc')));
+  const lessonsSnap = await getDocs(query(collection(db, 'trainingPrograms', programId, 'lessons'), orderBy('order', 'asc')));
+
+  if (modulesSnap.empty && lessonsSnap.empty) {
+    box.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;"><p style="font-size:0.85rem;color:var(--gray);">No content yet. Check back soon!</p></div>';
     return;
   }
+
+  // Load progress
   const progressSnap = await getDoc(doc(db, 'learningProgress', currentUser.uid + '_' + programId));
   const progressData = progressSnap.exists() ? progressSnap.data() : {};
+  const lessonsCompleted = progressData.lessonsCompleted || [];
   const modulesCompleted = progressData.modulesCompleted || [];
   const completionDates = progressData.completionDates || {};
   const now = Date.now();
   const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
 
-  function isModuleUnlocked(index, modules) {
+  // Group lessons by module week
+  const lessonsByModule = {};
+  lessonsSnap.docs.forEach(function(d) {
+    const l = Object.assign({id: d.id}, d.data());
+    const week = l.moduleWeek || 1;
+    if (!lessonsByModule[week]) lessonsByModule[week] = [];
+    lessonsByModule[week].push(l);
+  });
+
+  // Sort lessons within each module
+  Object.keys(lessonsByModule).forEach(function(week) {
+    lessonsByModule[week].sort(function(a, b) { return (a.lessonNumber||0) - (b.lessonNumber||0); });
+  });
+
+  const moduleDocs = modulesSnap.docs.map(function(d) { return Object.assign({id: d.id}, d.data()); });
+  const totalLessons = lessonsSnap.size;
+  const completedCount = lessonsCompleted.length;
+
+  function isModuleUnlocked(index) {
     if (index === 0) return true;
-    const prevId = modules[index - 1].id;
-    if (!modulesCompleted.includes(prevId)) return false;
-    // If already completed this module, always unlock next
-    if (modulesCompleted.includes(modules[index].id)) return true;
-    const prevCompletedAt = completionDates[prevId];
-    if (!prevCompletedAt) return true; // No date stored = legacy member, unlock
-    return (now - prevCompletedAt) >= SEVEN_DAYS;
+    const prevModule = moduleDocs[index - 1];
+    if (!prevModule) return false;
+    const prevWeek = prevModule.week || index;
+    const prevLessons = lessonsByModule[prevWeek] || [];
+    // Check all lessons of previous module completed
+    const allPrevCompleted = prevLessons.every(function(l) { return lessonsCompleted.includes(l.id); });
+    if (!allPrevCompleted) return false;
+    // Check 7 days passed since last lesson of prev module completed
+    const lastLesson = prevLessons[prevLessons.length - 1];
+    if (!lastLesson) return false;
+    const completedAt = completionDates[lastLesson.id];
+    if (!completedAt) return true;
+    return (now - completedAt) >= SEVEN_DAYS;
   }
 
-  const moduleDocs = snap.docs.map(function(d) { return Object.assign({id: d.id}, d.data()); });
+  let html = '<div style="background:var(--light);border-radius:12px;padding:1rem;">';
+  html += '<h4 style="font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Program Content</h4>';
+  html += '<div style="background:white;border-radius:8px;padding:0.5rem 1rem;margin-bottom:0.75rem;font-size:0.78rem;color:var(--gray);">Progress: <strong style="color:var(--navy);">' + completedCount + ' / ' + totalLessons + ' lessons completed</strong></div>';
 
-  let modulesHtml = '<div style="background:var(--light);border-radius:12px;padding:1rem;">';
-  modulesHtml += '<h4 style="font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">Program Modules</h4>';
-  modulesHtml += '<div style="background:white;border-radius:8px;padding:0.5rem 1rem;margin-bottom:0.75rem;font-size:0.78rem;color:var(--gray);">Progress: <strong style="color:var(--navy);">' + modulesCompleted.length + ' / ' + snap.docs.length + ' completed</strong></div>';
-
-  moduleDocs.forEach(function(m, i) {
-    const isCompleted = modulesCompleted.includes(m.id);
-    const unlocked = isModuleUnlocked(i, moduleDocs);
+  moduleDocs.forEach(function(m, mi) {
+    const week = m.week || (mi + 1);
+    const lessons = lessonsByModule[week] || [];
+    const unlocked = isModuleUnlocked(mi);
+    const allLessonsCompleted = lessons.length > 0 && lessons.every(function(l) { return lessonsCompleted.includes(l.id); });
+    const completedLessons = lessons.filter(function(l) { return lessonsCompleted.includes(l.id); }).length;
 
     let unlockMsg = '';
-    if (!unlocked && i > 0) {
-      const prevId = moduleDocs[i-1].id;
-      const prevCompletedAt = completionDates[prevId];
-      if (prevCompletedAt) {
-        const daysLeft = Math.ceil((SEVEN_DAYS - (now - prevCompletedAt)) / (24 * 60 * 60 * 1000));
+    if (!unlocked && mi > 0) {
+      const prevModule = moduleDocs[mi-1];
+      const prevWeek = prevModule.week || mi;
+      const prevLessons = lessonsByModule[prevWeek] || [];
+      const lastLesson = prevLessons[prevLessons.length-1];
+      if (lastLesson && completionDates[lastLesson.id]) {
+        const daysLeft = Math.ceil((SEVEN_DAYS - (now - completionDates[lastLesson.id])) / (24*60*60*1000));
         unlockMsg = 'Unlocks in ' + daysLeft + ' day' + (daysLeft !== 1 ? 's' : '');
       } else {
-        unlockMsg = 'Complete Week ' + i + ' first';
+        unlockMsg = 'Complete Module ' + (mi) + ' first';
       }
     }
 
-    const borderColor = isCompleted ? '#27AE60' : unlocked ? '#0A66C2' : '#ccc';
-    const circleColor = isCompleted ? '#27AE60' : unlocked ? '#0A66C2' : '#ccc';
-    const circleText = isCompleted ? '\u2713' : unlocked ? String(i+1) : '\uD83D\uDD12';
-    const statusText = isCompleted ? '\u2705 Completed' : unlocked ? 'Not started' : unlockMsg;
-    const actionBtn = isCompleted
-      ? '<button class="btn-sm btn-navy" onclick="openModuleContent(\'' + programId + '\',\'' + m.id + '\')">Review</button>'
-      : unlocked
-        ? '<button class="btn-sm btn-navy" onclick="openModuleContent(\'' + programId + '\',\'' + m.id + '\')">Start</button>'
-        : '<span style="background:var(--light);color:var(--gray);padding:0.3rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">\uD83D\uDD12 Locked</span>';
+    const borderColor = allLessonsCompleted ? '#27AE60' : unlocked ? '#0A66C2' : '#ccc';
+    const opacity = unlocked ? '1' : '0.6';
 
-    modulesHtml += [
-      '<div style="background:white;border-radius:12px;padding:1rem;margin-bottom:0.75rem;border-left:3px solid ' + borderColor + ';opacity:' + (unlocked || isCompleted ? '1' : '0.6') + ';">',
-      '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">',
-      '<div style="width:28px;height:28px;border-radius:50%;background:' + circleColor + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;font-weight:700;flex-shrink:0;">' + circleText + '</div>',
-      '<div style="flex:1;">',
-      '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(m.title||'') + '</p>',
-      '<p style="font-size:0.72rem;color:var(--gray);">' + (m.duration||'15 min') + ' · ' + statusText + '</p>',
-      '</div>',
-      actionBtn,
-      '</div>',
-      '<div id="module-content-' + m.id + '" style="display:none;"></div>',
-      '</div>'
-    ].join('');
+    html += '<div style="background:white;border-radius:12px;margin-bottom:0.75rem;border-left:3px solid ' + borderColor + ';opacity:' + opacity + ';">';
+    html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:1rem;cursor:' + (unlocked ? 'pointer' : 'default') + ';" onclick="' + (unlocked ? 'toggleModuleLessons(\'' + programId + '\',\'' + week + '\')' : '') + '">';
+    html += '<div style="width:32px;height:32px;border-radius:50%;background:' + borderColor + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.85rem;font-weight:700;flex-shrink:0;">' + (allLessonsCompleted ? '✓' : unlocked ? String(mi+1) : '🔒') + '</div>';
+    html += '<div style="flex:1;">';
+    html += '<p style="font-size:0.92rem;font-weight:700;color:var(--navy);">' + sanitize(m.title||'Module '+week) + '</p>';
+    html += '<p style="font-size:0.72rem;color:var(--gray);">' + (unlocked ? completedLessons + '/' + lessons.length + ' lessons · ' + (allLessonsCompleted ? '✅ Complete' : 'In progress') : unlockMsg) + '</p>';
+    html += '</div>';
+    html += unlocked ? '<span style="font-size:0.75rem;color:var(--gray);">▼</span>' : '';
+    html += '</div>';
+
+    // Lessons list (hidden by default, shown when module clicked)
+    html += '<div id="module-lessons-' + programId + '-' + week + '" style="display:none;padding:0 1rem 1rem;">';
+    if (unlocked && lessons.length > 0) {
+      lessons.forEach(function(l) {
+        const isDone = lessonsCompleted.includes(l.id);
+        html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0;border-bottom:1px solid var(--light);">';
+        html += '<div style="width:24px;height:24px;border-radius:50%;background:' + (isDone ? '#27AE60' : '#F5A623') + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.68rem;font-weight:700;flex-shrink:0;">' + (isDone ? '✓' : l.lessonNumber) + '</div>';
+        html += '<div style="flex:1;">';
+        html += '<p style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + sanitize(l.title||'Lesson '+l.lessonNumber) + '</p>';
+        html += '<p style="font-size:0.7rem;color:var(--gray);">' + (l.isLastLesson ? '📝 Includes assignment' : '') + (isDone ? ' · ✅ Done' : '') + '</p>';
+        html += '</div>';
+        html += '<button class="btn-sm btn-navy" onclick="openLessonContent(\'' + programId + '\',\'' + l.id + '\',\'trainingPrograms\')">' + (isDone ? 'Review' : 'Start') + '</button>';
+        html += '</div>';
+      });
+    }
+    html += '</div>';
+    html += '</div>';
   });
-  modulesHtml += '</div>';
-  box.innerHTML = modulesHtml;
+
+  html += '</div>';
+  box.innerHTML = html;
 }
+
+function toggleModuleLessons(programId, week) {
+  const box = document.getElementById('module-lessons-' + programId + '-' + week);
+  if (!box) return;
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+async function openLessonContent(programId, lessonId, colName) {
+  const existingBox = document.getElementById('lesson-content-' + lessonId);
+  if (existingBox) {
+    existingBox.style.display = existingBox.style.display === 'none' ? 'block' : 'none';
+    return;
+  }
+  const progressCol = colName === 'careerPrograms' ? 'careerLearningProgress' : 'learningProgress';
+  const btn = document.querySelector('[onclick*="openLessonContent(\''+programId+'\',\''+lessonId+'\']');
+  const parentRow = btn ? btn.closest('div[style*="display:flex"]') : null;
+  const contentDiv = document.createElement('div');
+  contentDiv.id = 'lesson-content-' + lessonId;
+  contentDiv.style.cssText = 'padding:0.75rem 0;';
+  contentDiv.innerHTML = '<div class="loading">Loading lesson...</div>';
+  if (parentRow && parentRow.parentNode) {
+    parentRow.parentNode.insertBefore(contentDiv, parentRow.nextSibling);
+  } else {
+    const fallback = document.getElementById('module-lessons-' + programId + '-1') || document.getElementById('career-module-lessons-' + programId + '-1');
+    if (fallback) fallback.appendChild(contentDiv);
+  }
+
+  const lessonSnap = await getDoc(doc(db, colName, programId, 'lessons', lessonId));
+  if (!lessonSnap.exists()) { contentDiv.innerHTML = '<p style="color:var(--gray);font-size:0.85rem;">Lesson not found.</p>'; return; }
+  const l = lessonSnap.data();
+  const quiz = typeof l.quiz === 'string' ? JSON.parse(l.quiz || '[]') : (l.quiz || []);
+
+  let html = '';
+
+  if (l.reading) {
+    html += '<div style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--navy);">';
+    html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">📖 Reading</p>';
+    html += '<div style="font-size:0.88rem;color:var(--navy);line-height:1.9;">' + l.reading.split('\n').join('<br>') + '</div>';
+    html += '</div>';
+  }
+
+  if (l.videoUrl) {
+    let embedUrl = l.videoUrl;
+    if (l.videoUrl.includes('youtube.com/watch?v=')) {
+      embedUrl = 'https://www.youtube.com/embed/' + l.videoUrl.split('v=')[1].split('&')[0];
+    } else if (l.videoUrl.includes('youtu.be/')) {
+      embedUrl = 'https://www.youtube.com/embed/' + l.videoUrl.split('youtu.be/')[1].split('?')[0];
+    }
+    if (embedUrl.includes('youtube.com/embed/')) {
+      html += '<div style="margin-bottom:1rem;">';
+      html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">🎥 Video Lesson</p>';
+      html += '<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;">';
+      html += '<iframe src="' + embedUrl + '" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:12px;" allowfullscreen></iframe>';
+      html += '</div></div>';
+    }
+  }
+
+  if (quiz.length > 0) {
+    html += '<div style="background:rgba(245,166,35,0.05);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--gold);">';
+    html += '<p style="font-size:0.82rem;font-weight:700;color:#b37800;margin-bottom:1rem;">✅ Lesson Quiz (70% to pass · 3 attempts)</p>';
+    quiz.forEach(function(q, qi) {
+      html += '<div style="margin-bottom:1rem;">';
+      html += '<p style="font-size:0.85rem;font-weight:600;color:var(--navy);margin-bottom:0.5rem;">' + (qi+1) + '. ' + sanitize(q.question) + '</p>';
+      q.options.forEach(function(opt, oi) {
+        html += '<label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.35rem;font-size:0.82rem;cursor:pointer;">';
+        html += '<input type="radio" name="lq_' + lessonId + '_' + qi + '" value="' + oi + '"> ' + sanitize(opt);
+        html += '</label>';
+      });
+      html += '</div>';
+    });
+    window['lesson_quiz_' + lessonId] = quiz;
+    html += '<div id="quiz-result-' + lessonId + '" style="margin-bottom:0.75rem;"></div>';
+    html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="submitLessonQuiz(\'' + programId + '\',\'' + lessonId + '\',\'' + colName + '\')">Submit Quiz</button>';
+    html += '</div>';
+  }
+
+  if (l.isLastLesson && l.assignment) {
+    html += '<div id="assignment-section-' + lessonId + '" style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--navy);">';
+    html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">📝 Module Assignment</p>';
+    html += '<p style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;line-height:1.7;">' + sanitize(l.assignment) + '</p>';
+    html += '<textarea id="assignment-' + lessonId + '" rows="5" style="width:100%;background:white;border:1.5px solid rgba(27,42,107,0.12);border-radius:10px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;box-sizing:border-box;" placeholder="Write your assignment response here..."></textarea>';
+    html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;margin-top:0.75rem;" onclick="submitLessonAssignment(\'' + programId + '\',\'' + lessonId + '\',\'' + colName + '\')">Submit Assignment</button>';
+    html += '<div id="assignment-result-' + lessonId + '" style="margin-top:0.75rem;"></div>';
+    html += '</div>';
+  }
+
+  contentDiv.innerHTML = html || '<p style="font-size:0.85rem;color:var(--gray);">No content yet for this lesson.</p>';
+}
+
+async function submitLessonQuiz(programId, lessonId, colName) {
+  const quiz = window['lesson_quiz_' + lessonId] || [];
+  if (!quiz.length) return showToast('Quiz not loaded', 'error');
+  const resultDiv = document.getElementById('quiz-result-' + lessonId);
+  let correct = 0;
+  quiz.forEach(function(q, qi) {
+    const sel = document.querySelector('input[name="lq_' + lessonId + '_' + qi + '"]:checked');
+    if (sel && parseInt(sel.value) === q.correctIndex) correct++;
+  });
+  const score = Math.round((correct / quiz.length) * 100);
+  const passed = score >= 70;
+  const progressCol = colName === 'careerPrograms' ? 'careerLearningProgress' : 'learningProgress';
+
+  const attRef = doc(db, 'quizAttempts', currentUser.uid + '_' + lessonId);
+  const attSnap = await getDoc(attRef);
+  const attempts = attSnap.exists() ? (attSnap.data().attempts || 0) : 0;
+
+  if (attempts >= 3 && !passed) {
+    showQuizFailureForm(programId, lessonId, score, attempts + 1, colName);
+    return;
+  }
+
+  await setDoc(attRef, {attempts: attempts + 1, lastScore: score, passed: passed, updatedAt: serverTimestamp()}, {merge: true});
+
+  if (passed) {
+    if (resultDiv) resultDiv.innerHTML = '<div style="background:rgba(39,174,96,0.08);border-radius:10px;padding:0.75rem;border-left:3px solid #27AE60;font-size:0.85rem;color:var(--navy);">✅ Passed! Score: ' + score + '%</div>';
+    showToast('Quiz passed! Score: ' + score + '% 🎉');
+    const progressRef = doc(db, progressCol, currentUser.uid + '_' + programId);
+    const progressSnap = await getDoc(progressRef);
+    const progressData = progressSnap.exists() ? progressSnap.data() : {};
+    const lessonsCompleted = progressData.lessonsCompleted || [];
+    const completionDates = progressData.completionDates || {};
+    if (!lessonsCompleted.includes(lessonId)) {
+      lessonsCompleted.push(lessonId);
+      completionDates[lessonId] = Date.now();
+      await setDoc(progressRef, Object.assign(progressData, {
+        lessonsCompleted: lessonsCompleted,
+        completionDates: completionDates,
+        updatedAt: serverTimestamp()
+      }), {merge: true});
+    }
+    // Refresh program view
+    if (colName === 'careerPrograms') {
+      openCareerProgram(programId);
+    } else {
+      openProgram(programId);
+    }
+  } else {
+    const attLeft = Math.max(0, 3 - (attempts + 1));
+    if (resultDiv) resultDiv.innerHTML = '<div style="background:rgba(220,53,69,0.06);border-radius:10px;padding:0.75rem;border-left:3px solid #dc3545;font-size:0.85rem;color:var(--navy);">❌ Score: ' + score + '%. Need 70%. ' + (attLeft > 0 ? attLeft + ' attempt(s) left.' : 'No attempts left — please contact YAN.') + '</div>';
+    showToast('Score: ' + score + '%. Need 70%. ' + (attLeft > 0 ? attLeft + ' attempt(s) left.' : 'Contact YAN for help.'), 'error');
+    if (attLeft === 0) showQuizFailureForm(programId, lessonId, score, attempts + 1, colName);
+  }
+}
+
+async function submitLessonAssignment(programId, lessonId, colName) {
+  const textarea = document.getElementById('assignment-' + lessonId);
+  if (!textarea) return;
+  const text = textarea.value.trim();
+  if (!text) return showToast('Write your assignment first', 'error');
+  const resultDiv = document.getElementById('assignment-result-' + lessonId);
+  const progressCol = colName === 'careerPrograms' ? 'careerLearningProgress' : 'learningProgress';
+
+  try {
+    await addDoc(collection(db, 'programAssignments'), {
+      userId: currentUser.uid,
+      userName: currentUserData.name,
+      country: currentUserData.country || '',
+      programId: programId,
+      lessonId: lessonId,
+      collection: colName,
+      submission: text,
+      response: text,
+      status: 'pending',
+      submittedAt: serverTimestamp()
+    });
+
+    const progressRef = doc(db, progressCol, currentUser.uid + '_' + programId);
+    const progressSnap = await getDoc(progressRef);
+    const progressData = progressSnap.exists() ? progressSnap.data() : {};
+    const lessonsCompleted = progressData.lessonsCompleted || [];
+    const completionDates = progressData.completionDates || {};
+    if (!lessonsCompleted.includes(lessonId)) {
+      lessonsCompleted.push(lessonId);
+      completionDates[lessonId] = Date.now();
+      await setDoc(progressRef, Object.assign(progressData, {
+        lessonsCompleted: lessonsCompleted,
+        completionDates: completionDates,
+        updatedAt: serverTimestamp()
+      }), {merge: true});
+    }
+
+    if (resultDiv) resultDiv.innerHTML = '<div style="background:rgba(39,174,96,0.06);border-radius:12px;padding:1rem;border-left:3px solid #27AE60;"><p style="font-size:0.85rem;color:var(--navy);">✅ Assignment submitted! Your facilitator will review it. Module ' + (colName === 'careerPrograms' ? '' : '') + ' unlocks in 7 days.</p></div>';
+    textarea.disabled = true;
+    document.querySelector('[onclick*="submitLessonAssignment(\''+programId+'\',\''+lessonId+'\']') && (document.querySelector('[onclick*="submitLessonAssignment(\''+programId+'\',\''+lessonId+'\']').disabled = true);
+    showToast('Assignment submitted! ✅');
+
+    if (colName === 'careerPrograms') {
+      setTimeout(function(){ openCareerProgram(programId); }, 1000);
+    } else {
+      setTimeout(function(){ openProgram(programId); }, 1000);
+    }
+  } catch(e) {
+    showToast('Failed to submit. Try again.', 'error');
+  }
+}
+
+function showQuizFailureForm(programId, lessonId, score, attempts, colName) {
+  const existing = document.getElementById('quiz-failure-modal');
+  if (existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'quiz-failure-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  modal.innerHTML = '<div style="background:white;border-radius:20px;padding:2rem;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">'
+    + '<div style="text-align:center;margin-bottom:1.5rem;"><div style="font-size:2.5rem;margin-bottom:0.5rem;">😔</div>'
+    + '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">Quiz Attempts Exhausted</h3>'
+    + '<p style="font-size:0.85rem;color:var(--gray);margin-top:0.5rem;">You used all 3 attempts. Score: ' + score + '%. Please tell YAN what was difficult so we can help you.</p></div>'
+    + '<div class="form-group"><label style="font-size:0.82rem;font-weight:600;color:var(--navy);">What was difficult about this quiz? *</label>'
+    + '<textarea id="failure-message" rows="4" style="width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.85rem;margin-top:0.35rem;outline:none;box-sizing:border-box;" placeholder="Describe what you found difficult or confusing..."></textarea></div>'
+    + '<div style="display:flex;gap:0.75rem;margin-top:1rem;">'
+    + '<button class="btn-primary" onclick="submitQuizFailure(\'' + programId + '\',\'' + lessonId + '\',' + score + ',' + attempts + ',\'' + colName + '\')" style="flex:1;">Submit to YAN</button>'
+    + '<button onclick="document.getElementById(\'quiz-failure-modal\').remove()" style="flex:1;background:var(--light);color:var(--navy);border:none;padding:0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;">Cancel</button>'
+    + '</div></div>';
+  document.body.appendChild(modal);
+}
+
+async function submitQuizFailure(programId, lessonId, score, attempts, colName) {
+  const message = document.getElementById('failure-message').value.trim();
+  if (!message) return showToast('Please describe the difficulty', 'error');
+  try {
+    await addDoc(collection(db, 'quizFailures'), {
+      userId: currentUser.uid,
+      userName: currentUserData.name,
+      country: currentUserData.country || '',
+      department: currentUserData.department || '',
+      programId: programId,
+      lessonId: lessonId,
+      collection: colName,
+      score: score,
+      attempts: attempts,
+      message: message,
+      status: 'pending',
+      createdAt: serverTimestamp()
+    });
+    showToast('Submitted to YAN! We will help you soon. 🙏');
+    document.getElementById('quiz-failure-modal').remove();
+  } catch(e) {
+    showToast('Failed to submit. Try again.', 'error');
+  }
+}
+
 
 function playProgramVideo(moduleId, url, programId) {
   const box = document.getElementById('prog-video-' + moduleId);
@@ -7925,88 +8206,6 @@ window.showProgramsSection = showProgramsSection;
 window.loadAllPrograms = loadAllPrograms;
 window.enrollInProgram = enrollInProgram;
 
-async function openModuleContent(programId, moduleId) {
-  const box = document.getElementById('module-content-' + moduleId);
-  if (!box) return;
-  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
-  box.innerHTML = '<div class="loading">Loading module...</div>';
-  box.style.display = 'block';
-
-  try {
-    const modSnap = await getDoc(doc(db, 'trainingPrograms', programId, 'modules', moduleId));
-    if (!modSnap.exists()) { box.innerHTML = '<p>Module not found.</p>'; return; }
-    const m = modSnap.data();
-
-    let html = '<div style="margin-top:0.75rem;">';
-
-    // Reading section
-    if (m.reading) {
-      html += '<div style="background:rgba(10,102,194,0.05);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid #0A66C2;">';
-      html += '<p style="font-size:0.82rem;font-weight:700;color:#0A66C2;margin-bottom:0.75rem;">📖 Reading Material</p>';
-      html += '<div style="font-size:0.88rem;color:var(--navy);line-height:1.9;">' + m.reading.split('\n').join('<br>') + '</div>';
-      html += '</div>';
-    }
-
-    // Video section
-    if (m.videoUrl) {
-      let embedUrl = '';
-      if (m.videoUrl.includes('youtube.com/embed/')) {
-        embedUrl = m.videoUrl;
-      } else if (m.videoUrl.includes('youtube.com/watch?v=')) {
-        const vid = m.videoUrl.split('v=')[1].split('&')[0];
-        embedUrl = 'https://www.youtube.com/embed/' + vid;
-      } else if (m.videoUrl.includes('youtu.be/')) {
-        const vid = m.videoUrl.split('youtu.be/')[1].split('?')[0];
-        embedUrl = 'https://www.youtube.com/embed/' + vid;
-      }
-      if (embedUrl) {
-        html += '<div style="margin-bottom:1rem;">';
-        html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">🎥 Video Lesson</p>';
-        html += '<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;">';
-        html += '<iframe src="' + embedUrl + '" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:12px;" allowfullscreen></iframe>';
-        html += '</div></div>';
-      }
-    }
-
-    // Quiz section
-    const quiz = typeof m.quiz === 'string' ? JSON.parse(m.quiz) : m.quiz;
-    if (quiz && quiz.length > 0) {
-      html += '<div style="background:rgba(245,166,35,0.05);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--gold);">';
-      html += '<p style="font-size:0.82rem;font-weight:700;color:#b37800;margin-bottom:1rem;">✅ Module Quiz (70% to pass · 3 attempts)</p>';
-      html += '<div id="quiz-' + moduleId + '">';
-      quiz.forEach(function(q, qi) {
-        html += '<div style="margin-bottom:1rem;">';
-        html += '<p style="font-size:0.85rem;font-weight:600;color:var(--navy);margin-bottom:0.5rem;">' + (qi+1) + '. ' + sanitize(q.question) + '</p>';
-        q.options.forEach(function(opt, oi) {
-          html += '<label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.35rem;font-size:0.82rem;cursor:pointer;">';
-          html += '<input type="radio" name="q' + moduleId + '_' + qi + '" value="' + oi + '"> ' + sanitize(opt);
-          html += '</label>';
-        });
-        html += '</div>';
-      });
-      window['quiz_' + moduleId] = typeof m.quiz === 'string' ? JSON.parse(m.quiz) : m.quiz;
-      html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="submitModuleQuiz(\'' + programId + '\',\'' + moduleId + '\')">Submit Quiz</button>';
-      html += '</div></div>';
-    }
-
-    // Assignment section
-    if (m.assignment) {
-      html += '<div style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--navy);">';
-      html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">📝 Assignment</p>';
-      html += '<p style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;line-height:1.7;">' + sanitize(m.assignment) + '</p>';
-      html += '<textarea id="assignment-' + moduleId + '" rows="5" style="width:100%;background:white;border:1.5px solid rgba(27,42,107,0.12);border-radius:10px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;" placeholder="Write your assignment response here..."></textarea>';
-      html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;margin-top:0.75rem;" onclick="submitAssignment(\'' + programId + '\',\'' + moduleId + '\')">Submit Assignment</button>';
-      html += '<div id="assignment-result-' + moduleId + '" style="margin-top:0.75rem;"></div>';
-      html += '</div>';
-    }
-
-    html += '</div>';
-    box.innerHTML = html;
-
-  } catch(e) {
-    box.innerHTML = '<p style="color:var(--gray);">Error loading module: ' + e.message + '</p>';
-  }
-}
 
 async function submitModuleQuiz(programId, moduleId, quiz) {
   quiz = quiz || window['quiz_' + moduleId] || [];
@@ -8106,7 +8305,6 @@ async function submitAssignment(programId, moduleId) {
   btn.textContent = 'Submit Assignment';
 }
 
-window.openModuleContent = openModuleContent;
 window.submitModuleQuiz = submitModuleQuiz;
 window.submitAssignment = submitAssignment;
 
@@ -8539,163 +8737,137 @@ async function openCareerProgram(programId) {
   const box = document.getElementById('career-program-modules-' + programId);
   if (!box) return;
   if (box.style.display !== 'none') { box.style.display = 'none'; return; }
-  box.innerHTML = '<div class="loading">Loading modules...</div>';
+  box.innerHTML = '<div class="loading">Loading program...</div>';
   box.style.display = 'block';
 
-  const snap = await getDocs(query(collection(db, 'careerPrograms', programId, 'modules'), orderBy('order', 'asc')));
-  const progressSnap = await getDoc(doc(db, 'careerLearningProgress', currentUser.uid + '_' + programId));
-  const progressData = progressSnap.exists() ? progressSnap.data() : {};
-  const modulesCompleted = progressData.modulesCompleted || [];
+  const modulesSnap = await getDocs(query(collection(db, 'careerPrograms', programId, 'modules'), orderBy('order', 'asc')));
+  const lessonsSnap = await getDocs(query(collection(db, 'careerPrograms', programId, 'lessons'), orderBy('order', 'asc')));
 
-  if (snap.empty) {
-    box.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;"><p style="font-size:0.85rem;color:var(--gray);">No modules yet. Check back soon!</p></div>';
+  if (modulesSnap.empty && lessonsSnap.empty) {
+    box.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;"><p style="font-size:0.85rem;color:var(--gray);">No content yet. Check back soon!</p></div>';
     return;
   }
 
-  let html = '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-top:0.75rem;">';
-  html += '<p style="font-size:0.78rem;color:var(--gray);margin-bottom:0.75rem;">Progress: <strong>' + modulesCompleted.length + ' / ' + snap.docs.length + ' completed</strong></p>';
+  const progressSnap = await getDoc(doc(db, 'careerLearningProgress', currentUser.uid + '_' + programId));
+  const progressData = progressSnap.exists() ? progressSnap.data() : {};
+  const lessonsCompleted = progressData.lessonsCompleted || [];
+  const completionDates = progressData.completionDates || {};
+  const now = Date.now();
+  const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
 
-  snap.docs.forEach(function(d, i) {
-    const m = Object.assign({id: d.id}, d.data());
-    const done = modulesCompleted.includes(d.id);
-    html += '<div style="background:white;border-radius:12px;padding:1rem;margin-bottom:0.75rem;border-left:3px solid ' + (done ? '#27AE60' : 'var(--navy)') + ';">'
-      + '<div style="display:flex;align-items:center;gap:0.75rem;">'
-      + '<div style="width:28px;height:28px;border-radius:50%;background:' + (done ? '#27AE60' : 'var(--navy)') + ';display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:700;">' + (done ? '✓' : (i+1)) + '</div>'
-      + '<div style="flex:1;">'
-      + '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(m.title||'') + '</p>'
-      + '<p style="font-size:0.72rem;color:var(--gray);">' + (m.duration||'30 min') + ' · ' + (done ? '✅ Completed' : 'Not started') + '</p>'
-      + '</div>'
-      + '<button class="btn-sm btn-navy" onclick="openCareerModuleContent(\'' + programId + '\',\'' + d.id + '\')">' + (done ? 'Review' : 'Start') + '</button>'
-      + '</div>'
-      + '<div id="career-module-' + d.id + '" style="display:none;"></div>'
-      + '</div>';
+  const lessonsByModule = {};
+  lessonsSnap.docs.forEach(function(d) {
+    const l = Object.assign({id: d.id}, d.data());
+    const week = l.moduleWeek || 1;
+    if (!lessonsByModule[week]) lessonsByModule[week] = [];
+    lessonsByModule[week].push(l);
   });
-  html += '</div>';
-  box.innerHTML = html;
-}
+  Object.keys(lessonsByModule).forEach(function(week) {
+    lessonsByModule[week].sort(function(a,b){ return (a.lessonNumber||0)-(b.lessonNumber||0); });
+  });
 
-async function openCareerModuleContent(programId, moduleId) {
-  const box = document.getElementById('career-module-' + moduleId);
-  if (!box) return;
-  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
-  box.innerHTML = '<div class="loading">Loading...</div>';
-  box.style.display = 'block';
+  const moduleDocs = modulesSnap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+  const totalLessons = lessonsSnap.size;
+  const completedCount = lessonsCompleted.length;
 
-  const modSnap = await getDoc(doc(db, 'careerPrograms', programId, 'modules', moduleId));
-  if (!modSnap.exists()) { box.innerHTML = '<p>Module not found.</p>'; return; }
-  const m = modSnap.data();
-
-  let html = '<div style="margin-top:0.75rem;">';
-
-  if (m.reading) {
-    html += '<div style="background:rgba(27,42,107,0.05);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--navy);">'
-      + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">📖 Reading</p>'
-      + '<div style="font-size:0.88rem;color:var(--navy);line-height:1.9;">' + m.reading.split('\n').join('<br>') + '</div>'
-      + '</div>';
+  function isModuleUnlocked(index) {
+    if (index === 0) return true;
+    const prevModule = moduleDocs[index-1];
+    if (!prevModule) return false;
+    const prevWeek = prevModule.week || index;
+    const prevLessons = lessonsByModule[prevWeek] || [];
+    const allPrevDone = prevLessons.every(function(l){ return lessonsCompleted.includes(l.id); });
+    if (!allPrevDone) return false;
+    const lastLesson = prevLessons[prevLessons.length-1];
+    if (!lastLesson) return true;
+    const completedAt = completionDates[lastLesson.id];
+    if (!completedAt) return true;
+    return (now - completedAt) >= SEVEN_DAYS;
   }
 
-  if (m.videoUrl) {
-    const videoId = m.videoUrl.includes('v=') ? m.videoUrl.split('v=')[1].split('&')[0]
-      : m.videoUrl.includes('youtu.be/') ? m.videoUrl.split('youtu.be/')[1].split('?')[0] : '';
-    if (videoId) {
-      html += '<div style="margin-bottom:1rem;">'
-        + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">🎥 Video</p>'
-        + '<div style="position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;">'
-        + '<iframe src="https://www.youtube.com/embed/' + videoId + '" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen></iframe>'
-        + '</div></div>';
+  let html = '<div style="background:var(--light);border-radius:12px;padding:1rem;">';
+  html += '<div style="background:white;border-radius:8px;padding:0.5rem 1rem;margin-bottom:0.75rem;font-size:0.78rem;color:var(--gray);">Progress: <strong style="color:var(--navy);">' + completedCount + ' / ' + totalLessons + ' lessons completed</strong></div>';
+
+  moduleDocs.forEach(function(m, mi) {
+    const week = m.week || (mi+1);
+    const lessons = lessonsByModule[week] || [];
+    const unlocked = isModuleUnlocked(mi);
+    const allDone = lessons.length > 0 && lessons.every(function(l){ return lessonsCompleted.includes(l.id); });
+    const completedLessons = lessons.filter(function(l){ return lessonsCompleted.includes(l.id); }).length;
+
+    let unlockMsg = '';
+    if (!unlocked && mi > 0) {
+      const prevModule = moduleDocs[mi-1];
+      const prevWeek = prevModule.week || mi;
+      const prevLessons = lessonsByModule[prevWeek] || [];
+      const lastLesson = prevLessons[prevLessons.length-1];
+      if (lastLesson && completionDates[lastLesson.id]) {
+        const daysLeft = Math.ceil((SEVEN_DAYS - (now - completionDates[lastLesson.id])) / (24*60*60*1000));
+        unlockMsg = 'Unlocks in ' + daysLeft + ' day' + (daysLeft!==1?'s':'');
+      } else {
+        unlockMsg = 'Complete Module ' + mi + ' first';
+      }
     }
-  }
 
-  if (m.quiz) {
-    const quiz = typeof m.quiz === 'string' ? JSON.parse(m.quiz) : m.quiz;
-    html += '<div style="background:rgba(245,166,35,0.05);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--gold);">'
-      + '<p style="font-size:0.82rem;font-weight:700;color:#b37800;margin-bottom:1rem;">✅ Quiz (70% to pass)</p>';
-    quiz.forEach(function(q, qi) {
-      html += '<div style="margin-bottom:1rem;"><p style="font-size:0.85rem;font-weight:600;color:var(--navy);margin-bottom:0.5rem;">' + (qi+1) + '. ' + sanitize(q.question) + '</p>';
-      q.options.forEach(function(opt, oi) {
-        html += '<label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.35rem;font-size:0.82rem;cursor:pointer;">'
-          + '<input type="radio" name="cq' + moduleId + '_' + qi + '" value="' + oi + '"> ' + sanitize(opt) + '</label>';
-      });
-      html += '</div>';
-    });
-    html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;" onclick="submitCareerQuiz(\'' + programId + '\',\'' + moduleId + '\',' + JSON.stringify(quiz).replace(/'/g,"\\'") + ')">Submit Quiz</button>';
+    const borderColor = allDone ? '#27AE60' : unlocked ? 'var(--navy)' : '#ccc';
+    const opacity = unlocked ? '1' : '0.6';
+
+    html += '<div style="background:white;border-radius:12px;margin-bottom:0.75rem;border-left:3px solid ' + borderColor + ';opacity:' + opacity + ';">';
+    html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:1rem;cursor:' + (unlocked?'pointer':'default') + ';" onclick="' + (unlocked ? 'toggleCareerModuleLessons(\'' + programId + '\',\'' + week + '\')' : '') + '">';
+    html += '<div style="width:32px;height:32px;border-radius:50%;background:' + borderColor + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.85rem;font-weight:700;flex-shrink:0;">' + (allDone ? '✓' : unlocked ? String(mi+1) : '🔒') + '</div>';
+    html += '<div style="flex:1;">';
+    html += '<p style="font-size:0.92rem;font-weight:700;color:var(--navy);">' + sanitize(m.title||'Module '+week) + '</p>';
+    html += '<p style="font-size:0.72rem;color:var(--gray);">' + (unlocked ? completedLessons+'/'+lessons.length+' lessons · '+(allDone?'✅ Complete':'In progress') : unlockMsg) + '</p>';
     html += '</div>';
-  }
+    html += unlocked ? '<span style="font-size:0.75rem;color:var(--gray);">▼</span>' : '';
+    html += '</div>';
 
-  if (m.assignment) {
-    html += '<div style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--navy);">'
-      + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">📝 Assignment</p>'
-      + '<p style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;line-height:1.7;">' + sanitize(m.assignment) + '</p>'
-      + '<textarea id="cassignment-' + moduleId + '" rows="4" style="width:100%;background:white;border:1.5px solid rgba(27,42,107,0.12);border-radius:10px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.85rem;" placeholder="Write your response here..."></textarea>'
-      + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;margin-top:0.75rem;" onclick="submitCareerAssignment(\'' + programId + '\',\'' + moduleId + '\')">Submit</button>'
-      + '<div id="cassignment-result-' + moduleId + '" style="margin-top:0.75rem;"></div>'
-      + '</div>';
-  }
+    html += '<div id="career-module-lessons-' + programId + '-' + week + '" style="display:none;padding:0 1rem 1rem;">';
+    if (unlocked && lessons.length > 0) {
+      lessons.forEach(function(l) {
+        const isDone = lessonsCompleted.includes(l.id);
+        html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0;border-bottom:1px solid var(--light);">';
+        html += '<div style="width:24px;height:24px;border-radius:50%;background:' + (isDone?'#27AE60':'#F5A623') + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.68rem;font-weight:700;flex-shrink:0;">' + (isDone?'✓':l.lessonNumber) + '</div>';
+        html += '<div style="flex:1;">';
+        html += '<p style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + sanitize(l.title||'Lesson '+l.lessonNumber) + '</p>';
+        html += '<p style="font-size:0.7rem;color:var(--gray);">' + (l.isLastLesson?'📝 Includes assignment':'') + (isDone?' · ✅ Done':'') + '</p>';
+        html += '</div>';
+        html += '<button class="btn-sm btn-navy" onclick="openLessonContent(\'' + programId + '\',\'' + l.id + '\',\'careerPrograms\')">' + (isDone?'Review':'Start') + '</button>';
+        html += '</div>';
+      });
+    }
+    html += '</div>';
+    html += '</div>';
+  });
 
   html += '</div>';
   box.innerHTML = html;
 }
 
-async function submitCareerQuiz(programId, moduleId, quiz) {
-  let correct = 0;
-  quiz.forEach(function(q, qi) {
-    const sel = document.querySelector('input[name="cq' + moduleId + '_' + qi + '"]:checked');
-    if (sel && parseInt(sel.value) === q.correctIndex) correct++;
-  });
-  const score = Math.round((correct / quiz.length) * 100);
-  const passed = score >= 70;
-
-  const attRef = doc(db, 'careerLearningProgress', currentUser.uid + '_' + programId + '_quiz_' + moduleId);
-  const attSnap = await getDoc(attRef);
-  const attempts = attSnap.exists() ? (attSnap.data().attempts||0) : 0;
-
-  if (attempts >= 3 && !passed) return showToast('3 attempts used. Contact your Career Hub head.', 'error');
-
-  await setDoc(attRef, {attempts: attempts+1, lastScore: score, passed}, {merge: true});
-
-  if (passed) {
-    showToast('Passed! Score: ' + score + '%');
-    const progRef = doc(db, 'careerLearningProgress', currentUser.uid + '_' + programId);
-    const progSnap = await getDoc(progRef);
-    const progData = progSnap.exists() ? progSnap.data() : {};
-    const done = progData.modulesCompleted || [];
-    if (!done.includes(moduleId)) {
-      done.push(moduleId);
-      await updateDoc(progRef, {modulesCompleted: done});
-    }
-    openCareerProgram(programId);
-  } else {
-    showToast('Score: ' + score + '%. Need 70%. Attempt ' + (attempts+1) + ' of 3.', 'error');
-  }
+function toggleCareerModuleLessons(programId, week) {
+  const box = document.getElementById('career-module-lessons-' + programId + '-' + week);
+  if (!box) return;
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
 }
 
-async function submitCareerAssignment(programId, moduleId) {
-  const text = document.getElementById('cassignment-' + moduleId).value.trim();
-  if (!text) return showToast('Write your assignment first', 'error');
-  const resultDiv = document.getElementById('cassignment-result-' + moduleId);
-  await addDoc(collection(db, 'careerAssignments'), {
-    userId: currentUser.uid, userName: currentUserData.name,
-    programId, moduleId, response: text,
-    status: 'pending', submittedAt: serverTimestamp()
-  });
-  resultDiv.innerHTML = '<div style="background:rgba(39,174,96,0.06);border-radius:12px;padding:1rem;border-left:3px solid #27AE60;">'
-    + '<p style="font-size:0.85rem;color:var(--navy);">✅ Assignment submitted! Your Career Hub head will review it shortly.</p>'
-    + '</div>';
-}
+
 
 window.loadCareerPrograms = loadCareerPrograms;
 window.enrollCareerProgram = enrollCareerProgram;
 window.openCareerProgram = openCareerProgram;
-window.openCareerModuleContent = openCareerModuleContent;
-window.submitCareerQuiz = submitCareerQuiz;
-window.submitCareerAssignment = submitCareerAssignment;
+window.toggleCareerModuleLessons = toggleCareerModuleLessons;
+window.openLessonContent = openLessonContent;
+window.submitLessonQuiz = submitLessonQuiz;
+window.submitLessonAssignment = submitLessonAssignment;
+window.showQuizFailureForm = showQuizFailureForm;
+window.submitQuizFailure = submitQuizFailure;
+window.toggleModuleLessons = toggleModuleLessons;
 
 window.showCareerSection = showCareerSection;
 window.loadCareerPaths = loadCareerPaths;
 window.openCareerPath = openCareerPath;
 window.playCareerVideo = playCareerVideo;
 window.openCareerAssignment = openCareerAssignment;
-window.submitCareerAssignment = submitCareerAssignment;
 window.markCareerDone = markCareerDone;
 window.loadCareerMaterials = loadCareerMaterials;
 window.filterCareerMaterials = filterCareerMaterials;
