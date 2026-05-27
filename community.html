@@ -304,6 +304,10 @@ async function doGoogleSignIn() {
     }
   } catch(e) {
     console.error('Google sign-in error:', e);
+    if (e.code === 'auth/cancelled-popup-request' || 
+        e.code === 'auth/popup-closed-by-user') {
+      return; // User closed popup - no error needed
+    }
     showToast(e.message || 'Google sign-in failed. Try again.', 'error');
   }
 }
