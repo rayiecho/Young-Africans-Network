@@ -6387,6 +6387,46 @@ async function markModuleDone(moduleId, programId) {
   showToast('Module completed!');
 }
 
+async function editProgramVideos(programId, programTitle) {
+  const snap = await getDocs(query(collection(db, 'trainingPrograms', programId, 'modules'), orderBy('order', 'asc')));
+  if (snap.empty) return showToast('No modules found', 'error');
+  
+  let formHtml = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;" id="video-edit-modal">';
+  formHtml += '<div style="background:white;border-radius:16px;padding:2rem;width:90%;max-width:500px;max-height:80vh;overflow-y:auto;">';
+  formHtml += '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1.5rem;">🎥 Edit Video URLs — ' + sanitize(programTitle) + '</h3>';
+  
+  snap.docs.forEach(function(d) {
+    const m = Object.assign({id: d.id}, d.data());
+    formHtml += '<div style="margin-bottom:1rem;">';
+    formHtml += '<label style="font-size:0.82rem;font-weight:600;color:var(--navy);">' + sanitize(m.title||d.id) + '</label>';
+    formHtml += '<input type="text" id="vid-' + d.id + '" value="' + sanitize(m.videoUrl||'') + '" placeholder="https://www.youtube.com/watch?v=..." style="width:100%;padding:0.5rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;margin-top:0.25rem;">';
+    formHtml += '</div>';
+  });
+  
+  formHtml += '<div style="display:flex;gap:0.75rem;margin-top:1rem;">';
+  formHtml += '<button class="btn-primary" onclick="saveVideoUrls(\'' + programId + '\',[\'';
+  formHtml += snap.docs.map(d => d.id).join("\',\'");
+  formHtml += '\'])">Save Videos</button>';
+  formHtml += '<button class="btn-outline" onclick="document.getElementById(\'video-edit-modal\').remove()">Cancel</button>';
+  formHtml += '</div></div></div>';
+  
+  document.body.insertAdjacentHTML('beforeend', formHtml);
+}
+
+async function saveVideoUrls(programId, moduleIds) {
+  let saved = 0;
+  for (const moduleId of moduleIds) {
+    const input = document.getElementById('vid-' + moduleId);
+    if (input) {
+      const videoUrl = input.value.trim();
+      await updateDoc(doc(db, 'trainingPrograms', programId, 'modules', moduleId), { videoUrl: videoUrl });
+      saved++;
+    }
+  }
+  document.getElementById('video-edit-modal')?.remove();
+  showToast(saved + ' video URLs saved! ✅');
+}
+
 async function deleteTrainingProgram(id) {
   if (!confirm('Delete this program?')) return;
   await deleteDoc(doc(db, 'trainingPrograms', id));
@@ -7910,7 +7950,7 @@ async function openModuleContent(programId, moduleId) {
         html += '<iframe src="https://www.youtube.com/embed/' + videoId + '" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:12px;" allowfullscreen></iframe>';
         html += '</div></div>';
       } else if (m.videoUrl) {
-        html += '<div style="margin-bottom:1rem;"><a href="' + m.videoUrl + '" target="_blank" class="btn-sm btn-navy">Watch Video →</a></div>';
+        html += '<div style="margin-bottom:1rem;"><p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">🎥 Video Lesson</p><div style="background:var(--light);border-radius:12px;padding:1rem;text-align:center;"><p style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;">Click to watch this lesson video</p><a href="' + m.videoUrl + '" target="_blank" class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;text-decoration:none;">▶ Watch Video</a></div></div>';
       }
     }
 
@@ -8062,6 +8102,8 @@ window.openProgramAssignment = openProgramAssignment;
 window.submitProgramAssignment = submitProgramAssignment;
 window.markModuleDone = markModuleDone;
 window.deleteTrainingProgram = deleteTrainingProgram;
+window.editProgramVideos = editProgramVideos;
+window.saveVideoUrls = saveVideoUrls;
 window.loadPartnerOrgs = loadPartnerOrgs;
 window.deletePartnerOrg = deletePartnerOrg;
 window.loadTrainingSessions = loadTrainingSessions;
