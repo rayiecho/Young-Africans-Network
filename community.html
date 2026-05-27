@@ -6357,7 +6357,7 @@ async function openLessonContent(programId, lessonId, colName) {
     if (fallback) fallback.appendChild(contentDiv);
   }
 
-  const lessonSnap = await getDoc(doc(db, colName, programId, 'lessons', lessonId));
+  const lessonSnap = await getDoc(doc(db, colName, programId, 'modules', lessonId));
   if (!lessonSnap.exists()) { contentDiv.innerHTML = '<p style="color:var(--gray);font-size:0.85rem;">Lesson not found.</p>'; return; }
   const l = lessonSnap.data();
   const quiz = typeof l.quiz === 'string' ? JSON.parse(l.quiz || '[]') : (l.quiz || []);
