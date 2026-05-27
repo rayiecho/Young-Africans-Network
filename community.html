@@ -280,7 +280,17 @@ async function doGoogleSignIn() {
   try {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    const result = await signInWithPopup(auth, provider);
+    await signInWithRedirect(auth, provider);
+  } catch(e) {
+    console.error('Google sign-in error:', e);
+    showToast('Google sign-in failed. Try again.', 'error');
+  }
+}
+
+async function handleGoogleRedirect() {
+  try {
+    const result = await getRedirectResult(auth);
+    if (!result) return;
     const user = result.user;
     // Check if user exists in Firestore
     const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -303,12 +313,8 @@ async function doGoogleSignIn() {
       showToast('Welcome back! 🌍');
     }
   } catch(e) {
-    console.error('Google sign-in error:', e);
-    if (e.code === 'auth/cancelled-popup-request' || 
-        e.code === 'auth/popup-closed-by-user') {
-      return; // User closed popup - no error needed
-    }
-    showToast(e.message || 'Google sign-in failed. Try again.', 'error');
+    console.error('Google redirect error:', e);
+    showToast('Google sign-in failed. Try again.', 'error');
   }
 }
 
