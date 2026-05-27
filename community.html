@@ -6233,14 +6233,11 @@ async function enrollInProgram(programId) {
 
   if (!activeSnap.empty) {
     const active = activeSnap.docs[0].data();
-    // Check if the program still exists
     const activeProgSnap = await getDoc(doc(db, 'trainingPrograms', active.programId));
     if (activeProgSnap.exists()) {
       return showToast('You are already enrolled in "' + (active.programTitle||'a program') + '". Complete it first before enrolling in another.', 'error');
-    } else {
-      // Program was deleted - clean up the stale enrollment
-      await deleteDoc(activeSnap.docs[0].ref);
     }
+    // Program no longer exists - silently ignore and allow new enrollment
   }
 
   const ref = doc(db, 'trainingPrograms', programId);
