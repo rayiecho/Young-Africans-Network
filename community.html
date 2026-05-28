@@ -401,9 +401,9 @@ function enterPlatform() {
   if (adminTab) adminTab.style.display = currentUserData.isAdmin ? 'flex' : 'none';
   showTab('feed');
   // Request push notification permission
-  if ('Notification' in window && Notification.permission === 'default') {
+  if ('Notification' in window && Notification.permission !== 'denied') {
     setTimeout(() => {
-      Notification.requestPermission();
+      subscribeToPush(currentUser.uid);
     }, 3000);
   }
   // Show onboarding for first time users
