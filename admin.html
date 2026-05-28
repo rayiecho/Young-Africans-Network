@@ -1758,7 +1758,7 @@ async function loadNotificationCenter(c) {
       html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(n.title || '') + '</p>';
       html += '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize(n.message || '') + '</p>';
       html += '<p style="font-size:0.7rem;color:var(--gray);margin-top:0.25rem;">By ' + sanitize(n.postedBy || 'Admin') + ' · ' + (n.readBy ? n.readBy.length : 0) + ' read</p></div>';
-      html += '<button onclick="deleteNotification('" + d.id + "')" style="background:none;border:none;color:var(--gray);cursor:pointer;font-size:1rem;padding:0.25rem;">🗑️</button>';
+      html += '<button onclick="deleteNotification(\'' + d.id + '\')" style="background:none;border:none;color:var(--gray);cursor:pointer;font-size:1rem;padding:0.25rem;">🗑️</button>';
       html += '</div>';
     });
   }
