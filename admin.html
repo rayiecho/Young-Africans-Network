@@ -1184,7 +1184,7 @@ async function loadCertificates(c) {
   c.innerHTML = html;
 }
 
-function filterCerts(status) {
+window.filterCerts = function(status) {
   document.querySelectorAll('.cert-card').forEach(card => {
     card.style.display = status === 'all' || card.dataset.status === status ? 'block' : 'none';
   });
@@ -2383,7 +2383,7 @@ window.loadRecommendations = async function(c) {
   c.innerHTML = html;
 }
 
-function filterRecs(status) {
+window.filterRecs = function(status) {
   document.querySelectorAll('.rec-card').forEach(card => {
     card.style.display = status === 'all' || card.dataset.status === status ? 'block' : 'none';
   });
