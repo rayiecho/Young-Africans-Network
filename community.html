@@ -1499,7 +1499,7 @@ async function downloadMagazineById(id, data) {
   canvas.width = 1200; canvas.height = 1700;
   const ctx = canvas.getContext('2d');
 
-  const { scholarships=[], stories=[], events=[], posts=[] } = data.content || {};
+  const { scholarships=[], stories=[], events=[], posts=[], jobs=[], programs=[], newMembers=[], announcements=[] } = data.content || {};
   const month = data.month || new Date().toLocaleDateString('en-GB',{month:'long',year:'numeric'});
 
   const logo = new Image();
@@ -1549,7 +1549,7 @@ async function downloadMagazineById(id, data) {
     // Edition info
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
     ctx.font = '14px Georgia';
-    ctx.fillText(`${scholarships.length} Scholarships · ${stories.length} Success Stories · ${events.length} Events`, 600, 370);
+    ctx.fillText(`${scholarships.length} Scholarships · ${jobs.length} Jobs · ${events.length} Events · ${programs.length} Programs`, 600, 370);
 
     // Divider
     ctx.fillStyle = '#F5A623';
@@ -1643,6 +1643,55 @@ async function downloadMagazineById(id, data) {
       });
     }
 
+    // JOBS SECTION
+    if (jobs.length > 0) {
+      ctx.fillStyle = '#1B2A6B';
+      ctx.font = 'bold 28px Georgia';
+      ctx.textAlign = 'left';
+      ctx.fillText('💼 JOB OPPORTUNITIES', 60, y); y += 15;
+      ctx.fillStyle = '#F5A623';
+      ctx.fillRect(60, y, 320, 3); y += 25;
+      jobs.slice(0,3).forEach(j => {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.roundRect(60, y, 1080, 80, 12);
+        ctx.fill();
+        ctx.fillStyle = '#0A66C2';
+        ctx.fillRect(60, y, 6, 80);
+        ctx.fillStyle = '#1B2A6B';
+        ctx.font = 'bold 16px Georgia';
+        ctx.fillText((j.title||'').substring(0,60), 85, y+28);
+        ctx.fillStyle = '#6B7280';
+        ctx.font = '13px Georgia';
+        ctx.fillText(`${j.provider||j.org||''} · ${j.country||''} · ${j.type||j.level||''}`, 85, y+52);
+        y += 95;
+      });
+      y += 20;
+    }
+    // PROGRAMS SECTION
+    if (programs.length > 0) {
+      ctx.fillStyle = '#1B2A6B';
+      ctx.font = 'bold 28px Georgia';
+      ctx.fillText('🎓 YAN TRAINING PROGRAMS', 60, y); y += 15;
+      ctx.fillStyle = '#F5A623';
+      ctx.fillRect(60, y, 370, 3); y += 25;
+      programs.slice(0,3).forEach(p => {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.roundRect(60, y, 520, 75, 12);
+        ctx.fill();
+        ctx.fillStyle = '#9B59B6';
+        ctx.fillRect(60, y, 6, 75);
+        ctx.fillStyle = '#1B2A6B';
+        ctx.font = 'bold 15px Georgia';
+        ctx.fillText((p.title||'').substring(0,35), 85, y+25);
+        ctx.fillStyle = '#6B7280';
+        ctx.font = '12px Georgia';
+        ctx.fillText(p.category||'', 85, y+50);
+        y += 90;
+      });
+      y += 10;
+    }
     // FOOTER
     ctx.fillStyle = '#1B2A6B';
     ctx.fillRect(0, 1640, 1200, 60);
