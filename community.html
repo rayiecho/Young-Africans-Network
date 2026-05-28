@@ -6296,7 +6296,7 @@ async function openProgram(programId) {
     lessonsByModule[week].sort(function(a,b){ return (a.lessonNumber||0)-(b.lessonNumber||0); });
   });
 
-  const moduleDocs = moduleDocs2;
+  const moduleDocs = modulesSnap.docs.length > 0 ? modulesSnap.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }) : [{id:'module-1',title:'Module 1: Foundations & Basics',week:1,order:1},{id:'module-2',title:'Module 2: Core Concepts & Practice',week:2,order:2},{id:'module-3',title:'Module 3: Advanced Techniques',week:3,order:3},{id:'module-4',title:'Module 4: Real World Application',week:4,order:4}];
   const totalLessons = lessonsSnap.size;
   const completedCount = lessonsCompleted.length;
   function isModuleUnlocked(index) {
