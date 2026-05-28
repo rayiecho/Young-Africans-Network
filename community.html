@@ -1274,94 +1274,127 @@ async function loadProfileCerts() {
   }).join('');
 }
 
-function downloadCertificate(certId) {
+async function downloadCertificate(certId) {
   const u = currentUserData;
   const dept = DEPARTMENTS.find(d => d.id === u.department);
   const verifyCode = 'YAN-' + currentUser.uid.substring(0,8).toUpperCase();
   const verifyUrl = 'https://youngafricansnetwork.org/verify.html?id=' + verifyCode;
   const dateStr = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
   const memberName = u.name || 'Member';
+  const photoUrl = u.photoUrl || '';
+
+  const skillsMap = {
+    'tech': ['HTML & CSS','JavaScript','Responsive Design','Web Hosting','Git Basics'],
+    'programs': ['HTML & CSS','JavaScript','Responsive Design','Web Hosting','Git Basics'],
+    'career': ['CV Writing','Interview Skills','LinkedIn Branding','Public Speaking','Salary Negotiation'],
+    'scholarships': ['Research Skills','Essay Writing','Application Strategy','Scholarship Sourcing','Academic Writing'],
+    'community': ['Community Development','Project Management','Leadership','Communication','Teamwork'],
+    'mental': ['Mental Wellness','Peer Support','Resilience','Stress Management','Self-Awareness'],
+    'communications': ['Content Creation','Social Media','Copywriting','Brand Communication','Storytelling'],
+    'partnerships': ['Networking','Partnership Development','Negotiation','Stakeholder Management','Strategy']
+  };
+  const skills = skillsMap[u.department] || ['Leadership','Communication','Teamwork','Problem Solving','Initiative'];
 
   const deptAchievements = {
     'career': 'Career Development & Public Speaking Program',
-    'scholarships': 'Active Contribution to the Scholarships Hub',
-    'community': 'Active Contribution to the Community Development Hub',
-    'mental': 'Active Contribution to the Mental Health & Wellness Hub',
-    'communications': 'Active Contribution to the Communications Hub',
-    'partnerships': 'Active Contribution to the Partnerships Hub',
+    'scholarships': 'Scholarships & Opportunities Hub',
+    'community': 'Community Development Hub',
+    'mental': 'Mental Health & Wellness Hub',
+    'communications': 'Communications Hub',
+    'partnerships': 'Partnerships Hub',
     'tech': 'Technology & Web Development Program',
-    'programs': 'YAN Training & Development Program'
+    'programs': 'Technology & Web Development Program'
   };
-  const achievement = deptAchievements[u.department] || (dept?.name ? 'Active Contribution to the ' + dept.name : 'YAN Program');
+
+  let achievement = deptAchievements[u.department] || (dept?.name || 'YAN Program');
+  let enrolledDate = '';
+  let modulesCompleted = 0;
+
+  try {
+    const progressSnap = await getDocs(query(
+      collection(db, 'learningProgress'),
+      where('userId', '==', currentUser.uid)
+    ));
+    if (!progressSnap.empty) {
+      const prog = progressSnap.docs[0].data();
+      if (prog.programTitle) achievement = prog.programTitle;
+      if (prog.enrolledAt?.toDate) enrolledDate = prog.enrolledAt.toDate().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+      if (prog.modulesCompleted) modulesCompleted = prog.modulesCompleted.length;
+    }
+  } catch(e) {}
 
   const css = [
     '@import url(https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Montserrat:wght@300;400;600;700;800&display=swap);',
     '*{margin:0;padding:0;box-sizing:border-box;}',
-    'body{background:#f5f0e8;display:flex;align-items:center;justify-content:center;min-height:100vh;}',
-    '.cert{width:297mm;height:210mm;background:#fff;position:relative;overflow:hidden;display:flex;font-family:Montserrat,sans-serif;box-shadow:0 20px 60px rgba(0,0,0,0.15);}',
-    '.left-bar{width:8mm;background:#1B2A6B;flex-shrink:0;}',
-    '.main{flex:1;display:flex;flex-direction:column;padding:10mm 12mm 8mm 12mm;position:relative;z-index:2;}',
-    '.right{width:80mm;position:relative;overflow:hidden;flex-shrink:0;}',
-    '.top-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6mm;}',
-    '.logo-area{display:flex;align-items:center;gap:10px;}',
-    '.logo-area img{width:44px;height:44px;border-radius:50%;border:2px solid #F5A623;}',
-    '.logo-text h2{font-size:9.5pt;font-weight:800;color:#1B2A6B;letter-spacing:0.5px;line-height:1.2;}',
-    '.logo-text p{font-size:6.5pt;color:#F5A623;font-weight:600;letter-spacing:0.5px;}',
-    '.cert-badge{background:#1B2A6B;color:#F5A623;padding:4px 14px;border-radius:2px;font-size:7pt;font-weight:700;letter-spacing:2px;text-transform:uppercase;}',
-    '.divider-gold{width:100%;height:1.5px;background:#F5A623;margin:0 0 5mm 0;}',
-    '.cert-title{font-size:8pt;font-weight:700;color:#F5A623;letter-spacing:3px;text-transform:uppercase;margin-bottom:3px;}',
-    '.awarded-to{font-size:8.5pt;color:#888;margin-bottom:2mm;font-weight:300;}',
-    '.member-name{font-family:Playfair Display,serif;font-size:32pt;font-weight:700;color:#1B2A6B;line-height:1.1;margin-bottom:1mm;}',
-    '.name-underline{width:70mm;height:2px;background:#F5A623;margin-bottom:4mm;}',
-    '.program-label{font-size:7.5pt;color:#888;font-weight:400;margin-bottom:1mm;text-transform:uppercase;letter-spacing:1px;}',
-    '.program-name{font-size:11pt;font-weight:700;color:#1B2A6B;margin-bottom:5mm;line-height:1.4;}',
-    '.sig-row{display:flex;gap:16mm;align-items:flex-end;margin-bottom:4mm;}',
-    '.sig-block{}',
-    '.sig-block img{height:36px;display:block;margin-bottom:2px;}',
-    '.sig-line{width:48mm;height:1px;background:#1B2A6B;margin-bottom:3px;opacity:0.3;}',
-    '.sig-name{font-size:7.5pt;font-weight:700;color:#1B2A6B;}',
-    '.sig-title{font-size:6.5pt;color:#888;}',
+    'body{background:#f0ece4;display:flex;align-items:center;justify-content:center;min-height:100vh;}',
+    '.cert{width:297mm;height:210mm;background:#fff;position:relative;overflow:hidden;display:flex;font-family:Montserrat,sans-serif;box-shadow:0 20px 60px rgba(0,0,0,0.2);}',
+    '.left-bar{width:6mm;background:#1B2A6B;flex-shrink:0;}',
+    '.main{flex:1;display:flex;flex-direction:column;padding:8mm 10mm 0 10mm;position:relative;z-index:2;}',
+    '.right{width:72mm;position:relative;overflow:hidden;flex-shrink:0;}',
+    '.top-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4mm;}',
+    '.logo-area{display:flex;align-items:center;gap:8px;}',
+    '.logo-area img.logo{width:38px;height:38px;border-radius:50%;border:2px solid #F5A623;}',
+    '.logo-text h2{font-size:8.5pt;font-weight:800;color:#1B2A6B;letter-spacing:0.5px;line-height:1.2;}',
+    '.logo-text p{font-size:6pt;color:#F5A623;font-weight:600;letter-spacing:0.5px;}',
+    '.cert-badge{background:#1B2A6B;color:#F5A623;padding:3px 12px;border-radius:2px;font-size:6.5pt;font-weight:700;letter-spacing:2px;text-transform:uppercase;}',
+    '.divider-gold{width:100%;height:1.5px;background:#F5A623;margin:0 0 4mm 0;}',
+    '.member-row{display:flex;align-items:center;gap:6mm;margin-bottom:3mm;}',
+    '.member-photo{width:52px;height:52px;border-radius:50%;border:3px solid #F5A623;object-fit:cover;flex-shrink:0;}',
+    '.member-photo-placeholder{width:52px;height:52px;border-radius:50%;border:3px solid #F5A623;background:#1B2A6B;display:flex;align-items:center;justify-content:center;color:#F5A623;font-size:18pt;font-weight:700;flex-shrink:0;}',
+    '.cert-title{font-size:7pt;font-weight:700;color:#F5A623;letter-spacing:3px;text-transform:uppercase;margin-bottom:2px;}',
+    '.member-name{font-family:Playfair Display,serif;font-size:28pt;font-weight:700;color:#1B2A6B;line-height:1.1;}',
+    '.name-underline{width:65mm;height:2px;background:#F5A623;margin:2mm 0 3mm 0;}',
+    '.program-label{font-size:6.5pt;color:#888;font-weight:400;text-transform:uppercase;letter-spacing:1px;margin-bottom:1mm;}',
+    '.program-name{font-size:10.5pt;font-weight:700;color:#1B2A6B;margin-bottom:3mm;line-height:1.3;}',
+    '.verify-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.3);color:#27AE60;padding:3px 10px;border-radius:50px;font-size:6.5pt;font-weight:700;margin-bottom:3mm;}',
+    '.skills-section{margin-bottom:3mm;}',
+    '.skills-label{font-size:6.5pt;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:2mm;font-weight:600;}',
+    '.skills-row{display:flex;flex-wrap:wrap;gap:4px;}',
+    '.skill-tag{background:rgba(27,42,107,0.07);color:#1B2A6B;padding:2px 8px;border-radius:50px;font-size:6.5pt;font-weight:600;border:1px solid rgba(27,42,107,0.15);}',
+    '.sig-row{display:flex;gap:10mm;align-items:flex-end;margin-bottom:3mm;}',
+    '.sig-block img{height:30px;display:block;margin-bottom:2px;}',
+    '.sig-line{width:44mm;height:1px;background:rgba(27,42,107,0.25);margin-bottom:2px;}',
+    '.sig-name{font-size:7pt;font-weight:700;color:#1B2A6B;}',
+    '.sig-title{font-size:6pt;color:#888;}',
     '.stamp-block{display:flex;align-items:center;justify-content:center;}',
-    '.stamp-block svg{width:60px;height:60px;opacity:0.85;}',
-    '.bottom-strip{background:#1B2A6B;margin:-8mm -12mm -8mm -12mm;padding:3.5mm 12mm;display:flex;justify-content:space-between;align-items:center;margin-top:auto;}',
-    '.bottom-strip span{font-size:6.5pt;color:rgba(255,255,255,0.7);}',
+    '.bottom-strip{background:#1B2A6B;padding:3mm 10mm;display:flex;justify-content:space-between;align-items:center;margin:0 -10mm;}',
+    '.bottom-strip span{font-size:6pt;color:rgba(255,255,255,0.65);}',
     '.bottom-strip strong{color:#F5A623;}',
-    '@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#f5f0e8;}@page{size:A4 landscape;margin:0;}}'
+    '.dates-row{display:flex;gap:8mm;margin-bottom:3mm;}',
+    '.date-item{font-size:6.5pt;color:#888;}',
+    '.date-item strong{color:#1B2A6B;display:block;font-size:7pt;}',
+    '@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#f0ece4;}@page{size:A4 landscape;margin:0;}}'
   ].join('\n');
 
-  const stampSvg = '<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">'
+  const stampSvg = '<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:58px;height:58px;">'
     + '<circle cx="100" cy="100" r="95" fill="none" stroke="#1B2A6B" stroke-width="4"/>'
     + '<circle cx="100" cy="100" r="80" fill="none" stroke="#1B2A6B" stroke-width="1.5"/>'
     + '<circle cx="100" cy="100" r="55" fill="none" stroke="#F5A623" stroke-width="2.5"/>'
     + '<path id="ta" d="M 18,100 A 82,82 0 0,1 182,100" fill="none"/>'
-    + '<text font-family="Montserrat" font-weight="700" font-size="11" fill="#1B2A6B" letter-spacing="2">'
-    + '<textPath href="#ta" startOffset="5%">YOUNG AFRICANS NETWORK</textPath></text>'
+    + '<text font-family="Montserrat" font-weight="700" font-size="11" fill="#1B2A6B" letter-spacing="2"><textPath href="#ta" startOffset="5%">YOUNG AFRICANS NETWORK</textPath></text>'
     + '<path id="tb" d="M 22,100 A 78,78 0 0,0 178,100" fill="none"/>'
-    + '<text font-family="Montserrat" font-weight="600" font-size="9" fill="#1B2A6B" letter-spacing="1">'
-    + '<textPath href="#tb" startOffset="10%">OFFICIAL DOCUMENT • EST. 2026</textPath></text>'
+    + '<text font-family="Montserrat" font-weight="600" font-size="9" fill="#1B2A6B" letter-spacing="1"><textPath href="#tb" startOffset="10%">OFFICIAL DOCUMENT • EST. 2026</textPath></text>'
     + '<image href="https://youngafricansnetwork.org/images/logo.png" x="72" y="72" width="56" height="56"/>'
     + '<circle cx="18" cy="100" r="4" fill="#F5A623"/>'
     + '<circle cx="182" cy="100" r="4" fill="#F5A623"/>'
     + '</svg>';
 
-  const africanSvg = '<svg viewBox="0 0 320 800" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;position:absolute;top:0;left:0;">'
-    + '<rect width="320" height="800" fill="#1B2A6B"/>'
-    + '<rect width="320" height="800" fill="url(#dots)" opacity="0.04"/>'
-    + '<circle cx="260" cy="160" r="200" fill="none" stroke="#F5A623" stroke-width="1" opacity="0.2"/>'
-    + '<circle cx="260" cy="160" r="150" fill="none" stroke="#F5A623" stroke-width="0.8" opacity="0.15"/>'
-    + '<polygon points="200,40 260,120 200,200 140,120" fill="none" stroke="#F5A623" stroke-width="3" opacity="0.9"/>'
-    + '<polygon points="215,65 260,120 215,175 170,120" fill="none" stroke="#F5A623" stroke-width="1.8" opacity="0.55"/>'
-    + '<polygon points="228,88 258,120 228,152 198,120" fill="#F5A623" opacity="0.12"/>'
-    + '<polygon points="120,230 180,310 120,390 60,310" fill="none" stroke="#F5A623" stroke-width="2.5" opacity="0.75"/>'
-    + '<polygon points="135,255 175,310 135,365 95,310" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.45"/>'
-    + '<polygon points="230,400 280,460 230,520 180,460" fill="none" stroke="#F5A623" stroke-width="2" opacity="0.6"/>'
-    + '<polygon points="242,420 278,460 242,500 206,460" fill="none" stroke="#F5A623" stroke-width="1.2" opacity="0.35"/>'
-    + '<polygon points="100,540 145,600 100,660 55,600" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.45"/>'
-    + '<line x1="0" y1="0" x2="320" y2="800" stroke="#F5A623" stroke-width="0.5" opacity="0.06"/>'
-    + '<line x1="320" y1="0" x2="0" y2="800" stroke="#F5A623" stroke-width="0.5" opacity="0.06"/>'
+  const africanSvg = '<svg viewBox="0 0 290 800" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;position:absolute;top:0;left:0;">'
+    + '<rect width="290" height="800" fill="#1B2A6B"/>'
+    + '<circle cx="230" cy="150" r="190" fill="none" stroke="#F5A623" stroke-width="1" opacity="0.2"/>'
+    + '<circle cx="230" cy="150" r="140" fill="none" stroke="#F5A623" stroke-width="0.8" opacity="0.15"/>'
+    + '<polygon points="175,35 240,115 175,195 110,115" fill="none" stroke="#F5A623" stroke-width="3" opacity="0.9"/>'
+    + '<polygon points="190,60 235,115 190,170 145,115" fill="none" stroke="#F5A623" stroke-width="1.8" opacity="0.55"/>'
+    + '<polygon points="203,83 233,115 203,147 173,115" fill="#F5A623" opacity="0.12"/>'
+    + '<polygon points="95,220 160,300 95,380 30,300" fill="none" stroke="#F5A623" stroke-width="2.5" opacity="0.75"/>'
+    + '<polygon points="110,245 155,300 110,355 65,300" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.45"/>'
+    + '<polygon points="195,390 255,455 195,520 135,455" fill="none" stroke="#F5A623" stroke-width="2" opacity="0.6"/>'
+    + '<polygon points="207,412 250,455 207,498 164,455" fill="none" stroke="#F5A623" stroke-width="1.2" opacity="0.35"/>'
+    + '<polygon points="75,530 130,595 75,660 20,595" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.4"/>'
+    + '<line x1="0" y1="0" x2="290" y2="800" stroke="#F5A623" stroke-width="0.4" opacity="0.06"/>'
     + '</svg>';
 
-  const qrSvg = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:70px;height:70px;">'
+  const qrSvg = '<svg viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg" style="width:65px;height:65px;">'
     + '<rect width="100" height="100" fill="white"/>'
     + '<rect x="5" y="5" width="35" height="35" fill="none" stroke="#1B2A6B" stroke-width="4"/>'
     + '<rect x="10" y="10" width="25" height="25" fill="#1B2A6B"/>'
@@ -1369,55 +1402,76 @@ function downloadCertificate(certId) {
     + '<rect x="65" y="10" width="25" height="25" fill="#1B2A6B"/>'
     + '<rect x="5" y="60" width="35" height="35" fill="none" stroke="#1B2A6B" stroke-width="4"/>'
     + '<rect x="10" y="65" width="25" height="25" fill="#1B2A6B"/>'
-    + '<rect x="50" y="50" width="8" height="8" fill="#1B2A6B"/>'
-    + '<rect x="62" y="50" width="8" height="8" fill="#1B2A6B"/>'
-    + '<rect x="74" y="50" width="8" height="8" fill="#1B2A6B"/>'
-    + '<rect x="86" y="50" width="8" height="8" fill="#1B2A6B"/>'
-    + '<rect x="50" y="62" width="8" height="8" fill="#1B2A6B"/>'
-    + '<rect x="74" y="62" width="8" height="8" fill="#1B2A6B"/>'
-    + '<rect x="50" y="74" width="8" height="8" fill="#1B2A6B"/>'
-    + '<rect x="62" y="74" width="8" height="8" fill="#1B2A6B"/>'
-    + '<rect x="86" y="74" width="8" height="8" fill="#1B2A6B"/>'
-    + '<rect x="50" y="86" width="8" height="8" fill="#1B2A6B"/>'
-    + '<rect x="74" y="86" width="8" height="8" fill="#1B2A6B"/>'
-    + '<text x="50" y="97" text-anchor="middle" font-family="Montserrat" font-size="7" fill="#1B2A6B" font-weight="600">SCAN TO VERIFY</text>'
+    + '<rect x="50" y="50" width="7" height="7" fill="#1B2A6B"/>'
+    + '<rect x="60" y="50" width="7" height="7" fill="#1B2A6B"/>'
+    + '<rect x="70" y="50" width="7" height="7" fill="#1B2A6B"/>'
+    + '<rect x="83" y="50" width="7" height="7" fill="#1B2A6B"/>'
+    + '<rect x="50" y="60" width="7" height="7" fill="#1B2A6B"/>'
+    + '<rect x="70" y="60" width="7" height="7" fill="#1B2A6B"/>'
+    + '<rect x="50" y="70" width="7" height="7" fill="#1B2A6B"/>'
+    + '<rect x="60" y="70" width="7" height="7" fill="#1B2A6B"/>'
+    + '<rect x="83" y="70" width="7" height="7" fill="#1B2A6B"/>'
+    + '<rect x="50" y="83" width="7" height="7" fill="#1B2A6B"/>'
+    + '<rect x="70" y="83" width="7" height="7" fill="#1B2A6B"/>'
+    + '<text x="50" y="108" text-anchor="middle" font-family="Montserrat" font-size="7" fill="white" font-weight="600">SCAN TO VERIFY</text>'
     + '</svg>';
+
+  const photoBlock = photoUrl
+    ? '<img class="member-photo" src="' + photoUrl + '" crossorigin="anonymous" alt="Photo"/>'
+    : '<div class="member-photo-placeholder">' + memberName.charAt(0) + '</div>';
+
+  const skillTags = skills.map(s => '<span class="skill-tag">' + s + '</span>').join('');
 
   const body = '<div class="cert">'
     + '<div class="left-bar"></div>'
     + '<div class="main">'
     + '<div class="top-row">'
     + '<div class="logo-area">'
-    + '<img src="https://youngafricansnetwork.org/images/logo.png" crossorigin="anonymous" alt="YAN"/>'
+    + '<img class="logo" src="https://youngafricansnetwork.org/images/logo.png" crossorigin="anonymous" alt="YAN"/>'
     + '<div class="logo-text"><h2>YOUNG AFRICANS NETWORK</h2><p>Building the Future, Together</p></div>'
     + '</div>'
     + '<div class="cert-badge">Certificate of Achievement</div>'
     + '</div>'
     + '<div class="divider-gold"></div>'
     + '<div class="cert-title">This certificate is awarded to</div>'
+    + '<div class="member-row">'
+    + photoBlock
+    + '<div>'
     + '<div class="member-name">' + memberName + '</div>'
+    + '<div style="font-size:7pt;color:#888;margin-top:2px;">' + (u.country || '') + '</div>'
+    + '</div>'
+    + '</div>'
     + '<div class="name-underline"></div>'
     + '<div class="program-label">For successfully completing</div>'
     + '<div class="program-name">' + achievement + '</div>'
+    + '<div class="verify-badge">&#10003; VERIFIED &nbsp;|&nbsp; Authentic YAN Certificate</div>'
+    + '<div class="skills-section">'
+    + '<div class="skills-label">Skills Earned</div>'
+    + '<div class="skills-row">' + skillTags + '</div>'
+    + '</div>'
+    + '<div class="dates-row">'
+    + (enrolledDate ? '<div class="date-item"><strong>Enrolled</strong>' + enrolledDate + '</div>' : '')
+    + '<div class="date-item"><strong>Date of Issue</strong>' + dateStr + '</div>'
+    + (modulesCompleted ? '<div class="date-item"><strong>Modules Completed</strong>' + modulesCompleted + '</div>' : '')
+    + '</div>'
     + '<div class="sig-row">'
     + '<div class="sig-block">'
     + '<img src="https://youngafricansnetwork.org/images/emmanuel_signature.png" crossorigin="anonymous" alt="Signature"/>'
     + '<div class="sig-line"></div>'
     + '<div class="sig-name">Emmanuel Ikumilu Mwori</div>'
-    + '<div class="sig-title">Founder &amp; CEO, Young Africans Network</div>'
+    + '<div class="sig-title">Founder & CEO, Young Africans Network</div>'
     + '</div>'
     + '<div class="stamp-block">' + stampSvg + '</div>'
     + '</div>'
     + '<div class="bottom-strip">'
-    + '<span><strong>Date of Issue:</strong> ' + dateStr + '</span>'
     + '<span><strong>Certificate ID:</strong> ' + verifyCode + '</span>'
-    + '<span>youngafricansnetwork.org/verify.html</span>'
+    + '<span>youngafricansnetwork.org/verify.html &nbsp;|&nbsp; youngafricansn@gmail.com</span>'
+    + '<span><strong>Issued:</strong> ' + dateStr + '</span>'
     + '</div>'
     + '</div>'
     + '<div class="right">' + africanSvg
-    + '<div style="position:absolute;bottom:12mm;left:50%;transform:translateX(-50%);text-align:center;">'
+    + '<div style="position:absolute;bottom:10mm;left:50%;transform:translateX(-50%);text-align:center;">'
     + '<a href="' + verifyUrl + '" style="text-decoration:none;">' + qrSvg + '</a>'
-    + '<div style="font-size:6pt;color:rgba(255,255,255,0.6);margin-top:4px;font-family:Montserrat;text-align:center;">Scan to verify</div>'
     + '</div>'
     + '</div>'
     + '</div>';
