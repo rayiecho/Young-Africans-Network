@@ -2069,83 +2069,6 @@ window.deleteProgram = async function(colName, progId) {
   }
 };
 
-window.loadRecommendations = async function(c) {
-  const [pendingSnap, allSnap] = await Promise.all([
-    getDocs(query(collection(db,'recommendations'), where('status','==','pending'), orderBy('createdAt','desc'))),
-    getDocs(query(collection(db,'recommendations'), orderBy('createdAt','desc')))
-  ]);
-
-  let html = '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">'
-    + '<h2 style="font-size:1.2rem;font-weight:900;color:var(--navy);">📝 Recommendation Letter Requests</h2>'
-    + '<span style="background:var(--red);color:#fff;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.8rem;font-weight:700;">'+ pendingSnap.size +' Pending</span>'
-    + '</div>';
-
-  // Filter tabs
-  html += '<div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">'
-    + '<button class="btn-sm btn-navy" onclick="filterRecs("all")">All ('+allSnap.size+')</button>'
-    + '<button class="btn-sm btn-outline" onclick="filterRecs("pending")">⏳ Pending ('+pendingSnap.size+')</button>'
-    + '<button class="btn-sm btn-outline" onclick="filterRecs("approved")">✅ Approved</button>'
-    + '<button class="btn-sm btn-outline" onclick="filterRecs("rejected")">❌ Rejected</button>'
-    + '</div>';
-
-  html += '<div id="recs-container">';
-
-  if (allSnap.empty) {
-    html += '<div class="section-card"><p style="color:var(--gray);text-align:center;padding:2rem;">No recommendation requests yet.</p></div>';
-  } else {
-    allSnap.docs.forEach(d => {
-      const r = d.data();
-      const date = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString() : 'Unknown date';
-      const statusColor = r.status === 'approved' ? 'var(--green,#27AE60)' : r.status === 'rejected' ? 'var(--red)' : 'var(--gold)';
-      const statusLabel = r.status === 'approved' ? '✅ Approved' : r.status === 'rejected' ? '❌ Rejected' : '⏳ Pending';
-
-      html += '<div class="section-card rec-card" data-status="'+(r.status||'pending')+'" style="margin-bottom:1rem;">'
-        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;margin-bottom:1rem;">'
-        + '<div>'
-        + '<p style="font-size:1rem;font-weight:800;color:var(--navy);">'+(r.memberName||r.userName||'Unknown Member')+'</p>'
-        + '<p style="font-size:0.78rem;color:var(--gray);">📧 '+(r.memberEmail||r.userEmail||'')+'</p>'
-        + '<p style="font-size:0.78rem;color:var(--gray);">📅 Submitted: '+date+'</p>'
-        + '</div>'
-        + '<span style="background:'+statusColor+'22;color:'+statusColor+';padding:0.3rem 0.9rem;border-radius:50px;font-size:0.78rem;font-weight:700;">'+statusLabel+'</span>'
-        + '</div>'
-        + '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:1rem;">'
-        + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">🎓 Scholarship / Program</p>'
-        + '<p style="font-size:0.88rem;color:var(--navy);">'+(r.scholarship||r.program||'Not specified')+'</p>'
-        + '</div>'
-        + '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:1rem;">'
-        + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">👤 Requested Recommender</p>'
-        + '<p style="font-size:0.88rem;color:var(--navy);">'+(r.recommender||'Not specified')+'</p>'
-        + '</div>'
-        + '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:1rem;">'
-        + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">📝 Purpose / Why They Should Be Recommended</p>'
-        + '<p style="font-size:0.88rem;color:var(--gray);line-height:1.6;">'+(r.purpose||r.message||r.reason||'No reason provided')+'</p>'
-        + '</div>'
-        + '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:1rem;">'
-        + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">⏰ Deadline</p>'
-        + '<p style="font-size:0.88rem;color:var(--navy);">'+(r.deadline||'Not specified')+'</p>'
-        + '</div>'
-        + (r.status === 'pending' ?
-          '<div style="display:flex;gap:0.75rem;flex-wrap:wrap;">'
-          + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.5rem;" onclick="approveRecLetter(\'' + d.id + '\',\'' + encodeURIComponent(r.memberName||r.userName||'') + '\',\'' + encodeURIComponent(r.scholarship||'') + '\')">✅ Approve & Generate Letter</button>'
-          + '<button class="btn-sm btn-red" style="padding:0.6rem 1.5rem;" onclick="rejectRecLetter(\'' + d.id + '\')">❌ Reject</button>'
-          + '</div>'
-          : r.status === 'approved' ?
-          '<p style="font-size:0.78rem;color:var(--green,#27AE60);font-weight:600;">✅ Approved — Member can now download the letter</p>'
-          : '<p style="font-size:0.78rem;color:var(--red);font-weight:600;">❌ Rejected</p>'
-        )
-        + '</div>';
-    });
-  }
-
-  html += '</div>';
-  c.innerHTML = html;
-}
-
-window.filterRecs = function(status) {
-  document.querySelectorAll('.rec-card').forEach(card => {
-    card.style.display = status === 'all' || card.dataset.status === status ? 'block' : 'none';
-  });
-}
 </script>
 
 <style>
@@ -2394,3 +2317,81 @@ document.addEventListener('click', function(e) {
 </script>
 </body>
 </html>
+
+window.loadRecommendations = async function(c) {
+  const [pendingSnap, allSnap] = await Promise.all([
+    getDocs(query(collection(db,'recommendations'), where('status','==','pending'), orderBy('createdAt','desc'))),
+    getDocs(query(collection(db,'recommendations'), orderBy('createdAt','desc')))
+  ]);
+
+  let html = '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">'
+    + '<h2 style="font-size:1.2rem;font-weight:900;color:var(--navy);">📝 Recommendation Letter Requests</h2>'
+    + '<span style="background:var(--red);color:#fff;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.8rem;font-weight:700;">'+ pendingSnap.size +' Pending</span>'
+    + '</div>';
+
+  // Filter tabs
+  html += '<div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">'
+    + '<button class="btn-sm btn-navy" onclick="filterRecs("all")">All ('+allSnap.size+')</button>'
+    + '<button class="btn-sm btn-outline" onclick="filterRecs("pending")">⏳ Pending ('+pendingSnap.size+')</button>'
+    + '<button class="btn-sm btn-outline" onclick="filterRecs("approved")">✅ Approved</button>'
+    + '<button class="btn-sm btn-outline" onclick="filterRecs("rejected")">❌ Rejected</button>'
+    + '</div>';
+
+  html += '<div id="recs-container">';
+
+  if (allSnap.empty) {
+    html += '<div class="section-card"><p style="color:var(--gray);text-align:center;padding:2rem;">No recommendation requests yet.</p></div>';
+  } else {
+    allSnap.docs.forEach(d => {
+      const r = d.data();
+      const date = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString() : 'Unknown date';
+      const statusColor = r.status === 'approved' ? 'var(--green,#27AE60)' : r.status === 'rejected' ? 'var(--red)' : 'var(--gold)';
+      const statusLabel = r.status === 'approved' ? '✅ Approved' : r.status === 'rejected' ? '❌ Rejected' : '⏳ Pending';
+
+      html += '<div class="section-card rec-card" data-status="'+(r.status||'pending')+'" style="margin-bottom:1rem;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;margin-bottom:1rem;">'
+        + '<div>'
+        + '<p style="font-size:1rem;font-weight:800;color:var(--navy);">'+(r.memberName||r.userName||'Unknown Member')+'</p>'
+        + '<p style="font-size:0.78rem;color:var(--gray);">📧 '+(r.memberEmail||r.userEmail||'')+'</p>'
+        + '<p style="font-size:0.78rem;color:var(--gray);">📅 Submitted: '+date+'</p>'
+        + '</div>'
+        + '<span style="background:'+statusColor+'22;color:'+statusColor+';padding:0.3rem 0.9rem;border-radius:50px;font-size:0.78rem;font-weight:700;">'+statusLabel+'</span>'
+        + '</div>'
+        + '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:1rem;">'
+        + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">🎓 Scholarship / Program</p>'
+        + '<p style="font-size:0.88rem;color:var(--navy);">'+(r.scholarship||r.program||'Not specified')+'</p>'
+        + '</div>'
+        + '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:1rem;">'
+        + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">👤 Requested Recommender</p>'
+        + '<p style="font-size:0.88rem;color:var(--navy);">'+(r.recommender||'Not specified')+'</p>'
+        + '</div>'
+        + '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:1rem;">'
+        + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">📝 Purpose / Why They Should Be Recommended</p>'
+        + '<p style="font-size:0.88rem;color:var(--gray);line-height:1.6;">'+(r.purpose||r.message||r.reason||'No reason provided')+'</p>'
+        + '</div>'
+        + '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:1rem;">'
+        + '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">⏰ Deadline</p>'
+        + '<p style="font-size:0.88rem;color:var(--navy);">'+(r.deadline||'Not specified')+'</p>'
+        + '</div>'
+        + (r.status === 'pending' ?
+          '<div style="display:flex;gap:0.75rem;flex-wrap:wrap;">'
+          + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.5rem;" onclick="approveRecLetter(\'' + d.id + '\',\'' + encodeURIComponent(r.memberName||r.userName||'') + '\',\'' + encodeURIComponent(r.scholarship||'') + '\')">✅ Approve & Generate Letter</button>'
+          + '<button class="btn-sm btn-red" style="padding:0.6rem 1.5rem;" onclick="rejectRecLetter(\'' + d.id + '\')">❌ Reject</button>'
+          + '</div>'
+          : r.status === 'approved' ?
+          '<p style="font-size:0.78rem;color:var(--green,#27AE60);font-weight:600;">✅ Approved — Member can now download the letter</p>'
+          : '<p style="font-size:0.78rem;color:var(--red);font-weight:600;">❌ Rejected</p>'
+        )
+        + '</div>';
+    });
+  }
+
+  html += '</div>';
+  c.innerHTML = html;
+}
+
+window.filterRecs = function(status) {
+  document.querySelectorAll('.rec-card').forEach(card => {
+    card.style.display = status === 'all' || card.dataset.status === status ? 'block' : 'none';
+  });
+}
