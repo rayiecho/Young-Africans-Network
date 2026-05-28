@@ -1532,7 +1532,7 @@ async function loadAssignments(c) {
         html += '</div>';
         html += '<p style="font-size:0.82rem;color:var(--navy);background:white;padding:0.75rem;border-radius:8px;margin-bottom:0.75rem;"><strong>Difficulty feedback:</strong> ' + sanitize(q.difficulty || q.feedback || 'No feedback') + '</p>';
         html += '<div style="display:flex;gap:0.5rem;">';
-        html += '<button class="btn-sm btn-navy" onclick="resetQuizAttempts('' + d.id + '','' + (q.userId || '') + '','' + (q.programId || '') + '','' + (q.moduleWeek || '') + '')">🔄 Reset Attempts</button>';
+        html += '<button class="btn-sm btn-navy" onclick="resetQuizAttempts(\''+d.id+'\',\''+( q.userId||'')+'\'\',\'\''+(q.programId||'')+'\',\'\''+(q.moduleWeek||'')+'\')">🔄 Reset Attempts</button>';
         html += '<button class="btn-sm" style="background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);" onclick="markQuizReviewed('' + d.id + '')">✅ Mark Reviewed</button>';
         html += '</div></div>';
       });
