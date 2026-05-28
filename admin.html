@@ -572,11 +572,11 @@ window.loadSection = async function(section) {
     newsletters: '📧 Newsletter Manager',
     analytics: '📈 Analytics Dashboard',
     assignments: '📝 Assignment Reviews',
-    programs: '🎓 Programs Manager' 
+    programs: '🎓 Programs Manager', notifications: '🔔 Notification Center' 
   }[section] || section;
   const container = document.getElementById('content-area');
   container.innerHTML = '<div class="loading">Loading...</div>';
-  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: loadAnalytics, assignments: loadAssignments, programs: loadProgramsAdmin };
+  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: loadAnalytics, assignments: loadAssignments, programs: loadProgramsAdmin, notifications: loadNotificationCenter };
   if (fns[section]) await fns[section](container);
 };
 
@@ -1680,6 +1680,135 @@ async function loadProgramsAdmin(c) {
   }
 }
 
+// ===== NOTIFICATION CENTER =====
+async function loadNotificationCenter(c) {
+  c.innerHTML = '<div class="loading">Loading...</div>';
+
+  const DEPARTMENTS = [
+    {id:'all', name:'📢 Everyone'},
+    {id:'programs', name:'💻 Programs & Training'},
+    {id:'career', name:'🎤 Career Development'},
+    {id:'scholarships', name:'🏆 Scholarships'},
+    {id:'community', name:'🌍 Community Impact'},
+    {id:'mental', name:'💚 Mental Health'},
+    {id:'communications', name:'📢 Communications'},
+    {id:'partnerships', name:'🤝 Partnerships'},
+    {id:'finance', name:'💰 Finance'},
+  ];
+
+  const recentSnap = await getDocs(query(collection(db, 'notifications'), orderBy('createdAt', 'desc'), limit(20)));
+
+  let html = '<div class="section-card">';
+  html += '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1.5rem;">📣 Send New Notification</h3>';
+
+  // Type selector
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">';
+  html += '<div class="form-group"><label>Notification Type</label><select id="notif-type-admin" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;">';
+  html += '<option value="announcement">📢 Announcement</option>';
+  html += '<option value="success">✅ Good News</option>';
+  html += '<option value="info">ℹ️ Information</option>';
+  html += '<option value="warning">⚠️ Alert</option>';
+  html += '</select></div>';
+
+  // Audience selector
+  html += '<div class="form-group"><label>Send To</label><select id="notif-audience" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;">';
+  DEPARTMENTS.forEach(function(d) {
+    html += '<option value="' + d.id + '">' + d.name + '</option>';
+  });
+  html += '</select></div></div>';
+
+  // Title
+  html += '<div class="form-group" style="margin-bottom:1rem;"><label>Title *</label>';
+  html += '<input type="text" id="notif-title-admin" placeholder="e.g. New Program Available!" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>';
+
+  // Message
+  html += '<div class="form-group" style="margin-bottom:1.5rem;"><label>Message *</label>';
+  html += '<textarea id="notif-message-admin" rows="4" placeholder="Write your message here..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;"></textarea></div>';
+
+  // Quick templates
+  html += '<div style="margin-bottom:1.5rem;">';
+  html += '<p style="font-size:0.78rem;color:var(--gray);margin-bottom:0.5rem;">Quick Templates:</p>';
+  html += '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">';
+  const templates = [
+    {label:'New Program', title:'🎓 New Program Available!', msg:'A new training program has been added. Log in to enroll now!'},
+    {label:'Deadline', title:'⏰ Important Deadline', msg:'Please note an upcoming deadline. Log in for details.'},
+    {label:'Event', title:'📅 Upcoming Event', msg:'YAN has an exciting event coming up. Stay tuned for details!'},
+    {label:'Achievement', title:'🏆 Congratulations!', msg:'YAN members have achieved something great. Log in to celebrate!'},
+    {label:'Maintenance', title:'🔧 Site Maintenance', msg:'YAN will undergo brief maintenance. We will be back shortly.'},
+  ];
+  templates.forEach(function(t) {
+    html += '<button onclick="fillNotifTemplate('' + t.title.replace(/'/g,"\'") + '','' + t.msg.replace(/'/g,"\'") + '')" style="background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.35rem 0.75rem;border-radius:50px;font-size:0.72rem;cursor:pointer;font-family:Poppins,sans-serif;">' + t.label + '</button>';
+  });
+  html += '</div></div>';
+
+  // Send button
+  html += '<button onclick="sendAdminNotification()" style="background:var(--navy);color:#fff;border:none;padding:0.85rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;width:100%;">🔔 Send Notification</button>';
+  html += '</div>';
+
+  // Recent notifications
+  html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">📋 Recent Notifications (' + recentSnap.size + ')</h3>';
+  if (recentSnap.empty) {
+    html += '<p style="color:var(--gray);font-size:0.85rem;">No notifications sent yet.</p>';
+  } else {
+    recentSnap.docs.forEach(function(d) {
+      const n = d.data();
+      const typeColors = {announcement:'#1B2A6B', success:'#27AE60', info:'#0A66C2', warning:'#F5A623'};
+      const color = typeColors[n.type] || '#1B2A6B';
+      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:0.75rem;background:var(--light);border-radius:12px;margin-bottom:0.75rem;border-left:3px solid ' + color + ';">';
+      html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(n.title || '') + '</p>';
+      html += '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize(n.message || '') + '</p>';
+      html += '<p style="font-size:0.7rem;color:var(--gray);margin-top:0.25rem;">By ' + sanitize(n.postedBy || 'Admin') + ' · ' + (n.readBy ? n.readBy.length : 0) + ' read</p></div>';
+      html += '<button onclick="deleteNotification('' + d.id + '')" style="background:none;border:none;color:var(--gray);cursor:pointer;font-size:1rem;padding:0.25rem;">🗑️</button>';
+      html += '</div>';
+    });
+  }
+  html += '</div>';
+
+  c.innerHTML = html;
+}
+
+window.fillNotifTemplate = function(title, msg) {
+  document.getElementById('notif-title-admin').value = title;
+  document.getElementById('notif-message-admin').value = msg;
+};
+
+window.sendAdminNotification = async function() {
+  const title = document.getElementById('notif-title-admin').value.trim();
+  const message = document.getElementById('notif-message-admin').value.trim();
+  const type = document.getElementById('notif-type-admin').value;
+  const audience = document.getElementById('notif-audience').value;
+
+  if (!title || !message) return showToast('Enter title and message', 'error');
+
+  try {
+    const notifData = {
+      title, message, type,
+      audience: audience,
+      postedBy: 'YAN Admin',
+      createdAt: serverTimestamp(),
+      readBy: []
+    };
+
+    if (audience !== 'all') notifData.department = audience;
+
+    await addDoc(collection(db, 'notifications'), notifData);
+    showToast('🔔 Notification sent successfully!');
+    document.getElementById('notif-title-admin').value = '';
+    document.getElementById('notif-message-admin').value = '';
+    loadSection('notifications');
+  } catch(e) {
+    showToast(e.message, 'error');
+  }
+};
+
+window.deleteNotification = async function(notifId) {
+  if (!confirm('Delete this notification?')) return;
+  await deleteDoc(doc(db, 'notifications', notifId));
+  showToast('Notification deleted');
+  loadSection('notifications');
+};
+
+
 window.deleteProgram = async function(colName, progId) {
   if (!confirm('Delete this program? This cannot be undone.')) return;
   try {
@@ -1886,6 +2015,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <button class="nav-item" data-section="analytics" onclick="loadSection('analytics')"><span class="nav-icon">📈</span> Analytics</button>
       <button class="nav-item" data-section="assignments" onclick="loadSection('assignments')"><span class="nav-icon">📝</span> Assignments</button>
       <button class="nav-item" data-section="programs" onclick="loadSection('programs')"><span class="nav-icon">🎓</span> Programs Manager</button>
+      <button class="nav-item" data-section="notifications" onclick="loadSection('notifications')"><span class="nav-icon">🔔</span> Notifications</button>
     </nav>
     <div class="admin-sidebar-footer">
       <button class="btn-logout-admin" onclick="doAdminLogout()">🚪 Sign Out</button>
