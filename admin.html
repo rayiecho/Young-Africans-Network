@@ -1737,7 +1737,7 @@ async function loadNotificationCenter(c) {
     {label:'Maintenance', title:'🔧 Site Maintenance', msg:'YAN will undergo brief maintenance. We will be back shortly.'},
   ];
   templates.forEach(function(t) {
-    html += '<button onclick="fillNotifTemplate('' + t.title.replace(/'/g,"\'") + '','' + t.msg.replace(/'/g,"\'") + '')" style="background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.35rem 0.75rem;border-radius:50px;font-size:0.72rem;cursor:pointer;font-family:Poppins,sans-serif;">' + t.label + '</button>';
+    html += '<button onclick="fillNotifTemplate(this)" data-title="' + t.title.replace(/"/g,'&quot;') + '" data-msg="' + t.msg.replace(/"/g,'&quot;') + '" style="background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.35rem 0.75rem;border-radius:50px;font-size:0.72rem;cursor:pointer;font-family:Poppins,sans-serif;">' + t.label + '</button>';
   });
   html += '</div></div>';
 
