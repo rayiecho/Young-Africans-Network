@@ -569,11 +569,14 @@ window.loadSection = async function(section) {
     forms: '📬 Form Submissions',
     hubs: '🏢 YAN Hubs Manager',
     partnerships: '🤝 Partnerships Manager',
-    newsletters: '📧 Newsletter Manager'
+    newsletters: '📧 Newsletter Manager',
+    analytics: '📈 Analytics Dashboard',
+    assignments: '📝 Assignment Reviews',
+    programs: '🎓 Programs Manager' 
   }[section] || section;
   const container = document.getElementById('content-area');
   container.innerHTML = '<div class="loading">Loading...</div>';
-  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin };
+  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: loadAnalytics, assignments: loadAssignments, programs: loadProgramsAdmin };
   if (fns[section]) await fns[section](container);
 };
 
@@ -1480,6 +1483,9 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <button class="nav-item" data-section="hubs" onclick="loadSection('hubs')"><span class="nav-icon">🏢</span> YAN Hubs</button>
       <button class="nav-item" data-section="partnerships" onclick="loadSection('partnerships')"><span class="nav-icon">🤝</span> Partnerships</button>
       <button class="nav-item" data-section="newsletters" onclick="loadSection('newsletters')"><span class="nav-icon">📧</span> Newsletters</button>
+      <button class="nav-item" data-section="analytics" onclick="loadSection('analytics')"><span class="nav-icon">📈</span> Analytics</button>
+      <button class="nav-item" data-section="assignments" onclick="loadSection('assignments')"><span class="nav-icon">📝</span> Assignments</button>
+      <button class="nav-item" data-section="programs" onclick="loadSection('programs')"><span class="nav-icon">🎓</span> Programs Manager</button>
     </nav>
     <div class="admin-sidebar-footer">
       <button class="btn-logout-admin" onclick="doAdminLogout()">🚪 Sign Out</button>
@@ -1507,6 +1513,313 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     </div>
   </main>
 </div>
+
+
+// ===== VIEW MEMBER PROGRESS =====
+window.viewMemberProgress = async function(userId, userName) {
+  const container = document.getElementById('content-area');
+  container.innerHTML = '<div class="loading">Loading progress for ' + userName + '...</div>';
+
+  try {
+    // Get tech hub progress
+    const techProgress = await getDocs(query(collection(db, 'learningProgress'), where('userId', '==', userId)));
+    const careerProgress = await getDocs(query(collection(db, 'careerLearningProgress'), where('userId', '==', userId)));
+    const assignments = await getDocs(query(collection(db, 'programAssignments'), where('userId', '==', userId)));
+    const careerAssignments = await getDocs(query(collection(db, 'careerAssignments'), where('userId', '==', userId)));
+
+    let html = '<div class="section-card">';
+    html += '<button onclick="loadSection('members')" style="background:var(--light);border:none;padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;cursor:pointer;margin-bottom:1rem;">← Back to Members</button>';
+    html += '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1.5rem;">📊 Progress Report — ' + userName + '</h3>';
+
+    // Tech Hub Progress
+    html += '<h4 style="font-size:0.9rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;padding-bottom:0.5rem;border-bottom:2px solid var(--light);">💻 Tech Hub Programs</h4>';
+    if (techProgress.empty) {
+      html += '<p style="color:var(--gray);font-size:0.85rem;margin-bottom:1rem;">No tech programs enrolled yet.</p>';
+    } else {
+      techProgress.docs.forEach(d => {
+        const p = d.data();
+        const progId = d.id.replace(userId + '_', '');
+        const completed = (p.lessonsCompleted || []).length;
+        const total = p.totalLessons || 20;
+        const pct = Math.round((completed / total) * 100);
+        html += '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">';
+        html += '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + progId + '</p>';
+        html += '<span style="font-size:0.78rem;color:var(--gray);">' + completed + '/' + total + ' lessons</span>';
+        html += '</div>';
+        html += '<div style="background:#e0e0e0;border-radius:50px;height:8px;width:100%;">';
+        html += '<div style="background:' + (pct===100?'#27AE60':'var(--navy)') + ';border-radius:50px;height:8px;width:' + pct + '%;transition:width 0.3s;"></div>';
+        html += '</div>';
+        html += '<p style="font-size:0.72rem;color:var(--gray);margin-top:0.35rem;">' + pct + '% complete' + (pct===100?' ✅ Completed!':'') + '</p>';
+        html += '</div>';
+      });
+    }
+
+    // Career Hub Progress
+    html += '<h4 style="font-size:0.9rem;font-weight:700;color:var(--navy);margin:1rem 0 0.75rem;padding-bottom:0.5rem;border-bottom:2px solid var(--light);">🎤 Career Hub Programs</h4>';
+    if (careerProgress.empty) {
+      html += '<p style="color:var(--gray);font-size:0.85rem;margin-bottom:1rem;">No career programs enrolled yet.</p>';
+    } else {
+      careerProgress.docs.forEach(d => {
+        const p = d.data();
+        const progId = d.id.replace(userId + '_', '');
+        const completed = (p.lessonsCompleted || []).length;
+        const total = p.totalLessons || 20;
+        const pct = Math.round((completed / total) * 100);
+        html += '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">';
+        html += '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + progId + '</p>';
+        html += '<span style="font-size:0.78rem;color:var(--gray);">' + completed + '/' + total + ' lessons</span>';
+        html += '</div>';
+        html += '<div style="background:#e0e0e0;border-radius:50px;height:8px;width:100%;">';
+        html += '<div style="background:' + (pct===100?'#27AE60':'#F5A623') + ';border-radius:50px;height:8px;width:' + pct + '%;transition:width 0.3s;"></div>';
+        html += '</div>';
+        html += '<p style="font-size:0.72rem;color:var(--gray);margin-top:0.35rem;">' + pct + '% complete' + (pct===100?' ✅ Completed!':'') + '</p>';
+        html += '</div>';
+      });
+    }
+
+    // Assignments
+    const allAssignments = [...assignments.docs, ...careerAssignments.docs];
+    html += '<h4 style="font-size:0.9rem;font-weight:700;color:var(--navy);margin:1rem 0 0.75rem;padding-bottom:0.5rem;border-bottom:2px solid var(--light);">📝 Assignments (' + allAssignments.length + ')</h4>';
+    if (allAssignments.length === 0) {
+      html += '<p style="color:var(--gray);font-size:0.85rem;">No assignments submitted yet.</p>';
+    } else {
+      allAssignments.forEach(d => {
+        const a = d.data();
+        const statusColor = a.status === 'approved' ? '#27AE60' : a.status === 'rejected' ? '#E63329' : '#F5A623';
+        html += '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+        html += '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(a.programId || 'Program') + '</p>';
+        html += '<span style="background:' + statusColor + '18;color:' + statusColor + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (a.status || 'pending').toUpperCase() + '</span>';
+        html += '</div>';
+        html += '<p style="font-size:0.78rem;color:var(--gray);margin-top:0.35rem;">' + sanitize(a.answer || a.submission || '') + '</p>';
+        if (a.feedback) html += '<p style="font-size:0.78rem;color:#27AE60;margin-top:0.25rem;">Feedback: ' + sanitize(a.feedback) + '</p>';
+        html += '</div>';
+      });
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
+  }
+};
+
+// ===== ANALYTICS =====
+async function loadAnalytics(c) {
+  c.innerHTML = '<div class="loading">Loading analytics...</div>';
+  try {
+    const [techProgs, careerProgs, users, certs, techProgress, careerProgress] = await Promise.all([
+      getDocs(collection(db, 'trainingPrograms')),
+      getDocs(collection(db, 'careerPrograms')),
+      getDocs(collection(db, 'users')),
+      getDocs(collection(db, 'certificates')),
+      getDocs(collection(db, 'learningProgress')),
+      getDocs(collection(db, 'careerLearningProgress'))
+    ]);
+
+    const totalEnrollments = techProgress.size + careerProgress.size;
+    const completions = [...techProgress.docs, ...careerProgress.docs].filter(d => {
+      const p = d.data();
+      return (p.lessonsCompleted || []).length >= 20;
+    }).length;
+
+    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem;">';
+    html += '<div class="stat-card"><div class="stat-num">' + users.size + '</div><div class="stat-label">Total Members</div></div>';
+    html += '<div class="stat-card"><div class="stat-num">' + (techProgs.size + careerProgs.size) + '</div><div class="stat-label">Total Programs</div></div>';
+    html += '<div class="stat-card"><div class="stat-num">' + totalEnrollments + '</div><div class="stat-label">Total Enrollments</div></div>';
+    html += '<div class="stat-card green"><div class="stat-num">' + completions + '</div><div class="stat-label">Completions</div></div>';
+    html += '<div class="stat-card red"><div class="stat-num">' + certs.size + '</div><div class="stat-label">Certificates</div></div>';
+    html += '</div>';
+
+    // Tech Programs breakdown
+    html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">💻 Tech Hub Programs</h3>';
+    for (const d of techProgs.docs) {
+      const p = d.data();
+      const enrolled = (p.enrolledBy || []).length;
+      const progProgress = techProgress.docs.filter(x => x.id.includes(d.id));
+      const completed = progProgress.filter(x => (x.data().lessonsCompleted || []).length >= 20).length;
+      const pct = enrolled > 0 ? Math.round((completed / enrolled) * 100) : 0;
+      html += '<div style="display:flex;align-items:center;gap:1rem;padding:0.75rem 0;border-bottom:1px solid var(--light);">';
+      html += '<div style="flex:1;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(p.title || d.id) + '</p>';
+      html += '<p style="font-size:0.72rem;color:var(--gray);">' + enrolled + ' enrolled · ' + completed + ' completed</p></div>';
+      html += '<div style="width:120px;"><div style="background:#e0e0e0;border-radius:50px;height:8px;">';
+      html += '<div style="background:var(--navy);border-radius:50px;height:8px;width:' + pct + '%;"></div></div>';
+      html += '<p style="font-size:0.68rem;color:var(--gray);text-align:right;">' + pct + '%</p></div>';
+      html += '<button class="btn-sm ' + (p.isOpen === false ? 'btn-navy' : 'btn-red') + '" onclick="toggleProgram('trainingPrograms','' + d.id + '',' + (p.isOpen === false ? 'true' : 'false') + ')">' + (p.isOpen === false ? '🔓 Open' : '🔒 Close') + '</button>';
+      html += '</div>';
+    }
+    html += '</div>';
+
+    // Career Programs breakdown
+    html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">🎤 Career Hub Programs</h3>';
+    for (const d of careerProgs.docs) {
+      const p = d.data();
+      const enrolled = (p.enrolledBy || []).length;
+      const progProgress = careerProgress.docs.filter(x => x.id.includes(d.id));
+      const completed = progProgress.filter(x => (x.data().lessonsCompleted || []).length >= 20).length;
+      const pct = enrolled > 0 ? Math.round((completed / enrolled) * 100) : 0;
+      html += '<div style="display:flex;align-items:center;gap:1rem;padding:0.75rem 0;border-bottom:1px solid var(--light);">';
+      html += '<div style="flex:1;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(p.title || d.id) + '</p>';
+      html += '<p style="font-size:0.72rem;color:var(--gray);">' + enrolled + ' enrolled · ' + completed + ' completed</p></div>';
+      html += '<div style="width:120px;"><div style="background:#e0e0e0;border-radius:50px;height:8px;">';
+      html += '<div style="background:#F5A623;border-radius:50px;height:8px;width:' + pct + '%;"></div></div>';
+      html += '<p style="font-size:0.68rem;color:var(--gray);text-align:right;">' + pct + '%</p></div>';
+      html += '<button class="btn-sm ' + (p.isOpen === false ? 'btn-navy' : 'btn-red') + '" onclick="toggleProgram('careerPrograms','' + d.id + '',' + (p.isOpen === false ? 'true' : 'false') + ')">' + (p.isOpen === false ? '🔓 Open' : '🔒 Close') + '</button>';
+      html += '</div>';
+    }
+    html += '</div>';
+
+    c.innerHTML = html;
+  } catch(e) {
+    c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
+  }
+}
+
+// ===== TOGGLE PROGRAM OPEN/CLOSE =====
+window.toggleProgram = async function(collection_name, progId, isOpen) {
+  try {
+    await updateDoc(doc(db, collection_name, progId), { isOpen: isOpen });
+    showToast(isOpen ? '🔓 Program opened!' : '🔒 Program closed!');
+    loadSection('analytics');
+  } catch(e) {
+    showToast(e.message, 'error');
+  }
+};
+
+// ===== ASSIGNMENTS REVIEW =====
+async function loadAssignments(c) {
+  c.innerHTML = '<div class="loading">Loading assignments...</div>';
+  try {
+    const [techAssign, careerAssign] = await Promise.all([
+      getDocs(query(collection(db, 'programAssignments'), orderBy('submittedAt', 'desc'))),
+      getDocs(query(collection(db, 'careerAssignments'), orderBy('submittedAt', 'desc')))
+    ]);
+
+    const all = [
+      ...techAssign.docs.map(d => ({...d.data(), id: d.id, type: 'Tech'})),
+      ...careerAssign.docs.map(d => ({...d.data(), id: d.id, type: 'Career'}))
+    ].sort((a,b) => (b.submittedAt?.seconds||0) - (a.submittedAt?.seconds||0));
+
+    const pending = all.filter(a => !a.status || a.status === 'pending');
+    const reviewed = all.filter(a => a.status && a.status !== 'pending');
+
+    let html = '<div class="section-card">';
+    html += '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">📝 Pending Assignments (' + pending.length + ')</h3>';
+
+    if (pending.length === 0) {
+      html += '<p style="color:var(--gray);font-size:0.85rem;">No pending assignments.</p>';
+    } else {
+      pending.forEach(a => {
+        const col = a.type === 'Tech' ? 'programAssignments' : 'careerAssignments';
+        html += '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:1rem;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">';
+        html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(a.userName || a.userId || 'Member') + '</p>';
+        html += '<p style="font-size:0.72rem;color:var(--gray);">' + a.type + ' Hub · ' + sanitize(a.programId || '') + ' · Module ' + (a.moduleWeek || '') + '</p></div>';
+        html += '<span style="background:rgba(245,166,35,0.1);color:#F5A623;padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">PENDING</span>';
+        html += '</div>';
+        html += '<p style="font-size:0.82rem;color:var(--navy);background:white;padding:0.75rem;border-radius:8px;margin-bottom:0.75rem;">' + sanitize(a.answer || a.submission || 'No content') + '</p>';
+        html += '<textarea id="feedback-' + a.id + '" placeholder="Write feedback..." style="width:100%;padding:0.5rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;margin-bottom:0.5rem;resize:vertical;min-height:60px;"></textarea>';
+        html += '<div style="display:flex;gap:0.5rem;">';
+        html += '<button class="btn-sm btn-navy" onclick="reviewAssignment('' + col + '','' + a.id + '','approved')">✅ Approve</button>';
+        html += '<button class="btn-sm btn-red" onclick="reviewAssignment('' + col + '','' + a.id + '','rejected')">❌ Reject</button>';
+        html += '</div></div>';
+      });
+    }
+    html += '</div>';
+
+    if (reviewed.length > 0) {
+      html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">✅ Reviewed Assignments (' + reviewed.length + ')</h3>';
+      reviewed.forEach(a => {
+        const statusColor = a.status === 'approved' ? '#27AE60' : '#E63329';
+        html += '<div style="background:var(--light);border-radius:12px;padding:0.75rem;margin-bottom:0.75rem;display:flex;justify-content:space-between;align-items:center;">';
+        html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(a.userName || a.userId || 'Member') + '</p>';
+        html += '<p style="font-size:0.72rem;color:var(--gray);">' + a.type + ' · ' + sanitize(a.programId || '') + '</p></div>';
+        html += '<span style="background:' + statusColor + '18;color:' + statusColor + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + a.status.toUpperCase() + '</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    c.innerHTML = html;
+  } catch(e) {
+    c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
+  }
+}
+
+window.reviewAssignment = async function(colName, assignId, status) {
+  const feedback = document.getElementById('feedback-' + assignId)?.value || '';
+  try {
+    await updateDoc(doc(db, colName, assignId), {
+      status: status,
+      feedback: feedback,
+      reviewedAt: serverTimestamp(),
+      reviewedBy: 'Admin'
+    });
+    showToast(status === 'approved' ? '✅ Assignment approved!' : '❌ Assignment rejected!');
+    loadSection('assignments');
+  } catch(e) {
+    showToast(e.message, 'error');
+  }
+};
+
+// ===== PROGRAMS MANAGER =====
+async function loadProgramsAdmin(c) {
+  c.innerHTML = '<div class="loading">Loading programs...</div>';
+  try {
+    const [techProgs, careerProgs] = await Promise.all([
+      getDocs(collection(db, 'trainingPrograms')),
+      getDocs(collection(db, 'careerPrograms'))
+    ]);
+
+    let html = '<div class="section-card">';
+    html += '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">💻 Tech Hub Programs</h3>';
+    techProgs.docs.forEach(d => {
+      const p = d.data();
+      const isOpen = p.isOpen !== false;
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--light);border-radius:12px;margin-bottom:0.75rem;">';
+      html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(p.title || d.id) + '</p>';
+      html += '<p style="font-size:0.72rem;color:var(--gray);">' + sanitize(p.category || '') + ' · ' + (p.enrolledBy?.length || 0) + ' enrolled</p></div>';
+      html += '<div style="display:flex;align-items:center;gap:0.5rem;">';
+      html += '<span style="background:' + (isOpen?'rgba(39,174,96,0.1)':'rgba(107,114,128,0.1)') + ';color:' + (isOpen?'#27AE60':'var(--gray)') + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (isOpen?'🟢 Open':'🔒 Closed') + '</span>';
+      html += '<button class="btn-sm ' + (isOpen?'btn-red':'btn-navy') + '" onclick="toggleProgram('trainingPrograms','' + d.id + '',' + !isOpen + ')">' + (isOpen?'Close':'Open') + '</button>';
+      html += '<button class="btn-sm btn-red" onclick="deleteProgram('trainingPrograms','' + d.id + '')">Delete</button>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+
+    html += '<div class="section-card">';
+    html += '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">🎤 Career Hub Programs</h3>';
+    careerProgs.docs.forEach(d => {
+      const p = d.data();
+      const isOpen = p.isOpen !== false;
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--light);border-radius:12px;margin-bottom:0.75rem;">';
+      html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(p.title || d.id) + '</p>';
+      html += '<p style="font-size:0.72rem;color:var(--gray);">' + sanitize(p.category || '') + ' · ' + (p.enrolledBy?.length || 0) + ' enrolled</p></div>';
+      html += '<div style="display:flex;align-items:center;gap:0.5rem;">';
+      html += '<span style="background:' + (isOpen?'rgba(39,174,96,0.1)':'rgba(107,114,128,0.1)') + ';color:' + (isOpen?'#27AE60':'var(--gray)') + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (isOpen?'🟢 Open':'🔒 Closed') + '</span>';
+      html += '<button class="btn-sm ' + (isOpen?'btn-red':'btn-navy') + '" onclick="toggleProgram('careerPrograms','' + d.id + '',' + !isOpen + ')">' + (isOpen?'Close':'Open') + '</button>';
+      html += '<button class="btn-sm btn-red" onclick="deleteProgram('careerPrograms','' + d.id + '')">Delete</button>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) {
+    c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
+  }
+}
+
+window.deleteProgram = async function(colName, progId) {
+  if (!confirm('Delete this program? This cannot be undone.')) return;
+  try {
+    await deleteDoc(doc(db, colName, progId));
+    showToast('Program deleted');
+    loadSection('programs');
+  } catch(e) {
+    showToast(e.message, 'error');
+  }
+};
 
 <script>
 document.addEventListener('click', function(e) {
