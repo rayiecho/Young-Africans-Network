@@ -4612,7 +4612,7 @@ async function openCareerPath(pathId) {
         + '<div style="display:flex;align-items:center;gap:0.75rem;">'
         + '<div style="width:36px;height:36px;border-radius:50%;background:' + path.color + ';display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.85rem;flex-shrink:0;">' + (i+1) + '</div>'
         + '<div><h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);">' + sanitize(m.title) + '</h4>'
-        + '<span style="font-size:0.72rem;color:var(--gray);">' + (m.type === 'video' ? '📹 Video' : m.type === 'article' ? '📄 Article' : m.type === 'PDF' ? '📄 PDF' : m.type === 'DOCX' ? '📝 DOCX' : '📄 ' + (m.type||'Guide')) + ' · ' + (m.duration || '10 min') + '</span></div></div>'
+        + '<span style="font-size:0.72rem;color:var(--gray);">' + (m.type === 'video' ? '📹 Video' : m.type === 'article' ? '📄 Article' : '📄 ' + (m.type || 'Guide')) + ' · ' + (m.duration || '10 min') + '</span></div></div>'
         + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">';
       if (m.type === 'video' && m.url) html += '<button class="btn-sm btn-navy" onclick="playCareerVideo(\'' + m.id + '\',\'' + m.url.replace(/'/g,"\\'") + '\')">▶ Watch</button>';
       if (m.type === 'article' && m.url) html += '<a href="' + sanitize(m.url) + '" target="_blank" class="btn-sm btn-outline" style="text-decoration:none;">🔗 Read</a>';
@@ -4699,7 +4699,7 @@ async function loadCareerMaterials() {
         + '<div style="flex:1;">'
         + '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">'
         + '<span style="background:' + color + '18;color:' + color + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + (path ? path.icon + ' ' + path.title : m.pathId) + '</span>'
-        + '<span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;">' + (m.type === 'video' ? '📹 Video' : m.type === 'article' ? '📄 Article' : m.type === 'PDF' ? '📄 PDF' : m.type === 'DOCX' ? '📝 DOCX' : m.type === 'Link' ? '🔗 Link' : '📄 ' + (m.type||'Guide')) + '</span>'
+        + '<span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;">' + (m.type === 'video' ? '📹 Video' : m.type === 'article' ? '📄 Article' : '📄 ' + (m.type || 'Guide')) + '</span>'
         + '</div>'
         + '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(m.title) + '</h4>'
         + (m.description ? '<p style="font-size:0.78rem;color:var(--gray);line-height:1.6;">' + sanitize(m.description.substring(0,120)) + '...</p>' : '')
