@@ -1658,7 +1658,7 @@ async function loadProgramsAdmin(c) {
       html += '<span style="background:' + (isOpen?'rgba(39,174,96,0.1)':'rgba(107,114,128,0.1)') + ';color:' + (isOpen?'#27AE60':'var(--gray)') + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (isOpen?'🟢 Open':'🔒 Closed') + '</span>';
       html += '<button class="btn-sm ' + (isOpen?'btn-red':'btn-navy') + '" onclick="toggleProgram(\'trainingPrograms\',' + "'" + d.id + "'" + ',' + !isOpen + ')">' + (isOpen?'Close':'Open') + '</button>';
       html += '<button class="btn-sm" style="background:#0A66C2;color:#fff;" onclick="editProgram(\'trainingPrograms\',' + "'" + d.id + "'" + ')">' + 'Edit' + '</button>';
-      html += '<button class="btn-sm btn-red" onclick="deleteProgram(\'trainingPrograms\','" + d.id + "')">Delete</button>';
+      html += '<button class="btn-sm btn-red" onclick="deleteProgram(\'trainingPrograms\',' + "'" + d.id + "'" + ')">' + 'Delete' + '</button>';
       html += '</div></div>';
     });
     html += '</div>';
@@ -1675,7 +1675,7 @@ async function loadProgramsAdmin(c) {
       html += '<span style="background:' + (isOpen?'rgba(39,174,96,0.1)':'rgba(107,114,128,0.1)') + ';color:' + (isOpen?'#27AE60':'var(--gray)') + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (isOpen?'🟢 Open':'🔒 Closed') + '</span>';
       html += '<button class="btn-sm ' + (isOpen?'btn-red':'btn-navy') + '" onclick="toggleProgram(\'careerPrograms\',' + "'" + d.id + "'" + ',' + !isOpen + ')">' + (isOpen?'Close':'Open') + '</button>';
       html += '<button class="btn-sm" style="background:#0A66C2;color:#fff;" onclick="editProgram(\'careerPrograms\',' + "'" + d.id + "'" + ')">' + 'Edit' + '</button>';
-      html += '<button class="btn-sm btn-red" onclick="deleteProgram(\'careerPrograms\','" + d.id + "')">Delete</button>';
+      html += '<button class="btn-sm btn-red" onclick="deleteProgram(\'careerPrograms\',' + "'" + d.id + "'" + ')">' + 'Delete' + '</button>';
       html += '</div></div>';
     });
     html += '</div>';
