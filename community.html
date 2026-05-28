@@ -1278,131 +1278,140 @@ function downloadCertificate(certId) {
   const u = currentUserData;
   const dept = DEPARTMENTS.find(d => d.id === u.department);
   const verifyCode = 'YAN-' + currentUser.uid.substring(0,8).toUpperCase();
-  const canvas = document.createElement('canvas');
-  canvas.width = 1200; canvas.height = 900;
-  const ctx = canvas.getContext('2d');
+  const dateStr = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const deptName = dept?.name || u.department || 'YAN Program';
 
-  // Background
-  ctx.fillStyle = '#F8F9FF'; ctx.fillRect(0, 0, 1200, 900);
-  ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 8; ctx.strokeRect(20, 20, 1160, 860);
-  ctx.strokeStyle = '#F5A623'; ctx.lineWidth = 3; ctx.strokeRect(32, 32, 1136, 836);
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#0D1B4B;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+  .cert{width:297mm;height:210mm;background:#0D1B4B;position:relative;overflow:hidden;display:flex;font-family:'Montserrat',sans-serif;}
+  .left{flex:1.1;padding:14mm 10mm 14mm 16mm;display:flex;flex-direction:column;justify-content:space-between;position:relative;z-index:2;}
+  .right{width:95mm;position:relative;overflow:hidden;}
+  .logo-area{display:flex;align-items:center;gap:12px;}
+  .logo-area img{width:52px;height:52px;border-radius:50%;border:2px solid #F5A623;}
+  .logo-text h2{font-size:11pt;font-weight:800;color:#fff;letter-spacing:1px;line-height:1.2;}
+  .logo-text p{font-size:7.5pt;color:#F5A623;font-weight:600;}
+  .cert-title{font-size:9pt;font-weight:700;color:#F5A623;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;}
+  .awarded-to{font-size:9.5pt;color:rgba(255,255,255,0.65);margin-bottom:4px;}
+  .member-name{font-family:'EB Garamond',serif;font-size:36pt;font-weight:700;color:#F5A623;line-height:1.1;margin-bottom:2mm;}
+  .name-line{width:85mm;height:2px;background:linear-gradient(90deg,#F5A623,transparent);margin-bottom:5mm;}
+  .program-desc{font-size:9pt;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:5mm;}
+  .program-desc strong{color:#fff;}
+  .sig-row{display:flex;gap:18mm;align-items:flex-end;}
+  .sig-block img{height:42px;display:block;margin-bottom:3px;filter:brightness(0) invert(1);}
+  .sig-line{width:52mm;height:1px;background:rgba(255,255,255,0.35);margin-bottom:4px;}
+  .sig-name{font-size:8pt;font-weight:700;color:#fff;}
+  .sig-title{font-size:7pt;color:rgba(255,255,255,0.55);}
+  .bottom-info{margin-top:4mm;}
+  .info-row{font-size:7.5pt;color:rgba(255,255,255,0.5);margin-bottom:2px;}
+  .info-row strong{color:#F5A623;}
+  .cert-id{font-size:7pt;color:rgba(255,255,255,0.35);margin-top:3px;letter-spacing:1px;}
+  .african-bg{position:absolute;top:0;right:0;width:95mm;height:210mm;}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#0D1B4B;}@page{size:A4 landscape;margin:0;}}
+</style>
+</head>
+<body>
+<div class="cert">
+  <div class="left">
+    <div class="logo-area">
+      <img src="https://youngafricansnetwork.org/images/logo.png" crossorigin="anonymous" alt="YAN"/>
+      <div class="logo-text">
+        <h2>YOUNG AFRICANS NETWORK</h2>
+        <p>Building the Future, Together</p>
+      </div>
+    </div>
+    <div>
+      <div class="cert-title">Certificate of Achievement</div>
+      <div class="awarded-to">This certificate is awarded to</div>
+      <div class="member-name">${u.name}</div>
+      <div class="name-line"></div>
+      <div class="program-desc">
+        For the successful completion of the<br/>
+        <strong>${deptName} Training Program</strong><br/>
+        at Young Africans Network, demonstrating dedication,<br/>
+        leadership and commitment to excellence.
+      </div>
+      <div class="sig-row">
+        <div class="sig-block">
+          <img src="https://youngafricansnetwork.org/images/emmanuel_signature.png" crossorigin="anonymous" alt="Signature"/>
+          <div class="sig-line"></div>
+          <div class="sig-name">Emmanuel Ikumilu Mwori</div>
+          <div class="sig-title">Founder &amp; CEO, Young Africans Network</div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-info">
+      <div class="info-row"><strong>Date of Issue:</strong> ${dateStr}</div>
+      <div class="info-row"><strong>Program:</strong> ${deptName}</div>
+      <div class="cert-id">Certificate ID: ${verifyCode} &nbsp;|&nbsp; youngafricansnetwork.org</div>
+    </div>
+  </div>
+  <div class="right">
+    <svg class="african-bg" viewBox="0 0 360 800" xmlns="http://www.w3.org/2000/svg">
+      <rect width="360" height="800" fill="#1B2A6B"/>
+      <polygon points="360,0 200,0 360,160" fill="#0D1B4B" opacity="0.6"/>
+      <circle cx="280" cy="120" r="180" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.15"/>
+      <circle cx="280" cy="120" r="140" fill="none" stroke="#F5A623" stroke-width="1" opacity="0.12"/>
+      <circle cx="280" cy="120" r="100" fill="none" stroke="#F5A623" stroke-width="0.8" opacity="0.1"/>
+      <g opacity="0.85">
+        <polygon points="180,60 230,130 180,200 130,130" fill="none" stroke="#F5A623" stroke-width="2.5"/>
+        <polygon points="195,80 235,130 195,180 155,130" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.6"/>
+        <polygon points="208,100 238,130 208,160 178,130" fill="#F5A623" opacity="0.15"/>
+      </g>
+      <g opacity="0.7" transform="translate(60,220)">
+        <polygon points="120,0 170,70 120,140 70,70" fill="none" stroke="#F5A623" stroke-width="2.5"/>
+        <polygon points="135,20 165,70 135,120 105,70" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.6"/>
+        <polygon points="148,40 163,70 148,100 133,70" fill="#F5A623" opacity="0.15"/>
+      </g>
+      <g opacity="0.55" transform="translate(180,380)">
+        <polygon points="120,0 170,70 120,140 70,70" fill="none" stroke="#F5A623" stroke-width="2"/>
+        <polygon points="135,20 165,70 135,120 105,70" fill="none" stroke="#F5A623" stroke-width="1.2" opacity="0.5"/>
+      </g>
+      <g opacity="0.4" transform="translate(20,500)">
+        <polygon points="100,0 150,70 100,140 50,70" fill="none" stroke="#F5A623" stroke-width="1.5"/>
+      </g>
+      <line x1="0" y1="400" x2="360" y2="400" stroke="#F5A623" stroke-width="0.5" opacity="0.15"/>
+      <line x1="0" y1="0" x2="360" y2="800" stroke="#F5A623" stroke-width="0.5" opacity="0.08"/>
+      <g transform="translate(240,580)" opacity="0.9">
+        <rect x="0" y="0" width="90" height="90" fill="white" rx="4"/>
+        <text x="45" y="55" text-anchor="middle" font-family="Montserrat" font-size="7" fill="#1B2A6B" font-weight="700">SCAN TO VERIFY</text>
+        <text x="45" y="65" text-anchor="middle" font-family="Montserrat" font-size="5.5" fill="#1B2A6B">${verifyCode}</text>
+        <rect x="8" y="8" width="24" height="24" fill="none" stroke="#1B2A6B" stroke-width="2.5"/>
+        <rect x="58" y="8" width="24" height="24" fill="none" stroke="#1B2A6B" stroke-width="2.5"/>
+        <rect x="8" y="58" width="24" height="24" fill="none" stroke="#1B2A6B" stroke-width="2.5"/>
+        <rect x="12" y="12" width="16" height="16" fill="#1B2A6B"/>
+        <rect x="62" y="12" width="16" height="16" fill="#1B2A6B"/>
+        <rect x="12" y="62" width="16" height="16" fill="#1B2A6B"/>
+        <rect x="36" y="10" width="4" height="4" fill="#1B2A6B"/>
+        <rect x="42" y="10" width="4" height="4" fill="#1B2A6B"/>
+        <rect x="36" y="16" width="4" height="4" fill="#1B2A6B"/>
+        <rect x="10" y="36" width="4" height="4" fill="#1B2A6B"/>
+        <rect x="10" y="42" width="4" height="4" fill="#1B2A6B"/>
+        <rect x="36" y="36" width="4" height="4" fill="#1B2A6B"/>
+        <rect x="42" y="42" width="4" height="4" fill="#1B2A6B"/>
+        <rect x="62" y="36" width="4" height="4" fill="#1B2A6B"/>
+        <rect x="68" y="42" width="4" height="4" fill="#1B2A6B"/>
+        <rect x="36" y="62" width="4" height="4" fill="#1B2A6B"/>
+        <rect x="42" y="68" width="4" height="4" fill="#1B2A6B"/>
+        <rect x="62" y="62" width="4" height="4" fill="#1B2A6B"/>
+      </g>
+    </svg>
+  </div>
+</div>
+<script>
+window.onload = function() { setTimeout(()=>{ window.print(); }, 1000); }
+</script>
+</body>
+</html>`;
 
-  const logo = new Image();
-  logo.crossOrigin = 'anonymous';
-  logo.onload = function() {
-    // Logo circle
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(600, 100, 55, 0, Math.PI * 2);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fill();
-    ctx.clip();
-    ctx.drawImage(logo, 545, 45, 110, 110);
-    ctx.restore();
-    ctx.beginPath();
-    ctx.arc(600, 100, 56, 0, Math.PI * 2);
-    ctx.strokeStyle = '#F5A623'; ctx.lineWidth = 3; ctx.stroke();
-
-    // Header
-    ctx.fillStyle = '#1B2A6B'; ctx.font = 'bold 46px Georgia'; ctx.textAlign = 'center';
-    ctx.fillText('YOUNG AFRICANS NETWORK', 600, 200);
-    ctx.fillStyle = '#E63329'; ctx.font = '22px Georgia';
-    ctx.fillText('Building the Future, Together', 600, 235);
-
-    // Divider
-    ctx.strokeStyle = '#F5A623'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(150, 255); ctx.lineTo(1050, 255); ctx.stroke();
-
-    // Certificate title
-    ctx.fillStyle = '#F5A623'; ctx.font = 'bold 34px Georgia';
-    ctx.fillText('CERTIFICATE OF ACHIEVEMENT', 600, 300);
-
-    // Body
-    ctx.fillStyle = '#6B7280'; ctx.font = '21px Georgia';
-    ctx.fillText('This is to certify that', 600, 355);
-    ctx.fillStyle = '#E63329'; ctx.font = 'bold 48px Georgia';
-    ctx.fillText(u.name, 600, 415);
-    ctx.fillStyle = '#1B2A6B'; ctx.font = '21px Georgia';
-    ctx.fillText('has successfully completed the', 600, 460);
-    ctx.font = 'bold 28px Georgia';
-    ctx.fillText(dept?.name || u.department, 600, 505);
-    ctx.fillStyle = '#6B7280'; ctx.font = '19px Georgia';
-    ctx.fillText('training program at Young Africans Network', 600, 545);
-    ctx.fillStyle = '#1B2A6B'; ctx.font = '17px Georgia';
-    ctx.fillText(`Date: ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`, 600, 585);
-    ctx.fillStyle = '#6B7280'; ctx.font = '14px Georgia';
-    ctx.fillText(`Certificate ID: ${verifyCode}`, 600, 610);
-
-    // Divider
-    ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(150, 630); ctx.lineTo(1050, 630); ctx.stroke();
-
-    // Left signature - Founder
-    // Signature image ABOVE line
-    const signImg = new Image();
-    signImg.crossOrigin = 'anonymous';
-    signImg.onload = function() {
-      ctx.drawImage(signImg, 100, 650, 180, 65);
-    };
-    signImg.src = '/images/emmanuel_signature.png';
-    // Line below signature
-    ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(100, 725); ctx.lineTo(450, 725); ctx.stroke();
-    // Name and title BELOW line
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#1B2A6B'; ctx.font = 'italic bold 18px Georgia';
-    ctx.fillText('Emmanuel Ikumilu Mwori', 100, 748);
-    ctx.fillStyle = '#6B7280'; ctx.font = '13px Georgia';
-    ctx.fillText('Founder & CEO, Young Africans Network', 100, 766);
-
-    // Right signature - Dept Head
-    // Line below empty space for signature
-    ctx.strokeStyle = '#1B2A6B'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(750, 725); ctx.lineTo(1100, 725); ctx.stroke();
-    // Name and title BELOW line
-    ctx.textAlign = 'right';
-    ctx.fillStyle = '#1B2A6B'; ctx.font = 'italic bold 18px Georgia';
-    ctx.fillText('Department Head', 1100, 748);
-    ctx.fillStyle = '#6B7280'; ctx.font = '13px Georgia';
-    ctx.fillText(dept?.name || 'Department', 1100, 766);
-
-    // QR Code
-    const qrImg = new Image();
-    qrImg.crossOrigin = 'anonymous';
-    qrImg.onload = function() {
-      ctx.drawImage(qrImg, 920, 590, 130, 130);
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#6B7280'; ctx.font = '12px Georgia';
-      ctx.fillText('Scan to verify', 985, 735);
-      // Footer
-      ctx.fillStyle = '#1B2A6B'; ctx.fillRect(20, 750, 1160, 45);
-      ctx.fillStyle = '#FFFFFF'; ctx.font = '13px Georgia';
-      ctx.fillText('youngafricansnetwork.org | youngafricansn@gmail.com', 600, 778);
-      // Download
-      const link = document.createElement('a');
-      link.download = `YAN_Certificate_${u.name.replace(/ /g,'_')}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      showToast('Certificate downloading! 🏆');
-      showLinkedInPromptAfterDownload(dept?.name || u.department);
-    };
-    qrImg.onerror = function() {
-      const link = document.createElement('a');
-      link.download = `YAN_Certificate_${u.name.replace(/ /g,'_')}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      showToast('Certificate downloading! 🏆');
-    };
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('https://youngafricansnetwork.org/verify.html?id='+verifyCode)}`;
-  };
-  logo.onerror = function() {
-    const link = document.createElement('a');
-    link.download = `YAN_Certificate_${u.name.replace(/ /g,'_')}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-    showToast('Certificate downloading! 🏆');
-  };
-  logo.src = '/images/logo.jpeg';
+  const printWin = window.open('', '_blank');
+  printWin.document.write(html);
+  printWin.document.close();
 }
 
 // MAGAZINE
