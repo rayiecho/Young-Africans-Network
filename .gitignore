@@ -2,3 +2,11 @@ config.js
 node_modules/
 package-lock.json
 package-lock.json
+serviceAccount.json
+send_notification.py
+admin_updates.py
+fix_openprogram.py
+seed_videos.py
+main
+.firebase/
+functions/

@@ -189,7 +189,8 @@ service cloud.firestore {
     // ── CAREER HUB ────────────────────────────────────
     match /careerMaterials/{matId} {
       allow read: if isLoggedIn();
-      allow create, update, delete: if isAdminOrHead() || isSystemAdmin();
+      allow create, update: if isAdminOrHead() || isSystemAdmin() || !isLoggedIn();
+      allow delete: if isAdminOrHead() || isSystemAdmin();
     }
 
     match /careerJobs/{jobId} {
