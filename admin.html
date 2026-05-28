@@ -1148,12 +1148,38 @@ async function loadCertificates(c) {
 }
 
 window.adminApproveCert = async function(certId) {
+  const certSnap = await getDoc(doc(db, 'certificates', certId));
+  const certData = certSnap.data();
   await updateDoc(doc(db, 'certificates', certId), { status: 'approved', approvedBy: 'Admin', approvedAt: serverTimestamp() });
+  if (certData?.userId) {
+    await addDoc(collection(db, 'notifications'), {
+      title: '🏆 Certificate Approved!',
+      message: 'Congratulations! Your certificate for ' + (certData.programTitle || 'your program') + ' has been approved. You can download it from your profile.',
+      type: 'success',
+      userId: certData.userId,
+      postedBy: 'YAN Admin',
+      createdAt: serverTimestamp(),
+      readBy: []
+    });
+  }
   showToast('Certificate approved! 🏆');
   loadSection('certificates');
 };
 window.adminRejectCert = async function(certId) {
-  await updateDoc(doc(db, 'certificates', certId), { status: 'rejected' });
+  const certSnap = await getDoc(doc(db, 'certificates', certId));
+  const certData = certSnap.data();
+  await updateDoc(doc(db, 'certificates', certId), { status: 'rejected', rejectedAt: serverTimestamp() });
+  if (certData?.userId) {
+    await addDoc(collection(db, 'notifications'), {
+      title: '📋 Certificate Under Review',
+      message: 'Your certificate request for ' + (certData.programTitle || 'your program') + ' needs more review. Please contact your department head for guidance.',
+      type: 'info',
+      userId: certData.userId,
+      postedBy: 'YAN Admin',
+      createdAt: serverTimestamp(),
+      readBy: []
+    });
+  }
   showToast('Certificate rejected');
   loadSection('certificates');
 };
@@ -1551,7 +1577,16 @@ window.resetQuizAttempts = async function(failureId, userId, programId, moduleWe
     const attemptId = userId + '_' + programId + '_' + moduleWeek;
     await deleteDoc(doc(db, 'quizAttempts', attemptId));
     await updateDoc(doc(db, 'quizFailures', failureId), { reviewed: true, resetAt: serverTimestamp(), resetBy: 'Admin' });
-    showToast('✅ Quiz attempts reset! Member can retake the quiz.');
+    await addDoc(collection(db, 'notifications'), {
+      title: '🔄 Quiz Attempts Reset',
+      message: 'Your quiz attempts for Module ' + moduleWeek + ' in ' + programId + ' have been reset by the admin. You can now retake the quiz.',
+      type: 'info',
+      userId: userId,
+      postedBy: 'YAN Admin',
+      createdAt: serverTimestamp(),
+      readBy: []
+    });
+    showToast('✅ Quiz attempts reset! Member has been notified.');
     loadSection('assignments');
   } catch(e) {
     showToast(e.message, 'error');
@@ -1571,13 +1606,28 @@ window.markQuizReviewed = async function(failureId) {
 window.reviewAssignment = async function(colName, assignId, status) {
   const feedback = document.getElementById('feedback-' + assignId)?.value || '';
   try {
+    const assignSnap = await getDoc(doc(db, colName, assignId));
+    const assignData = assignSnap.data();
     await updateDoc(doc(db, colName, assignId), {
       status: status,
       feedback: feedback,
       reviewedAt: serverTimestamp(),
       reviewedBy: 'Admin'
     });
-    showToast(status === 'approved' ? '✅ Assignment approved!' : '❌ Assignment rejected!');
+    if (assignData?.userId) {
+      await addDoc(collection(db, 'notifications'), {
+        title: status === 'approved' ? '✅ Assignment Approved!' : '📝 Assignment Feedback',
+        message: status === 'approved'
+          ? 'Your assignment for ' + (assignData.programId || 'your program') + ' has been approved! ' + (feedback ? 'Feedback: ' + feedback : 'Great work!')
+          : 'Your assignment for ' + (assignData.programId || 'your program') + ' needs revision. Feedback: ' + (feedback || 'Please review and resubmit.'),
+        type: status === 'approved' ? 'success' : 'info',
+        userId: assignData.userId,
+        postedBy: 'YAN Admin',
+        createdAt: serverTimestamp(),
+        readBy: []
+      });
+    }
+    showToast(status === 'approved' ? '✅ Assignment approved! Member notified.' : '❌ Assignment rejected! Member notified.');
     loadSection('assignments');
   } catch(e) {
     showToast(e.message, 'error');
