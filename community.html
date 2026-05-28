@@ -6262,8 +6262,17 @@ async function openProgram(programId) {
   if (box.style.display !== 'none') { box.style.display = 'none'; return; }
   box.innerHTML = '<div class="loading">Loading program...</div>';
   box.style.display = 'block';
-  const modulesSnap = await getDocs(query(collection(db, 'trainingPrograms', programId, 'modules'), orderBy('order', 'asc')));
-  const lessonsSnap = await getDocs(query(collection(db, 'trainingPrograms', programId, 'lessons'), orderBy('order', 'asc')));
+  let modulesSnap, lessonsSnap;
+  try {
+    [modulesSnap, lessonsSnap] = await Promise.all([
+      getDocs(query(collection(db, 'trainingPrograms', programId, 'modules'), orderBy('order', 'asc'))),
+      getDocs(query(collection(db, 'trainingPrograms', programId, 'lessons'), orderBy('order', 'asc')))
+    ]);
+  } catch(e) {
+    console.error('openProgram fetch error:', e);
+    box.innerHTML = '<div style="padding:1rem;"><p style="color:red;">Error: ' + e.message + '</p></div>';
+    return;
+  }
   if (modulesSnap.empty && lessonsSnap.empty) {
     box.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;"><p style="font-size:0.85rem;color:var(--gray);">No content yet. Check back soon!</p></div>';
     return;
