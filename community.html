@@ -8660,7 +8660,7 @@ async function loadCareerPrograms() {
     } else {
       snap.docs.forEach(function(d) {
         const p = Object.assign({id: d.id}, d.data());
-        const openDate = p.openDate ? new Date(p.openDate) : new Date();
+        const openDate = p.openDate ? new Date(p.openDate) : new Date('2020-01-01');
         const isOpen = openDate <= today;
         const enrolled = p.enrolledBy && p.enrolledBy.includes(currentUser.uid);
         const daysUntil = Math.ceil((openDate - today) / (1000 * 60 * 60 * 24));
