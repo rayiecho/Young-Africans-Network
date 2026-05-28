@@ -1602,9 +1602,9 @@ async function loadAssignments(c) {
         html += '<p style="font-size:0.72rem;color:var(--gray);">Program: ' + sanitize(q.programId || '') + ' · Module ' + (q.moduleWeek || '') + ' · Score: ' + (q.score || 0) + '%</p></div>';
         html += '<span style="background:' + statusColor + '18;color:' + statusColor + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (q.reviewed ? 'REVIEWED' : 'PENDING') + '</span>';
         html += '</div>';
-        html += '<p style="font-size:0.82rem;color:var(--navy);background:white;padding:0.75rem;border-radius:8px;margin-bottom:0.75rem;"><strong>Difficulty feedback:</strong> ' + sanitize(q.difficulty || q.feedback || 'No feedback') + '</p>';
+        html += '<p style="font-size:0.82rem;color:var(--navy);background:white;padding:0.75rem;border-radius:8px;margin-bottom:0.75rem;"><strong>Difficulty feedback:</strong> ' + sanitize(q.message || q.difficulty || q.feedback || 'No feedback') + '</p>';
         html += '<div style="display:flex;gap:0.5rem;">';
-        html += '<button class="btn-sm btn-navy" onclick="resetQuizAttempts(\''+d.id+'\',\''+( q.userId||'')+'\'\',\'\''+(q.programId||'')+'\',\'\''+(q.moduleWeek||'')+'\')">🔄 Reset Attempts</button>';
+        html += '<button class="btn-sm btn-navy" onclick="resetQuizAttempts(\'' + d.id + '\',\'' + (q.userId||'') + '\',\'' + (q.programId||'') + '\',\'' + (q.moduleWeek||'') + '\')">Reset Attempts</button>';
         html += '<button class="btn-sm" style="background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);" onclick="markQuizReviewed(\'' + d.id + '\')">✅ Mark Reviewed</button>';
         html += '</div></div>';
       });
