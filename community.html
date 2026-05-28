@@ -6287,8 +6287,8 @@ async function openProgram(programId) {
     lessonsByModule[week].sort(function(a,b){ return (a.lessonNumber||0)-(b.lessonNumber||0); });
   });
 
-  const moduleDocs = modulesSnap.docs.map(function(d) { return Object.assign({id: d.id}, d.data()); });
-  const totalLessons = lessonsSnap.size || moduleDocs.length;
+  const moduleDocs = moduleDocs2;
+  const totalLessons = lessonsSnap.size;
   const completedCount = lessonsCompleted.length;
   function isModuleUnlocked(index) {
     if (index === 0) return true;
