@@ -1452,9 +1452,9 @@ async function loadAnalytics(c) {
 }
 
 // ===== TOGGLE PROGRAM OPEN/CLOSE =====
-window.toggleProgram = async function(collection_name, progId, isOpen) {
+window.toggleProgram = async function(colName, progId, isOpen) {
   try {
-    await updateDoc(doc(db, collection_name, progId), { isOpen: isOpen });
+    await updateDoc(doc(db, colName, progId), { isOpen: isOpen });
     showToast(isOpen ? '🔓 Program opened!' : '🔒 Program closed!');
     loadSection('analytics');
   } catch(e) {
