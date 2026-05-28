@@ -1302,7 +1302,7 @@ window.viewMemberProgress = async function(userId, userName) {
     const careerAssignments = await getDocs(query(collection(db, 'careerAssignments'), where('userId', '==', userId)));
 
     let html = '<div class="section-card">';
-    html += '<button onclick="loadSection('members')" style="background:var(--light);border:none;padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;cursor:pointer;margin-bottom:1rem;">← Back to Members</button>';
+    html += '<button onclick="loadSection(\'members\')" style="background:var(--light);border:none;padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;cursor:pointer;margin-bottom:1rem;">← Back to Members</button>';
     html += '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1.5rem;">📊 Progress Report — ' + userName + '</h3>';
 
     // Tech Hub Progress
