@@ -1492,9 +1492,10 @@ window.toggleProgram = async function(colName, progId, isOpen) {
 async function loadAssignments(c) {
   c.innerHTML = '<div class="loading">Loading assignments...</div>';
   try {
-    const [techAssign, careerAssign] = await Promise.all([
+    const [techAssign, careerAssign, quizFails] = await Promise.all([
       getDocs(query(collection(db, 'programAssignments'), orderBy('submittedAt', 'desc'))),
-      getDocs(query(collection(db, 'careerAssignments'), orderBy('submittedAt', 'desc')))
+      getDocs(query(collection(db, 'careerAssignments'), orderBy('submittedAt', 'desc'))),
+      getDocs(query(collection(db, 'quizFailures'), orderBy('submittedAt', 'desc')))
     ]);
 
     const all = [
