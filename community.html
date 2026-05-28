@@ -318,10 +318,19 @@ async function doGoogleSignIn() {
   try {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    await signInWithPopup(auth, provider);
+    // Try popup first, fall back to redirect
+    try {
+      await signInWithPopup(auth, provider);
+    } catch(popupErr) {
+      if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/cancelled-popup-request' || popupErr.message.includes('invalid')) {
+        await signInWithRedirect(auth, provider);
+      } else {
+        throw popupErr;
+      }
+    }
   } catch(e) {
     console.error('Google sign-in error:', e);
-    showToast('Google sign-in failed. Try again.', 'error');
+    showToast('Google sign-in failed: ' + e.message, 'error');
   }
 }
 
