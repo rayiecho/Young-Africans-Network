@@ -1126,10 +1126,10 @@ async function loadCertificates(c) {
     + '</div>';
 
   html += '<div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">'
-    + '<button class="btn-sm btn-navy" onclick="filterCerts('all')">All ('+snap.size+')</button>'
-    + '<button class="btn-sm btn-outline" onclick="filterCerts('pending')">⏳ Pending ('+pending+')</button>'
-    + '<button class="btn-sm btn-outline" onclick="filterCerts('approved')">✅ Approved</button>'
-    + '<button class="btn-sm btn-outline" onclick="filterCerts('rejected')">❌ Rejected</button>'
+    + '<button class="btn-sm btn-navy" onclick="filterCerts(&apos;all&apos;)">All ('+snap.size+')</button>'
+    + '<button class="btn-sm btn-outline" onclick="filterCerts(&apos;pending&apos;)">⏳ Pending ('+pending+')</button>'
+    + '<button class="btn-sm btn-outline" onclick="filterCerts(&apos;approved&apos;)">✅ Approved</button>'
+    + '<button class="btn-sm btn-outline" onclick="filterCerts(&apos;rejected&apos;)">❌ Rejected</button>'
     + '</div>';
 
   if (snap.empty) {
@@ -2324,10 +2324,10 @@ async function loadRecommendations(c) {
 
   // Filter tabs
   html += '<div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">'
-    + '<button class="btn-sm btn-navy" onclick="filterRecs('all')">All ('+allSnap.size+')</button>'
-    + '<button class="btn-sm btn-outline" onclick="filterRecs('pending')">⏳ Pending ('+pendingSnap.size+')</button>'
-    + '<button class="btn-sm btn-outline" onclick="filterRecs('approved')">✅ Approved</button>'
-    + '<button class="btn-sm btn-outline" onclick="filterRecs('rejected')">❌ Rejected</button>'
+    + '<button class="btn-sm btn-navy" onclick="filterRecs(&apos;all&apos;)">All ('+allSnap.size+')</button>'
+    + '<button class="btn-sm btn-outline" onclick="filterRecs(&apos;pending&apos;)">⏳ Pending ('+pendingSnap.size+')</button>'
+    + '<button class="btn-sm btn-outline" onclick="filterRecs(&apos;approved&apos;)">✅ Approved</button>'
+    + '<button class="btn-sm btn-outline" onclick="filterRecs(&apos;rejected&apos;)">❌ Rejected</button>'
     + '</div>';
 
   html += '<div id="recs-container">';
