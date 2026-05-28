@@ -1289,232 +1289,6 @@ window.deleteItem = async function(collectionName, docId, reloadFn) {
 
 checkAuth();
 
-
-</script>
-
-<style>
-:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;--green:#27AE60;--sidebar:240px;}
-*{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;}
-body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);overflow-x:hidden;}
-::-webkit-scrollbar{width:4px;}
-::-webkit-scrollbar-thumb{background:var(--navy);}
-
-/* TOAST */
-.toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);color:var(--white);padding:0.85rem 1.5rem;border-radius:12px;font-size:0.88rem;font-weight:500;z-index:9999;transform:translateY(100px);opacity:0;transition:all 0.3s;pointer-events:none;}
-.toast.show{transform:translateY(0);opacity:1;}
-.toast.error{background:var(--red);}
-.toast.success{background:var(--green);}
-
-/* LOGIN */
-#screen-login{min-height:100vh;background:linear-gradient(135deg,var(--navy),var(--dark));display:none;align-items:center;justify-content:center;padding:2rem;}
-.login-card{background:var(--white);border-radius:24px;padding:3rem;width:100%;max-width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
-.login-card img{height:70px;margin-bottom:1.5rem;border-radius:50%;}
-.login-card h2{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;}
-.login-card p{color:var(--gray);font-size:0.85rem;margin-bottom:2rem;}
-.login-card input{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.85rem 1rem;border-radius:12px;font-family:'Poppins',sans-serif;font-size:0.9rem;outline:none;text-align:center;letter-spacing:2px;margin-bottom:1rem;}
-.btn-login{width:100%;background:var(--red);color:var(--white);padding:0.9rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:1rem;font-weight:700;border:none;cursor:pointer;}
-.btn-login:hover{background:var(--navy);}
-.login-back{display:block;margin-top:1rem;color:var(--gray);font-size:0.82rem;text-decoration:none;}
-
-/* DASHBOARD */
-#screen-dashboard{display:none;min-height:100vh;}
-
-/* SIDEBAR */
-.admin-sidebar{width:var(--sidebar);background:var(--dark);position:fixed;top:0;left:0;bottom:0;z-index:50;overflow-y:auto;display:flex;flex-direction:column;}
-.admin-sidebar-logo{padding:1.5rem 1.25rem;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:0.75rem;}
-.admin-sidebar-logo img{height:40px;border-radius:8px;}
-.admin-sidebar-logo div{font-size:0.82rem;font-weight:700;color:var(--white);line-height:1.3;}
-.admin-sidebar-logo span{display:block;font-size:0.68rem;color:var(--gold);font-weight:400;}
-.admin-nav{padding:1rem 0;flex:1;}
-.nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1.25rem;color:rgba(255,255,255,0.6);font-size:0.82rem;font-weight:500;cursor:pointer;transition:all 0.2s;border:none;background:none;width:100%;text-align:left;}
-.nav-item:hover{color:var(--white);background:rgba(255,255,255,0.06);}
-.nav-item.active{color:var(--white);background:rgba(255,255,255,0.12);border-left:3px solid var(--gold);}
-.nav-item .nav-icon{font-size:1rem;width:22px;text-align:center;}
-.admin-sidebar-footer{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,0.08);}
-.btn-logout-admin{display:flex;align-items:center;gap:0.5rem;color:rgba(255,255,255,0.5);font-size:0.82rem;background:none;border:none;cursor:pointer;padding:0.5rem;transition:color 0.2s;}
-.btn-logout-admin:hover{color:var(--red);}
-
-/* MAIN */
-.admin-main{margin-left:var(--sidebar);display:flex;flex-direction:column;min-height:100vh;}
-.admin-topbar{background:var(--white);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(27,42,107,0.08);position:sticky;top:0;z-index:40;}
-.admin-topbar-left{display:flex;align-items:center;gap:1rem;}
-.admin-topbar-left h1{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:900;color:var(--navy);}
-#section-title{font-size:0.88rem;color:var(--gray);}
-.admin-topbar-right a{font-size:0.82rem;color:var(--navy);text-decoration:none;padding:0.5rem 1rem;border-radius:8px;border:1px solid rgba(27,42,107,0.15);}
-.admin-topbar-right a:hover{background:var(--light);}
-#content-area{padding:2rem;max-width:1100px;}
-
-/* SECTION CARDS */
-.section-card{background:var(--white);border-radius:16px;padding:1.75rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
-.section-card h3{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;}
-.form-group label{display:block;font-size:0.78rem;font-weight:600;color:var(--navy);margin-bottom:0.4rem;}
-.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.7rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.85rem;outline:none;transition:border-color 0.2s;}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--navy);}
-.btn-primary{background:var(--red);color:var(--white);padding:0.75rem 2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.9rem;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;}
-.btn-primary:hover{background:var(--navy);}
-.btn-delete{background:rgba(230,51,41,0.1);color:var(--red);border:none;padding:0.4rem 0.85rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
-.btn-delete:hover{background:var(--red);color:var(--white);}
-.btn-approve{background:rgba(39,174,96,0.1);color:var(--green);border:none;padding:0.4rem 0.85rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;}
-.btn-approve:hover{background:var(--green);color:var(--white);}
-.btn-sm-action{background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.35rem 0.75rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.72rem;cursor:pointer;white-space:nowrap;}
-.btn-sm-action:hover{background:var(--navy);color:var(--white);}
-
-/* STATS */
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:1.5rem;}
-.stat-card{border-radius:16px;padding:1.5rem;text-align:center;}
-.stat-card.navy{background:var(--navy);}
-.stat-card.red{background:var(--red);}
-.stat-card.gold{background:var(--gold);}
-.stat-num{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;color:var(--white);line-height:1;}
-.stat-label{font-size:0.75rem;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:0.5px;margin-top:0.25rem;}
-.overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
-.overview-card{background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
-.overview-card h3{font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;}
-.quick-actions{display:flex;flex-wrap:wrap;gap:0.5rem;}
-.btn-quick{background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);padding:0.5rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
-.btn-quick:hover{background:var(--navy);color:var(--white);border-color:var(--navy);}
-
-/* GALLERY GRID */
-.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1rem;}
-.gallery-item-card{border-radius:12px;overflow:hidden;background:var(--light);position:relative;}
-.gallery-item-card img{width:100%;height:140px;object-fit:cover;display:block;}
-.video-thumb{height:140px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--navy),var(--dark));color:var(--white);font-size:0.85rem;font-weight:600;}
-.gallery-item-info{padding:0.5rem 0.75rem;}
-.gallery-item-info p{font-size:0.78rem;color:var(--navy);font-weight:500;}
-.gallery-item-info span{font-size:0.7rem;color:var(--gray);}
-.gallery-item-card .btn-delete{position:absolute;top:0.5rem;right:0.5rem;font-size:0.75rem;padding:0.25rem 0.5rem;}
-
-/* LIST TABLE */
-.list-table{border-radius:12px;overflow:hidden;border:1px solid rgba(27,42,107,0.08);}
-.list-header{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 2fr;background:var(--navy);padding:0.75rem 1rem;gap:0.5rem;}
-.list-header span{font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.5px;}
-.list-row{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 2fr;padding:0.85rem 1rem;gap:0.5rem;border-bottom:1px solid rgba(27,42,107,0.06);align-items:center;}
-.list-row:last-child{border-bottom:none;}
-.list-row:hover{background:var(--light);}
-.list-row span{font-size:0.82rem;color:var(--navy);}
-.list-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;vertical-align:middle;}
-.list-avatar-placeholder{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:var(--white);font-size:0.85rem;}
-
-/* LIST ITEM CARD */
-.list-item-card{display:flex;align-items:center;justify-content:space-between;background:var(--light);border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.75rem;gap:1rem;flex-wrap:wrap;}
-.list-item-info{display:flex;align-items:center;gap:0.75rem;flex:1;min-width:200px;}
-.list-item-info strong{font-size:0.88rem;color:var(--navy);}
-.list-item-info p{font-size:0.75rem;color:var(--gray);}
-
-/* DEPT FILTER */
-.dept-filter{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;}
-.dept-filter-btn{background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
-.dept-filter-btn.active,.dept-filter-btn:hover{background:var(--navy);color:var(--white);border-color:var(--navy);}
-
-/* STATUS */
-.status-badge{font-size:0.72rem;font-weight:600;padding:0.2rem 0.6rem;border-radius:50px;}
-.status-badge.upcoming,.cert-status.pending{background:rgba(245,166,35,0.15);color:#b37800;}
-.status-badge.past,.cert-status.approved{background:rgba(39,174,96,0.15);color:var(--green);}
-.cert-status.rejected{background:rgba(230,51,41,0.1);color:var(--red);}
-.status-select{background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.35rem 0.5rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.78rem;outline:none;}
-
-/* LOADING */
-.loading{text-align:center;padding:3rem;color:var(--gray);}
-
-/* RESPONSIVE */
-@media(max-width:1024px){
-  .stats-grid{grid-template-columns:repeat(2,1fr);}
-  .overview-grid{grid-template-columns:1fr;}
-  .gallery-grid{grid-template-columns:repeat(3,1fr);}
-  .list-header,.list-row{grid-template-columns:2fr 1.5fr 1fr 2fr;}
-  .list-header span:nth-child(3),.list-row span:nth-child(3){display:none;}
-}
-@media(max-width:768px){
-  :root{--sidebar:0px;}
-  .admin-sidebar{transform:translateX(-100%);transition:transform 0.3s;width:240px;}
-  .admin-sidebar.open{transform:translateX(0);}
-  .admin-main{margin-left:0;}
-  .form-grid{grid-template-columns:1fr;}
-  .stats-grid{grid-template-columns:1fr 1fr;}
-  .gallery-grid{grid-template-columns:repeat(2,1fr);}
-  #content-area{padding:1.25rem;}
-  .list-header,.list-row{grid-template-columns:2fr 1fr 2fr;font-size:0.75rem;}
-  .list-header span:nth-child(2),.list-header span:nth-child(3),.list-row span:nth-child(2),.list-row span:nth-child(3){display:none;}
-}
-@media(max-width:480px){
-  .stats-grid{grid-template-columns:1fr;}
-  .gallery-grid{grid-template-columns:1fr 1fr;}
-}
-</style>
-</head>
-<body>
-
-<div id="toast" class="toast"></div>
-
-<!-- LOGIN -->
-<div id="screen-login">
-  <div class="login-card">
-    <img src="images/logo.jpeg" alt="YAN Logo">
-    <h2>Admin Dashboard</h2>
-    <p>Young Africans Network — Content Management System</p>
-    <input type="password" id="admin-pass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doAdminLogin()">
-    <button class="btn-login" onclick="doAdminLogin()">Access Dashboard 🛡️</button>
-    <a href="index.html" class="login-back">← Back to website</a>
-  </div>
-</div>
-
-<!-- DASHBOARD -->
-<div id="screen-dashboard">
-
-  <!-- SIDEBAR -->
-  <aside class="admin-sidebar" id="admin-sidebar">
-    <div class="admin-sidebar-logo">
-      <img src="images/logo.jpeg" alt="YAN">
-      <div>Young Africans Network <span>Admin CMS</span></div>
-    </div>
-    <nav class="admin-nav">
-      <button class="nav-item" data-section="overview" onclick="loadSection('overview')"><span class="nav-icon">📊</span> Overview</button>
-      <button class="nav-item" data-section="gallery" onclick="loadSection('gallery')"><span class="nav-icon">📸</span> Gallery</button>
-      <button class="nav-item" data-section="team" onclick="loadSection('team')"><span class="nav-icon">👥</span> Team</button>
-      <button class="nav-item" data-section="stories" onclick="loadSection('stories')"><span class="nav-icon">📖</span> Journey Stories</button>
-      <button class="nav-item" data-section="events" onclick="loadSection('events')"><span class="nav-icon">📅</span> Events</button>
-      <button class="nav-item" data-section="materials" onclick="loadSection('materials')"><span class="nav-icon">📚</span> Training Materials</button>
-      <button class="nav-item" data-section="certificates" onclick="loadSection('certificates')"><span class="nav-icon">🏆</span> Certificates</button>
-      <button class="nav-item" data-section="members" onclick="loadSection('members')"><span class="nav-icon">🌍</span> Members</button>
-      <button class="nav-item" data-section="moderation" onclick="loadSection('moderation')"><span class="nav-icon">🛡️</span> Moderation</button>
-      <button class="nav-item" data-section="forms" onclick="loadSection('forms')"><span class="nav-icon">📬</span> Form Submissions</button>
-      <button class="nav-item" data-section="hubs" onclick="loadSection('hubs')"><span class="nav-icon">🏢</span> YAN Hubs</button>
-      <button class="nav-item" data-section="partnerships" onclick="loadSection('partnerships')"><span class="nav-icon">🤝</span> Partnerships</button>
-      <button class="nav-item" data-section="newsletters" onclick="loadSection('newsletters')"><span class="nav-icon">📧</span> Newsletters</button>
-      <button class="nav-item" data-section="analytics" onclick="loadSection('analytics')"><span class="nav-icon">📈</span> Analytics</button>
-      <button class="nav-item" data-section="assignments" onclick="loadSection('assignments')"><span class="nav-icon">📝</span> Assignments</button>
-      <button class="nav-item" data-section="programs" onclick="loadSection('programs')"><span class="nav-icon">🎓</span> Programs Manager</button>
-    </nav>
-    <div class="admin-sidebar-footer">
-      <button class="btn-logout-admin" onclick="doAdminLogout()">🚪 Sign Out</button>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="admin-main">
-    <div class="admin-topbar">
-      <div class="admin-topbar-left">
-        <button style="background:none;border:none;cursor:pointer;padding:4px;display:flex;flex-direction:column;gap:4px;" onclick="document.getElementById('admin-sidebar').classList.toggle('open')">
-          <span style="display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;"></span>
-          <span style="display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;"></span>
-          <span style="display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;"></span>
-        </button>
-        <h1>YAN Admin</h1>
-        <span id="section-title">📊 Dashboard Overview</span>
-      </div>
-      <div class="admin-topbar-right">
-        <a href="index.html">← Main Site</a>
-      </div>
-    </div>
-    <div id="content-area">
-      <div class="loading">Loading dashboard...</div>
-    </div>
-  </main>
-</div>
-
-
 // ===== VIEW MEMBER PROGRESS =====
 window.viewMemberProgress = async function(userId, userName) {
   const container = document.getElementById('content-area');
@@ -1813,6 +1587,231 @@ async function loadProgramsAdmin(c) {
 window.loadAnalytics = loadAnalytics;
 window.loadAssignments = loadAssignments;
 window.loadProgramsAdmin = loadProgramsAdmin;
+
+</script>
+
+<style>
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;--green:#27AE60;--sidebar:240px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);overflow-x:hidden;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--navy);}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);color:var(--white);padding:0.85rem 1.5rem;border-radius:12px;font-size:0.88rem;font-weight:500;z-index:9999;transform:translateY(100px);opacity:0;transition:all 0.3s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.error{background:var(--red);}
+.toast.success{background:var(--green);}
+
+/* LOGIN */
+#screen-login{min-height:100vh;background:linear-gradient(135deg,var(--navy),var(--dark));display:none;align-items:center;justify-content:center;padding:2rem;}
+.login-card{background:var(--white);border-radius:24px;padding:3rem;width:100%;max-width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+.login-card img{height:70px;margin-bottom:1.5rem;border-radius:50%;}
+.login-card h2{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;}
+.login-card p{color:var(--gray);font-size:0.85rem;margin-bottom:2rem;}
+.login-card input{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.85rem 1rem;border-radius:12px;font-family:'Poppins',sans-serif;font-size:0.9rem;outline:none;text-align:center;letter-spacing:2px;margin-bottom:1rem;}
+.btn-login{width:100%;background:var(--red);color:var(--white);padding:0.9rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:1rem;font-weight:700;border:none;cursor:pointer;}
+.btn-login:hover{background:var(--navy);}
+.login-back{display:block;margin-top:1rem;color:var(--gray);font-size:0.82rem;text-decoration:none;}
+
+/* DASHBOARD */
+#screen-dashboard{display:none;min-height:100vh;}
+
+/* SIDEBAR */
+.admin-sidebar{width:var(--sidebar);background:var(--dark);position:fixed;top:0;left:0;bottom:0;z-index:50;overflow-y:auto;display:flex;flex-direction:column;}
+.admin-sidebar-logo{padding:1.5rem 1.25rem;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:0.75rem;}
+.admin-sidebar-logo img{height:40px;border-radius:8px;}
+.admin-sidebar-logo div{font-size:0.82rem;font-weight:700;color:var(--white);line-height:1.3;}
+.admin-sidebar-logo span{display:block;font-size:0.68rem;color:var(--gold);font-weight:400;}
+.admin-nav{padding:1rem 0;flex:1;}
+.nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1.25rem;color:rgba(255,255,255,0.6);font-size:0.82rem;font-weight:500;cursor:pointer;transition:all 0.2s;border:none;background:none;width:100%;text-align:left;}
+.nav-item:hover{color:var(--white);background:rgba(255,255,255,0.06);}
+.nav-item.active{color:var(--white);background:rgba(255,255,255,0.12);border-left:3px solid var(--gold);}
+.nav-item .nav-icon{font-size:1rem;width:22px;text-align:center;}
+.admin-sidebar-footer{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,0.08);}
+.btn-logout-admin{display:flex;align-items:center;gap:0.5rem;color:rgba(255,255,255,0.5);font-size:0.82rem;background:none;border:none;cursor:pointer;padding:0.5rem;transition:color 0.2s;}
+.btn-logout-admin:hover{color:var(--red);}
+
+/* MAIN */
+.admin-main{margin-left:var(--sidebar);display:flex;flex-direction:column;min-height:100vh;}
+.admin-topbar{background:var(--white);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(27,42,107,0.08);position:sticky;top:0;z-index:40;}
+.admin-topbar-left{display:flex;align-items:center;gap:1rem;}
+.admin-topbar-left h1{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:900;color:var(--navy);}
+#section-title{font-size:0.88rem;color:var(--gray);}
+.admin-topbar-right a{font-size:0.82rem;color:var(--navy);text-decoration:none;padding:0.5rem 1rem;border-radius:8px;border:1px solid rgba(27,42,107,0.15);}
+.admin-topbar-right a:hover{background:var(--light);}
+#content-area{padding:2rem;max-width:1100px;}
+
+/* SECTION CARDS */
+.section-card{background:var(--white);border-radius:16px;padding:1.75rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.section-card h3{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;}
+.form-group label{display:block;font-size:0.78rem;font-weight:600;color:var(--navy);margin-bottom:0.4rem;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.7rem 1rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.85rem;outline:none;transition:border-color 0.2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--navy);}
+.btn-primary{background:var(--red);color:var(--white);padding:0.75rem 2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.9rem;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;}
+.btn-primary:hover{background:var(--navy);}
+.btn-delete{background:rgba(230,51,41,0.1);color:var(--red);border:none;padding:0.4rem 0.85rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.btn-delete:hover{background:var(--red);color:var(--white);}
+.btn-approve{background:rgba(39,174,96,0.1);color:var(--green);border:none;padding:0.4rem 0.85rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn-approve:hover{background:var(--green);color:var(--white);}
+.btn-sm-action{background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.35rem 0.75rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.72rem;cursor:pointer;white-space:nowrap;}
+.btn-sm-action:hover{background:var(--navy);color:var(--white);}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:1.5rem;}
+.stat-card{border-radius:16px;padding:1.5rem;text-align:center;}
+.stat-card.navy{background:var(--navy);}
+.stat-card.red{background:var(--red);}
+.stat-card.gold{background:var(--gold);}
+.stat-num{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;color:var(--white);line-height:1;}
+.stat-label{font-size:0.75rem;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:0.5px;margin-top:0.25rem;}
+.overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+.overview-card{background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.overview-card h3{font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;}
+.quick-actions{display:flex;flex-wrap:wrap;gap:0.5rem;}
+.btn-quick{background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);padding:0.5rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn-quick:hover{background:var(--navy);color:var(--white);border-color:var(--navy);}
+
+/* GALLERY GRID */
+.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1rem;}
+.gallery-item-card{border-radius:12px;overflow:hidden;background:var(--light);position:relative;}
+.gallery-item-card img{width:100%;height:140px;object-fit:cover;display:block;}
+.video-thumb{height:140px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--navy),var(--dark));color:var(--white);font-size:0.85rem;font-weight:600;}
+.gallery-item-info{padding:0.5rem 0.75rem;}
+.gallery-item-info p{font-size:0.78rem;color:var(--navy);font-weight:500;}
+.gallery-item-info span{font-size:0.7rem;color:var(--gray);}
+.gallery-item-card .btn-delete{position:absolute;top:0.5rem;right:0.5rem;font-size:0.75rem;padding:0.25rem 0.5rem;}
+
+/* LIST TABLE */
+.list-table{border-radius:12px;overflow:hidden;border:1px solid rgba(27,42,107,0.08);}
+.list-header{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 2fr;background:var(--navy);padding:0.75rem 1rem;gap:0.5rem;}
+.list-header span{font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.5px;}
+.list-row{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 2fr;padding:0.85rem 1rem;gap:0.5rem;border-bottom:1px solid rgba(27,42,107,0.06);align-items:center;}
+.list-row:last-child{border-bottom:none;}
+.list-row:hover{background:var(--light);}
+.list-row span{font-size:0.82rem;color:var(--navy);}
+.list-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;vertical-align:middle;}
+.list-avatar-placeholder{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:var(--white);font-size:0.85rem;}
+
+/* LIST ITEM CARD */
+.list-item-card{display:flex;align-items:center;justify-content:space-between;background:var(--light);border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.75rem;gap:1rem;flex-wrap:wrap;}
+.list-item-info{display:flex;align-items:center;gap:0.75rem;flex:1;min-width:200px;}
+.list-item-info strong{font-size:0.88rem;color:var(--navy);}
+.list-item-info p{font-size:0.75rem;color:var(--gray);}
+
+/* DEPT FILTER */
+.dept-filter{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;}
+.dept-filter-btn{background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.dept-filter-btn.active,.dept-filter-btn:hover{background:var(--navy);color:var(--white);border-color:var(--navy);}
+
+/* STATUS */
+.status-badge{font-size:0.72rem;font-weight:600;padding:0.2rem 0.6rem;border-radius:50px;}
+.status-badge.upcoming,.cert-status.pending{background:rgba(245,166,35,0.15);color:#b37800;}
+.status-badge.past,.cert-status.approved{background:rgba(39,174,96,0.15);color:var(--green);}
+.cert-status.rejected{background:rgba(230,51,41,0.1);color:var(--red);}
+.status-select{background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.35rem 0.5rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.78rem;outline:none;}
+
+/* LOADING */
+.loading{text-align:center;padding:3rem;color:var(--gray);}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .overview-grid{grid-template-columns:1fr;}
+  .gallery-grid{grid-template-columns:repeat(3,1fr);}
+  .list-header,.list-row{grid-template-columns:2fr 1.5fr 1fr 2fr;}
+  .list-header span:nth-child(3),.list-row span:nth-child(3){display:none;}
+}
+@media(max-width:768px){
+  :root{--sidebar:0px;}
+  .admin-sidebar{transform:translateX(-100%);transition:transform 0.3s;width:240px;}
+  .admin-sidebar.open{transform:translateX(0);}
+  .admin-main{margin-left:0;}
+  .form-grid{grid-template-columns:1fr;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .gallery-grid{grid-template-columns:repeat(2,1fr);}
+  #content-area{padding:1.25rem;}
+  .list-header,.list-row{grid-template-columns:2fr 1fr 2fr;font-size:0.75rem;}
+  .list-header span:nth-child(2),.list-header span:nth-child(3),.list-row span:nth-child(2),.list-row span:nth-child(3){display:none;}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr;}
+  .gallery-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<!-- LOGIN -->
+<div id="screen-login">
+  <div class="login-card">
+    <img src="images/logo.jpeg" alt="YAN Logo">
+    <h2>Admin Dashboard</h2>
+    <p>Young Africans Network — Content Management System</p>
+    <input type="password" id="admin-pass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doAdminLogin()">
+    <button class="btn-login" onclick="doAdminLogin()">Access Dashboard 🛡️</button>
+    <a href="index.html" class="login-back">← Back to website</a>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="screen-dashboard">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-sidebar-logo">
+      <img src="images/logo.jpeg" alt="YAN">
+      <div>Young Africans Network <span>Admin CMS</span></div>
+    </div>
+    <nav class="admin-nav">
+      <button class="nav-item" data-section="overview" onclick="loadSection('overview')"><span class="nav-icon">📊</span> Overview</button>
+      <button class="nav-item" data-section="gallery" onclick="loadSection('gallery')"><span class="nav-icon">📸</span> Gallery</button>
+      <button class="nav-item" data-section="team" onclick="loadSection('team')"><span class="nav-icon">👥</span> Team</button>
+      <button class="nav-item" data-section="stories" onclick="loadSection('stories')"><span class="nav-icon">📖</span> Journey Stories</button>
+      <button class="nav-item" data-section="events" onclick="loadSection('events')"><span class="nav-icon">📅</span> Events</button>
+      <button class="nav-item" data-section="materials" onclick="loadSection('materials')"><span class="nav-icon">📚</span> Training Materials</button>
+      <button class="nav-item" data-section="certificates" onclick="loadSection('certificates')"><span class="nav-icon">🏆</span> Certificates</button>
+      <button class="nav-item" data-section="members" onclick="loadSection('members')"><span class="nav-icon">🌍</span> Members</button>
+      <button class="nav-item" data-section="moderation" onclick="loadSection('moderation')"><span class="nav-icon">🛡️</span> Moderation</button>
+      <button class="nav-item" data-section="forms" onclick="loadSection('forms')"><span class="nav-icon">📬</span> Form Submissions</button>
+      <button class="nav-item" data-section="hubs" onclick="loadSection('hubs')"><span class="nav-icon">🏢</span> YAN Hubs</button>
+      <button class="nav-item" data-section="partnerships" onclick="loadSection('partnerships')"><span class="nav-icon">🤝</span> Partnerships</button>
+      <button class="nav-item" data-section="newsletters" onclick="loadSection('newsletters')"><span class="nav-icon">📧</span> Newsletters</button>
+      <button class="nav-item" data-section="analytics" onclick="loadSection('analytics')"><span class="nav-icon">📈</span> Analytics</button>
+      <button class="nav-item" data-section="assignments" onclick="loadSection('assignments')"><span class="nav-icon">📝</span> Assignments</button>
+      <button class="nav-item" data-section="programs" onclick="loadSection('programs')"><span class="nav-icon">🎓</span> Programs Manager</button>
+    </nav>
+    <div class="admin-sidebar-footer">
+      <button class="btn-logout-admin" onclick="doAdminLogout()">🚪 Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-topbar-left">
+        <button style="background:none;border:none;cursor:pointer;padding:4px;display:flex;flex-direction:column;gap:4px;" onclick="document.getElementById('admin-sidebar').classList.toggle('open')">
+          <span style="display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;"></span>
+          <span style="display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;"></span>
+          <span style="display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;"></span>
+        </button>
+        <h1>YAN Admin</h1>
+        <span id="section-title">📊 Dashboard Overview</span>
+      </div>
+      <div class="admin-topbar-right">
+        <a href="index.html">← Main Site</a>
+      </div>
+    </div>
+    <div id="content-area">
+      <div class="loading">Loading dashboard...</div>
+    </div>
+  </main>
+</div>
+
 window.deleteProgram = async function(colName, progId) {
   if (!confirm('Delete this program? This cannot be undone.')) return;
   try {
