@@ -1810,6 +1810,9 @@ async function loadProgramsAdmin(c) {
   }
 }
 
+window.loadAnalytics = loadAnalytics;
+window.loadAssignments = loadAssignments;
+window.loadProgramsAdmin = loadProgramsAdmin;
 window.deleteProgram = async function(colName, progId) {
   if (!confirm('Delete this program? This cannot be undone.')) return;
   try {
