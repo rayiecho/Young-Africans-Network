@@ -330,6 +330,10 @@ service cloud.firestore {
         allow read: if isLoggedIn();
         allow write: if isAdminOrHead() || isSystemAdmin() || request.auth == null;
       }
+      match /lessons/{lessonId} {
+        allow read: if isLoggedIn();
+        allow write: if isAdminOrHead() || isSystemAdmin() || request.auth == null;
+      }
     }
 
     match /trainingPartners/{partnerId} {
@@ -459,6 +463,10 @@ service cloud.firestore {
         allow read: if isLoggedIn();
         allow write: if isAdminOrHead() || isSystemAdmin() || request.auth == null;
       }
+      match /lessons/{lessonId} {
+        allow read: if isLoggedIn();
+        allow write: if isAdminOrHead() || isSystemAdmin() || request.auth == null;
+      }
     }
     match /careerLearningProgress/{progressId} {
       allow read, write: if isLoggedIn();
@@ -472,6 +480,15 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow create: if isLoggedIn();
       allow delete: if isAdmin();
+    }
+
+    match /quizAttempts/{attemptId} {
+      allow read, write: if isLoggedIn();
+    }
+    match /quizFailures/{failureId} {
+      allow read: if isLoggedIn() && (resource.data.userId == request.auth.uid || isAdminOrHead());
+      allow create: if isLoggedIn();
+      allow update: if isAdminOrHead() || isSystemAdmin();
     }
   }
 }
