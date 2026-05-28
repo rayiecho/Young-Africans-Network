@@ -1410,13 +1410,14 @@ window.viewMemberProgress = async function(userId, userName) {
 async function loadAnalytics(c) {
   c.innerHTML = '<div class="loading">Loading analytics...</div>';
   try {
-    const [techProgs, careerProgs, users, certs, techProgress, careerProgress] = await Promise.all([
+    const [techProgs, careerProgs, users, certs, techProgress, careerProgress, pushSubs] = await Promise.all([
       getDocs(collection(db, 'trainingPrograms')),
       getDocs(collection(db, 'careerPrograms')),
       getDocs(collection(db, 'users')),
       getDocs(collection(db, 'certificates')),
       getDocs(collection(db, 'learningProgress')),
-      getDocs(collection(db, 'careerLearningProgress'))
+      getDocs(collection(db, 'careerLearningProgress')),
+      getDocs(collection(db, 'pushSubscriptions'))
     ]);
 
     const totalEnrollments = techProgress.size + careerProgress.size;
@@ -1431,6 +1432,7 @@ async function loadAnalytics(c) {
     html += '<div class="stat-card"><div class="stat-num">' + totalEnrollments + '</div><div class="stat-label">Total Enrollments</div></div>';
     html += '<div class="stat-card green"><div class="stat-num">' + completions + '</div><div class="stat-label">Completions</div></div>';
     html += '<div class="stat-card red"><div class="stat-num">' + certs.size + '</div><div class="stat-label">Certificates</div></div>';
+    html += '<div class="stat-card"><div class="stat-num">' + pushSubs.size + '</div><div class="stat-label">Push Subscribers</div></div>';
     html += '</div>';
 
     // Tech Programs breakdown
