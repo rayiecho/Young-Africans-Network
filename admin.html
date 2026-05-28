@@ -576,7 +576,7 @@ window.loadSection = async function(section) {
   }[section] || section;
   const container = document.getElementById('content-area');
   container.innerHTML = '<div class="loading">Loading...</div>';
-  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: window.loadAnalytics, assignments: window.loadAssignments, programs: window.loadProgramsAdmin };
+  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: loadAnalytics, assignments: loadAssignments, programs: loadProgramsAdmin };
   if (fns[section]) await fns[section](container);
 };
 
@@ -1421,7 +1421,7 @@ async function loadAnalytics(c) {
       html += '<div style="width:120px;"><div style="background:#e0e0e0;border-radius:50px;height:8px;">';
       html += '<div style="background:var(--navy);border-radius:50px;height:8px;width:' + pct + '%;"></div></div>';
       html += '<p style="font-size:0.68rem;color:var(--gray);text-align:right;">' + pct + '%</p></div>';
-      html += '<button class="btn-sm ' + (p.isOpen === false ? 'btn-navy' : 'btn-red') + '" onclick="toggleProgram('trainingPrograms','' + d.id + '',' + (p.isOpen === false ? 'true' : 'false') + ')">' + (p.isOpen === false ? '🔓 Open' : '🔒 Close') + '</button>';
+      html += '<button class="btn-sm ' + (p.isOpen === false ? 'btn-navy' : 'btn-red') + '" onclick="toggleProgram(\'trainingPrograms\',' + "'" + d.id + "'" + ',' + (p.isOpen === false ? 'true' : 'false') + ')">' + (p.isOpen === false ? '🔓 Open' : '🔒 Close') + '</button>';
       html += '</div>';
     }
     html += '</div>';
@@ -1440,7 +1440,7 @@ async function loadAnalytics(c) {
       html += '<div style="width:120px;"><div style="background:#e0e0e0;border-radius:50px;height:8px;">';
       html += '<div style="background:#F5A623;border-radius:50px;height:8px;width:' + pct + '%;"></div></div>';
       html += '<p style="font-size:0.68rem;color:var(--gray);text-align:right;">' + pct + '%</p></div>';
-      html += '<button class="btn-sm ' + (p.isOpen === false ? 'btn-navy' : 'btn-red') + '" onclick="toggleProgram('careerPrograms','' + d.id + '',' + (p.isOpen === false ? 'true' : 'false') + ')">' + (p.isOpen === false ? '🔓 Open' : '🔒 Close') + '</button>';
+      html += '<button class="btn-sm ' + (p.isOpen === false ? 'btn-navy' : 'btn-red') + '" onclick="toggleProgram(\'careerPrograms\',' + "'" + d.id + "'" + ',' + (p.isOpen === false ? 'true' : 'false') + ')">' + (p.isOpen === false ? '🔓 Open' : '🔒 Close') + '</button>';
       html += '</div>';
     }
     html += '</div>';
@@ -1496,8 +1496,8 @@ async function loadAssignments(c) {
         html += '<p style="font-size:0.82rem;color:var(--navy);background:white;padding:0.75rem;border-radius:8px;margin-bottom:0.75rem;">' + sanitize(a.answer || a.submission || 'No content') + '</p>';
         html += '<textarea id="feedback-' + a.id + '" placeholder="Write feedback..." style="width:100%;padding:0.5rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;margin-bottom:0.5rem;resize:vertical;min-height:60px;"></textarea>';
         html += '<div style="display:flex;gap:0.5rem;">';
-        html += '<button class="btn-sm btn-navy" onclick="reviewAssignment('' + col + '','' + a.id + '','approved')">✅ Approve</button>';
-        html += '<button class="btn-sm btn-red" onclick="reviewAssignment('' + col + '','' + a.id + '','rejected')">❌ Reject</button>';
+        html += '<button class="btn-sm btn-navy" onclick="reviewAssignment(\''+col+'\',\''+a.id+'\',\'approved\')">✅ Approve</button>';
+        html += '<button class="btn-sm btn-red" onclick="reviewAssignment(\''+col+'\',\''+a.id+'\',\'rejected\')">❌ Reject</button>';
         html += '</div></div>';
       });
     }
@@ -1557,8 +1557,8 @@ async function loadProgramsAdmin(c) {
       html += '<p style="font-size:0.72rem;color:var(--gray);">' + sanitize(p.category || '') + ' · ' + (p.enrolledBy?.length || 0) + ' enrolled</p></div>';
       html += '<div style="display:flex;align-items:center;gap:0.5rem;">';
       html += '<span style="background:' + (isOpen?'rgba(39,174,96,0.1)':'rgba(107,114,128,0.1)') + ';color:' + (isOpen?'#27AE60':'var(--gray)') + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (isOpen?'🟢 Open':'🔒 Closed') + '</span>';
-      html += '<button class="btn-sm ' + (isOpen?'btn-red':'btn-navy') + '" onclick="toggleProgram('trainingPrograms','' + d.id + '',' + !isOpen + ')">' + (isOpen?'Close':'Open') + '</button>';
-      html += '<button class="btn-sm btn-red" onclick="deleteProgram('trainingPrograms','' + d.id + '')">Delete</button>';
+      html += '<button class="btn-sm ' + (isOpen?'btn-red':'btn-navy') + '" onclick="toggleProgram(\'trainingPrograms\',\'" + d.id + "\',' + !isOpen + ')">' + (isOpen?'Close':'Open') + '</button>';
+      html += '<button class="btn-sm btn-red" onclick="deleteProgram(\'trainingPrograms\',' + "'" + d.id + "'" + ')">Delete</button>';
       html += '</div></div>';
     });
     html += '</div>';
@@ -1573,8 +1573,8 @@ async function loadProgramsAdmin(c) {
       html += '<p style="font-size:0.72rem;color:var(--gray);">' + sanitize(p.category || '') + ' · ' + (p.enrolledBy?.length || 0) + ' enrolled</p></div>';
       html += '<div style="display:flex;align-items:center;gap:0.5rem;">';
       html += '<span style="background:' + (isOpen?'rgba(39,174,96,0.1)':'rgba(107,114,128,0.1)') + ';color:' + (isOpen?'#27AE60':'var(--gray)') + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (isOpen?'🟢 Open':'🔒 Closed') + '</span>';
-      html += '<button class="btn-sm ' + (isOpen?'btn-red':'btn-navy') + '" onclick="toggleProgram('careerPrograms','' + d.id + '',' + !isOpen + ')">' + (isOpen?'Close':'Open') + '</button>';
-      html += '<button class="btn-sm btn-red" onclick="deleteProgram('careerPrograms','' + d.id + '')">Delete</button>';
+      html += '<button class="btn-sm ' + (isOpen?'btn-red':'btn-navy') + '" onclick="toggleProgram(\'careerPrograms\',\'" + d.id + "\',' + !isOpen + ')">' + (isOpen?'Close':'Open') + '</button>';
+      html += '<button class="btn-sm btn-red" onclick="deleteProgram(\'careerPrograms\',' + "'" + d.id + "'" + ')">Delete</button>';
       html += '</div></div>';
     });
     html += '</div>';
@@ -1584,9 +1584,6 @@ async function loadProgramsAdmin(c) {
   }
 }
 
-window.loadAnalytics = loadAnalytics;
-window.loadAssignments = loadAssignments;
-window.loadProgramsAdmin = loadProgramsAdmin;
 
 </script>
 
