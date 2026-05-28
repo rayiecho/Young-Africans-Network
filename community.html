@@ -322,7 +322,7 @@ async function doGoogleSignIn() {
     try {
       await signInWithPopup(auth, provider);
     } catch(popupErr) {
-      if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/cancelled-popup-request' || popupErr.message.includes('invalid')) {
+      if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/cancelled-popup-request' || popupErr.code === 'auth/popup-closed-by-user' || popupErr.message.includes('invalid')) {
         await signInWithRedirect(auth, provider);
       } else {
         throw popupErr;

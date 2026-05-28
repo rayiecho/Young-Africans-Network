@@ -1625,7 +1625,7 @@ window.resetQuizAttempts = async function(failureId, userId, programId, lessonId
     await updateDoc(doc(db, 'quizFailures', failureId), { reviewed: true, resetAt: serverTimestamp(), resetBy: 'Admin' });
     await addDoc(collection(db, 'notifications'), {
       title: '🔄 Quiz Attempts Reset',
-      message: 'Your quiz attempts for Module ' + moduleWeek + ' in ' + programId + ' have been reset by the admin. You can now retake the quiz.',
+      message: 'Your quiz attempts for ' + lessonId + ' in ' + programId + ' have been reset by the admin. You can now retake the quiz.',
       type: 'info',
       userId: userId,
       postedBy: 'YAN Admin',
