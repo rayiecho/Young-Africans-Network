@@ -1809,16 +1809,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
   </main>
 </div>
 
-window.deleteProgram = async function(colName, progId) {
-  if (!confirm('Delete this program? This cannot be undone.')) return;
-  try {
-    await deleteDoc(doc(db, colName, progId));
-    showToast('Program deleted');
-    loadSection('programs');
-  } catch(e) {
-    showToast(e.message, 'error');
-  }
-};
+
 
 <script>
 document.addEventListener('click', function(e) {
