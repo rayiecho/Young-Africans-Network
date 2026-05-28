@@ -1767,9 +1767,9 @@ async function loadNotificationCenter(c) {
   c.innerHTML = html;
 }
 
-window.fillNotifTemplate = function(title, msg) {
-  document.getElementById('notif-title-admin').value = title;
-  document.getElementById('notif-message-admin').value = msg;
+window.fillNotifTemplate = function(btn) {
+  document.getElementById('notif-title-admin').value = btn.dataset.title || '';
+  document.getElementById('notif-message-admin').value = btn.dataset.msg || '';
 };
 
 window.sendAdminNotification = async function() {
