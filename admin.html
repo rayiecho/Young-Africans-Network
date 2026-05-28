@@ -1584,7 +1584,16 @@ async function loadProgramsAdmin(c) {
   }
 }
 
-
+window.deleteProgram = async function(colName, progId) {
+  if (!confirm('Delete this program? This cannot be undone.')) return;
+  try {
+    await deleteDoc(doc(db, colName, progId));
+    showToast('Program deleted');
+    loadSection('programs');
+  } catch(e) {
+    showToast(e.message, 'error');
+  }
+};
 </script>
 
 <style>
