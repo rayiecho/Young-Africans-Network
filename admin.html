@@ -1516,11 +1516,57 @@ async function loadAssignments(c) {
       html += '</div>';
     }
 
+    // Quiz Failures Section
+    html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">😓 Quiz Failures & Feedback (' + quizFails.size + ')</h3>';
+    if (quizFails.empty) {
+      html += '<p style="color:var(--gray);font-size:0.85rem;">No quiz failures yet.</p>';
+    } else {
+      quizFails.docs.forEach(function(d) {
+        const q = d.data();
+        const statusColor = q.reviewed ? '#27AE60' : '#F5A623';
+        html += '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">';
+        html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(q.userName || q.userId || 'Member') + '</p>';
+        html += '<p style="font-size:0.72rem;color:var(--gray);">Program: ' + sanitize(q.programId || '') + ' · Module ' + (q.moduleWeek || '') + ' · Score: ' + (q.score || 0) + '%</p></div>';
+        html += '<span style="background:' + statusColor + '18;color:' + statusColor + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (q.reviewed ? 'REVIEWED' : 'PENDING') + '</span>';
+        html += '</div>';
+        html += '<p style="font-size:0.82rem;color:var(--navy);background:white;padding:0.75rem;border-radius:8px;margin-bottom:0.75rem;"><strong>Difficulty feedback:</strong> ' + sanitize(q.difficulty || q.feedback || 'No feedback') + '</p>';
+        html += '<div style="display:flex;gap:0.5rem;">';
+        html += '<button class="btn-sm btn-navy" onclick="resetQuizAttempts('' + d.id + '','' + (q.userId || '') + '','' + (q.programId || '') + '','' + (q.moduleWeek || '') + '')">🔄 Reset Attempts</button>';
+        html += '<button class="btn-sm" style="background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);" onclick="markQuizReviewed('' + d.id + '')">✅ Mark Reviewed</button>';
+        html += '</div></div>';
+      });
+    }
+    html += '</div>';
+
     c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
   }
 }
+
+window.resetQuizAttempts = async function(failureId, userId, programId, moduleWeek) {
+  if (!confirm('Reset quiz attempts for this member?')) return;
+  try {
+    const attemptId = userId + '_' + programId + '_' + moduleWeek;
+    await deleteDoc(doc(db, 'quizAttempts', attemptId));
+    await updateDoc(doc(db, 'quizFailures', failureId), { reviewed: true, resetAt: serverTimestamp(), resetBy: 'Admin' });
+    showToast('✅ Quiz attempts reset! Member can retake the quiz.');
+    loadSection('assignments');
+  } catch(e) {
+    showToast(e.message, 'error');
+  }
+};
+
+window.markQuizReviewed = async function(failureId) {
+  try {
+    await updateDoc(doc(db, 'quizFailures', failureId), { reviewed: true, reviewedAt: serverTimestamp() });
+    showToast('✅ Marked as reviewed');
+    loadSection('assignments');
+  } catch(e) {
+    showToast(e.message, 'error');
+  }
+};
 
 window.reviewAssignment = async function(colName, assignId, status) {
   const feedback = document.getElementById('feedback-' + assignId)?.value || '';
