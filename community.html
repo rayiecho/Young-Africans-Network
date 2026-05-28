@@ -280,7 +280,7 @@ async function doGoogleSignIn() {
   try {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    await signInWithRedirect(auth, provider);
+    await signInWithPopup(auth, provider);
   } catch(e) {
     console.error('Google sign-in error:', e);
     showToast('Google sign-in failed. Try again.', 'error');
