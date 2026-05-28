@@ -1280,137 +1280,104 @@ function downloadCertificate(certId) {
   const verifyCode = 'YAN-' + currentUser.uid.substring(0,8).toUpperCase();
   const dateStr = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
   const deptName = dept?.name || u.department || 'YAN Program';
+  const memberName = u.name || 'Member';
 
-  const html = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;600;700;800&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:#0D1B4B;display:flex;align-items:center;justify-content:center;min-height:100vh;}
-  .cert{width:297mm;height:210mm;background:#0D1B4B;position:relative;overflow:hidden;display:flex;font-family:'Montserrat',sans-serif;}
-  .left{flex:1.1;padding:14mm 10mm 14mm 16mm;display:flex;flex-direction:column;justify-content:space-between;position:relative;z-index:2;}
-  .right{width:95mm;position:relative;overflow:hidden;}
-  .logo-area{display:flex;align-items:center;gap:12px;}
-  .logo-area img{width:52px;height:52px;border-radius:50%;border:2px solid #F5A623;}
-  .logo-text h2{font-size:11pt;font-weight:800;color:#fff;letter-spacing:1px;line-height:1.2;}
-  .logo-text p{font-size:7.5pt;color:#F5A623;font-weight:600;}
-  .cert-title{font-size:9pt;font-weight:700;color:#F5A623;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;}
-  .awarded-to{font-size:9.5pt;color:rgba(255,255,255,0.65);margin-bottom:4px;}
-  .member-name{font-family:'EB Garamond',serif;font-size:36pt;font-weight:700;color:#F5A623;line-height:1.1;margin-bottom:2mm;}
-  .name-line{width:85mm;height:2px;background:linear-gradient(90deg,#F5A623,transparent);margin-bottom:5mm;}
-  .program-desc{font-size:9pt;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:5mm;}
-  .program-desc strong{color:#fff;}
-  .sig-row{display:flex;gap:18mm;align-items:flex-end;}
-  .sig-block img{height:42px;display:block;margin-bottom:3px;filter:brightness(0) invert(1);}
-  .sig-line{width:52mm;height:1px;background:rgba(255,255,255,0.35);margin-bottom:4px;}
-  .sig-name{font-size:8pt;font-weight:700;color:#fff;}
-  .sig-title{font-size:7pt;color:rgba(255,255,255,0.55);}
-  .bottom-info{margin-top:4mm;}
-  .info-row{font-size:7.5pt;color:rgba(255,255,255,0.5);margin-bottom:2px;}
-  .info-row strong{color:#F5A623;}
-  .cert-id{font-size:7pt;color:rgba(255,255,255,0.35);margin-top:3px;letter-spacing:1px;}
-  .african-bg{position:absolute;top:0;right:0;width:95mm;height:210mm;}
-  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#0D1B4B;}@page{size:A4 landscape;margin:0;}}
-</style>
-</head>
-<body>
-<div class="cert">
-  <div class="left">
-    <div class="logo-area">
-      <img src="https://youngafricansnetwork.org/images/logo.png" crossorigin="anonymous" alt="YAN"/>
-      <div class="logo-text">
-        <h2>YOUNG AFRICANS NETWORK</h2>
-        <p>Building the Future, Together</p>
-      </div>
-    </div>
-    <div>
-      <div class="cert-title">Certificate of Achievement</div>
-      <div class="awarded-to">This certificate is awarded to</div>
-      <div class="member-name">${u.name}</div>
-      <div class="name-line"></div>
-      <div class="program-desc">
-        For the successful completion of the<br/>
-        <strong>${deptName} Training Program</strong><br/>
-        at Young Africans Network, demonstrating dedication,<br/>
-        leadership and commitment to excellence.
-      </div>
-      <div class="sig-row">
-        <div class="sig-block">
-          <img src="https://youngafricansnetwork.org/images/emmanuel_signature.png" crossorigin="anonymous" alt="Signature"/>
-          <div class="sig-line"></div>
-          <div class="sig-name">Emmanuel Ikumilu Mwori</div>
-          <div class="sig-title">Founder &amp; CEO, Young Africans Network</div>
-        </div>
-      </div>
-    </div>
-    <div class="bottom-info">
-      <div class="info-row"><strong>Date of Issue:</strong> ${dateStr}</div>
-      <div class="info-row"><strong>Program:</strong> ${deptName}</div>
-      <div class="cert-id">Certificate ID: ${verifyCode} &nbsp;|&nbsp; youngafricansnetwork.org</div>
-    </div>
-  </div>
-  <div class="right">
-    <svg class="african-bg" viewBox="0 0 360 800" xmlns="http://www.w3.org/2000/svg">
-      <rect width="360" height="800" fill="#1B2A6B"/>
-      <polygon points="360,0 200,0 360,160" fill="#0D1B4B" opacity="0.6"/>
-      <circle cx="280" cy="120" r="180" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.15"/>
-      <circle cx="280" cy="120" r="140" fill="none" stroke="#F5A623" stroke-width="1" opacity="0.12"/>
-      <circle cx="280" cy="120" r="100" fill="none" stroke="#F5A623" stroke-width="0.8" opacity="0.1"/>
-      <g opacity="0.85">
-        <polygon points="180,60 230,130 180,200 130,130" fill="none" stroke="#F5A623" stroke-width="2.5"/>
-        <polygon points="195,80 235,130 195,180 155,130" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.6"/>
-        <polygon points="208,100 238,130 208,160 178,130" fill="#F5A623" opacity="0.15"/>
-      </g>
-      <g opacity="0.7" transform="translate(60,220)">
-        <polygon points="120,0 170,70 120,140 70,70" fill="none" stroke="#F5A623" stroke-width="2.5"/>
-        <polygon points="135,20 165,70 135,120 105,70" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.6"/>
-        <polygon points="148,40 163,70 148,100 133,70" fill="#F5A623" opacity="0.15"/>
-      </g>
-      <g opacity="0.55" transform="translate(180,380)">
-        <polygon points="120,0 170,70 120,140 70,70" fill="none" stroke="#F5A623" stroke-width="2"/>
-        <polygon points="135,20 165,70 135,120 105,70" fill="none" stroke="#F5A623" stroke-width="1.2" opacity="0.5"/>
-      </g>
-      <g opacity="0.4" transform="translate(20,500)">
-        <polygon points="100,0 150,70 100,140 50,70" fill="none" stroke="#F5A623" stroke-width="1.5"/>
-      </g>
-      <line x1="0" y1="400" x2="360" y2="400" stroke="#F5A623" stroke-width="0.5" opacity="0.15"/>
-      <line x1="0" y1="0" x2="360" y2="800" stroke="#F5A623" stroke-width="0.5" opacity="0.08"/>
-      <g transform="translate(240,580)" opacity="0.9">
-        <rect x="0" y="0" width="90" height="90" fill="white" rx="4"/>
-        <text x="45" y="55" text-anchor="middle" font-family="Montserrat" font-size="7" fill="#1B2A6B" font-weight="700">SCAN TO VERIFY</text>
-        <text x="45" y="65" text-anchor="middle" font-family="Montserrat" font-size="5.5" fill="#1B2A6B">${verifyCode}</text>
-        <rect x="8" y="8" width="24" height="24" fill="none" stroke="#1B2A6B" stroke-width="2.5"/>
-        <rect x="58" y="8" width="24" height="24" fill="none" stroke="#1B2A6B" stroke-width="2.5"/>
-        <rect x="8" y="58" width="24" height="24" fill="none" stroke="#1B2A6B" stroke-width="2.5"/>
-        <rect x="12" y="12" width="16" height="16" fill="#1B2A6B"/>
-        <rect x="62" y="12" width="16" height="16" fill="#1B2A6B"/>
-        <rect x="12" y="62" width="16" height="16" fill="#1B2A6B"/>
-        <rect x="36" y="10" width="4" height="4" fill="#1B2A6B"/>
-        <rect x="42" y="10" width="4" height="4" fill="#1B2A6B"/>
-        <rect x="36" y="16" width="4" height="4" fill="#1B2A6B"/>
-        <rect x="10" y="36" width="4" height="4" fill="#1B2A6B"/>
-        <rect x="10" y="42" width="4" height="4" fill="#1B2A6B"/>
-        <rect x="36" y="36" width="4" height="4" fill="#1B2A6B"/>
-        <rect x="42" y="42" width="4" height="4" fill="#1B2A6B"/>
-        <rect x="62" y="36" width="4" height="4" fill="#1B2A6B"/>
-        <rect x="68" y="42" width="4" height="4" fill="#1B2A6B"/>
-        <rect x="36" y="62" width="4" height="4" fill="#1B2A6B"/>
-        <rect x="42" y="68" width="4" height="4" fill="#1B2A6B"/>
-        <rect x="62" y="62" width="4" height="4" fill="#1B2A6B"/>
-      </g>
-    </svg>
-  </div>
-</div>
-<script>
-window.onload = function() { setTimeout(()=>{ window.print(); }, 1000); }
-</script>
-</body>
-</html>`;
+  const css = [
+    '@import url(https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;600;700;800&display=swap);',
+    '*{margin:0;padding:0;box-sizing:border-box;}',
+    'body{background:#0D1B4B;display:flex;align-items:center;justify-content:center;min-height:100vh;}',
+    '.cert{width:297mm;height:210mm;background:#0D1B4B;position:relative;overflow:hidden;display:flex;font-family:Montserrat,sans-serif;}',
+    '.left{flex:1.1;padding:14mm 10mm 14mm 16mm;display:flex;flex-direction:column;justify-content:space-between;position:relative;z-index:2;}',
+    '.right{width:95mm;position:relative;overflow:hidden;}',
+    '.logo-area{display:flex;align-items:center;gap:12px;}',
+    '.logo-area img{width:52px;height:52px;border-radius:50%;border:2px solid #F5A623;}',
+    '.logo-text h2{font-size:11pt;font-weight:800;color:#fff;letter-spacing:1px;line-height:1.2;}',
+    '.logo-text p{font-size:7.5pt;color:#F5A623;font-weight:600;}',
+    '.cert-title{font-size:9pt;font-weight:700;color:#F5A623;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;}',
+    '.awarded-to{font-size:9.5pt;color:rgba(255,255,255,0.65);margin-bottom:4px;}',
+    '.member-name{font-family:EB Garamond,serif;font-size:36pt;font-weight:700;color:#F5A623;line-height:1.1;margin-bottom:2mm;}',
+    '.name-line{width:85mm;height:2px;background:#F5A623;margin-bottom:5mm;}',
+    '.program-desc{font-size:9pt;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:5mm;}',
+    '.program-desc strong{color:#fff;}',
+    '.sig-block img{height:42px;display:block;margin-bottom:3px;filter:brightness(0) invert(1);}',
+    '.sig-line{width:52mm;height:1px;background:rgba(255,255,255,0.35);margin-bottom:4px;}',
+    '.sig-name{font-size:8pt;font-weight:700;color:#fff;}',
+    '.sig-title{font-size:7pt;color:rgba(255,255,255,0.55);}',
+    '.bottom-info{margin-top:4mm;}',
+    '.info-row{font-size:7.5pt;color:rgba(255,255,255,0.5);margin-bottom:2px;}',
+    '.info-row strong{color:#F5A623;}',
+    '.cert-id{font-size:7pt;color:rgba(255,255,255,0.35);margin-top:3px;letter-spacing:1px;}',
+    '.african-bg{position:absolute;top:0;right:0;width:95mm;height:210mm;}',
+    '@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#0D1B4B;}@page{size:A4 landscape;margin:0;}}'
+  ].join('\n');
+
+  const svgStamp = '<svg viewBox="0 0 360 800" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">'
+    + '<rect width="360" height="800" fill="#1B2A6B"/>'
+    + '<polygon points="360,0 200,0 360,160" fill="#0D1B4B" opacity="0.6"/>'
+    + '<circle cx="280" cy="120" r="180" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.15"/>'
+    + '<circle cx="280" cy="120" r="140" fill="none" stroke="#F5A623" stroke-width="1" opacity="0.12"/>'
+    + '<circle cx="280" cy="120" r="100" fill="none" stroke="#F5A623" stroke-width="0.8" opacity="0.1"/>'
+    + '<polygon points="180,60 230,130 180,200 130,130" fill="none" stroke="#F5A623" stroke-width="2.5" opacity="0.85"/>'
+    + '<polygon points="195,80 235,130 195,180 155,130" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.5"/>'
+    + '<polygon points="208,100 238,130 208,160 178,130" fill="#F5A623" opacity="0.15"/>'
+    + '<g transform="translate(60,220)" opacity="0.7">'
+    + '<polygon points="120,0 170,70 120,140 70,70" fill="none" stroke="#F5A623" stroke-width="2.5"/>'
+    + '<polygon points="135,20 165,70 135,120 105,70" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.6"/>'
+    + '<polygon points="148,40 163,70 148,100 133,70" fill="#F5A623" opacity="0.15"/>'
+    + '</g>'
+    + '<g transform="translate(180,380)" opacity="0.55">'
+    + '<polygon points="120,0 170,70 120,140 70,70" fill="none" stroke="#F5A623" stroke-width="2"/>'
+    + '<polygon points="135,20 165,70 135,120 105,70" fill="none" stroke="#F5A623" stroke-width="1.2" opacity="0.5"/>'
+    + '</g>'
+    + '<g transform="translate(20,500)" opacity="0.4">'
+    + '<polygon points="100,0 150,70 100,140 50,70" fill="none" stroke="#F5A623" stroke-width="1.5"/>'
+    + '</g>'
+    + '<rect x="220" y="580" width="90" height="90" fill="white" rx="4"/>'
+    + '<text x="265" y="648" text-anchor="middle" font-family="Montserrat" font-size="7" fill="#1B2A6B" font-weight="700">SCAN TO VERIFY</text>'
+    + '<text x="265" y="660" text-anchor="middle" font-family="Montserrat" font-size="5.5" fill="#1B2A6B">' + verifyCode + '</text>'
+    + '<rect x="228" y="588" width="24" height="24" fill="none" stroke="#1B2A6B" stroke-width="2.5"/>'
+    + '<rect x="278" y="588" width="24" height="24" fill="none" stroke="#1B2A6B" stroke-width="2.5"/>'
+    + '<rect x="228" y="638" width="24" height="24" fill="none" stroke="#1B2A6B" stroke-width="2.5"/>'
+    + '<rect x="232" y="592" width="16" height="16" fill="#1B2A6B"/>'
+    + '<rect x="282" y="592" width="16" height="16" fill="#1B2A6B"/>'
+    + '<rect x="232" y="642" width="16" height="16" fill="#1B2A6B"/>'
+    + '<rect x="256" y="590" width="4" height="4" fill="#1B2A6B"/>'
+    + '<rect x="262" y="596" width="4" height="4" fill="#1B2A6B"/>'
+    + '<rect x="256" y="616" width="4" height="4" fill="#1B2A6B"/>'
+    + '<rect x="282" y="616" width="4" height="4" fill="#1B2A6B"/>'
+    + '<rect x="256" y="642" width="4" height="4" fill="#1B2A6B"/>'
+    + '</svg>';
+
+  const body = '<div class="cert">'
+    + '<div class="left">'
+    + '<div class="logo-area">'
+    + '<img src="https://youngafricansnetwork.org/images/logo.png" crossorigin="anonymous" alt="YAN"/>'
+    + '<div class="logo-text"><h2>YOUNG AFRICANS NETWORK</h2><p>Building the Future, Together</p></div>'
+    + '</div>'
+    + '<div>'
+    + '<div class="cert-title">Certificate of Achievement</div>'
+    + '<div class="awarded-to">This certificate is awarded to</div>'
+    + '<div class="member-name">' + memberName + '</div>'
+    + '<div class="name-line"></div>'
+    + '<div class="program-desc">For the successful completion of the<br/><strong>' + deptName + ' Training Program</strong><br/>at Young Africans Network, demonstrating dedication,<br/>leadership and commitment to excellence.</div>'
+    + '<div class="sig-block">'
+    + '<img src="https://youngafricansnetwork.org/images/emmanuel_signature.png" crossorigin="anonymous" alt="Signature"/>'
+    + '<div class="sig-line"></div>'
+    + '<div class="sig-name">Emmanuel Ikumilu Mwori</div>'
+    + '<div class="sig-title">Founder &amp; CEO, Young Africans Network</div>'
+    + '</div>'
+    + '</div>'
+    + '<div class="bottom-info">'
+    + '<div class="info-row"><strong>Date of Issue:</strong> ' + dateStr + '</div>'
+    + '<div class="info-row"><strong>Program:</strong> ' + deptName + '</div>'
+    + '<div class="cert-id">Certificate ID: ' + verifyCode + ' | youngafricansnetwork.org</div>'
+    + '</div>'
+    + '</div>'
+    + '<div class="right">' + svgStamp + '</div>'
+    + '</div>';
 
   const printWin = window.open('', '_blank');
-  printWin.document.write(html);
+  printWin.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><style>' + css + '</style></head><body>' + body + '<script>window.onload=function(){setTimeout(function(){window.print();},1000);}<\/script></body></html>');
   printWin.document.close();
 }
 
