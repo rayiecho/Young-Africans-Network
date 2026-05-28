@@ -8648,7 +8648,7 @@ async function loadCareerPrograms() {
   container.innerHTML = '<div class="loading">Loading programs...</div>';
 
   try {
-    const snap = await getDocs(query(collection(db, 'careerPrograms'), orderBy('openDate', 'asc')));
+    const snap = await getDocs(query(collection(db, 'careerPrograms'), orderBy('createdAt', 'desc')));
     const today = new Date();
 
     let html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.5rem;">'
@@ -8656,7 +8656,7 @@ async function loadCareerPrograms() {
       + '</div>';
 
     if (snap.empty) {
-      html += '<div class="empty-state"><p>Programs coming soon! Check back on June 1st.</p></div>';
+      html += '<div class="empty-state"><p>No programs available yet. Check back soon!</p></div>';
     } else {
       snap.docs.forEach(function(d) {
         const p = Object.assign({id: d.id}, d.data());
