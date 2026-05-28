@@ -206,7 +206,7 @@ async function loadHubDetail(hubId) {
           + '</div>'
           + '<div style="display:flex;gap:0.5rem;">'
           + '<button class="btn-sm btn-navy" onclick="approveRecLetter(\'' + d.id + '\',\'' + r.memberName + '\',\'' + r.scholarship + '\')">Approve</button>'
-          + '<button class="btn-sm btn-red" onclick="rejectRecLetter(\'' + d.id + '\')">Reject</button>'
+          + '<button class="btn-sm btn-red" style="padding:0.6rem 1.5rem;" onclick="rejectRecLetter(\'' + d.id + '\')">❌ Reject</button>'
           + '</div></div>';
       });
       html += '</div>';
@@ -2311,7 +2311,7 @@ document.addEventListener('click', function(e) {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>emailjs.init('NyhRgF1xCbrxy7XEG');
-async function loadRecommendations(c) {
+window.loadRecommendations = async function(c) {
   const [pendingSnap, allSnap] = await Promise.all([
     getDocs(query(collection(db,'recommendations'), where('status','==','pending'), orderBy('createdAt','desc'))),
     getDocs(query(collection(db,'recommendations'), orderBy('createdAt','desc')))
@@ -2368,8 +2368,8 @@ async function loadRecommendations(c) {
         + '</div>'
         + (r.status === 'pending' ?
           '<div style="display:flex;gap:0.75rem;flex-wrap:wrap;">'
-          + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.5rem;" onclick="approveRecLetter(''+d.id+'',''+encodeURIComponent(r.memberName||r.userName||'')+'',''+encodeURIComponent(r.scholarship||'')+'')">✅ Approve & Generate Letter</button>'
-          + '<button class="btn-sm btn-red" style="padding:0.6rem 1.5rem;" onclick="rejectRecLetter(''+d.id+'')">❌ Reject</button>'
+          + '<button class="btn-primary" style="width:auto;padding:0.6rem 1.5rem;" onclick="approveRecLetter(\'' + d.id + '\',\'' + encodeURIComponent(r.memberName||r.userName||'') + '\',\'' + encodeURIComponent(r.scholarship||'') + '\')">✅ Approve & Generate Letter</button>'
+          + '<button class="btn-sm btn-red" style="padding:0.6rem 1.5rem;" onclick="rejectRecLetter(\'' + d.id + '\')">❌ Reject</button>'
           + '</div>'
           : r.status === 'approved' ?
           '<p style="font-size:0.78rem;color:var(--green,#27AE60);font-weight:600;">✅ Approved — Member can now download the letter</p>'
