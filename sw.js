@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yan-cache-v6';
+const CACHE_NAME = 'yan-cache-v7';
 const STATIC_ASSETS = [
   '/images/logo.jpeg'
 ];
@@ -27,8 +27,6 @@ self.addEventListener('activate', function(event) {
 self.addEventListener('fetch', function(event) {
   if (event.request.method !== 'GET') return;
   const url = event.request.url;
-  
-  // Never cache HTML files or external APIs
   if (url.endsWith('.html') || url.endsWith('/') ||
       url.includes('firestore.googleapis.com') ||
       url.includes('gstatic.com') ||
@@ -39,8 +37,6 @@ self.addEventListener('fetch', function(event) {
       url.includes('daily.co') ||
       url.includes('anthropic') ||
       url.includes('workers.dev')) return;
-
-  // Cache only static assets like images
   event.respondWith(
     caches.match(event.request).then(function(cached) {
       return cached || fetch(event.request).then(function(response) {
@@ -52,6 +48,41 @@ self.addEventListener('fetch', function(event) {
         }
         return response;
       });
+    })
+  );
+});
+
+// ── PUSH NOTIFICATIONS ─────────────────────────────────
+self.addEventListener('push', function(event) {
+  let data = { title: 'YAN Notification', body: 'You have a new update', icon: '/images/logo.jpeg' };
+  if (event.data) {
+    try { data = event.data.json(); } catch(e) { data.body = event.data.text(); }
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: data.icon || '/images/logo.jpeg',
+      badge: '/images/logo.jpeg',
+      vibrate: [200, 100, 200],
+      data: { url: data.url || 'https://youngafricansnetwork.org/community.html' },
+      actions: [
+        { action: 'open', title: 'Open YAN' },
+        { action: 'close', title: 'Dismiss' }
+      ]
+    })
+  );
+});
+
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  if (event.action === 'close') return;
+  const url = event.notification.data?.url || 'https://youngafricansnetwork.org/community.html';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+      for (const client of clientList) {
+        if (client.url === url && 'focus' in client) return client.focus();
+      }
+      if (clients.openWindow) return clients.openWindow(url);
     })
   );
 });
