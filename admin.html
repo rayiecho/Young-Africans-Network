@@ -1657,7 +1657,8 @@ async function loadProgramsAdmin(c) {
       html += '<div style="display:flex;align-items:center;gap:0.5rem;">';
       html += '<span style="background:' + (isOpen?'rgba(39,174,96,0.1)':'rgba(107,114,128,0.1)') + ';color:' + (isOpen?'#27AE60':'var(--gray)') + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (isOpen?'🟢 Open':'🔒 Closed') + '</span>';
       html += '<button class="btn-sm ' + (isOpen?'btn-red':'btn-navy') + '" onclick="toggleProgram(\'trainingPrograms\',' + "'" + d.id + "'" + ',' + !isOpen + ')">' + (isOpen?'Close':'Open') + '</button>';
-      html += '<button class="btn-sm btn-red" onclick="deleteProgram(\'trainingPrograms\',' + "'" + d.id + "'" + ')">Delete</button>';
+      html += '<button class="btn-sm" style="background:#0A66C2;color:#fff;" onclick="editProgram(\'trainingPrograms\',\'" + d.id + "\',\'" + sanitize(p.title||'') + '\')">Edit</button>';
+      html += '<button class="btn-sm btn-red" onclick="deleteProgram(\'trainingPrograms\','" + d.id + "' + ')">Delete</button>';
       html += '</div></div>';
     });
     html += '</div>';
@@ -1673,7 +1674,8 @@ async function loadProgramsAdmin(c) {
       html += '<div style="display:flex;align-items:center;gap:0.5rem;">';
       html += '<span style="background:' + (isOpen?'rgba(39,174,96,0.1)':'rgba(107,114,128,0.1)') + ';color:' + (isOpen?'#27AE60':'var(--gray)') + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (isOpen?'🟢 Open':'🔒 Closed') + '</span>';
       html += '<button class="btn-sm ' + (isOpen?'btn-red':'btn-navy') + '" onclick="toggleProgram(\'careerPrograms\',' + "'" + d.id + "'" + ',' + !isOpen + ')">' + (isOpen?'Close':'Open') + '</button>';
-      html += '<button class="btn-sm btn-red" onclick="deleteProgram(\'careerPrograms\',' + "'" + d.id + "'" + ')">Delete</button>';
+      html += '<button class="btn-sm" style="background:#0A66C2;color:#fff;" onclick="editProgram(\'careerPrograms\',\'" + d.id + "\',\'" + sanitize(p.title||'') + '\')">Edit</button>';
+      html += '<button class="btn-sm btn-red" onclick="deleteProgram(\'careerPrograms\','" + d.id + "' + ')">Delete</button>';
       html += '</div></div>';
     });
     html += '</div>';
@@ -1977,6 +1979,41 @@ window.generateBalanceSheet = async function() {
   w.document.close();
 };
 
+
+window.editProgram = async function(colName, progId) {
+  const snap = await getDoc(doc(db, colName, progId));
+  if (!snap.exists()) return;
+  const p = snap.data();
+  const container = document.getElementById('content-area');
+  container.innerHTML = '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">✏️ Edit Program</h3>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">' +
+    '<div class="form-group" style="grid-column:1/-1;"><label>Title *</label><input type="text" id="edit-prog-title" value="' + sanitize(p.title||'') + '" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>' +
+    '<div class="form-group" style="grid-column:1/-1;"><label>Description</label><textarea id="edit-prog-desc" rows="3" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;">' + sanitize(p.description||p.desc||'') + '</textarea></div>' +
+    '<div class="form-group"><label>Category</label><input type="text" id="edit-prog-cat" value="' + sanitize(p.category||'') + '" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>' +
+    '<div class="form-group"><label>Duration</label><input type="text" id="edit-prog-dur" value="' + sanitize(p.duration||'4 Weeks') + '" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>' +
+    '<div class="form-group"><label>Level</label><select id="edit-prog-level" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;"><option ' + (p.level==="Beginner"?"selected":"") + '>Beginner</option><option ' + (p.level==="Intermediate"?"selected":"") + '>Intermediate</option><option ' + (p.level==="Advanced"?"selected":"") + '>Advanced</option></select></div>' +
+    '<div class="form-group"><label>Modules Count</label><input type="number" id="edit-prog-modules" value="' + (p.modules||4) + '" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:0.75rem;margin-top:1rem;">' +
+    '<button onclick="saveEditProgram(\''+colName+'\',\''+progId+'\')" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Save Changes</button>' +
+    '<button onclick="loadSection(\'programs\')" style="background:var(--light);color:var(--navy);border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;">Cancel</button>' +
+    '</div></div>';
+};
+
+window.saveEditProgram = async function(colName, progId) {
+  const title = document.getElementById('edit-prog-title').value.trim();
+  const description = document.getElementById('edit-prog-desc').value.trim();
+  const category = document.getElementById('edit-prog-cat').value.trim();
+  const duration = document.getElementById('edit-prog-dur').value.trim();
+  const level = document.getElementById('edit-prog-level').value;
+  const modules = parseInt(document.getElementById('edit-prog-modules').value)||4;
+  if (!title) return showToast('Title is required','error');
+  try {
+    await updateDoc(doc(db,colName,progId),{title,description,category,duration,level,modules,updatedAt:serverTimestamp()});
+    showToast('✅ Program updated!');
+    loadSection('programs');
+  } catch(e) { showToast(e.message,'error'); }
+};
 
 window.deleteProgram = async function(colName, progId) {
   if (!confirm('Delete this program? This cannot be undone.')) return;
