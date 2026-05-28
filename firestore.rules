@@ -319,6 +319,11 @@ service cloud.firestore {
       allow write: if isSystemAdmin() || isLoggedIn();
     }
 
+    match /pushSubscriptions/{userId} {
+      allow read: if isLoggedIn() && (isOwner(userId) || isAdmin());
+      allow write: if isLoggedIn() && isOwner(userId);
+    }
+
 
     match /trainingPrograms/{progId} {
       allow read: if isLoggedIn();
