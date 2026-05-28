@@ -572,11 +572,11 @@ window.loadSection = async function(section) {
     newsletters: '📧 Newsletter Manager',
     analytics: '📈 Analytics Dashboard',
     assignments: '📝 Assignment Reviews',
-    programs: '🎓 Programs Manager', notifications: '🔔 Notification Center' 
+    programs: '🎓 Programs Manager', notifications: '🔔 Notification Center', finance: '💰 Finance Manager' 
   }[section] || section;
   const container = document.getElementById('content-area');
   container.innerHTML = '<div class="loading">Loading...</div>';
-  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: loadAnalytics, assignments: loadAssignments, programs: loadProgramsAdmin, notifications: loadNotificationCenter };
+  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: loadAnalytics, assignments: loadAssignments, programs: loadProgramsAdmin, notifications: loadNotificationCenter, finance: loadFinance };
   if (fns[section]) await fns[section](container);
 };
 
@@ -1812,6 +1812,172 @@ window.deleteNotification = async function(notifId) {
 };
 
 
+// ===== FINANCE MANAGER =====
+async function loadFinance(c) {
+  c.innerHTML = '<div class="loading">Loading finance data...</div>';
+  try {
+    const [incomeSnap, expenseSnap, loanSnap] = await Promise.all([
+      getDocs(query(collection(db, 'financeIncome'), orderBy('date', 'desc'))),
+      getDocs(query(collection(db, 'financeExpenses'), orderBy('date', 'desc'))),
+      getDocs(query(collection(db, 'financeLoans'), orderBy('date', 'desc')))
+    ]);
+    const income = incomeSnap.docs.map(d => ({...d.data(), id: d.id}));
+    const expenses = expenseSnap.docs.map(d => ({...d.data(), id: d.id}));
+    const loans = loanSnap.docs.map(d => ({...d.data(), id: d.id}));
+    const totalIncome = income.reduce((s,i) => s + (parseFloat(i.amount)||0), 0);
+    const totalExpenses = expenses.reduce((s,e) => s + (parseFloat(e.amount)||0), 0);
+    const outstandingLoans = loans.filter(l => l.status !== 'repaid').reduce((s,l) => s + (parseFloat(l.amount)||0), 0);
+    const balance = totalIncome - totalExpenses;
+    let html = '';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-bottom:1.5rem;">';
+    html += '<div class="stat-card green"><div class="stat-num">KES ' + totalIncome.toLocaleString() + '</div><div class="stat-label">Total Income</div></div>';
+    html += '<div class="stat-card red"><div class="stat-num">KES ' + totalExpenses.toLocaleString() + '</div><div class="stat-label">Total Expenses</div></div>';
+    html += '<div class="stat-card"><div class="stat-num" style="color:' + (balance>=0?'#27AE60':'#E63329') + '">KES ' + balance.toLocaleString() + '</div><div class="stat-label">Balance</div></div>';
+    html += '<div class="stat-card"><div class="stat-num">KES ' + outstandingLoans.toLocaleString() + '</div><div class="stat-label">Outstanding Loans</div></div>';
+    html += '</div>';
+    html += '<div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.5rem;">';
+    html += '<button onclick="showFinanceForm(\'income\')" style="background:#27AE60;color:#fff;border:none;padding:0.75rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer;">+ Add Income</button>';
+    html += '<button onclick="showFinanceForm(\'expense\')" style="background:#E63329;color:#fff;border:none;padding:0.75rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer;">+ Add Expense</button>';
+    html += '<button onclick="showFinanceForm(\'loan\')" style="background:#F5A623;color:#fff;border:none;padding:0.75rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer;">+ Add Loan</button>';
+    html += '<button onclick="generateBalanceSheet()" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer;">📊 Balance Sheet</button>';
+    html += '</div>';
+    html += '<div id="finance-form-container"></div>';
+    html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">💰 Income (' + income.length + ')</h3>';
+    if (!income.length) { html += '<p style="color:var(--gray);font-size:0.85rem;">No income recorded yet.</p>'; }
+    else {
+      html += '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;"><tr style="background:var(--light);"><th style="padding:0.5rem;text-align:left;">Date</th><th style="padding:0.5rem;text-align:left;">Description</th><th style="padding:0.5rem;text-align:left;">Category</th><th style="padding:0.5rem;text-align:right;">Amount</th><th></th></tr>';
+      income.forEach(function(i) {
+        html += '<tr style="border-bottom:1px solid var(--light);"><td style="padding:0.5rem;">' + sanitize(i.date||'') + '</td><td style="padding:0.5rem;">' + sanitize(i.description||'') + '</td><td style="padding:0.5rem;">' + sanitize(i.category||'') + '</td><td style="padding:0.5rem;text-align:right;font-weight:700;color:#27AE60;">' + parseFloat(i.amount||0).toLocaleString() + '</td><td><button onclick="deleteFinanceEntry(\'financeIncome\',\'' + i.id + '\')" style="background:none;border:none;cursor:pointer;">🗑️</button><button onclick="generateReceipt(\'financeIncome\',\'' + i.id + '\')" style="background:none;border:none;cursor:pointer;">🧾</button></td></tr>';
+      });
+      html += '</table>';
+    }
+    html += '</div>';
+    html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">💸 Expenses (' + expenses.length + ')</h3>';
+    if (!expenses.length) { html += '<p style="color:var(--gray);font-size:0.85rem;">No expenses recorded yet.</p>'; }
+    else {
+      html += '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;"><tr style="background:var(--light);"><th style="padding:0.5rem;text-align:left;">Date</th><th style="padding:0.5rem;text-align:left;">Description</th><th style="padding:0.5rem;text-align:left;">Category</th><th style="padding:0.5rem;text-align:right;">Amount</th><th>Receipt</th><th></th></tr>';
+      expenses.forEach(function(e) {
+        html += '<tr style="border-bottom:1px solid var(--light);"><td style="padding:0.5rem;">' + sanitize(e.date||'') + '</td><td style="padding:0.5rem;">' + sanitize(e.description||'') + '</td><td style="padding:0.5rem;">' + sanitize(e.category||'') + '</td><td style="padding:0.5rem;text-align:right;font-weight:700;color:#E63329;">' + parseFloat(e.amount||0).toLocaleString() + '</td><td style="padding:0.5rem;">' + (e.receiptUrl ? '<a href="' + e.receiptUrl + '" target="_blank" style="color:var(--navy);font-size:0.75rem;">View 📎</a>' : '-') + '</td><td><button onclick="deleteFinanceEntry(\'financeExpenses\',\'' + e.id + '\')" style="background:none;border:none;cursor:pointer;">🗑️</button></td></tr>';
+      });
+      html += '</table>';
+    }
+    html += '</div>';
+    html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">🏦 Loans (' + loans.length + ')</h3>';
+    if (!loans.length) { html += '<p style="color:var(--gray);font-size:0.85rem;">No loans recorded yet.</p>'; }
+    else {
+      html += '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;"><tr style="background:var(--light);"><th style="padding:0.5rem;">Date</th><th style="padding:0.5rem;">Lender</th><th style="padding:0.5rem;">Purpose</th><th style="padding:0.5rem;">Due</th><th style="padding:0.5rem;text-align:right;">Amount</th><th style="padding:0.5rem;">Status</th><th></th></tr>';
+      loans.forEach(function(l) {
+        const sc = l.status==='repaid'?'#27AE60':l.status==='overdue'?'#E63329':'#F5A623';
+        html += '<tr style="border-bottom:1px solid var(--light);"><td style="padding:0.5rem;">' + sanitize(l.date||'') + '</td><td style="padding:0.5rem;font-weight:600;">' + sanitize(l.lender||'') + '</td><td style="padding:0.5rem;">' + sanitize(l.purpose||l.description||'') + '</td><td style="padding:0.5rem;">' + sanitize(l.dueDate||'') + '</td><td style="padding:0.5rem;text-align:right;font-weight:700;color:#F5A623;">' + parseFloat(l.amount||0).toLocaleString() + '</td><td style="padding:0.5rem;"><span style="background:' + sc + '18;color:' + sc + ';padding:0.2rem 0.5rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (l.status||'pending').toUpperCase() + '</span></td><td style="display:flex;gap:0.25rem;"><button onclick="markLoanRepaid(\''+l.id+'\')" style="background:none;border:none;cursor:pointer;font-size:0.72rem;color:#27AE60;">✅</button><button onclick="deleteFinanceEntry(\'financeLoans\',\'' + l.id + '\')" style="background:none;border:none;cursor:pointer;">🗑️</button></td></tr>';
+      });
+      html += '</table>';
+    }
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+}
+
+window.showFinanceForm = function(type) {
+  const container = document.getElementById('finance-form-container');
+  const isIncome = type==='income', isLoan = type==='loan';
+  const color = isIncome?'#27AE60':isLoan?'#F5A623':'#E63329';
+  const title = isIncome?'💰 Add Income':isLoan?'🏦 Add Loan':'💸 Add Expense';
+  const cats = isIncome?['Donation','Membership Fee','Sponsorship','Event Revenue','Grant','Other']:isLoan?['Bank Loan','Member Loan','External Loan','Emergency Fund','Other']:['Operations','Events','Marketing','Equipment','Travel','Salaries','Other'];
+  container.innerHTML = '<div class="section-card" style="border-left:4px solid '+color+';">' +
+    '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">'+title+'</h3>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">' +
+    '<div class="form-group"><label>Date *</label><input type="date" id="fin-date" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;"></div>' +
+    '<div class="form-group"><label>Amount (KES) *</label><input type="number" id="fin-amount" placeholder="e.g. 5000" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;"></div>' +
+    '<div class="form-group"><label>Category *</label><select id="fin-category" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;">' + cats.map(c=>'<option>'+c+'</option>').join('') + '</select></div>' +
+    (isLoan?'<div class="form-group"><label>Lender *</label><input type="text" id="fin-lender" placeholder="e.g. KCB Bank" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;"></div>':'') +
+    (isLoan?'<div class="form-group"><label>Due Date</label><input type="date" id="fin-due" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;"></div>':'') +
+    '<div class="form-group" style="grid-column:1/-1;"><label>Description *</label><input type="text" id="fin-desc" placeholder="e.g. Member registration fees" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;"></div>' +
+    (!isIncome&&!isLoan?'<div class="form-group" style="grid-column:1/-1;"><label>Receipt (optional)</label><input type="file" id="fin-receipt" accept="image/*,application/pdf" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;"></div>':'') +
+    '</div>' +
+    '<div style="display:flex;gap:0.75rem;margin-top:1rem;">' +
+    '<button onclick="saveFinanceEntry(\''+type+'\')" style="background:'+color+';color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Save</button>' +
+    '<button onclick="document.getElementById(\'finance-form-container\').innerHTML=\'\'" style="background:var(--light);color:var(--navy);border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;">Cancel</button>' +
+    '</div></div>';
+};
+
+window.saveFinanceEntry = async function(type) {
+  const date = document.getElementById('fin-date').value;
+  const amount = document.getElementById('fin-amount').value;
+  const category = document.getElementById('fin-category').value;
+  const description = document.getElementById('fin-desc').value;
+  if (!date||!amount||!description) return showToast('Fill all required fields','error');
+  const colName = type==='income'?'financeIncome':type==='loan'?'financeLoans':'financeExpenses';
+  const data = {date, amount:parseFloat(amount), category, description, createdBy:'Admin', createdAt:serverTimestamp()};
+  if (type==='loan') { data.lender=document.getElementById('fin-lender')?.value||''; data.dueDate=document.getElementById('fin-due')?.value||''; data.status='pending'; data.purpose=description; }
+  if (type==='expense') {
+    const fi = document.getElementById('fin-receipt');
+    if (fi?.files[0]) { try { data.receiptUrl = await uploadToCloudinary(fi.files[0]); } catch(e) {} }
+  }
+  await addDoc(collection(db,colName), data);
+  showToast(type==='income'?'💰 Income recorded!':type==='loan'?'🏦 Loan recorded!':'💸 Expense recorded!');
+  loadSection('finance');
+};
+
+window.deleteFinanceEntry = async function(colName, id) {
+  if (!confirm('Delete this entry?')) return;
+  await deleteDoc(doc(db,colName,id));
+  showToast('Entry deleted');
+  loadSection('finance');
+};
+
+window.markLoanRepaid = async function(loanId) {
+  if (!confirm('Mark as repaid?')) return;
+  await updateDoc(doc(db,'financeLoans',loanId), {status:'repaid',repaidAt:serverTimestamp()});
+  showToast('✅ Loan marked as repaid!');
+  loadSection('finance');
+};
+
+window.generateReceipt = function(colName, id) {
+  getDoc(doc(db,colName,id)).then(function(snap) {
+    if (!snap.exists()) return;
+    const d = snap.data();
+    const rNo = 'YAN-' + id.substring(0,8).toUpperCase();
+    const w = window.open('','_blank','width=600,height=800');
+    w.document.write('<html><head><title>YAN Receipt</title><style>body{font-family:Arial,sans-serif;padding:40px;color:#1B2A6B;}.box{border:2px solid #1B2A6B;border-radius:12px;padding:30px;margin-top:20px;}.row{display:flex;justify-content:space-between;margin-bottom:12px;font-size:14px;}.amt{font-size:28px;font-weight:900;color:#27AE60;margin:20px 0;}@media print{button{display:none;}}</style></head><body>');
+    w.document.write('<h2>🌍 Young Africans Network</h2><p style="color:#6B7280;">youngafricansnetwork.org</p>');
+    w.document.write('<div class="box"><h3>Official Receipt — '+rNo+'</h3>');
+    w.document.write('<div class="row"><span>Date:</span><strong>'+( d.date||''  )+'</strong></div>');
+    w.document.write('<div class="row"><span>Description:</span><strong>'+(d.description||'')+'</strong></div>');
+    w.document.write('<div class="row"><span>Category:</span><strong>'+(d.category||'')+'</strong></div>');
+    w.document.write('<div class="amt">KES '+parseFloat(d.amount||0).toLocaleString()+'</div>');
+    w.document.write('<div class="row"><span>Receipt No:</span><strong>'+rNo+'</strong></div>');
+    w.document.write('<div class="row"><span>Issued by:</span><strong>YAN Administration</strong></div></div>');
+    w.document.write('<br><button onclick="window.print()" style="background:#1B2A6B;color:#fff;padding:10px 30px;border:none;border-radius:50px;cursor:pointer;">🖨️ Print / Save PDF</button>');
+    w.document.write('</body></html>'); w.document.close();
+  });
+};
+
+window.generateBalanceSheet = async function() {
+  const [iS,eS,lS] = await Promise.all([getDocs(collection(db,'financeIncome')),getDocs(collection(db,'financeExpenses')),getDocs(collection(db,'financeLoans'))]);
+  const inc = iS.docs.map(d=>d.data()), exp = eS.docs.map(d=>d.data()), lns = lS.docs.map(d=>d.data());
+  const tI=inc.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
+  const tE=exp.reduce((s,e)=>s+(parseFloat(e.amount)||0),0);
+  const tL=lns.filter(l=>l.status!=='repaid').reduce((s,l)=>s+(parseFloat(l.amount)||0),0);
+  const net=tI-tE-tL;
+  const now=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const w=window.open('','_blank','width=700,height=900');
+  w.document.write('<html><head><title>YAN Balance Sheet</title><style>body{font-family:Arial,sans-serif;padding:40px;color:#1B2A6B;}table{width:100%;border-collapse:collapse;}td,th{padding:8px;border-bottom:1px solid #e0e0e0;}th{background:#f8f9ff;}.tot{font-weight:900;background:#f8f9ff;}.pos{color:#27AE60;font-weight:900;}.neg{color:#E63329;font-weight:900;}@media print{button{display:none;}}</style></head><body>');
+  w.document.write('<h1>🌍 Young Africans Network — Balance Sheet</h1><p>As at '+now+'</p>');
+  w.document.write('<h3>💰 Income</h3><table><tr><th>Date</th><th>Description</th><th>Category</th><th style="text-align:right;">KES</th></tr>');
+  inc.forEach(i=>w.document.write('<tr><td>'+(i.date||'')+'</td><td>'+(i.description||'')+'</td><td>'+(i.category||'')+'</td><td style="text-align:right;">'+parseFloat(i.amount||0).toLocaleString()+'</td></tr>'));
+  w.document.write('<tr class="tot"><td colspan="3">TOTAL INCOME</td><td style="text-align:right;" class="pos">KES '+tI.toLocaleString()+'</td></tr></table>');
+  w.document.write('<h3>💸 Expenses</h3><table><tr><th>Date</th><th>Description</th><th>Category</th><th style="text-align:right;">KES</th></tr>');
+  exp.forEach(e=>w.document.write('<tr><td>'+(e.date||'')+'</td><td>'+(e.description||'')+'</td><td>'+(e.category||'')+'</td><td style="text-align:right;">'+parseFloat(e.amount||0).toLocaleString()+'</td></tr>'));
+  w.document.write('<tr class="tot"><td colspan="3">TOTAL EXPENSES</td><td style="text-align:right;" class="neg">KES '+tE.toLocaleString()+'</td></tr></table>');
+  w.document.write('<h3>🏦 Outstanding Loans</h3><table><tr><th>Lender</th><th>Purpose</th><th>Due</th><th style="text-align:right;">KES</th></tr>');
+  lns.filter(l=>l.status!=='repaid').forEach(l=>w.document.write('<tr><td>'+(l.lender||'')+'</td><td>'+(l.purpose||'')+'</td><td>'+(l.dueDate||'')+'</td><td style="text-align:right;">'+parseFloat(l.amount||0).toLocaleString()+'</td></tr>'));
+  w.document.write('<tr class="tot"><td colspan="3">TOTAL OUTSTANDING</td><td style="text-align:right;" class="neg">KES '+tL.toLocaleString()+'</td></tr></table>');
+  w.document.write('<h3>📊 Net Position</h3><table><tr><td>Total Income</td><td style="text-align:right;" class="pos">KES '+tI.toLocaleString()+'</td></tr><tr><td>Less: Expenses</td><td style="text-align:right;" class="neg">KES '+tE.toLocaleString()+'</td></tr><tr><td>Less: Outstanding Loans</td><td style="text-align:right;" class="neg">KES '+tL.toLocaleString()+'</td></tr><tr class="tot"><td>NET POSITION</td><td style="text-align:right;" class="'+(net>=0?'pos':'neg')+'">KES '+net.toLocaleString()+'</td></tr></table>');
+  w.document.write('<br><button onclick="window.print()" style="background:#1B2A6B;color:#fff;padding:10px 30px;border:none;border-radius:50px;cursor:pointer;">🖨️ Print / Save PDF</button></body></html>');
+  w.document.close();
+};
+
+
 window.deleteProgram = async function(colName, progId) {
   if (!confirm('Delete this program? This cannot be undone.')) return;
   try {
@@ -2019,6 +2185,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <button class="nav-item" data-section="assignments" onclick="loadSection('assignments')"><span class="nav-icon">📝</span> Assignments</button>
       <button class="nav-item" data-section="programs" onclick="loadSection('programs')"><span class="nav-icon">🎓</span> Programs Manager</button>
       <button class="nav-item" data-section="notifications" onclick="loadSection('notifications')"><span class="nav-icon">🔔</span> Notifications</button>
+      <button class="nav-item" data-section="finance" onclick="loadSection('finance')"><span class="nav-icon">💰</span> Finance</button>
     </nav>
     <div class="admin-sidebar-footer">
       <button class="btn-logout-admin" onclick="doAdminLogout()">🚪 Sign Out</button>
