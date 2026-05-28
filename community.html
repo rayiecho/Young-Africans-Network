@@ -4708,6 +4708,7 @@ async function loadCareerMaterials() {
       if (m.type === 'video' && m.url) materialsHtml += '<button class="btn-sm btn-navy" onclick="playCareerVideo(\'' + m.id + '\',\'' + m.url.replace(/'/g,"\\'") + '\')">▶ Watch</button>';
       if (m.type === 'article' && m.url) materialsHtml += '<a href="' + sanitize(m.url) + '" target="_blank" class="btn-sm btn-outline" style="text-decoration:none;">🔗 Read</a>';
       if (m.type === 'assignment') materialsHtml += '<button class="btn-sm btn-navy" onclick="openCareerAssignment(\'' + m.id + '\')">📝 Submit</button>';
+      if (m.type !== 'video' && m.type !== 'article' && m.type !== 'assignment' && m.url) materialsHtml += '<a href="' + sanitize(m.url) + '" target="_blank" class="btn-sm btn-navy" style="text-decoration:none;">🔗 Open</a>';
       materialsHtml += '<button class="btn-sm btn-outline" onclick="markCareerDone(\'' + m.id + '\',\'' + m.pathId + '\')">✅ Done</button>';
       if (isAdminOrCareerHead) materialsHtml += '<button class="btn-sm btn-red" onclick="deleteCareerMaterial(\'' + m.id + '\')">🗑️</button>';
       materialsHtml += '</div></div>';
