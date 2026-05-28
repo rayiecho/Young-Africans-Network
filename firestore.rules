@@ -324,6 +324,16 @@ service cloud.firestore {
       allow write: if isLoggedIn() && isOwner(userId);
     }
 
+    match /financeIncome/{docId} {
+      allow read, write: if isAdmin();
+    }
+    match /financeExpenses/{docId} {
+      allow read, write: if isAdmin();
+    }
+    match /financeLoans/{docId} {
+      allow read, write: if isAdmin();
+    }
+
 
     match /trainingPrograms/{progId} {
       allow read: if isLoggedIn();
