@@ -6355,12 +6355,6 @@ async function openProgram(programId) {
     html += '</div>';
   });
   html += '</div>';
-    if (unlocked) {
-      html += '<button class="btn-sm btn-navy" onclick="openLessonContent(\'' + programId + '\',\'' + m.id + '\',\'trainingPrograms\')">' + (isDone ? 'Review' : 'Start') + '</button>';
-    }
-    html += '</div>';
-    html += '</div>';
-  });
 
   html += '</div>';
   box.innerHTML = html;
