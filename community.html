@@ -484,32 +484,50 @@ function enterPlatform() {
   updateNotifBadge();
 }
 
+function showTabError(tab) {
+  const panel = document.getElementById('tab-' + tab);
+  if (panel) panel.innerHTML = '<div style="max-width:500px;margin:3rem auto;text-align:center;padding:2rem;">'
+    + '<div style="font-size:3rem;margin-bottom:1rem;"></div>'
+    + '<h3 style="font-family:Playfair Display,serif;font-size:1.2rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Something went wrong</h3>'
+    + '<p style="color:var(--gray);font-size:0.85rem;margin-bottom:1.5rem;">This section could not load. Please try again or contact tech@youngafricansnetwork.org</p>'
+    + '<button onclick="showTab(\'' + tab + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;">Try Again</button>'
+    + '</div>';
+}
+
+async function safeLoad(tab, fn) {
+  try {
+    await fn();
+  } catch(e) {
+    console.error('Tab error [' + tab + ']:', e);
+    showTabError(tab);
+  }
+}
+
 function loadTabContent(tab) {
   unsubscribers.forEach(u => u());
   unsubscribers = [];
-  if (tab === 'feed') loadFeed();
-  if (tab === 'hubs') loadYANHubs();
-  if (tab === 'meetings') loadMeetings();
-  if (tab === 'profile') loadProfile();
-  if (tab === 'head') loadHeadPanel();
-  if (tab === 'admin') loadAdminPanel();
-  if (tab === 'notifications') loadNotifications();
-  if (tab === 'directory') loadDirectory();
-  if (tab === 'ai') loadAI();
-  if (tab === 'scholarships') loadScholarships();
-  if (tab === 'career') loadCareerHub();
-  if (tab === 'community-impact') loadCommunityHub();
-  if (tab === 'mental-health') loadMentalHealthHub();
-  if (tab === 'programs-hub') loadProgramsHub();
-  if (tab === 'comms-hub') loadCommsHub();
-  if (tab === 'partnerships-hub') loadPartnershipsHub();
-  if (tab === 'magazine') loadMagazine();
-  if (tab === 'achievements') loadAchievements();
-  if (tab === 'resources') loadResources();
-  if (tab === 'polls') loadPolls();
-  if (tab === 'messages') loadMessagesTab();
-  if (tab === 'messages') loadMessagesTab();
-  if (tab === 'calendar') loadCalendar();
+  if (tab === 'feed') safeLoad(tab, loadFeed);
+  if (tab === 'hubs') safeLoad(tab, loadYANHubs);
+  if (tab === 'meetings') safeLoad(tab, loadMeetings);
+  if (tab === 'profile') safeLoad(tab, loadProfile);
+  if (tab === 'head') safeLoad(tab, loadHeadPanel);
+  if (tab === 'admin') safeLoad(tab, loadAdminPanel);
+  if (tab === 'notifications') safeLoad(tab, loadNotifications);
+  if (tab === 'directory') safeLoad(tab, loadDirectory);
+  if (tab === 'ai') safeLoad(tab, loadAI);
+  if (tab === 'scholarships') safeLoad(tab, loadScholarships);
+  if (tab === 'career') safeLoad(tab, loadCareerHub);
+  if (tab === 'community-impact') safeLoad(tab, loadCommunityHub);
+  if (tab === 'mental-health') safeLoad(tab, loadMentalHealthHub);
+  if (tab === 'programs-hub') safeLoad(tab, loadProgramsHub);
+  if (tab === 'comms-hub') safeLoad(tab, loadCommsHub);
+  if (tab === 'partnerships-hub') safeLoad(tab, loadPartnershipsHub);
+  if (tab === 'magazine') safeLoad(tab, loadMagazine);
+  if (tab === 'achievements') safeLoad(tab, loadAchievements);
+  if (tab === 'resources') safeLoad(tab, loadResources);
+  if (tab === 'polls') safeLoad(tab, loadPolls);
+  if (tab === 'messages') safeLoad(tab, loadMessagesTab);
+  if (tab === 'calendar') safeLoad(tab, loadCalendar);
 }
 
 // MEMBER DIRECTORY
