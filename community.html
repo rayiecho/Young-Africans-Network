@@ -10041,6 +10041,11 @@ window.sendYANGuideFloat = async function() {
   }
 };
 
+window.doSignOut = async function() {
+  await signOut(auth);
+  showScreen('screen-landing');
+};
+
 window.resendVerificationEmail = async function() {
   try {
     await sendEmailVerification(currentUser);
