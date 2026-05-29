@@ -1408,7 +1408,7 @@ async function downloadCertificate(certId) {
     'programs': 'Technology & Web Development Program'
   };
 
-  let achievement = deptAchievements[u.department] || (dept?.name || 'YAN Program');
+  let achievement = deptAchievements[deptOverride || u.department] || (dept?.name ? 'Active Contribution to ' + dept.name : 'YAN Program');
   let enrolledDate = '';
   let modulesCompleted = 0;
 
@@ -1428,6 +1428,7 @@ async function downloadCertificate(certId) {
         const progSnap = await getDoc(doc(db, colName, prog.programId));
         if (progSnap.exists() && progSnap.data().skills) skills = progSnap.data().skills;
       }
+    }
     }
   } catch(e) {}
 
