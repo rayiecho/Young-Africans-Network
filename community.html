@@ -10384,7 +10384,7 @@ async function loadMentorshipTab() {
     container.innerHTML = html;
     showMentorshipSection('find');
   } catch(e) {
-    document.getElementById('tab-achievements').innerHTML = '<p style="color:var(--red);padding:1rem;">Error: ' + e.message + '</p>';
+    document.getElementById('mentorship-container').innerHTML = '<p style="color:var(--red);padding:1rem;">Error: ' + e.message + '</p>';
   }
 }
 
