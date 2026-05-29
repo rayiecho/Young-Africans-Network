@@ -9496,6 +9496,43 @@ window.checkEmailVerified = async function() {
 };
 
 
+
+window.submitProgramApplication = async function(programId, programTitleEncoded) {
+  const motivation = document.getElementById('app-motivation').value.trim();
+  const background = document.getElementById('app-background').value.trim();
+  const goals = document.getElementById('app-goals').value.trim();
+  const commitment = document.getElementById('app-commitment').value;
+  const programTitle = decodeURIComponent(programTitleEncoded);
+
+  if (!motivation || motivation.length < 30) return showToast('Please explain your motivation in detail (at least 30 characters)', 'error');
+  if (!background || background.length < 20) return showToast('Please describe your background', 'error');
+  if (!goals || goals.length < 20) return showToast('Please describe your goals after completion', 'error');
+
+  try {
+    await addDoc(collection(db, 'programApplications'), {
+      userId: currentUser.uid,
+      userName: currentUserData.name,
+      userEmail: currentUserData.email || '',
+      userCountry: currentUserData.country || '',
+      userDepartment: currentUserData.department || '',
+      programId, programTitle,
+      motivation, background, goals, commitment,
+      status: 'pending',
+      appliedAt: serverTimestamp()
+    });
+    document.querySelector('div[style*="position:fixed"]')?.remove();
+    showToast('Application submitted! Admin will review it soon.');
+    await addDoc(collection(db, 'notifications'), {
+      title: 'Application Received',
+      message: 'Your application for ' + programTitle + ' has been received. We will review it and notify you soon.',
+      type: 'info', userId: currentUser.uid, postedBy: 'YAN Admin',
+      createdAt: serverTimestamp(), readBy: []
+    });
+  } catch(e) {
+    showToast('Error: ' + e.message, 'error');
+  }
+};
+
 // ===== YAN POINTS SYSTEM =====
 const POINTS_MAP = {
   post: 5, comment: 2, like_received: 1, meeting: 20,
