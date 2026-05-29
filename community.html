@@ -10207,7 +10207,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .dd-items{display:none;background:rgba(0,0,0,0.2);}
 .dd-item{display:block;width:100%;padding:0.6rem 1.25rem 0.6rem 2.5rem;color:rgba(255,255,255,0.55);font-size:0.8rem;font-weight:500;cursor:pointer;border:none;background:none;text-align:left;font-family:Poppins,sans-serif;transition:all 0.2s;}
 .dd-item:hover{color:var(--white);background:rgba(255,255,255,0.06);}
-.tab-btn{display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1.25rem;color:rgba(255,255,255,0.6);font-size:0.85rem;font-weight:500;cursor:pointer;transition:all 0.2s;border:none;background:none;width:100%;text-align:left;}
+.tab-btn{display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1.25rem;color:rgba(255,255,255,0.6);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;border:none;background:none;width:100%;text-align:left;}
 .tab-btn:hover{color:var(--white);background:rgba(255,255,255,0.06);}
 .tab-btn.active{color:var(--white);background:rgba(255,255,255,0.12);border-left:3px solid var(--gold);}
 .tab-btn .tab-icon{font-size:0.65rem;width:24px;text-align:center;color:var(--gold);font-weight:900;letter-spacing:-1px;}
@@ -10569,10 +10569,10 @@ h2,h3{position:relative;}
       </div>
     </div>
     <nav class="sidebar-nav">
-      <button class="tab-btn active" data-tab="feed" onclick="showTab('feed')"><span class="tab-icon">—</span> MAIN FEED</button>
+      <button class="tab-btn active" data-tab="feed" onclick="showTab('feed')">MAIN FEED</button>
 
       <div class="sidebar-dropdown">
-        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('hubs-dd')"><span class="tab-icon">—</span> YAN HUBS <span class="dd-arrow" id="arrow-hubs-dd">&#9658;</span></button>
+        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('hubs-dd')">YAN HUBS <span class="dd-arrow" id="arrow-hubs-dd">&#9658;</span></button>
         <div class="dd-items" id="hubs-dd">
           <button class="dd-item" onclick="showTab('hubs');closeDropdowns()">Programs &amp; Training</button>
           <button class="dd-item" onclick="showTab('scholarships');closeDropdowns()">Scholarships</button>
@@ -10585,7 +10585,7 @@ h2,h3{position:relative;}
       </div>
 
       <div class="sidebar-dropdown">
-        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('library-dd')"><span class="tab-icon">—</span> YAN LIBRARY <span class="dd-arrow" id="arrow-library-dd">&#9658;</span></button>
+        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('library-dd')">YAN LIBRARY <span class="dd-arrow" id="arrow-library-dd">&#9658;</span></button>
         <div class="dd-items" id="library-dd">
           <button class="dd-item" onclick="showTab('magazine');closeDropdowns()">Magazine</button>
           <button class="dd-item" onclick="showTab('resources');closeDropdowns()">Resources</button>
@@ -10594,7 +10594,7 @@ h2,h3{position:relative;}
       </div>
 
       <div class="sidebar-dropdown">
-        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('support-dd')"><span class="tab-icon">—</span> YAN SUPPORT <span class="dd-arrow" id="arrow-support-dd">&#9658;</span></button>
+        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('support-dd')">YAN SUPPORT <span class="dd-arrow" id="arrow-support-dd">&#9658;</span></button>
         <div class="dd-items" id="support-dd">
           <button class="dd-item" onclick="showTab('directory');closeDropdowns()">Directory</button>
           <button class="dd-item" onclick="showTab('polls');closeDropdowns()">Polls</button>
@@ -10603,10 +10603,10 @@ h2,h3{position:relative;}
         </div>
       </div>
 
-      <button class="tab-btn" data-tab="mentorship" onclick="showTab('mentorship')"><span class="tab-icon">—</span> MENTORSHIP</button>
+      <button class="tab-btn" data-tab="mentorship" onclick="showTab('mentorship')">MENTORSHIP</button>
 
       <div class="sidebar-dropdown">
-        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('profile-dd')"><span class="tab-icon">—</span> MY PROFILE <span class="dd-arrow" id="arrow-profile-dd">&#9658;</span></button>
+        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('profile-dd')">MY PROFILE <span class="dd-arrow" id="arrow-profile-dd">&#9658;</span></button>
         <div class="dd-items" id="profile-dd">
           <button class="dd-item" onclick="showTab('profile');closeDropdowns()">My Profile</button>
           <button class="dd-item" onclick="showTab('achievements');closeDropdowns()">Achievements</button>
@@ -10615,8 +10615,8 @@ h2,h3{position:relative;}
         </div>
       </div>
 
-      <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">—</span> HEAD PANEL</button>
-      <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;"><span class="tab-icon">—</span> ADMIN PANEL</button>
+      <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;">HEAD PANEL</button>
+      <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;">ADMIN PANEL</button>
     </nav>
     <div class="sidebar-logout">
       <button class="btn-logout" onclick="doLogout()"><span></span> Sign Out</button>
