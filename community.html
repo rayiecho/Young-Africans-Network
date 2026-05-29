@@ -9865,7 +9865,7 @@ window.showMentorshipSection = async function(section) {
         html += '<div style="background:var(--white);border-radius:12px;padding:1rem;margin-bottom:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);display:flex;justify-content:space-between;align-items:center;">';
         html += '<div><p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(m.mentorName||'') + '</p>';
         html += '<p style="font-size:0.75rem;color:var(--gray);">Status: <span style="color:' + (m.status==='active'?'#27AE60':'var(--gray)') + ';font-weight:600;">' + (m.status||'pending') + '</span></p></div>';
-        html += '<button onclick="openConversation(\'' + [currentUser.uid,m.mentorId].sort().join('_') + '\',\'' + m.mentorId + '\',\'' + encodeURIComponent(m.mentorName||'') + '\',\''  + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Chat</button>';
+        html += '<button onclick="showTab('messages');setTimeout(()=>openConversation(\'' + [currentUser.uid,m.mentorId].sort().join('_') + '\',\'' + m.mentorId + '\',\'' + encodeURIComponent(m.mentorName||'') + '\',\''  + '\'),500)" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Chat</button>';
         html += '</div>';
       });
     }
@@ -9881,7 +9881,7 @@ window.showMentorshipSection = async function(section) {
           html += '<button onclick="acceptMentorship(\'' + d.id + '\')" style="background:#27AE60;color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Accept</button>';
         }
         html += '<button onclick="logMentoringSession(\'' + d.id + '\',\'' + m.menteeId + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Log Session</button>';
-        html += '<button onclick="openConversation(\'' + [currentUser.uid,m.menteeId].sort().join('_') + '\',\'' + m.menteeId + '\',\'' + encodeURIComponent(m.menteeName||'') + '\',\'' + '\')" style="background:var(--light);color:var(--navy);border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Chat</button>';
+        html += '<button onclick="showTab('messages');setTimeout(()=>openConversation(\'' + [currentUser.uid,m.menteeId].sort().join('_') + '\',\'' + m.menteeId + '\',\'' + encodeURIComponent(m.menteeName||'') + '\',\'' + '\'),500)" style="background:var(--light);color:var(--navy);border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Chat</button>';
         html += '</div></div>';
       });
     }
