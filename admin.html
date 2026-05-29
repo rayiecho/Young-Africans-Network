@@ -338,8 +338,8 @@ async function rejectRecLetter(recId) {
 async function loadFormsAdmin(c) {
   try {
     const [joinSnap, contactSnap] = await Promise.all([
-      getDocs(query(collection(db, 'joinRequests'), orderBy('submittedAt', 'desc'))),
-      getDocs(query(collection(db, 'contactSubmissions'), orderBy('submittedAt', 'desc')))
+      getDocs(query(collection(db, 'joinRequests'), orderBy('submittedAt', 'desc'))).catch(() => getDocs(collection(db, 'joinRequests'))),
+      getDocs(query(collection(db, 'contactSubmissions'), orderBy('submittedAt', 'desc'))).catch(() => getDocs(collection(db, 'contactSubmissions')))
     ]);
 
     let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">'
