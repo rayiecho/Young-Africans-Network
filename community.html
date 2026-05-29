@@ -9668,9 +9668,9 @@ async function loadMentorshipTab() {
     html += '<h2 style="font-family:Playfair Display,serif;font-size:1.5rem;font-weight:900;margin-bottom:0.25rem;">YAN Mentorship Program</h2>';
     html += '<p style="color:rgba(255,255,255,0.75);font-size:0.85rem;">Connect with experienced members who can guide your journey</p>';
     html += '<div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap;">';
-    html += '<button onclick="showMentorshipSection('find')" style="background:rgba(255,255,255,0.2);color:#fff;border:1.5px solid rgba(255,255,255,0.4);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">Find a Mentor</button>';
-    html += '<button onclick="showMentorshipSection('become')" style="background:rgba(255,255,255,0.2);color:#fff;border:1.5px solid rgba(255,255,255,0.4);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">Become a Mentor</button>';
-    html += '<button onclick="showMentorshipSection('my')" style="background:rgba(255,255,255,0.2);color:#fff;border:1.5px solid rgba(255,255,255,0.4);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">My Mentorships</button>';
+    html += '<button onclick="showMentorshipSection(\'find\')" style="background:rgba(255,255,255,0.2);color:#fff;border:1.5px solid rgba(255,255,255,0.4);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">Find a Mentor</button>';
+    html += '<button onclick="showMentorshipSection(\'become\')" style="background:rgba(255,255,255,0.2);color:#fff;border:1.5px solid rgba(255,255,255,0.4);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">Become a Mentor</button>';
+    html += '<button onclick="showMentorshipSection(\'my\')" style="background:rgba(255,255,255,0.2);color:#fff;border:1.5px solid rgba(255,255,255,0.4);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">My Mentorships</button>';
     html += '</div></div>';
     html += '<div id="mentorship-section"></div></div>';
     container.innerHTML = html;
@@ -9877,7 +9877,7 @@ window.aiMatchMentor = async function() {
       + '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize(match.country||'') + ' · ' + sanitize(match.department||'') + '</p>'
       + '<p style="font-size:0.82rem;color:var(--gray);margin:0.5rem 0;">' + sanitize(match.bio||'') + '</p>'
       + '<button onclick="requestMentor(\'' + match.id + '\',\'' + encodeURIComponent(match.name||'') + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.6rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;margin-top:0.75rem;">Request This Mentor</button>'
-      + '<button onclick="showMentorshipSection('find')" style="background:none;border:none;color:var(--gray);font-size:0.82rem;cursor:pointer;margin-left:1rem;">View All Mentors</button>'
+      + '<button onclick="showMentorshipSection(\'find\')" style="background:none;border:none;color:var(--gray);font-size:0.82rem;cursor:pointer;margin-left:1rem;">View All Mentors</button>'
       + '</div>';
   } catch(e) {
     showToast('AI matching failed. Browse mentors manually.', 'error');
