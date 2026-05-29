@@ -75,6 +75,56 @@ service cloud.firestore {
       allow read: if isAdmin();
     }
 
+    match /memberPoints/{userId} {
+      allow read: if isLoggedIn();
+      allow write: if isLoggedIn() && request.auth.uid == userId;
+    }
+    match /pointsHistory/{docId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+    }
+    match /mentorProfiles/{userId} {
+      allow read: if isLoggedIn();
+      allow write: if isLoggedIn() && request.auth.uid == userId;
+    }
+    match /mentorships/{docId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn() && (
+        resource.data.mentorId == request.auth.uid ||
+        resource.data.menteeId == request.auth.uid
+      );
+    }
+    match /mentoringSessions/{docId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+    }
+    match /programApplications/{appId} {
+      allow read: if isLoggedIn() && (
+        resource.data.userId == request.auth.uid || isAdminOrHead()
+      );
+      allow create: if isLoggedIn();
+      allow update: if isAdminOrHead();
+      allow delete: if isAdmin();
+    }
+
+    match /config/{docId} {
+      allow read: if isLoggedIn();
+      allow write: if isAdmin();
+    }
+
+    match /conversations/{convId} {
+      allow read, write: if isLoggedIn() && (
+        resource == null || 
+        request.auth.uid in resource.data.participants ||
+        request.auth.uid in request.resource.data.participants
+      );
+    }
+    match /conversations/{convId}/messages/{msgId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn() && request.resource.data.senderId == request.auth.uid;
+    }
+
     match /certificates/{certId} {
       allow read: if true;
       allow create: if isLoggedIn();
