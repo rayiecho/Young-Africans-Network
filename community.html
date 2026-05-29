@@ -558,7 +558,7 @@ function loadTabContent(tab) {
   if (tab === 'comms-hub') safeLoad(tab, loadCommsHub);
   if (tab === 'partnerships-hub') safeLoad(tab, loadPartnershipsHub);
   if (tab === 'magazine') safeLoad(tab, loadMagazine);
-  if (tab === 'achievements') safeLoad(tab, loadAchievements);
+  if (tab === 'achievements') safeLoad(tab, loadLeaderboard);
   if (tab === 'resources') safeLoad(tab, loadResources);
   if (tab === 'polls') safeLoad(tab, loadPolls);
   if (tab === 'messages') safeLoad(tab, loadMessagesTab);
@@ -3025,7 +3025,8 @@ async function markAttendance(meetingId, meetingTitle) {
     markedAt: serverTimestamp(),
     meetingTitle
   });
-  showToast('Attendance marked! ');
+  showToast('Attendance marked!');
+  awardPoints('meeting');
 }
 
 async function viewAttendance(meetingId, meetingTitle) {
@@ -9497,6 +9498,149 @@ window.checkEmailVerified = async function() {
     else alert('Error: ' + e.message);
   }
 };
+
+
+// ===== YAN POINTS SYSTEM =====
+const POINTS_MAP = {
+  post: 5, comment: 2, like_received: 1, meeting: 20,
+  lesson_complete: 15, quiz_pass: 25, program_complete: 100,
+  cert_request: 10, mentoring_session: 30, referral: 50
+};
+
+const TIERS = [
+  {name:'Legend', min:2000, reward:'Full YAN Recognition Package + Special Role', icon:'L', color:'#9B59B6'},
+  {name:'Diamond', min:1000, reward:'YAN T-Shirt + Website Feature', icon:'D', color:'#1ABC9C'},
+  {name:'Gold', min:500, reward:'YAN Book + Recognition Post', icon:'G', color:'#F5A623'},
+  {name:'Silver', min:200, reward:'YAN Certificate of Excellence', icon:'S', color:'#95A5A6'},
+  {name:'Bronze', min:0, reward:'Recognition Badge', icon:'B', color:'#CD7F32'},
+];
+
+function getTier(points) {
+  return TIERS.find(t => points >= t.min) || TIERS[TIERS.length-1];
+}
+
+function getNextTier(points) {
+  const idx = TIERS.findIndex(t => points >= t.min);
+  return idx > 0 ? TIERS[idx-1] : null;
+}
+
+async function awardPoints(action, userId, userName) {
+  const uid = userId || currentUser?.uid;
+  const uname = userName || currentUserData?.name;
+  if (!uid) return;
+  const pts = POINTS_MAP[action] || 0;
+  if (!pts) return;
+  try {
+    const ref = doc(db, 'memberPoints', uid);
+    const snap = await getDoc(ref);
+    const current = snap.exists() ? (snap.data().total || 0) : 0;
+    const newTotal = current + pts;
+    const oldTier = getTier(current);
+    const newTier = getTier(newTotal);
+    await setDoc(ref, {
+      userId: uid, userName: uname,
+      total: newTotal,
+      lastUpdated: serverTimestamp(),
+      [`earned_${action}`]: (snap.data()?.[`earned_${action}`] || 0) + pts
+    }, {merge: true});
+    // Log transaction
+    await addDoc(collection(db, 'pointsHistory'), {
+      userId: uid, action, points: pts,
+      total: newTotal, createdAt: serverTimestamp()
+    });
+    // Notify tier upgrade
+    if (oldTier.name !== newTier.name) {
+      showToast('Tier upgraded to ' + newTier.name + '! Reward: ' + newTier.reward);
+      await addDoc(collection(db, 'notifications'), {
+        title: 'Tier Upgrade - ' + newTier.name + '!',
+        message: 'Congratulations! You have reached ' + newTier.name + ' tier. Your reward: ' + newTier.reward + '. Contact info@youngafricansnetwork.org to claim.',
+        type: 'success', userId: uid, postedBy: 'YAN Points System',
+        createdAt: serverTimestamp(), readBy: []
+      });
+    }
+  } catch(e) { console.log('Points error:', e); }
+}
+
+async function loadLeaderboard() {
+  const container = document.getElementById('tab-achievements');
+  if (!container) return;
+  try {
+    const snap = await getDocs(query(collection(db, 'memberPoints'), orderBy('total', 'desc'), limit(50)));
+    const mySnap = await getDoc(doc(db, 'memberPoints', currentUser.uid));
+    const myPoints = mySnap.exists() ? mySnap.data().total || 0 : 0;
+    const myTier = getTier(myPoints);
+    const nextTier = getNextTier(myPoints);
+
+    let html = '<div style="max-width:800px;margin:0 auto;">';
+
+    // My points card
+    html += '<div style="background:linear-gradient(135deg,var(--navy),#2D3F7B);border-radius:20px;padding:1.5rem;margin-bottom:1.5rem;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">';
+    html += '<div style="display:flex;align-items:center;gap:1rem;">';
+    html += '<div style="width:56px;height:56px;border-radius:50%;background:' + myTier.color + ';display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;color:#fff;">' + myTier.icon + '</div>';
+    html += '<div><h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;margin-bottom:2px;">' + myPoints + ' Points</h2>';
+    html += '<p style="color:rgba(255,255,255,0.75);font-size:0.82rem;">' + myTier.name + ' Tier — ' + myTier.reward + '</p>';
+    if (nextTier) {
+      const needed = nextTier.min - myPoints;
+      html += '<p style="color:var(--gold);font-size:0.75rem;margin-top:4px;">' + needed + ' points to ' + nextTier.name + '</p>';
+      html += '<div style="width:200px;height:4px;background:rgba(255,255,255,0.2);border-radius:50px;margin-top:6px;">';
+      html += '<div style="width:' + Math.min(100, ((myPoints - (TIERS[TIERS.findIndex(t=>t.name===myTier.name)+1]?.min||0)) / (nextTier.min - (TIERS[TIERS.findIndex(t=>t.name===myTier.name)+1]?.min||0))) * 100) + '%;height:4px;background:var(--gold);border-radius:50px;"></div></div>';
+    }
+    html += '</div></div>';
+    html += '<div style="text-align:right;"><p style="font-size:0.78rem;color:rgba(255,255,255,0.6);">Reward</p><p style="font-size:0.85rem;font-weight:700;">' + myTier.reward + '</p></div>';
+    html += '</div>';
+
+    // Tiers overview
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.75rem;margin-bottom:1.5rem;">';
+    [...TIERS].reverse().forEach(t => {
+      const active = myTier.name === t.name;
+      html += '<div style="background:var(--white);border-radius:12px;padding:1rem;text-align:center;border:2px solid ' + (active ? t.color : 'transparent') + ';box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
+      html += '<div style="width:40px;height:40px;border-radius:50%;background:' + t.color + ';display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;margin:0 auto 0.5rem;">' + t.icon + '</div>';
+      html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);">' + t.name + '</p>';
+      html += '<p style="font-size:0.7rem;color:var(--gray);">' + t.min + '+ pts</p>';
+      html += '<p style="font-size:0.68rem;color:var(--gray);margin-top:4px;">' + t.reward + '</p>';
+      html += '</div>';
+    });
+    html += '</div>';
+
+    // Leaderboard
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">';
+    html += '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Top Members</h3>';
+    snap.docs.forEach((d, idx) => {
+      const data = d.data();
+      const tier = getTier(data.total || 0);
+      const isMe = d.id === currentUser.uid;
+      html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;border-radius:12px;background:' + (isMe ? 'rgba(27,42,107,0.05)' : '') + ';margin-bottom:0.5rem;">';
+      html += '<span style="font-size:0.9rem;font-weight:800;color:' + (idx < 3 ? ['#F5A623','#95A5A6','#CD7F32'][idx] : 'var(--gray)') + ';width:28px;">' + (idx+1) + '</span>';
+      html += '<div style="width:36px;height:36px;border-radius:50%;background:' + tier.color + ';display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.85rem;">' + (data.userName||'?').charAt(0) + '</div>';
+      html += '<div style="flex:1;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(data.userName||'Member') + (isMe ? ' (You)' : '') + '</p>';
+      html += '<p style="font-size:0.72rem;color:var(--gray);">' + tier.name + ' Tier</p></div>';
+      html += '<span style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + (data.total||0) + ' pts</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+
+    // How to earn points
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-top:1rem;">';
+    html += '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">How to Earn Points</h3>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.5rem;">';
+    const actions = [
+      ['Post on Feed', 5], ['Comment', 2], ['Like Received', 1],
+      ['Attend Meeting', 20], ['Complete Lesson', 15], ['Pass Quiz', 25],
+      ['Complete Program', 100], ['Mentoring Session', 30], ['Refer a Member', 50]
+    ];
+    actions.forEach(([a, p]) => {
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0.75rem;background:var(--light);border-radius:8px;">';
+      html += '<span style="font-size:0.78rem;color:var(--navy);">' + a + '</span>';
+      html += '<span style="font-size:0.78rem;font-weight:700;color:var(--gold);">+' + p + '</span></div>';
+    });
+    html += '</div></div></div>';
+    container.innerHTML = html;
+  } catch(e) {
+    console.error('Leaderboard error:', e);
+    document.getElementById('tab-achievements').innerHTML = '<p style="color:var(--red);padding:1rem;">Error loading leaderboard: ' + e.message + '</p>';
+  }
+}
+window.loadLeaderboard = loadLeaderboard;
 
 // ===== MESSAGING SYSTEM =====
 let activeConversationId = null;
