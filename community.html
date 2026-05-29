@@ -364,7 +364,7 @@ async function doRegister() {
       }
       localStorage.removeItem('yan_referral');
     }
-    showWelcomeModal();
+    showScreen('screen-verify-email');
   } catch(e) {
     showToast(e.message, 'error');
   } finally {
@@ -10345,6 +10345,7 @@ h2,h3{position:relative;}
     <div style="font-size:3rem;margin-bottom:1rem;"></div>
     <h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:0.75rem;">Verify Your Email</h2>
     <p style="color:var(--gray);font-size:0.88rem;line-height:1.7;margin-bottom:1.5rem;">We sent a verification link to your email address. Please check your inbox and click the link to activate your account.</p>
+    <a href="https://chat.whatsapp.com/BlvxC0j6sUUBfWjbIW9dH9" target="_blank" style="display:block;background:#25D366;color:#fff;padding:0.75rem 1.5rem;border-radius:50px;font-weight:700;font-size:0.88rem;text-decoration:none;margin-bottom:1rem;text-align:center;"> Join YAN WhatsApp Community</a>
     <div style="background:rgba(27,42,107,0.05);border-radius:12px;padding:1rem;margin-bottom:1.5rem;">
       <p style="font-size:0.82rem;color:var(--gray);">Didn't receive the email? Check your spam folder or click below to resend.</p>
     </div>
