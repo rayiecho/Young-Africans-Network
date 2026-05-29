@@ -1000,8 +1000,8 @@ async function requestCertificate(deptOverride) {
     + '<label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Any specific achievements or milestones?</label>'
     + '<textarea id="cert-achievements" rows="3" placeholder="e.g. Led a community project, completed all training materials, mentored new members..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;"></textarea></div>'
     + '<div style="display:flex;gap:1rem;">'
-    + '<button onclick="submitCertRequest('' + dept + '','' + (deptInfo?.name||dept) + '')" style="flex:1;background:var(--navy);color:#fff;border:none;padding:0.85rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Submit Request</button>'
-    + '<button onclick="this.closest('div[style*=fixed]').remove()" style="background:var(--light);color:var(--navy);border:none;padding:0.85rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;">Cancel</button>'
+    + '<button onclick="submitCertRequest(\'' + dept + '\',\'' + (deptInfo?.name||dept) + '\')" style="flex:1;background:var(--navy);color:#fff;border:none;padding:0.85rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Submit Request</button>'
+    + '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:var(--light);color:var(--navy);border:none;padding:0.85rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;">Cancel</button>'
     + '</div></div>';
   document.body.appendChild(modal);
 }
