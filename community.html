@@ -150,9 +150,10 @@ window.addEventListener('beforeunload', function() {
 
 // Show loading screen immediately on page load
 document.addEventListener('DOMContentLoaded', function() {
+  // Hide ALL screens immediately to prevent flash
+  document.querySelectorAll('.screen').forEach(s => { s.style.display = 'none'; s.classList.remove('active'); });
   const loading = document.getElementById('screen-loading');
   if (loading) { loading.classList.add('active'); loading.style.display = 'flex'; }
-  // Keep loading screen visible until auth resolves - never show landing on refresh
   document.getElementById('screen-landing') && (document.getElementById('screen-landing').style.display = 'none');
   // Show slow message after 5 seconds
   setTimeout(() => {
