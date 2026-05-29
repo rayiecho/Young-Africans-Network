@@ -1412,23 +1412,25 @@ async function downloadCertificate(certId) {
   let enrolledDate = '';
   let modulesCompleted = 0;
 
+  const hubDept = deptOverride || u.department;
   try {
-    const progressSnap = await getDocs(query(
-      collection(db, 'learningProgress'),
-      where('userId', '==', currentUser.uid)
-    ));
-    if (!progressSnap.empty) {
-      const prog = progressSnap.docs[0].data();
-      if (prog.programTitle) achievement = prog.programTitle.replace(/^YAN\s+/i, '');
-      if (prog.enrolledAt?.toDate) enrolledDate = prog.enrolledAt.toDate().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
-      if (prog.modulesCompleted) modulesCompleted = prog.modulesCompleted.length;
-      // Pull skills from actual program
-      if (prog.programId) {
-        const colName = u.department === 'career' ? 'careerPrograms' : 'trainingPrograms';
-        const progSnap = await getDoc(doc(db, colName, prog.programId));
-        if (progSnap.exists() && progSnap.data().skills) skills = progSnap.data().skills;
-    }
-    }
+    if (hubDept === 'programs' || hubDept === 'tech' || hubDept === 'career') {
+      const progressColName = hubDept === 'career' ? 'careerLearningProgress' : 'learningProgress';
+      const progressSnap = await getDocs(query(
+        collection(db, progressColName),
+        where('userId', '==', currentUser.uid)
+      ));
+      if (!progressSnap.empty) {
+        const prog = progressSnap.docs[0].data();
+        if (prog.programTitle) achievement = prog.programTitle.replace(/^YAN\s+/i, '');
+        if (prog.enrolledAt?.toDate) enrolledDate = prog.enrolledAt.toDate().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+        if (prog.modulesCompleted) modulesCompleted = prog.modulesCompleted.length;
+        if (prog.programId) {
+          const pCol = hubDept === 'career' ? 'careerPrograms' : 'trainingPrograms';
+          const progSnap = await getDoc(doc(db, pCol, prog.programId));
+          if (progSnap.exists() && progSnap.data().skills) skills = progSnap.data().skills;
+        }
+      }
     }
   } catch(e) {}
 
