@@ -3847,17 +3847,17 @@ function renderAchievementsGrid(type) {
     <div style="background:var(--white);border-radius:20px;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,0.07);text-align:center;transition:transform 0.2s;position:relative;overflow:hidden;"
       onmouseover="this.style.transform='translateY(-6px)'"
       onmouseout="this.style.transform='translateY(0)'">
-      <div style="position:absolute;top:0;left:0;right:0;height:4px;background:\${a.badgeColor};"></div>
+      <div style="position:absolute;top:0;left:0;right:0;height:4px;background:${a.badgeColor};"></div>
       <div style="width:72px;height:72px;border-radius:50%;margin:0 auto 1rem;overflow:hidden;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:900;color:#fff;border:3px solid var(--light);">
-        \${a.photoUrl
-          ? \`<img src="\${a.photoUrl}" style="width:100%;height:100%;object-fit:cover;">\`
+        ${a.photoUrl
+          ? `<img src="${a.photoUrl}" style="width:100%;height:100%;object-fit:cover;">`
           : (a.name||'?')[0].toUpperCase()}
       </div>
-      <div style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">\${sanitize(a.name)}</div>
-      <div style="display:inline-block;background:\${a.badgeColor}18;color:\${a.badgeColor};padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;margin-bottom:0.75rem;">\${a.badge}</div>
-      <div style="font-size:0.88rem;font-weight:600;color:var(--navy);margin-bottom:0.25rem;">\${a.icon} \${sanitize(a.title)}</div>
-      <div style="font-size:0.75rem;color:var(--gray);line-height:1.5;">\${sanitize(a.subtitle)}</div>
-      <div style="font-size:0.68rem;color:var(--gray);margin-top:0.75rem;">\${timeAgo(a.date)}</div>
+      <div style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">${sanitize(a.name)}</div>
+      <div style="display:inline-block;background:${a.badgeColor}18;color:${a.badgeColor};padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:700;margin-bottom:0.75rem;">${a.badge}</div>
+      <div style="font-size:0.88rem;font-weight:600;color:var(--navy);margin-bottom:0.25rem;">${a.icon} ${sanitize(a.title)}</div>
+      <div style="font-size:0.75rem;color:var(--gray);line-height:1.5;">${sanitize(a.subtitle)}</div>
+      <div style="font-size:0.68rem;color:var(--gray);margin-top:0.75rem;">${timeAgo(a.date)}</div>
     </div>`).join('');
 }
 window.loadAchievements = loadAchievements;
