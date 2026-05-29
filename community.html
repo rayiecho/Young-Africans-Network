@@ -9866,8 +9866,6 @@ window.showMentorshipSection = async function(section) {
         html += '<div><p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(m.mentorName||'') + '</p>';
         html += '<p style="font-size:0.75rem;color:var(--gray);">Status: <span style="color:' + (m.status==='active'?'#27AE60':'var(--gray)') + ';font-weight:600;">' + (m.status||'pending') + '</span></p></div>';
         html += '<button onclick="joinMentorshipMeeting(\'' + m.mentorId + '\',\'' + encodeURIComponent(m.mentorName||'') + '\')" style="background:#27AE60;color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;margin-right:0.5rem;">Join Meeting</button>';
-        const mentorMeetingUrl2 = 'https://youngafricansnetwork.daily.co/YAN_MENTORSHIP_' + [currentUser.uid,m.mentorId].sort().join('').substring(0,8).toUpperCase();
-        html += '<button onclick="window.open(\'' + mentorMeetingUrl2 + '\',\'_blank\')" style="background:#27AE60;color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;margin-right:0.5rem;">Join Meeting</button>';
         html += '<button onclick="showTab(\'messages\');setTimeout(()=>openConversation(\'' + [currentUser.uid,m.mentorId].sort().join('_') + '\',\'' + m.mentorId + '\',\'' + encodeURIComponent(m.mentorName||'') + '\',\''  + '\'),500)" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Chat</button>';
         html += '</div>';
       });
@@ -10044,6 +10042,16 @@ window.joinMentorshipMeeting = async function(mentorId, mentorNameEncoded) {
 };
 
 function openMentorshipMeetingRoom(roomName, otherPersonName) {
+  const meetingUrl = 'https://youngafricansnetwork.daily.co/' + roomName + '?showLeaveButton=0&showFullscreenButton=1';
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+  // On mobile, iframe camera/mic permissions are blocked — open in new tab instead
+  if (isMobile) {
+    window.open(meetingUrl, '_blank');
+    showToast('Meeting opened in your browser. Return here when done.');
+    return;
+  }
+
   const modal = document.createElement('div');
   modal.id = 'mentorship-meeting-modal';
   modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:99999;display:flex;flex-direction:column;';
@@ -10056,7 +10064,7 @@ function openMentorshipMeetingRoom(roomName, otherPersonName) {
     + '<div style="display:flex;gap:0.75rem;">'
     + '<button onclick="endMentorshipMeeting()" style="background:var(--red);color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.82rem;">End Meeting</button>'
     + '</div></div>'
-    + '<iframe src="https://youngafricansnetwork.daily.co/' + roomName + '?showLeaveButton=0&showFullscreenButton=1" '
+    + '<iframe src="' + meetingUrl + '" '
     + 'style="flex:1;border:none;width:100%;" allow="camera;microphone;fullscreen;display-capture"></iframe>';
   document.body.appendChild(modal);
 }
