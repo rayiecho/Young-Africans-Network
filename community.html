@@ -152,6 +152,8 @@ window.addEventListener('beforeunload', function() {
 document.addEventListener('DOMContentLoaded', function() {
   const loading = document.getElementById('screen-loading');
   if (loading) { loading.classList.add('active'); loading.style.display = 'flex'; }
+  // Keep loading screen visible until auth resolves - never show landing on refresh
+  document.getElementById('screen-landing') && (document.getElementById('screen-landing').style.display = 'none');
   // Show slow message after 5 seconds
   setTimeout(() => {
     const slowMsg = document.getElementById('loading-slow-msg');
@@ -159,13 +161,13 @@ document.addEventListener('DOMContentLoaded', function() {
       slowMsg.style.display = 'block';
     }
   }, 5000);
-  // Redirect to landing if still loading after 15 seconds
+  // Redirect to landing if still loading after 25 seconds
   setTimeout(() => {
     const loading = document.getElementById('screen-loading');
     if (loading && loading.classList.contains('active')) {
       showScreen('screen-landing');
     }
-  }, 15000);
+  }, 25000);
 });
 
 async function subscribeToPush(userId) {
@@ -9483,7 +9485,7 @@ async function loadMessagesTab() {
   if (!container || !currentUser) return;
   container.innerHTML = '<p style="padding:1rem;color:var(--gray);">Loading...</p>';
   try {
-    const convSnap = await getDocs(query(collection(db,'conversations'),where('participants','array-contains',currentUser.uid),orderBy('lastMessageAt','desc')));
+    const convSnap = await getDocs(query(collection(db,'conversations'),where('participants','array-contains',currentUser.uid)));
     let html = '<div style="display:grid;grid-template-columns:300px 1fr;gap:1rem;height:75vh;">';
     html += '<div style="background:var(--white);border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06);overflow:hidden;display:flex;flex-direction:column;">';
     html += '<div style="padding:1rem;border-bottom:1px solid var(--light);display:flex;justify-content:space-between;align-items:center;">';
