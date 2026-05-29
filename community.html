@@ -6626,38 +6626,58 @@ async function loadAllPrograms() {
 }
 
 async function enrollInProgram(programId) {
-  if (!confirm('Enroll in this program? You can only be enrolled in one program at a time.')) return;
-
   // Check if already enrolled in another program
   const activeSnap = await getDocs(query(
     collection(db, 'learningProgress'),
     where('userId', '==', currentUser.uid),
     where('status', '==', 'enrolled')
   ));
-
   if (!activeSnap.empty) {
     const active = activeSnap.docs[0].data();
-    const activeProgSnap = await getDoc(doc(db, 'trainingPrograms', active.programId));
-    if (activeProgSnap.exists()) {
-      return showToast('You are already enrolled in "' + (active.programTitle||'a program') + '". Complete it first before enrolling in another.', 'error');
-    }
-    // Program no longer exists - silently ignore and allow new enrollment
+    return showToast('You are already enrolled in "' + (active.programTitle||'a program') + '". Complete it first.', 'error');
   }
-
+  // Check if already applied
+  const appSnap = await getDocs(query(
+    collection(db, 'programApplications'),
+    where('userId', '==', currentUser.uid),
+    where('programId', '==', programId)
+  ));
+  if (!appSnap.empty) {
+    const appStatus = appSnap.docs[0].data().status;
+    if (appStatus === 'pending') return showToast('Your application is already pending review.', 'error');
+    if (appStatus === 'approved') return showToast('You are already enrolled in this program!', 'error');
+    if (appStatus === 'rejected') return showToast('Your previous application was rejected. Contact info@youngafricansnetwork.org for more information.', 'error');
+  }
   const ref = doc(db, 'trainingPrograms', programId);
   const snap = await getDoc(ref);
   const data = snap.data();
-  const enrolledBy = data.enrolledBy || [];
-  if (enrolledBy.includes(currentUser.uid)) return showToast('Already enrolled!', 'error');
-  enrolledBy.push(currentUser.uid);
-  await updateDoc(ref, {enrolledBy: enrolledBy});
-  await setDoc(doc(db, 'learningProgress', currentUser.uid + '_' + programId), {
-    userId: currentUser.uid, programId: programId,
-    programTitle: data.title, status: 'enrolled',
-    progress: 0, modulesCompleted: [], enrolledAt: serverTimestamp()
-  }, {merge: true});
-  showToast('Enrolled successfully! Go to My Learning to start.');
-  loadAllPrograms();
+  // Show application form
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;';
+  modal.innerHTML = '<div style="background:#fff;border-radius:20px;padding:2rem;max-width:540px;width:100%;max-height:90vh;overflow-y:auto;">'
+    + '<h2 style="font-family:Playfair Display,serif;font-size:1.2rem;font-weight:900;color:var(--navy);margin-bottom:0.25rem;">Apply for Program</h2>'
+    + '<p style="font-size:0.82rem;color:var(--gold);font-weight:600;margin-bottom:0.5rem;">' + sanitize(data.title||'') + '</p>'
+    + '<div style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1rem;margin-bottom:1.5rem;">'
+    + '<p style="font-size:0.8rem;color:var(--gray);line-height:1.6;">' + sanitize(data.description||'') + '</p>'
+    + '<p style="font-size:0.78rem;color:var(--navy);margin-top:0.5rem;font-weight:600;">' + (data.duration||'') + ' &nbsp;|&nbsp; ' + (data.level||'Beginner') + '</p>'
+    + '</div>'
+    + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Why do you want to join this program? *</label>'
+    + '<textarea id="app-motivation" rows="4" placeholder="Explain your motivation and what you hope to achieve..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;"></textarea></div>'
+    + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Relevant background or experience *</label>'
+    + '<textarea id="app-background" rows="3" placeholder="Describe any relevant education, work or skills..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;"></textarea></div>'
+    + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">What will you do after completing this program? *</label>'
+    + '<textarea id="app-goals" rows="3" placeholder="How will you apply what you learn..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;"></textarea></div>'
+    + '<div style="margin-bottom:1.5rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Weekly commitment</label>'
+    + '<select id="app-commitment" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;">'
+    + '<option value="high">High — 5+ hours per week</option>'
+    + '<option value="medium">Medium — 3-5 hours per week</option>'
+    + '<option value="low">Low — 1-3 hours per week</option>'
+    + '</select></div>'
+    + '<div style="display:flex;gap:0.75rem;">'
+    + '<button onclick="submitProgramApplication(\'' + programId + '\',\'' + encodeURIComponent(data.title||'') + '\')" style="flex:1;background:var(--navy);color:#fff;border:none;padding:0.85rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Submit Application</button>'
+    + '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:var(--light);color:var(--navy);border:none;padding:0.85rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;">Cancel</button>'
+    + '</div></div>';
+  document.body.appendChild(modal);
 }
 
 async function openProgram(programId) {
