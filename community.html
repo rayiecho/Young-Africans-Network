@@ -9410,6 +9410,40 @@ window.postMaterial=postMaterial; window.toggleMaterialFields=toggleMaterialFiel
 window.renderQuizBuilder=renderQuizBuilder; window.saveQuiz=saveQuiz; window.deleteMaterial=deleteMaterial;
 window.showAdminSection=showAdminSection; window.toggleRole=toggleRole; window.removeMember=removeMember; window.loadAdminDepartments=loadAdminDepartments; window.loadAdminMembers=loadAdminMembers; window.loadAdminScholarshipApplications=loadAdminScholarshipApplications;
 window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteTeamMember=deleteTeamMember; window.addTeamMember=addTeamMember; window.toggleDeptField=toggleDeptField; window.previewTeamPhoto=previewTeamPhoto; window.deleteQuiz=deleteQuiz; window.viewMemberProgress=viewMemberProgress; window.issueCertificate=issueCertificate; window.sendBulkEmail=sendBulkEmail; window.sendNewsletter=sendNewsletter; window.deleteTeamMember=deleteTeamMember; 
+window.doSignOut = async function() {
+  await signOut(auth);
+  showScreen('screen-landing');
+};
+
+window.resendVerificationEmail = async function() {
+  try {
+    await sendEmailVerification(currentUser);
+    if (typeof showToast === 'function') showToast('Verification email sent! Check your inbox.');
+    else alert('Verification email sent! Check your inbox.');
+  } catch(e) {
+    if (typeof showToast === 'function') showToast('Error: ' + e.message, 'error');
+    else alert('Error: ' + e.message);
+  }
+};
+
+window.checkEmailVerified = async function() {
+  try {
+    await currentUser.reload();
+    if (currentUser.emailVerified) {
+      const snap = await getDoc(doc(db, 'users', currentUser.uid));
+      if (snap.exists()) {
+        currentUserData = snap.data();
+        enterPlatform();
+      }
+    } else {
+      if (typeof showToast === 'function') showToast('Email not verified yet. Please check your inbox.', 'error');
+      else alert('Email not verified yet. Please check your inbox.');
+    }
+  } catch(e) {
+    if (typeof showToast === 'function') showToast('Error: ' + e.message, 'error');
+    else alert('Error: ' + e.message);
+  }
+};
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -10050,40 +10084,6 @@ window.sendYANGuideFloat = async function() {
   }
 };
 
-window.doSignOut = async function() {
-  await signOut(auth);
-  showScreen('screen-landing');
-};
-
-window.resendVerificationEmail = async function() {
-  try {
-    await sendEmailVerification(currentUser);
-    if (typeof showToast === 'function') showToast('Verification email sent! Check your inbox.');
-    else alert('Verification email sent! Check your inbox.');
-  } catch(e) {
-    if (typeof showToast === 'function') showToast('Error: ' + e.message, 'error');
-    else alert('Error: ' + e.message);
-  }
-};
-
-window.checkEmailVerified = async function() {
-  try {
-    await currentUser.reload();
-    if (currentUser.emailVerified) {
-      const snap = await getDoc(doc(db, 'users', currentUser.uid));
-      if (snap.exists()) {
-        currentUserData = snap.data();
-        enterPlatform();
-      }
-    } else {
-      if (typeof showToast === 'function') showToast('Email not verified yet. Please check your inbox.', 'error');
-      else alert('Email not verified yet. Please check your inbox.');
-    }
-  } catch(e) {
-    if (typeof showToast === 'function') showToast('Error: ' + e.message, 'error');
-    else alert('Error: ' + e.message);
-  }
-};
 
 // ===== MESSAGING SYSTEM =====
 let activeConversationId = null;
