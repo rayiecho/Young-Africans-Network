@@ -281,9 +281,51 @@ async function deleteHubMaterial(colName, docId, hubId) {
 }
 
 async function approveRecLetter(recId, memberName, scholarship) {
-  await updateDoc(doc(db,'recommendations',recId), {status:'approved', approvedAt: serverTimestamp()});
-  showToast('Approved for '+memberName);
-  loadHubDetail('scholarships');
+  if (!confirm('Approve recommendation letter for ' + decodeURIComponent(memberName) + '?')) return;
+  try {
+    const recSnap = await getDoc(doc(db, 'recommendations', recId));
+    const recData = recSnap.data();
+    await updateDoc(doc(db,'recommendations',recId), {status:'approved', approvedAt: serverTimestamp(), approvedBy: 'YAN Admin'});
+    const memberNameDecoded = decodeURIComponent(memberName || recData?.memberName || recData?.userName || 'Member');
+    const scholarshipDecoded = decodeURIComponent(scholarship || recData?.scholarship || '');
+    const deadline = recData?.deadline || 'as soon as possible';
+    // Send in-app notification
+    if (recData?.userId) {
+      await addDoc(collection(db, 'notifications'), {
+        title: 'Recommendation Letter Approved',
+        message: 'Your recommendation letter for ' + scholarshipDecoded + ' has been approved. Go to Scholarships Hub to download it.',
+        type: 'success', userId: recData.userId, postedBy: 'YAN Admin',
+        createdAt: serverTimestamp(), readBy: []
+      });
+      // Send email
+      const userSnap = await getDoc(doc(db, 'users', recData.userId));
+      const userEmail = userSnap.exists() ? userSnap.data().email : null;
+      if (userEmail) {
+        const msg = 'Dear ' + memberNameDecoded + ',\n\n'
+          + 'We are pleased to inform you that your request for a Recommendation Letter has been approved by the Young Africans Network Administration.\n\n'
+          + 'SCHOLARSHIP / PROGRAM: ' + scholarshipDecoded + '\n'
+          + 'DEADLINE: ' + deadline + '\n\n'
+          + 'HOW TO DOWNLOAD YOUR LETTER:\n'
+          + 'Visit youngafricansnetwork.org/community.html, go to Scholarships Hub, click the Recommendation Letter tab and click Download Letter.\n\n'
+          + 'IMPORTANT NOTES:\n'
+          + '- This is an official letter from Young Africans Network, signed by our administration.\n'
+          + '- The letter confirms your active membership and standing within YAN.\n'
+          + '- Please submit it before the deadline: ' + deadline + '\n'
+          + '- For verification, scholarship committees may contact us at youngafricansnetwork.org\n\n'
+          + 'We believe in you and your potential. Give this application everything you have — you are ready for this.\n\n'
+          + 'Building the Future, Together.\n\n'
+          + 'Warm regards,\nYAN Administration Office\nYoung Africans Network\n'
+          + 'youngafricansnetwork.org | youngafricansn@gmail.com';
+        await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
+          to_email: userEmail, name: memberNameDecoded,
+          subject: 'Your YAN Recommendation Letter Has Been Approved — ' + scholarshipDecoded,
+          message: msg
+        });
+      }
+    }
+    showToast('Approved! Member notified by email.');
+    loadSection('recommendations');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
 
 async function rejectRecLetter(recId) {
