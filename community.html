@@ -1657,7 +1657,12 @@ async function downloadCertificate(certId, deptOverride) {
     + ' &nbsp;|&nbsp; <button onclick="window.print()" style="background:#1B2A6B;color:#fff;border:none;padding:4px 16px;border-radius:4px;cursor:pointer;font-weight:700;">Print / Save PDF</button>'
     + '</div>'
     + body
-    + '<script>setTimeout(function(){window.print();},1500);<\/script></body></html>');
+    + '<script>setTimeout(function(){window.print();},1500);<\/script><script>
+function toggleDropdown(id){var el=document.getElementById(id);var arrow=document.getElementById("arrow-"+id);var isOpen=el.style.display!=="none";document.querySelectorAll(".dropdown-items").forEach(function(d){d.style.display="none";});document.querySelectorAll(".dropdown-arrow").forEach(function(a){a.classList.remove("open");});if(!isOpen){el.style.display="block";if(arrow)arrow.classList.add("open");}}
+function closeDropdowns(){document.querySelectorAll(".dropdown-items").forEach(function(d){d.style.display="none";});document.querySelectorAll(".dropdown-arrow").forEach(function(a){a.classList.remove("open");});}
+function showSubSection(s){setTimeout(function(){var b=document.querySelector("[onclick*=""+s+""]");if(b)b.click();},300);}
+</script>
+</body></html>');
   printWin.document.close();
 }
 
@@ -2104,6 +2109,11 @@ body{font-family:'Poppins',sans-serif;color:#1B2A6B;background:#fff;}
   <div style="margin-top:30px;font-size:11px;color:rgba(255,255,255,0.4);">© ${new Date().getFullYear()} Young Africans Network. All Rights Reserved.</div>
 </div>
 
+<script>
+function toggleDropdown(id){var el=document.getElementById(id);var arrow=document.getElementById("arrow-"+id);var isOpen=el.style.display!=="none";document.querySelectorAll(".dropdown-items").forEach(function(d){d.style.display="none";});document.querySelectorAll(".dropdown-arrow").forEach(function(a){a.classList.remove("open");});if(!isOpen){el.style.display="block";if(arrow)arrow.classList.add("open");}}
+function closeDropdowns(){document.querySelectorAll(".dropdown-items").forEach(function(d){d.style.display="none";});document.querySelectorAll(".dropdown-arrow").forEach(function(a){a.classList.remove("open");});}
+function showSubSection(s){setTimeout(function(){var b=document.querySelector("[onclick*=""+s+""]");if(b)b.click();},300);}
+</script>
 </body></html>`;
   w.document.write(html);
   w.document.close();
@@ -2685,6 +2695,11 @@ function downloadRecommendationLetter(scholarship, recommender, reason, deadline
     <span>youngafricansnetwork.org</span>
   </div>
 </div>
+<script>
+function toggleDropdown(id){var el=document.getElementById(id);var arrow=document.getElementById("arrow-"+id);var isOpen=el.style.display!=="none";document.querySelectorAll(".dropdown-items").forEach(function(d){d.style.display="none";});document.querySelectorAll(".dropdown-arrow").forEach(function(a){a.classList.remove("open");});if(!isOpen){el.style.display="block";if(arrow)arrow.classList.add("open");}}
+function closeDropdowns(){document.querySelectorAll(".dropdown-items").forEach(function(d){d.style.display="none";});document.querySelectorAll(".dropdown-arrow").forEach(function(a){a.classList.remove("open");});}
+function showSubSection(s){setTimeout(function(){var b=document.querySelector("[onclick*=""+s+""]");if(b)b.click();},300);}
+</script>
 </body>
 </html>`;
 
@@ -10938,5 +10953,10 @@ window.sendYANGuideFloat = async function() {
 </script>
 <!-- END YAN GUIDE FLOAT -->
 
+<script>
+function toggleDropdown(id){var el=document.getElementById(id);var arrow=document.getElementById("arrow-"+id);var isOpen=el.style.display!=="none";document.querySelectorAll(".dropdown-items").forEach(function(d){d.style.display="none";});document.querySelectorAll(".dropdown-arrow").forEach(function(a){a.classList.remove("open");});if(!isOpen){el.style.display="block";if(arrow)arrow.classList.add("open");}}
+function closeDropdowns(){document.querySelectorAll(".dropdown-items").forEach(function(d){d.style.display="none";});document.querySelectorAll(".dropdown-arrow").forEach(function(a){a.classList.remove("open");});}
+function showSubSection(s){setTimeout(function(){var b=document.querySelector("[onclick*=""+s+""]");if(b)b.click();},300);}
+</script>
 </body>
 </html>
