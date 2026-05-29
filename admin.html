@@ -619,7 +619,18 @@ window.loadSection = async function(section) {
   const container = document.getElementById('content-area');
   container.innerHTML = '<div class="loading">Loading...</div>';
   const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: loadAnalytics, assignments: loadAssignments, programs: loadProgramsAdmin, notifications: loadNotificationCenter, finance: loadFinance, recommendations: (...args) => window.loadRecommendations(...args) };
-  if (fns[section]) await fns[section](container);
+  if (fns[section]) {
+    try {
+      await fns[section](container);
+    } catch(e) {
+      console.error('Admin section error [' + section + ']:', e);
+      container.innerHTML = '<div style="text-align:center;padding:3rem;">'
+        + '<h3 style="color:var(--navy);margin-bottom:0.5rem;">Section failed to load</h3>'
+        + '<p style="color:var(--gray);font-size:0.85rem;margin-bottom:1rem;">' + e.message + '</p>'
+        + '<button onclick="loadSection(\'' + section + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;cursor:pointer;font-family:Poppins,sans-serif;font-weight:600;">Try Again</button>'
+        + '</div>';
+    }
+  }
 };
 
 // ===== OVERVIEW =====
