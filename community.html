@@ -4566,18 +4566,54 @@ async function handleGlobalSearch(query) {
     const results = [];
 
     try {
+      // Search tabs
+      const tabs = [
+        {name:'Main Feed', keywords:['feed','home','posts','news'], tab:'feed', icon:''},
+        {name:'YAN Hubs', keywords:['hubs','hub','departments'], tab:'hubs', icon:''},
+        {name:'Programs & Training', keywords:['programs','training','lessons','courses'], tab:'hubs', icon:''},
+        {name:'Scholarships', keywords:['scholarship','opportunity','funding','grant'], tab:'scholarships', icon:''},
+        {name:'Career Development', keywords:['career','cv','resume','interview','job'], tab:'career', icon:''},
+        {name:'Community Impact', keywords:['community','impact','volunteer','tasks'], tab:'community-impact', icon:''},
+        {name:'Mental Health', keywords:['mental','health','wellbeing','support'], tab:'mental-health', icon:''},
+        {name:'Mentorship', keywords:['mentor','mentorship','mentee'], tab:'mentorship', icon:''},
+        {name:'Magazine', keywords:['magazine','digest','newsletter'], tab:'magazine', icon:''},
+        {name:'Resources', keywords:['resources','cv template','guide','pdf'], tab:'resources', icon:''},
+        {name:'Calendar', keywords:['calendar','events','schedule'], tab:'calendar', icon:''},
+        {name:'Directory', keywords:['directory','members','find people'], tab:'directory', icon:''},
+        {name:'Polls', keywords:['polls','vote','survey'], tab:'polls', icon:''},
+        {name:'Meetings', keywords:['meetings','meeting','video call'], tab:'meetings', icon:''},
+        {name:'My Profile', keywords:['profile','my profile','account'], tab:'profile', icon:''},
+        {name:'Achievements', keywords:['achievements','certificates','badges'], tab:'achievements', icon:''},
+        {name:'Messages', keywords:['messages','chat','inbox'], tab:'messages', icon:''},
+        {name:'Notifications', keywords:['notifications','alerts'], tab:'notifications', icon:''},
+      ];
+      tabs.forEach(function(t) {
+        if (t.name.toLowerCase().includes(q) || t.keywords.some(function(k){ return k.includes(q); })) {
+          results.push({
+            type: 'tab',
+            icon: '<div style="width:32px;height:32px;border-radius:50%;background:rgba(27,42,107,0.1);display:flex;align-items:center;justify-content:center;font-size:1rem;">' + t.icon + '</div>',
+            title: t.name,
+            subtitle: 'Go to ' + t.name,
+            action: "showTab('" + t.tab + "')"
+          });
+        }
+      });
+
       // Search members
       const usersSnap = await getDocs(collection(db, 'users'));
       usersSnap.docs.forEach(function(d) {
         const u = d.data();
         if ((u.name && u.name.toLowerCase().includes(q)) ||
             (u.country && u.country.toLowerCase().includes(q))) {
+          var convId = [currentUser.uid, d.id].sort().join('_');
+          var encodedName = encodeURIComponent(u.name||'');
+          var encodedPhoto = encodeURIComponent(u.photoUrl||'');
           results.push({
             type: 'member',
             icon: u.photoUrl ? '<img src="' + u.photoUrl + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">' : '<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.85rem;">' + (u.name||'?')[0] + '</div>',
             title: u.name || '',
-            subtitle: (u.role || 'Member') + ' · ' + (u.country || ''),
-            action: "showTab('directory')"
+            subtitle: (u.role || 'Member') + ' · ' + (u.country || '') + ' — Click to message',
+            action: "showTab('messages');setTimeout(function(){openConversation('" + convId + "','" + d.id + "','" + encodedName + "','" + encodedPhoto + "');},500)"
           });
         }
       });
@@ -4638,7 +4674,7 @@ async function handleGlobalSearch(query) {
       return;
     }
 
-    const typeLabels = { member:' Member', post:' Post', scholarship:' Scholarship', resource:' Resource' };
+    const typeLabels = { tab:' Navigation', member:' Member', post:' Post', scholarship:' Scholarship', resource:' Resource' };
     const grouped = {};
     results.forEach(function(r) {
       if (!grouped[r.type]) grouped[r.type] = [];
