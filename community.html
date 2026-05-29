@@ -4648,6 +4648,7 @@ async function loadCareerHub() {
 }
 
 function showCareerSection(section) {
+  if (section === 'ai-matcher') { loadCareerMatcher(); return; }
   document.querySelectorAll('.career-nav-btn').forEach(function(b, i) {
     const sections = ['paths','programs','materials','jobs','resources','progress','manage'];
     b.classList.toggle('active', sections[i] === section);
