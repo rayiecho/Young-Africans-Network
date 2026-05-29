@@ -127,11 +127,6 @@ function showScreen(id) {
   target.classList.add('active');
   target.style.display = 'flex';
 }
-function updateMobNav(btn) {
-  document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-}
-
 function showTab(tab) {
   activeTab = tab;
   if (currentUser) localStorage.setItem('yan_last_tab', tab);
@@ -10133,22 +10128,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .topbar-back:hover{background:var(--light);}
 .hamburger-mobile{display:none;background:none;border:none;cursor:pointer;padding:4px;flex-direction:column;gap:5px;}
 .hamburger-mobile span{display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;}
-.mobile-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid rgba(27,42,107,0.1);z-index:100;padding:0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,0.08);}
-.mobile-bottom-nav-inner{display:flex;justify-content:space-around;align-items:center;}
-.mob-nav-btn{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;padding:0.4rem 0.75rem;cursor:pointer;color:var(--gray);font-family:Poppins,sans-serif;font-size:0.6rem;font-weight:600;transition:all 0.2s;border-radius:12px;min-width:56px;}
-.mob-nav-btn.active{color:var(--navy);}
-.mob-nav-btn .mob-icon{font-size:1.1rem;font-weight:900;color:inherit;}
-.mob-nav-btn .mob-dot{width:4px;height:4px;border-radius:50%;background:var(--red);display:none;margin-top:2px;}
-.mob-nav-btn.has-notif .mob-dot{display:block;}
-@media(max-width:768px){
-  .sidebar{display:none!important;}
-  .mobile-bottom-nav{display:block;}
-  .main-content{padding-bottom:70px;}
-  .tab-panel{padding:1rem;}
-  .topbar{padding:0 1rem;height:56px;}
-  .topbar-title{font-size:1.1rem;}
-  #screen-platform{flex-direction:column;}
-}
+
 .tab-panel{display:none;padding:2rem;max-width:900px;margin:0 auto;width:100%;}
 .tab-panel.active{display:block;}
 .post-composer{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
@@ -10479,26 +10459,7 @@ h2,h3{position:relative;}
 
 <!-- PLATFORM -->
 <div id="screen-platform" class="screen">
-  <!-- MOBILE BOTTOM NAV -->
-  <div class="mobile-bottom-nav">
-    <div class="mobile-bottom-nav-inner">
-      <button class="mob-nav-btn active" onclick="showTab('feed');updateMobNav(this)" data-tab="feed">
-        <span class="mob-icon">—</span>Feed<span class="mob-dot"></span>
-      </button>
-      <button class="mob-nav-btn" onclick="showTab('hubs');updateMobNav(this)" data-tab="hubs">
-        <span class="mob-icon">—</span>Hubs<span class="mob-dot"></span>
-      </button>
-      <button class="mob-nav-btn" onclick="showTab('messages');updateMobNav(this)" data-tab="messages">
-        <span class="mob-icon">—</span>Messages<span id="mob-msg-badge" class="mob-dot"></span>
-      </button>
-      <button class="mob-nav-btn" onclick="showTab('notifications');updateMobNav(this)" data-tab="notifications">
-        <span class="mob-icon">—</span>Alerts<span class="mob-dot"></span>
-      </button>
-      <button class="mob-nav-btn" onclick="showTab('profile');updateMobNav(this)" data-tab="profile">
-        <span class="mob-icon">—</span>Profile<span class="mob-dot"></span>
-      </button>
-    </div>
-  </div>
+
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <a href="index.html">
