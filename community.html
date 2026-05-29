@@ -192,7 +192,43 @@ async function subscribeToPush(userId) {
 onAuthStateChanged(auth, async user => {
   if (user) {
     currentUser = user;
-    // Show loading with message
+    // Check email verification first (fast - no Firestore needed)
+    if (!user.emailVerified) {
+      showScreen('screen-verify-email');
+      return;
+    }
+    // Try cached data from localStorage for instant load
+    const cacheKey = 'yan_user_' + user.uid;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        currentUserData = JSON.parse(cached);
+        enterPlatform();
+        setTimeout(() => loadUnreadBadge(), 1000);
+        setTimeout(() => subscribeToPush(user.uid), 3000);
+        const lastTab = localStorage.getItem('yan_last_tab');
+        const lastUid = localStorage.getItem('yan_last_uid');
+        if (lastTab && lastUid === user.uid && lastTab !== 'feed') {
+          setTimeout(() => { showTab(lastTab); localStorage.removeItem('yan_last_tab'); }, 300);
+        }
+        // Refresh data in background
+        getDoc(doc(db, 'users', user.uid)).then(snap => {
+          if (snap.exists()) {
+            currentUserData = snap.data();
+            localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
+            // Update sidebar silently
+            const sn = document.getElementById('sidebar-name');
+            const sr = document.getElementById('sidebar-role');
+            const sd = document.getElementById('sidebar-dept');
+            if (sn) sn.textContent = currentUserData.name || '';
+            if (sr) sr.textContent = currentUserData.role || 'Member';
+            if (sd) sd.textContent = DEPARTMENTS.find(d=>d.id===currentUserData.department)?.name || '';
+          }
+        }).catch(()=>{});
+        return;
+      } catch(e) { localStorage.removeItem(cacheKey); }
+    }
+    // No cache - show loading and fetch
     const loading = document.getElementById('screen-loading');
     const loadingMsg = document.getElementById('loading-message');
     if (loading) { loading.classList.add('active'); loading.style.display = 'flex'; }
@@ -200,29 +236,20 @@ onAuthStateChanged(auth, async user => {
     try {
       const snap = await getDoc(doc(db, 'users', user.uid));
       if (snap.exists()) {
-        // Check email verification
-        if (!user.emailVerified) {
-          showScreen('screen-verify-email');
-          return;
-        }
         currentUserData = snap.data();
+        // Cache for next login
+        localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
         if (!currentUserData.profileComplete) {
           updateDoc(doc(db, 'users', user.uid), { profileComplete: true }).catch(()=>{});
           currentUserData.profileComplete = true;
         }
         enterPlatform();
-        setTimeout(() => loadUnreadBadge(), 2000);
-        setTimeout(() => loadUnreadBadge(), 2000);
-        // Non-blocking background tasks
+        setTimeout(() => loadUnreadBadge(), 1000);
         setTimeout(() => subscribeToPush(user.uid), 3000);
-        // Restore last location
         const lastTab = localStorage.getItem('yan_last_tab');
         const lastUid = localStorage.getItem('yan_last_uid');
         if (lastTab && lastUid === user.uid && lastTab !== 'feed') {
-          setTimeout(() => {
-            showTab(lastTab);
-            localStorage.removeItem('yan_last_tab');
-          }, 500);
+          setTimeout(() => { showTab(lastTab); localStorage.removeItem('yan_last_tab'); }, 300);
         }
       } else {
         showScreen('screen-register');
