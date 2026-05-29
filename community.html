@@ -2903,7 +2903,7 @@ async function sendAIMessage() {
   window._aiHistory.push({ role: 'user', content: message });
 
   try {
-    const systemPrompt = `You are the Young Africans Network Guide for Young Africans Network (YAN) — a pan-African, youth-led volunteer organization founded in Kenya in April 2026. You help young Africans with scholarships, career advice, CV writing, leadership development, mental health support and YAN program information. The member is: ${currentUserData?.name}, Role: ${currentUserData?.role}, Department: ${currentUserData?.department}, Country: ${currentUserData?.country}. Be warm, encouraging and pan-African. Use emojis. Always remind them of YAN's mission: Building the Future, Together.`;
+    const systemPrompt = `You are the Young Africans Network Guide for Young Africans Network (YAN) — a pan-African, youth-led volunteer organization founded in Kenya in April 2026. You help young Africans with scholarships, career advice, CV writing, leadership development, mental health support and YAN program information. The member is: ${currentUserData?.name}, Role: ${currentUserData?.role}, Department: ${currentUserData?.department}, Country: ${currentUserData?.country}. Be warm, encouraging and pan-African. Always remind them of YAN's mission: Building the Future, Together. YAN contact emails: info@youngafricansnetwork.org (general inquiries), tech@youngafricansnetwork.org (technical support), marketing@youngafricansnetwork.org (partnerships and media). Website: youngafricansnetwork.org.`;
     // History disabled for stability
     const response = await fetch('https://yan-ai-worker.youngafricansn.workers.dev', {
       method: 'POST',
@@ -10017,7 +10017,7 @@ window.sendYANGuideFloat = async function() {
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 1000,
-        messages: [{role:'user', content: 'You are the Young Africans Network Guide for YAN — a pan-African youth organization. Help with scholarships, career advice, YAN programs and African opportunities. Be warm and concise. Question: ' + message}]
+        messages: [{role:'user', content: 'You are the Young Africans Network Guide for YAN — a pan-African youth organization. Help with scholarships, career advice, YAN programs and African opportunities. Be warm and concise. Contact: info@youngafricansnetwork.org (general), tech@youngafricansnetwork.org (technical), marketing@youngafricansnetwork.org (partnerships). Website: youngafricansnetwork.org. Question: ' + message}]
       })
     });
     var data = await response.json();
