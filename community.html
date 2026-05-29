@@ -10106,7 +10106,7 @@ async function loadMessagesTab() {
       
       html += '<div onclick="openConversation(\'' + d.id + '\',\'' + otherId + '\',\'' + encodeURIComponent(otherUser) + '\',\'' + encodeURIComponent(otherPhoto) + '\')" '
         + 'style="display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1rem;cursor:pointer;border-bottom:1px solid var(--light);transition:background 0.2s;" '
-        + 'onmouseover="this.style.background='var(--light)'" onmouseout="this.style.background='';">'
+        + 'onmouseover="this.style.background=\'var(--light)\'" onmouseout="this.style.background=\'\'";>'
         + '<div style="position:relative;flex-shrink:0;">'
         + (otherPhoto ? '<img src="' + otherPhoto + '" style="width:42px;height:42px;border-radius:50%;object-fit:cover;">' 
           : '<div style="width:42px;height:42px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1rem;">' + otherUser.charAt(0) + '</div>')
@@ -10223,7 +10223,7 @@ window.showNewMessageModal = async function() {
     const u = d.data();
     userList += '<div onclick="startConversation(\'' + d.id + '\',\'' + encodeURIComponent(u.name||'Member') + '\',\'' + encodeURIComponent(u.photoUrl||'') + '\')" '
       + 'style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;cursor:pointer;border-radius:10px;transition:background 0.2s;" '
-      + 'onmouseover="this.style.background='var(--light)'" onmouseout="this.style.background='';">'
+      + 'onmouseover="this.style.background=\'var(--light)\'" onmouseout="this.style.background=\'\'";>'
       + (u.photoUrl ? '<img src="' + u.photoUrl + '" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">'
         : '<div style="width:38px;height:38px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">' + (u.name||'M').charAt(0) + '</div>')
       + '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(u.name||'Member') + '</p>'
@@ -10234,7 +10234,7 @@ window.showNewMessageModal = async function() {
   modal.innerHTML = '<div style="background:#fff;border-radius:20px;padding:1.5rem;max-width:420px;width:100%;max-height:80vh;display:flex;flex-direction:column;">'
     + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">'
     + '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);">New Message</h3>'
-    + '<button onclick="this.closest('div[style*=fixed]').remove()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--gray);">x</button>'
+    + '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--gray);">x</button>'
     + '</div>'
     + '<input type="text" placeholder="Search members..." oninput="filterMemberSearch(this.value)" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;margin-bottom:1rem;">'
     + '<div id="member-search-list" style="overflow-y:auto;flex:1;">' + userList + '</div>'
