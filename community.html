@@ -1376,7 +1376,7 @@ async function loadProfileCerts() {
   }).join('');
 }
 
-async function downloadCertificate(certId) {
+async function downloadCertificate(certId, deptOverride) {
   const u = currentUserData;
   const dept = DEPARTMENTS.find(d => d.id === u.department);
   const verifyCode = 'YAN-' + currentUser.uid.substring(0,8).toUpperCase();
