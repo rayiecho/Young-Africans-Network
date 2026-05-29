@@ -10301,6 +10301,14 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 #sidebar-role{font-size:0.7rem;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.5px;}
 #sidebar-dept{font-size:0.68rem;color:var(--gold);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sidebar-nav{padding:1rem 0;flex:1;}
+.sidebar-dropdown{width:100%;}
+.dropdown-toggle{display:flex;justify-content:space-between;align-items:center;width:100%;}
+.dropdown-arrow{font-size:0.7rem;transition:transform 0.2s;margin-left:auto;}
+.dropdown-arrow.open{transform:rotate(90deg);}
+.dropdown-items{background:rgba(0,0,0,0.15);overflow:hidden;}
+.dropdown-item{display:flex;align-items:center;gap:0.5rem;padding:0.65rem 1.25rem 0.65rem 2rem;color:rgba(255,255,255,0.55);font-size:0.8rem;font-weight:500;cursor:pointer;transition:all 0.2s;border:none;background:none;width:100%;text-align:left;font-family:Poppins,sans-serif;}
+.dropdown-item:hover{color:var(--white);background:rgba(255,255,255,0.06);}
+.dropdown-item.active{color:var(--gold);font-weight:700;}
 .tab-btn{display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1.25rem;color:rgba(255,255,255,0.6);font-size:0.85rem;font-weight:500;cursor:pointer;transition:all 0.2s;border:none;background:none;width:100%;text-align:left;}
 .tab-btn:hover{color:var(--white);background:rgba(255,255,255,0.06);}
 .tab-btn.active{color:var(--white);background:rgba(255,255,255,0.12);border-left:3px solid var(--gold);}
@@ -10666,20 +10674,69 @@ h2,h3{position:relative;}
       </div>
     </div>
     <nav class="sidebar-nav">
-      <button class="tab-btn active" data-tab="feed" onclick="showTab('feed')"><span class="tab-icon">—</span> Main Feed</button>
-      <button class="tab-btn" data-tab="hubs" onclick="showTab('hubs')"><span class="tab-icon">—</span> YAN Hubs</button>
-      <button class="tab-btn" data-tab="meetings" onclick="showTab('meetings')"><span class="tab-icon">—</span> Meetings</button>
-      <button class="tab-btn" data-tab="profile" onclick="showTab('profile')"><span class="tab-icon">—</span> My Profile</button>
-      <button class="tab-btn" data-tab="directory" onclick="showTab('directory')"><span class="tab-icon">—</span> Directory</button>
-      <button class="tab-btn" data-tab="magazine" onclick="showTab('magazine')"><span class="tab-icon">—</span> Magazine</button>
-      <button class="tab-btn" data-tab="achievements" onclick="showTab('achievements')"><span class="tab-icon">—</span> Achievements</button>
-      <button class="tab-btn" data-tab="mentorship" onclick="showTab('mentorship')"><span class="tab-icon">-</span> Mentorship</button>
-      <button class="tab-btn" data-tab="resources" onclick="showTab('resources')"><span class="tab-icon">—</span> Resources</button>
-      <button class="tab-btn" data-tab="messages" onclick="showTab('messages')"><span class="tab-icon">-</span> Messages <span id="msg-unread-badge" style="display:none;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:0.65rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;">0</span></button>
-      <button class="tab-btn" data-tab="polls" onclick="showTab('polls')"><span class="tab-icon">—</span> Polls</button>
-      <button class="tab-btn" data-tab="calendar" onclick="showTab('calendar')"><span class="tab-icon">—</span> Calendar</button>
-      <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">—</span> Head Panel</button>
-      <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;"><span class="tab-icon">—</span> Admin Panel</button>
+      <!-- MAIN FEED -->
+      <button class="tab-btn active" data-tab="feed" onclick="showTab('feed')"><span class="tab-icon">—</span> MAIN FEED</button>
+
+      <!-- YAN HUBS DROPDOWN -->
+      <div class="sidebar-dropdown">
+        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('hubs-dropdown')">
+          <span class="tab-icon">—</span> YAN HUBS <span class="dropdown-arrow" id="arrow-hubs-dropdown">▸</span>
+        </button>
+        <div class="dropdown-items" id="hubs-dropdown" style="display:none;">
+          <button class="dropdown-item" onclick="showTab('hubs');showSubSection('programs-hub');closeDropdowns()"> Programs & Training</button>
+          <button class="dropdown-item" onclick="showTab('scholarships');closeDropdowns()"> Scholarships</button>
+          <button class="dropdown-item" onclick="showTab('career');closeDropdowns()"> Career Development</button>
+          <button class="dropdown-item" onclick="showTab('community-impact');closeDropdowns()"> Community Impact</button>
+          <button class="dropdown-item" onclick="showTab('mental-health');closeDropdowns()"> Mental Health</button>
+          <button class="dropdown-item" onclick="showTab('comms-hub');closeDropdowns()"> Communications</button>
+          <button class="dropdown-item" onclick="showTab('partnerships-hub');closeDropdowns()"> Partnerships</button>
+        </div>
+      </div>
+
+      <!-- YAN LIBRARY DROPDOWN -->
+      <div class="sidebar-dropdown">
+        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('library-dropdown')">
+          <span class="tab-icon">—</span> YAN LIBRARY <span class="dropdown-arrow" id="arrow-library-dropdown">▸</span>
+        </button>
+        <div class="dropdown-items" id="library-dropdown" style="display:none;">
+          <button class="dropdown-item" data-tab="magazine" onclick="showTab('magazine');closeDropdowns()"> Magazine</button>
+          <button class="dropdown-item" data-tab="resources" onclick="showTab('resources');closeDropdowns()"> Resources</button>
+          <button class="dropdown-item" data-tab="calendar" onclick="showTab('calendar');closeDropdowns()"> Calendar</button>
+        </div>
+      </div>
+
+      <!-- YAN SUPPORT DROPDOWN -->
+      <div class="sidebar-dropdown">
+        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('support-dropdown')">
+          <span class="tab-icon">—</span> YAN SUPPORT <span class="dropdown-arrow" id="arrow-support-dropdown">▸</span>
+        </button>
+        <div class="dropdown-items" id="support-dropdown" style="display:none;">
+          <button class="dropdown-item" data-tab="directory" onclick="showTab('directory');closeDropdowns()"> Directory</button>
+          <button class="dropdown-item" data-tab="polls" onclick="showTab('polls');closeDropdowns()"> Polls</button>
+          <button class="dropdown-item" data-tab="meetings" onclick="showTab('meetings');closeDropdowns()"> Meetings</button>
+          <button class="dropdown-item" onclick="window.open('https://wa.me/+254700000000','_blank');"> Help Line</button>
+        </div>
+      </div>
+
+      <!-- MENTORSHIP -->
+      <button class="tab-btn" data-tab="mentorship" onclick="showTab('mentorship')"><span class="tab-icon">—</span> MENTORSHIP</button>
+
+      <!-- MY PROFILE DROPDOWN -->
+      <div class="sidebar-dropdown">
+        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('profile-dropdown')">
+          <span class="tab-icon">—</span> MY PROFILE <span class="dropdown-arrow" id="arrow-profile-dropdown">▸</span>
+        </button>
+        <div class="dropdown-items" id="profile-dropdown" style="display:none;">
+          <button class="dropdown-item" data-tab="profile" onclick="showTab('profile');closeDropdowns()"> My Profile</button>
+          <button class="dropdown-item" data-tab="achievements" onclick="showTab('achievements');closeDropdowns()"> Achievements</button>
+          <button class="dropdown-item" data-tab="messages" onclick="showTab('messages');closeDropdowns()"> Messages <span id="msg-unread-badge" style="display:none;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:0.65rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;">0</span></button>
+          <button class="dropdown-item" data-tab="notifications" onclick="showTab('notifications');closeDropdowns()"> Notifications</button>
+        </div>
+      </div>
+
+      <!-- ADMIN & HEAD (hidden by default) -->
+      <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">—</span> HEAD PANEL</button>
+      <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;"><span class="tab-icon">—</span> ADMIN PANEL</button>
     </nav>
     <div class="sidebar-logout">
       <button class="btn-logout" onclick="doLogout()"><span></span> Sign Out</button>
