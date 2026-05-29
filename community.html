@@ -9049,7 +9049,7 @@ async function loadCareerPrograms() {
       snap.docs.forEach(function(d) {
         const p = Object.assign({id: d.id}, d.data());
         const openDate = p.openDate ? new Date(p.openDate) : new Date('2020-01-01');
-        const isOpen = openDate <= today;
+        const isOpen = p.isOpen === true;
         const enrolled = p.enrolledBy && p.enrolledBy.includes(currentUser.uid);
         const daysUntil = Math.ceil((openDate - today) / (1000 * 60 * 60 * 24));
 
@@ -9057,7 +9057,7 @@ async function loadCareerPrograms() {
           + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">'
           + '<div style="flex:1;">'
           + '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap;">'
-          + '<span style="background:' + (isOpen ? 'rgba(39,174,96,0.1)' : 'rgba(107,114,128,0.1)') + ';color:' + (isOpen ? '#27AE60' : 'var(--gray)') + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (isOpen ? ' Open' : ' Opens in ' + daysUntil + ' days') + '</span>'
+          + '<span style="background:' + (isOpen ? 'rgba(39,174,96,0.1)' : 'rgba(245,166,35,0.1)') + ';color:' + (isOpen ? '#27AE60' : '#b37800') + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (isOpen ? 'Open' : 'Coming Soon') + '</span>'
           + '<span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;">4 Weeks</span>'
           + '<span style="background:var(--light);color:var(--gray);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;">' + (p.level||'Beginner') + '</span>'
           + '</div>'
@@ -9069,7 +9069,7 @@ async function loadCareerPrograms() {
           + (isOpen && enrolled ? '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;">Enrolled</span>' : '')
           + (isOpen && enrolled ? '<button class="btn-sm btn-navy" onclick="openCareerProgram(\'' + p.id + '\')">Continue →</button>' : '')
           + (isOpen && !enrolled ? '<button class="btn-sm btn-navy" onclick="enrollCareerProgram(\'' + p.id + '\')">Enroll Now</button>' : '')
-          + (!isOpen ? '<span style="background:var(--light);color:var(--gray);padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;">Coming Soon</span>' : '')
+          + (!isOpen ? '<span style="background:rgba(245,166,35,0.1);color:#b37800;padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;">Coming Soon</span>' : '')
           + '</div>'
           + '</div>'
           + '<div id="career-program-modules-' + p.id + '" style="display:none;"></div>'
