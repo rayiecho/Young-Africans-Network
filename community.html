@@ -488,11 +488,6 @@ async function doForgotPassword() {
 // PLATFORM ENTRY
 function enterPlatform() {
   showScreen('screen-platform');
-  // Show launch banner
-  const launchKey = 'yan_launch_banner_seen';
-  if (!localStorage.getItem(launchKey)) {
-    setTimeout(() => showLaunchBanner(), 1500);
-  }
   document.getElementById('sidebar-name').textContent = currentUserData.name || '';
   document.getElementById('sidebar-role').textContent = currentUserData.role || 'Member';
   document.getElementById('sidebar-dept').textContent = DEPARTMENTS.find(d=>d.id===currentUserData.department)?.name || '';
@@ -558,11 +553,10 @@ function loadTabContent(tab) {
   if (tab === 'comms-hub') safeLoad(tab, loadCommsHub);
   if (tab === 'partnerships-hub') safeLoad(tab, loadPartnershipsHub);
   if (tab === 'magazine') safeLoad(tab, loadMagazine);
-  if (tab === 'achievements') safeLoad(tab, loadLeaderboard);
+  if (tab === 'achievements') safeLoad(tab, loadAchievements);
   if (tab === 'resources') safeLoad(tab, loadResources);
   if (tab === 'polls') safeLoad(tab, loadPolls);
   if (tab === 'messages') safeLoad(tab, loadMessagesTab);
-  if (tab === 'mentorship') safeLoad(tab, loadMentorshipTab);
   if (tab === 'calendar') safeLoad(tab, loadCalendar);
 }
 
@@ -1657,12 +1651,7 @@ async function downloadCertificate(certId, deptOverride) {
     + ' &nbsp;|&nbsp; <button onclick="window.print()" style="background:#1B2A6B;color:#fff;border:none;padding:4px 16px;border-radius:4px;cursor:pointer;font-weight:700;">Print / Save PDF</button>'
     + '</div>'
     + body
-    + '<script>setTimeout(function(){window.print();},1500);<\/script><script>
-function toggleDropdown(id){var el=document.getElementById(id);var arrow=document.getElementById("arrow-"+id);var isOpen=el.style.display!=="none";document.querySelectorAll(".dropdown-items").forEach(function(d){d.style.display="none";});document.querySelectorAll(".dropdown-arrow").forEach(function(a){a.classList.remove("open");});if(!isOpen){el.style.display="block";if(arrow)arrow.classList.add("open");}}
-function closeDropdowns(){document.querySelectorAll(".dropdown-items").forEach(function(d){d.style.display="none";});document.querySelectorAll(".dropdown-arrow").forEach(function(a){a.classList.remove("open");});}
-function showSubSection(s){setTimeout(function(){var b=document.querySelector("[onclick*=""+s+""]");if(b)b.click();},300);}
-</script>
-</body></html>');
+    + '<script>setTimeout(function(){window.print();},1500);<\/script></body></html>');
   printWin.document.close();
 }
 
@@ -2109,11 +2098,6 @@ body{font-family:'Poppins',sans-serif;color:#1B2A6B;background:#fff;}
   <div style="margin-top:30px;font-size:11px;color:rgba(255,255,255,0.4);">© ${new Date().getFullYear()} Young Africans Network. All Rights Reserved.</div>
 </div>
 
-<script>
-function toggleDropdown(id){var el=document.getElementById(id);var arrow=document.getElementById("arrow-"+id);var isOpen=el.style.display!=="none";document.querySelectorAll(".dropdown-items").forEach(function(d){d.style.display="none";});document.querySelectorAll(".dropdown-arrow").forEach(function(a){a.classList.remove("open");});if(!isOpen){el.style.display="block";if(arrow)arrow.classList.add("open");}}
-function closeDropdowns(){document.querySelectorAll(".dropdown-items").forEach(function(d){d.style.display="none";});document.querySelectorAll(".dropdown-arrow").forEach(function(a){a.classList.remove("open");});}
-function showSubSection(s){setTimeout(function(){var b=document.querySelector("[onclick*=""+s+""]");if(b)b.click();},300);}
-</script>
 </body></html>`;
   w.document.write(html);
   w.document.close();
@@ -2695,11 +2679,6 @@ function downloadRecommendationLetter(scholarship, recommender, reason, deadline
     <span>youngafricansnetwork.org</span>
   </div>
 </div>
-<script>
-function toggleDropdown(id){var el=document.getElementById(id);var arrow=document.getElementById("arrow-"+id);var isOpen=el.style.display!=="none";document.querySelectorAll(".dropdown-items").forEach(function(d){d.style.display="none";});document.querySelectorAll(".dropdown-arrow").forEach(function(a){a.classList.remove("open");});if(!isOpen){el.style.display="block";if(arrow)arrow.classList.add("open");}}
-function closeDropdowns(){document.querySelectorAll(".dropdown-items").forEach(function(d){d.style.display="none";});document.querySelectorAll(".dropdown-arrow").forEach(function(a){a.classList.remove("open");});}
-function showSubSection(s){setTimeout(function(){var b=document.querySelector("[onclick*=""+s+""]");if(b)b.click();},300);}
-</script>
 </body>
 </html>`;
 
@@ -3041,8 +3020,7 @@ async function markAttendance(meetingId, meetingTitle) {
     markedAt: serverTimestamp(),
     meetingTitle
   });
-  showToast('Attendance marked!');
-  awardPoints('meeting');
+  showToast('Attendance marked! ');
 }
 
 async function viewAttendance(meetingId, meetingTitle) {
@@ -6646,58 +6624,38 @@ async function loadAllPrograms() {
 }
 
 async function enrollInProgram(programId) {
+  if (!confirm('Enroll in this program? You can only be enrolled in one program at a time.')) return;
+
   // Check if already enrolled in another program
   const activeSnap = await getDocs(query(
     collection(db, 'learningProgress'),
     where('userId', '==', currentUser.uid),
     where('status', '==', 'enrolled')
   ));
+
   if (!activeSnap.empty) {
     const active = activeSnap.docs[0].data();
-    return showToast('You are already enrolled in "' + (active.programTitle||'a program') + '". Complete it first.', 'error');
+    const activeProgSnap = await getDoc(doc(db, 'trainingPrograms', active.programId));
+    if (activeProgSnap.exists()) {
+      return showToast('You are already enrolled in "' + (active.programTitle||'a program') + '". Complete it first before enrolling in another.', 'error');
+    }
+    // Program no longer exists - silently ignore and allow new enrollment
   }
-  // Check if already applied
-  const appSnap = await getDocs(query(
-    collection(db, 'programApplications'),
-    where('userId', '==', currentUser.uid),
-    where('programId', '==', programId)
-  ));
-  if (!appSnap.empty) {
-    const appStatus = appSnap.docs[0].data().status;
-    if (appStatus === 'pending') return showToast('Your application is already pending review.', 'error');
-    if (appStatus === 'approved') return showToast('You are already enrolled in this program!', 'error');
-    if (appStatus === 'rejected') return showToast('Your previous application was rejected. Contact info@youngafricansnetwork.org for more information.', 'error');
-  }
+
   const ref = doc(db, 'trainingPrograms', programId);
   const snap = await getDoc(ref);
   const data = snap.data();
-  // Show application form
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;';
-  modal.innerHTML = '<div style="background:#fff;border-radius:20px;padding:2rem;max-width:540px;width:100%;max-height:90vh;overflow-y:auto;">'
-    + '<h2 style="font-family:Playfair Display,serif;font-size:1.2rem;font-weight:900;color:var(--navy);margin-bottom:0.25rem;">Apply for Program</h2>'
-    + '<p style="font-size:0.82rem;color:var(--gold);font-weight:600;margin-bottom:0.5rem;">' + sanitize(data.title||'') + '</p>'
-    + '<div style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1rem;margin-bottom:1.5rem;">'
-    + '<p style="font-size:0.8rem;color:var(--gray);line-height:1.6;">' + sanitize(data.description||'') + '</p>'
-    + '<p style="font-size:0.78rem;color:var(--navy);margin-top:0.5rem;font-weight:600;">' + (data.duration||'') + ' &nbsp;|&nbsp; ' + (data.level||'Beginner') + '</p>'
-    + '</div>'
-    + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Why do you want to join this program? *</label>'
-    + '<textarea id="app-motivation" rows="4" placeholder="Explain your motivation and what you hope to achieve..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;"></textarea></div>'
-    + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Relevant background or experience *</label>'
-    + '<textarea id="app-background" rows="3" placeholder="Describe any relevant education, work or skills..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;"></textarea></div>'
-    + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">What will you do after completing this program? *</label>'
-    + '<textarea id="app-goals" rows="3" placeholder="How will you apply what you learn..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;"></textarea></div>'
-    + '<div style="margin-bottom:1.5rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Weekly commitment</label>'
-    + '<select id="app-commitment" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;">'
-    + '<option value="high">High — 5+ hours per week</option>'
-    + '<option value="medium">Medium — 3-5 hours per week</option>'
-    + '<option value="low">Low — 1-3 hours per week</option>'
-    + '</select></div>'
-    + '<div style="display:flex;gap:0.75rem;">'
-    + '<button onclick="submitProgramApplication(\'' + programId + '\',\'' + encodeURIComponent(data.title||'') + '\')" style="flex:1;background:var(--navy);color:#fff;border:none;padding:0.85rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Submit Application</button>'
-    + '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:var(--light);color:var(--navy);border:none;padding:0.85rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;">Cancel</button>'
-    + '</div></div>';
-  document.body.appendChild(modal);
+  const enrolledBy = data.enrolledBy || [];
+  if (enrolledBy.includes(currentUser.uid)) return showToast('Already enrolled!', 'error');
+  enrolledBy.push(currentUser.uid);
+  await updateDoc(ref, {enrolledBy: enrolledBy});
+  await setDoc(doc(db, 'learningProgress', currentUser.uid + '_' + programId), {
+    userId: currentUser.uid, programId: programId,
+    programTitle: data.title, status: 'enrolled',
+    progress: 0, modulesCompleted: [], enrolledAt: serverTimestamp()
+  }, {merge: true});
+  showToast('Enrolled successfully! Go to My Learning to start.');
+  loadAllPrograms();
 }
 
 async function openProgram(programId) {
@@ -9535,565 +9493,6 @@ window.checkEmailVerified = async function() {
   }
 };
 
-
-
-window.submitProgramApplication = async function(programId, programTitleEncoded) {
-  const motivation = document.getElementById('app-motivation').value.trim();
-  const background = document.getElementById('app-background').value.trim();
-  const goals = document.getElementById('app-goals').value.trim();
-  const commitment = document.getElementById('app-commitment').value;
-  const programTitle = decodeURIComponent(programTitleEncoded);
-
-  if (!motivation || motivation.length < 30) return showToast('Please explain your motivation in detail (at least 30 characters)', 'error');
-  if (!background || background.length < 20) return showToast('Please describe your background', 'error');
-  if (!goals || goals.length < 20) return showToast('Please describe your goals after completion', 'error');
-
-  try {
-    await addDoc(collection(db, 'programApplications'), {
-      userId: currentUser.uid,
-      userName: currentUserData.name,
-      userEmail: currentUserData.email || '',
-      userCountry: currentUserData.country || '',
-      userDepartment: currentUserData.department || '',
-      programId, programTitle,
-      motivation, background, goals, commitment,
-      status: 'pending',
-      appliedAt: serverTimestamp()
-    });
-    document.querySelector('div[style*="position:fixed"]')?.remove();
-    showToast('Application submitted! Admin will review it soon.');
-    await addDoc(collection(db, 'notifications'), {
-      title: 'Application Received',
-      message: 'Your application for ' + programTitle + ' has been received. We will review it and notify you soon.',
-      type: 'info', userId: currentUser.uid, postedBy: 'YAN Admin',
-      createdAt: serverTimestamp(), readBy: []
-    });
-  } catch(e) {
-    showToast('Error: ' + e.message, 'error');
-  }
-};
-
-
-function showLaunchBanner() {
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;';
-  modal.innerHTML = `
-  <div style="background:linear-gradient(135deg,#1B2A6B,#E63329);border-radius:24px;padding:0;max-width:520px;width:100%;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.4);">
-    <div style="padding:2.5rem;text-align:center;color:#fff;">
-      <div style="font-size:3rem;margin-bottom:0.5rem;">🌍</div>
-      <div style="background:rgba(255,255,255,0.15);border-radius:50px;padding:0.3rem 1.25rem;display:inline-block;font-size:0.72rem;font-weight:700;letter-spacing:2px;margin-bottom:1rem;">OFFICIAL LAUNCH</div>
-      <h1 style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;margin-bottom:0.5rem;line-height:1.2;">Young Africans Network</h1>
-      <p style="color:rgba(255,255,255,0.85);font-size:0.95rem;margin-bottom:0.25rem;">is officially live!</p>
-      <p style="color:var(--gold);font-size:1rem;font-weight:700;margin-bottom:1.5rem;">June 1, 2026 — Building the Future, Together</p>
-      <p style="color:rgba(255,255,255,0.8);font-size:0.85rem;line-height:1.7;margin-bottom:1.5rem;">
-        Welcome to Africa's fastest growing youth platform. Connect, learn, earn scholarships, build your career and shape the future of our continent.
-      </p>
-      <div style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1.5rem;">
-        <button onclick="shareLaunch('twitter')" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;">Share on X (Twitter)</button>
-        <button onclick="shareLaunch('whatsapp')" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;">Share on WhatsApp</button>
-        <button onclick="shareLaunch('linkedin')" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;">Share on LinkedIn</button>
-        <button onclick="shareLaunch('copy')" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;">Copy Link</button>
-      </div>
-      <button onclick="this.closest('div[style*=fixed]').remove();localStorage.setItem('yan_launch_banner_seen','1')" style="background:none;border:none;color:rgba(255,255,255,0.6);font-size:0.82rem;cursor:pointer;font-family:Poppins,sans-serif;">Continue to Platform</button>
-    </div>
-  </div>`;
-  document.body.appendChild(modal);
-}
-
-window.shareLaunch = function(platform) {
-  const text = "I just joined Young Africans Network (YAN) — Africa's platform for youth empowerment! Scholarships, career development, training programs and more. Join me! 🌍";
-  const url = "https://youngafricansnetwork.org";
-  const fullText = text + " " + url;
-  
-  if (platform === 'twitter') {
-    window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(fullText), '_blank');
-  } else if (platform === 'whatsapp') {
-    window.open("https://wa.me/?text=" + encodeURIComponent(fullText), '_blank');
-  } else if (platform === 'linkedin') {
-    window.open("https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(url), '_blank');
-  } else if (platform === 'copy') {
-    navigator.clipboard.writeText(fullText).then(() => {
-      if (typeof showToast === 'function') showToast('Link copied! Share it everywhere.');
-      else alert('Link copied!');
-    });
-  }
-};
-
-// ===== YAN POINTS SYSTEM =====
-const POINTS_MAP = {
-  post: 5, comment: 2, like_received: 1, meeting: 20,
-  lesson_complete: 15, quiz_pass: 25, program_complete: 100,
-  cert_request: 10, mentoring_session: 30, referral: 50
-};
-
-const TIERS = [
-  {name:'Legend', min:2000, reward:'Full YAN Recognition Package + Special Role', icon:'L', color:'#9B59B6'},
-  {name:'Diamond', min:1000, reward:'YAN T-Shirt + Website Feature', icon:'D', color:'#1ABC9C'},
-  {name:'Gold', min:500, reward:'YAN Book + Recognition Post', icon:'G', color:'#F5A623'},
-  {name:'Silver', min:200, reward:'YAN Certificate of Excellence', icon:'S', color:'#95A5A6'},
-  {name:'Bronze', min:0, reward:'Recognition Badge', icon:'B', color:'#CD7F32'},
-];
-
-function getTier(points) {
-  return TIERS.find(t => points >= t.min) || TIERS[TIERS.length-1];
-}
-
-function getNextTier(points) {
-  const idx = TIERS.findIndex(t => points >= t.min);
-  return idx > 0 ? TIERS[idx-1] : null;
-}
-
-async function awardPoints(action, userId, userName) {
-  const uid = userId || currentUser?.uid;
-  const uname = userName || currentUserData?.name;
-  if (!uid) return;
-  const pts = POINTS_MAP[action] || 0;
-  if (!pts) return;
-  try {
-    const ref = doc(db, 'memberPoints', uid);
-    const snap = await getDoc(ref);
-    const current = snap.exists() ? (snap.data().total || 0) : 0;
-    const newTotal = current + pts;
-    const oldTier = getTier(current);
-    const newTier = getTier(newTotal);
-    await setDoc(ref, {
-      userId: uid, userName: uname,
-      total: newTotal,
-      lastUpdated: serverTimestamp(),
-      [`earned_${action}`]: (snap.data()?.[`earned_${action}`] || 0) + pts
-    }, {merge: true});
-    // Log transaction
-    await addDoc(collection(db, 'pointsHistory'), {
-      userId: uid, action, points: pts,
-      total: newTotal, createdAt: serverTimestamp()
-    });
-    // Notify tier upgrade
-    if (oldTier.name !== newTier.name) {
-      showToast('Tier upgraded to ' + newTier.name + '! Reward: ' + newTier.reward);
-      await addDoc(collection(db, 'notifications'), {
-        title: 'Tier Upgrade - ' + newTier.name + '!',
-        message: 'Congratulations! You have reached ' + newTier.name + ' tier. Your reward: ' + newTier.reward + '. Contact info@youngafricansnetwork.org to claim.',
-        type: 'success', userId: uid, postedBy: 'YAN Points System',
-        createdAt: serverTimestamp(), readBy: []
-      });
-    }
-  } catch(e) { console.log('Points error:', e); }
-}
-
-async function loadLeaderboard() {
-  const container = document.getElementById('tab-achievements');
-  if (!container) return;
-  try {
-    const snap = await getDocs(query(collection(db, 'memberPoints'), orderBy('total', 'desc'), limit(50)));
-    const mySnap = await getDoc(doc(db, 'memberPoints', currentUser.uid));
-    const myPoints = mySnap.exists() ? mySnap.data().total || 0 : 0;
-    const myTier = getTier(myPoints);
-    const nextTier = getNextTier(myPoints);
-
-    let html = '<div style="max-width:800px;margin:0 auto;">';
-
-    // My points card
-    html += '<div style="background:linear-gradient(135deg,var(--navy),#2D3F7B);border-radius:20px;padding:1.5rem;margin-bottom:1.5rem;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">';
-    html += '<div style="display:flex;align-items:center;gap:1rem;">';
-    html += '<div style="width:56px;height:56px;border-radius:50%;background:' + myTier.color + ';display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;color:#fff;">' + myTier.icon + '</div>';
-    html += '<div><h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;margin-bottom:2px;">' + myPoints + ' Points</h2>';
-    html += '<p style="color:rgba(255,255,255,0.75);font-size:0.82rem;">' + myTier.name + ' Tier — ' + myTier.reward + '</p>';
-    if (nextTier) {
-      const needed = nextTier.min - myPoints;
-      html += '<p style="color:var(--gold);font-size:0.75rem;margin-top:4px;">' + needed + ' points to ' + nextTier.name + '</p>';
-      html += '<div style="width:200px;height:4px;background:rgba(255,255,255,0.2);border-radius:50px;margin-top:6px;">';
-      html += '<div style="width:' + Math.min(100, ((myPoints - (TIERS[TIERS.findIndex(t=>t.name===myTier.name)+1]?.min||0)) / (nextTier.min - (TIERS[TIERS.findIndex(t=>t.name===myTier.name)+1]?.min||0))) * 100) + '%;height:4px;background:var(--gold);border-radius:50px;"></div></div>';
-    }
-    html += '</div></div>';
-    html += '<div style="text-align:right;"><p style="font-size:0.78rem;color:rgba(255,255,255,0.6);">Reward</p><p style="font-size:0.85rem;font-weight:700;">' + myTier.reward + '</p></div>';
-    html += '</div>';
-
-    // Tiers overview
-    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.75rem;margin-bottom:1.5rem;">';
-    [...TIERS].reverse().forEach(t => {
-      const active = myTier.name === t.name;
-      html += '<div style="background:var(--white);border-radius:12px;padding:1rem;text-align:center;border:2px solid ' + (active ? t.color : 'transparent') + ';box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
-      html += '<div style="width:40px;height:40px;border-radius:50%;background:' + t.color + ';display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;margin:0 auto 0.5rem;">' + t.icon + '</div>';
-      html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);">' + t.name + '</p>';
-      html += '<p style="font-size:0.7rem;color:var(--gray);">' + t.min + '+ pts</p>';
-      html += '<p style="font-size:0.68rem;color:var(--gray);margin-top:4px;">' + t.reward + '</p>';
-      html += '</div>';
-    });
-    html += '</div>';
-
-    // Leaderboard
-    html += '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">';
-    html += '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Top Members</h3>';
-    snap.docs.forEach((d, idx) => {
-      const data = d.data();
-      const tier = getTier(data.total || 0);
-      const isMe = d.id === currentUser.uid;
-      html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;border-radius:12px;background:' + (isMe ? 'rgba(27,42,107,0.05)' : '') + ';margin-bottom:0.5rem;">';
-      html += '<span style="font-size:0.9rem;font-weight:800;color:' + (idx < 3 ? ['#F5A623','#95A5A6','#CD7F32'][idx] : 'var(--gray)') + ';width:28px;">' + (idx+1) + '</span>';
-      html += '<div style="width:36px;height:36px;border-radius:50%;background:' + tier.color + ';display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.85rem;">' + (data.userName||'?').charAt(0) + '</div>';
-      html += '<div style="flex:1;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(data.userName||'Member') + (isMe ? ' (You)' : '') + '</p>';
-      html += '<p style="font-size:0.72rem;color:var(--gray);">' + tier.name + ' Tier</p></div>';
-      html += '<span style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + (data.total||0) + ' pts</span>';
-      html += '</div>';
-    });
-    html += '</div>';
-
-    // How to earn points
-    html += '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-top:1rem;">';
-    html += '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">How to Earn Points</h3>';
-    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.5rem;">';
-    const actions = [
-      ['Post on Feed', 5], ['Comment', 2], ['Like Received', 1],
-      ['Attend Meeting', 20], ['Complete Lesson', 15], ['Pass Quiz', 25],
-      ['Complete Program', 100], ['Mentoring Session', 30], ['Refer a Member', 50]
-    ];
-    actions.forEach(([a, p]) => {
-      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0.75rem;background:var(--light);border-radius:8px;">';
-      html += '<span style="font-size:0.78rem;color:var(--navy);">' + a + '</span>';
-      html += '<span style="font-size:0.78rem;font-weight:700;color:var(--gold);">+' + p + '</span></div>';
-    });
-    html += '</div></div></div>';
-    container.innerHTML = html;
-  } catch(e) {
-    console.error('Leaderboard error:', e);
-    document.getElementById('tab-achievements').innerHTML = '<p style="color:var(--red);padding:1rem;">Error loading leaderboard: ' + e.message + '</p>';
-  }
-}
-window.loadLeaderboard = loadLeaderboard;
-
-
-// ===== MENTORSHIP SYSTEM =====
-async function loadMentorshipTab() {
-  const container = document.getElementById('mentorship-container');
-  if (!container) return;
-  container.innerHTML = '<p style="padding:1rem;color:var(--gray);">Loading...</p>';
-
-  try {
-    const myMentorSnap = await getDocs(query(
-      collection(db, 'mentorships'),
-      where('menteeId', '==', currentUser.uid)
-    ));
-    const myMenteesSnap = await getDocs(query(
-      collection(db, 'mentorships'),
-      where('mentorId', '==', currentUser.uid)
-    ));
-    const myProfileSnap = await getDoc(doc(db, 'mentorProfiles', currentUser.uid));
-    const myProfile = myProfileSnap.exists() ? myProfileSnap.data() : null;
-
-    let html = '<div style="max-width:800px;margin:0 auto;">';
-
-    // Header
-    html += '<div style="background:linear-gradient(135deg,#1B2A6B,#9B59B6);border-radius:20px;padding:1.5rem;margin-bottom:1.5rem;color:#fff;">';
-    html += '<h2 style="font-family:Playfair Display,serif;font-size:1.5rem;font-weight:900;margin-bottom:0.25rem;">YAN Mentorship Program</h2>';
-    html += '<p style="color:rgba(255,255,255,0.75);font-size:0.85rem;">Connect with experienced members who can guide your journey</p>';
-    html += '<div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap;">';
-    html += '<button onclick="showMentorshipSection(\'find\')" style="background:rgba(255,255,255,0.2);color:#fff;border:1.5px solid rgba(255,255,255,0.4);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">Find a Mentor</button>';
-    html += '<button onclick="showMentorshipSection(\'become\')" style="background:rgba(255,255,255,0.2);color:#fff;border:1.5px solid rgba(255,255,255,0.4);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">Become a Mentor</button>';
-    html += '<button onclick="showMentorshipSection(\'my\')" style="background:rgba(255,255,255,0.2);color:#fff;border:1.5px solid rgba(255,255,255,0.4);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">My Mentorships</button>';
-    html += '</div></div>';
-    html += '<div id="mentorship-section"></div></div>';
-    container.innerHTML = html;
-    showMentorshipSection('find');
-  } catch(e) {
-    document.getElementById('tab-achievements').innerHTML = '<p style="color:var(--red);padding:1rem;">Error: ' + e.message + '</p>';
-  }
-}
-
-window.showMentorshipSection = async function(section) {
-  const container = document.getElementById('mentorship-section');
-  if (!container) return;
-  container.innerHTML = '<p style="padding:1rem;color:var(--gray);">Loading...</p>';
-
-  if (section === 'find') {
-    // Get available mentors
-    const mentorsSnap = await getDocs(query(
-      collection(db, 'mentorProfiles'),
-      where('available', '==', true)
-    ));
-    let html = '<div style="margin-top:1rem;">';
-    html += '<div style="display:flex;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;">';
-    html += '<button onclick="aiMatchMentor()" style="background:linear-gradient(135deg,#1B2A6B,#9B59B6);color:#fff;border:none;padding:0.6rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">AI Match Me</button>';
-    html += '</div>';
-
-    if (mentorsSnap.empty) {
-      html += '<div style="text-align:center;padding:2rem;color:var(--gray);font-size:0.85rem;">No mentors available yet. Be the first to become one!</div>';
-    } else {
-      mentorsSnap.docs.forEach(d => {
-        const m = d.data();
-        html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">';
-        html += '<div style="display:flex;gap:1rem;align-items:flex-start;">';
-        html += (m.photoUrl ? '<img src="'+m.photoUrl+'" style="width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
-          : '<div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--navy),#9B59B6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem;flex-shrink:0;">' + (m.name||'M').charAt(0) + '</div>');
-        html += '<div style="flex:1;">';
-        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">';
-        html += '<div><h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);">' + sanitize(m.name||'') + '</h3>';
-        html += '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize(m.country||'') + ' · ' + sanitize(m.department||'') + '</p></div>';
-        html += '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">Available</span>';
-        html += '</div>';
-        html += '<p style="font-size:0.82rem;color:var(--gray);margin:0.5rem 0;line-height:1.6;">' + sanitize(m.bio||'') + '</p>';
-        html += '<div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.75rem;">';
-        (m.skills||[]).forEach(s => {
-          html += '<span style="background:rgba(27,42,107,0.07);color:var(--navy);padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;">' + sanitize(s) + '</span>';
-        });
-        html += '</div>';
-        html += '<button onclick="requestMentor(\'' + d.id + '\',\'' + encodeURIComponent(m.name||'') + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">Request Mentorship</button>';
-        html += '</div></div></div>';
-      });
-    }
-    html += '</div>';
-    container.innerHTML = html;
-
-  } else if (section === 'become') {
-    const myProfile = await getDoc(doc(db, 'mentorProfiles', currentUser.uid));
-    const p = myProfile.exists() ? myProfile.data() : {};
-    container.innerHTML = '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-top:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
-      + '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Become a Mentor</h3>'
-      + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Your Bio / What you can help with</label>'
-      + '<textarea id="mentor-bio" rows="3" placeholder="e.g. I can help with CV writing, scholarship applications, web development..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;">' + (p.bio||'') + '</textarea></div>'
-      + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Your Skills (comma separated)</label>'
-      + '<input id="mentor-skills" type="text" placeholder="e.g. CV Writing, Public Speaking, Web Development" value="' + (p.skills||[]).join(', ') + '" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>'
-      + '<div style="margin-bottom:1.5rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Max Mentees at a time</label>'
-      + '<select id="mentor-max" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;">'
-      + '<option value="1"' + (p.maxMentees===1?' selected':'') + '>1 mentee</option>'
-      + '<option value="2"' + (p.maxMentees===2?' selected':'') + '>2 mentees</option>'
-      + '<option value="3"' + (!p.maxMentees||p.maxMentees===3?' selected':'') + '>3 mentees</option>'
-      + '<option value="5"' + (p.maxMentees===5?' selected':'') + '>5 mentees</option>'
-      + '</select></div>'
-      + '<button onclick="saveMentorProfile()" style="background:var(--navy);color:#fff;border:none;padding:0.85rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;width:100%;">'
-      + (myProfile.exists() ? 'Update Profile' : 'Register as Mentor') + '</button>'
-      + (myProfile.exists() ? '<button onclick="toggleMentorAvailability('+myProfile.data().available+')" style="background:'+(myProfile.data().available?'var(--red)':'rgba(39,174,96,0.1)')+';color:'+(myProfile.data().available?'#fff':'#27AE60')+';border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;width:100%;margin-top:0.75rem;">'+(myProfile.data().available?'Pause Mentoring':'Resume Mentoring')+'</button>' : '')
-      + '</div>';
-
-  } else if (section === 'my') {
-    const [asSnap, amSnap] = await Promise.all([
-      getDocs(query(collection(db,'mentorships'),where('menteeId','==',currentUser.uid))),
-      getDocs(query(collection(db,'mentorships'),where('mentorId','==',currentUser.uid)))
-    ]);
-    let html = '<div style="margin-top:1rem;">';
-    if (asSnap.empty && amSnap.empty) {
-      html += '<div style="text-align:center;padding:2rem;color:var(--gray);">No mentorships yet. Find a mentor or become one!</div>';
-    }
-    if (!asSnap.empty) {
-      html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">My Mentors</h3>';
-      asSnap.docs.forEach(d => {
-        const m = d.data();
-        html += '<div style="background:var(--white);border-radius:12px;padding:1rem;margin-bottom:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);display:flex;justify-content:space-between;align-items:center;">';
-        html += '<div><p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(m.mentorName||'') + '</p>';
-        html += '<p style="font-size:0.75rem;color:var(--gray);">Status: <span style="color:' + (m.status==='active'?'#27AE60':'var(--gray)') + ';font-weight:600;">' + (m.status||'pending') + '</span></p></div>';
-        html += '<button onclick="joinMentorshipMeeting(\'' + m.mentorId + '\',\'' + encodeURIComponent(m.mentorName||'') + '\')" style="background:#27AE60;color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;margin-right:0.5rem;">Join Meeting</button>';
-        html += '<button onclick="showTab(\'messages\');setTimeout(()=>openConversation(\'' + [currentUser.uid,m.mentorId].sort().join('_') + '\',\'' + m.mentorId + '\',\'' + encodeURIComponent(m.mentorName||'') + '\',\''  + '\'),500)" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Chat</button>';
-        html += '</div>';
-      });
-    }
-    if (!amSnap.empty) {
-      html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin:1rem 0 0.75rem;">My Mentees</h3>';
-      amSnap.docs.forEach(d => {
-        const m = d.data();
-        html += '<div style="background:var(--white);border-radius:12px;padding:1rem;margin-bottom:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">';
-        html += '<div><p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(m.menteeName||'') + '</p>';
-        html += '<p style="font-size:0.75rem;color:var(--gray);">Status: <span style="color:' + (m.status==='active'?'#27AE60':'var(--gray)') + ';font-weight:600;">' + (m.status||'pending') + '</span></p></div>';
-        html += '<div style="display:flex;gap:0.5rem;">';
-        if (m.status === 'pending') {
-          html += '<button onclick="acceptMentorship(\'' + d.id + '\')" style="background:#27AE60;color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Accept</button>';
-        }
-        html += '<button onclick="startMentorshipMeeting(\'' + m.menteeId + '\',\'' + encodeURIComponent(m.menteeName||'') + '\',\'' + d.id + '\')" style="background:#27AE60;color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Start Meeting</button>';
-        const menteeMeetingUrl2 = 'https://youngafricansnetwork.daily.co/YAN_MENTORSHIP_' + [currentUser.uid,m.menteeId].sort().join('').substring(0,8).toUpperCase();
-        html += '<button onclick="window.open(\'' + menteeMeetingUrl2 + '\',\'_blank\')" style="background:#27AE60;color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Join Meeting</button>';
-        html += '<button onclick="logMentoringSession(\'' + d.id + '\',\'' + m.menteeId + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Log Session</button>';
-        html += '<button onclick="showTab(\'messages\');setTimeout(()=>openConversation(\'' + [currentUser.uid,m.menteeId].sort().join('_') + '\',\'' + m.menteeId + '\',\'' + encodeURIComponent(m.menteeName||'') + '\',\'' + '\'),500)" style="background:var(--light);color:var(--navy);border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Chat</button>';
-        html += '</div></div>';
-      });
-    }
-    html += '</div>';
-    container.innerHTML = html;
-  }
-};
-
-window.saveMentorProfile = async function() {
-  const bio = document.getElementById('mentor-bio').value.trim();
-  const skills = document.getElementById('mentor-skills').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const maxMentees = parseInt(document.getElementById('mentor-max').value);
-  if (!bio) return showToast('Please add a bio', 'error');
-  await setDoc(doc(db, 'mentorProfiles', currentUser.uid), {
-    userId: currentUser.uid, name: currentUserData.name,
-    photoUrl: currentUserData.photoUrl || '',
-    country: currentUserData.country || '', department: currentUserData.department || '',
-    bio, skills, maxMentees, available: true, createdAt: serverTimestamp()
-  }, {merge: true});
-  showToast('Mentor profile saved!');
-  showMentorshipSection('find');
-};
-
-window.toggleMentorAvailability = async function(current) {
-  await updateDoc(doc(db, 'mentorProfiles', currentUser.uid), { available: !current });
-  showToast('Availability updated!');
-  showMentorshipSection('become');
-};
-
-window.requestMentor = async function(mentorId, mentorNameEncoded) {
-  const mentorName = decodeURIComponent(mentorNameEncoded);
-  if (!confirm('Request ' + mentorName + ' as your mentor?')) return;
-  const existing = await getDocs(query(collection(db,'mentorships'),where('menteeId','==',currentUser.uid),where('status','==','active')));
-  if (!existing.empty) return showToast('You already have an active mentor!', 'error');
-  await addDoc(collection(db, 'mentorships'), {
-    mentorId, mentorName, menteeId: currentUser.uid,
-    menteeName: currentUserData.name, status: 'pending',
-    createdAt: serverTimestamp()
-  });
-  await addDoc(collection(db,'notifications'), {
-    title: 'New Mentorship Request',
-    message: currentUserData.name + ' has requested you as their mentor.',
-    type: 'info', userId: mentorId, postedBy: 'YAN Mentorship',
-    createdAt: serverTimestamp(), readBy: []
-  });
-  showToast('Mentorship request sent!');
-  showMentorshipSection('my');
-};
-
-window.acceptMentorship = async function(mentorshipId) {
-  await updateDoc(doc(db,'mentorships',mentorshipId), {status:'active', acceptedAt: serverTimestamp()});
-  showToast('Mentorship accepted!');
-  showMentorshipSection('my');
-};
-
-window.logMentoringSession = async function(mentorshipId, menteeId) {
-  if (!confirm('Log a completed mentoring session? You will earn 30 points.')) return;
-  await addDoc(collection(db,'mentoringSessions'), {
-    mentorshipId, mentorId: currentUser.uid, menteeId,
-    loggedAt: serverTimestamp()
-  });
-  await awardPoints('mentoring_session');
-  showToast('Session logged! +30 points earned.');
-};
-
-window.aiMatchMentor = async function() {
-  const btn = event.target;
-  btn.textContent = 'Finding your best match...';
-  btn.disabled = true;
-  try {
-    const mentorsSnap = await getDocs(query(collection(db,'mentorProfiles'),where('available','==',true)));
-    if (mentorsSnap.empty) {
-      showToast('No mentors available yet.', 'error');
-      btn.textContent = 'AI Match Me';
-      btn.disabled = false;
-      return;
-    }
-    const mentors = mentorsSnap.docs.map(d => ({id:d.id,...d.data()}));
-    const prompt = 'You are a mentorship matcher for YAN (Young Africans Network). Match this mentee with the best mentor from the list.\n\nMentee: Name=' + currentUserData.name + ', Department=' + currentUserData.department + ', Country=' + currentUserData.country + ', Role=' + currentUserData.role + '\n\nMentors: ' + JSON.stringify(mentors.map(m=>({id:m.id,name:m.name,department:m.department,country:m.country,skills:m.skills,bio:m.bio}))) + '\n\nReturn JSON only: {"bestMatchId":"mentor_id","reason":"why this is the best match in 2 sentences"}';
-    const resp = await fetch('https://yan-ai-worker.youngafricansn.workers.dev/ai', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({message: prompt})
-    });
-    const data = await resp.json();
-    const text = data.response || '';
-    const result = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}')+1));
-    const match = mentors.find(m => m.id === result.bestMatchId) || mentors[0];
-    showToast('Best match found: ' + match.name + '!');
-    // Scroll to matched mentor
-    const container = document.getElementById('mentorship-section');
-    container.innerHTML = '<div style="background:linear-gradient(135deg,rgba(27,42,107,0.05),rgba(155,89,182,0.05));border-radius:16px;padding:1.5rem;margin-top:1rem;border:2px solid #9B59B6;">'
-      + '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:0.5rem;">Your AI Match</h3>'
-      + '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:1rem;">' + sanitize(result.reason) + '</p>'
-      + (match.photoUrl ? '<img src="'+match.photoUrl+'" style="width:52px;height:52px;border-radius:50%;object-fit:cover;margin-bottom:0.75rem;">'
-        : '<div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--navy),#9B59B6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem;margin-bottom:0.75rem;">' + (match.name||'M').charAt(0) + '</div>')
-      + '<h4 style="font-size:0.95rem;font-weight:800;color:var(--navy);">' + sanitize(match.name||'') + '</h4>'
-      + '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize(match.country||'') + ' · ' + sanitize(match.department||'') + '</p>'
-      + '<p style="font-size:0.82rem;color:var(--gray);margin:0.5rem 0;">' + sanitize(match.bio||'') + '</p>'
-      + '<button onclick="requestMentor(\'' + match.id + '\',\'' + encodeURIComponent(match.name||'') + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.6rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;margin-top:0.75rem;">Request This Mentor</button>'
-      + '<button onclick="showMentorshipSection(\'find\')" style="background:none;border:none;color:var(--gray);font-size:0.82rem;cursor:pointer;margin-left:1rem;">View All Mentors</button>'
-      + '</div>';
-  } catch(e) {
-    showToast('AI matching failed. Browse mentors manually.', 'error');
-    showMentorshipSection('find');
-  }
-  btn.textContent = 'AI Match Me';
-  btn.disabled = false;
-};
-
-
-// ===== MENTORSHIP MEETINGS =====
-window.startMentorshipMeeting = async function(menteeId, menteeNameEncoded, mentorshipId) {
-  const menteeName = decodeURIComponent(menteeNameEncoded);
-  // Find a free mentorship room
-  const availableRooms = ['YAN_GENERAL_FORUM','YAN_TRAINING_FORUM','YAN_SCHOLARSHIP_REVISION','YAN_CAREER_ROOM','YAN_ANY_BUSINESS','YAN_MENTAL_DISCUSSION'];
-  const activeMeetingsSnap = await getDocs(query(collection(db,'mentorshipMeetings'),where('active','==',true)));
-  const usedRooms = activeMeetingsSnap.docs.map(d => d.data().roomName);
-  const roomName = availableRooms.find(r => !usedRooms.includes(r)) || availableRooms[0];
-  
-  // Save active meeting to Firestore
-  await setDoc(doc(db, 'mentorshipMeetings', mentorshipId), {
-    mentorId: currentUser.uid,
-    menteeId, mentorName: currentUserData.name,
-    menteeName, roomName, active: true,
-    startedAt: serverTimestamp()
-  });
-
-  // Notify mentee
-  await addDoc(collection(db, 'notifications'), {
-    title: currentUserData.name + ' started a meeting!',
-    message: 'Your mentor ' + currentUserData.name + ' has started a mentorship meeting. Click to join now!',
-    type: 'meeting', userId: menteeId,
-    action: 'mentorship_meeting', mentorshipId,
-    postedBy: 'YAN Mentorship', createdAt: serverTimestamp(), readBy: []
-  });
-
-  // Open meeting inside platform
-  openMentorshipMeetingRoom(roomName, menteeName);
-  showToast(menteeName + ' has been notified to join!');
-};
-
-window.joinMentorshipMeeting = async function(mentorId, mentorNameEncoded) {
-  const mentorName = decodeURIComponent(mentorNameEncoded);
-  const mentorshipId = [currentUser.uid, mentorId].sort().join('_');
-  
-  // Check if active meeting exists
-  const meetingSnap = await getDoc(doc(db, 'mentorshipMeetings', mentorshipId));
-  if (!meetingSnap.exists() || !meetingSnap.data().active) {
-    showToast('No active meeting found. Ask your mentor to start one.', 'error');
-    return;
-  }
-  const roomName = meetingSnap.data().roomName;
-  openMentorshipMeetingRoom(roomName, mentorName);
-};
-
-function openMentorshipMeetingRoom(roomName, otherPersonName) {
-  const meetingUrl = 'https://youngafricansnetwork.daily.co/' + roomName + '?showLeaveButton=0&showFullscreenButton=1';
-  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-
-  // On mobile, iframe camera/mic permissions are blocked — open in new tab instead
-  if (isMobile) {
-    window.open(meetingUrl, '_blank');
-    showToast('Meeting opened in your browser. Return here when done.');
-    return;
-  }
-
-  const modal = document.createElement('div');
-  modal.id = 'mentorship-meeting-modal';
-  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:99999;display:flex;flex-direction:column;';
-  modal.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;background:var(--navy);">'
-    + '<div style="display:flex;align-items:center;gap:0.75rem;">'
-    + '<div style="width:10px;height:10px;border-radius:50%;background:#27AE60;animation:pulse-btn 1.5s infinite;"></div>'
-    + '<span style="color:#fff;font-family:Poppins,sans-serif;font-weight:700;font-size:0.9rem;">Mentorship Meeting — ' + sanitize(otherPersonName) + '</span>'
-    + '</div>'
-    + '<span style="background:rgba(230,51,41,0.3);color:#fff;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.7rem;font-weight:600;">Recording in progress</span>'
-    + '<div style="display:flex;gap:0.75rem;">'
-    + '<button onclick="endMentorshipMeeting()" style="background:var(--red);color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.82rem;">End Meeting</button>'
-    + '</div></div>'
-    + '<iframe src="' + meetingUrl + '" '
-    + 'style="flex:1;border:none;width:100%;" allow="camera;microphone;fullscreen;display-capture"></iframe>';
-  document.body.appendChild(modal);
-}
-
-window.endMentorshipMeeting = async function() {
-  const modal = document.getElementById('mentorship-meeting-modal');
-  if (modal) modal.remove();
-  // Ask to log session
-  if (confirm('Meeting ended! Log this as a completed mentoring session? (+30 points)')) {
-    await awardPoints('mentoring_session');
-    showToast('Session logged! +30 points earned.');
-  }
-};
-
 // ===== MESSAGING SYSTEM =====
 let activeConversationId = null;
 let messageUnsubscribe = null;
@@ -10324,14 +9723,6 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 #sidebar-role{font-size:0.7rem;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.5px;}
 #sidebar-dept{font-size:0.68rem;color:var(--gold);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sidebar-nav{padding:1rem 0;flex:1;}
-.sidebar-dropdown{width:100%;}
-.dropdown-toggle{display:flex;justify-content:space-between;align-items:center;width:100%;}
-.dropdown-arrow{font-size:0.7rem;transition:transform 0.2s;margin-left:auto;}
-.dropdown-arrow.open{transform:rotate(90deg);}
-.dropdown-items{background:rgba(0,0,0,0.15);overflow:hidden;}
-.dropdown-item{display:flex;align-items:center;gap:0.5rem;padding:0.65rem 1.25rem 0.65rem 2rem;color:rgba(255,255,255,0.55);font-size:0.8rem;font-weight:500;cursor:pointer;transition:all 0.2s;border:none;background:none;width:100%;text-align:left;font-family:Poppins,sans-serif;}
-.dropdown-item:hover{color:var(--white);background:rgba(255,255,255,0.06);}
-.dropdown-item.active{color:var(--gold);font-weight:700;}
 .tab-btn{display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1.25rem;color:rgba(255,255,255,0.6);font-size:0.85rem;font-weight:500;cursor:pointer;transition:all 0.2s;border:none;background:none;width:100%;text-align:left;}
 .tab-btn:hover{color:var(--white);background:rgba(255,255,255,0.06);}
 .tab-btn.active{color:var(--white);background:rgba(255,255,255,0.12);border-left:3px solid var(--gold);}
@@ -10347,7 +9738,6 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .topbar-back:hover{background:var(--light);}
 .hamburger-mobile{display:none;background:none;border:none;cursor:pointer;padding:4px;flex-direction:column;gap:5px;}
 .hamburger-mobile span{display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;}
-
 .tab-panel{display:none;padding:2rem;max-width:900px;margin:0 auto;width:100%;}
 .tab-panel.active{display:block;}
 .post-composer{background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
@@ -10523,8 +9913,6 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .empty-state{text-align:center;padding:3rem 1rem;color:var(--gray);font-size:0.9rem;}
 .achieve-filter-btn{background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 1.25rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
 .achieve-filter-btn.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
-.messages-grid{display:grid;grid-template-columns:300px 1fr;gap:1rem;height:75vh;}
-.messages-grid{display:grid;grid-template-columns:300px 1fr;gap:1rem;height:75vh;}
 @media(max-width:768px){
   :root{--sidebar:0px;}
   .sidebar{position:fixed;transform:translateX(-100%);transition:transform 0.3s;width:260px;z-index:100;}
@@ -10680,7 +10068,6 @@ h2,h3{position:relative;}
 
 <!-- PLATFORM -->
 <div id="screen-platform" class="screen">
-
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <a href="index.html">
@@ -10697,69 +10084,19 @@ h2,h3{position:relative;}
       </div>
     </div>
     <nav class="sidebar-nav">
-      <!-- MAIN FEED -->
-      <button class="tab-btn active" data-tab="feed" onclick="showTab('feed')"><span class="tab-icon">—</span> MAIN FEED</button>
-
-      <!-- YAN HUBS DROPDOWN -->
-      <div class="sidebar-dropdown">
-        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('hubs-dropdown')">
-          <span class="tab-icon">—</span> YAN HUBS <span class="dropdown-arrow" id="arrow-hubs-dropdown">▸</span>
-        </button>
-        <div class="dropdown-items" id="hubs-dropdown" style="display:none;">
-          <button class="dropdown-item" onclick="showTab('hubs');showSubSection('programs-hub');closeDropdowns()"> Programs & Training</button>
-          <button class="dropdown-item" onclick="showTab('scholarships');closeDropdowns()"> Scholarships</button>
-          <button class="dropdown-item" onclick="showTab('career');closeDropdowns()"> Career Development</button>
-          <button class="dropdown-item" onclick="showTab('community-impact');closeDropdowns()"> Community Impact</button>
-          <button class="dropdown-item" onclick="showTab('mental-health');closeDropdowns()"> Mental Health</button>
-          <button class="dropdown-item" onclick="showTab('comms-hub');closeDropdowns()"> Communications</button>
-          <button class="dropdown-item" onclick="showTab('partnerships-hub');closeDropdowns()"> Partnerships</button>
-        </div>
-      </div>
-
-      <!-- YAN LIBRARY DROPDOWN -->
-      <div class="sidebar-dropdown">
-        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('library-dropdown')">
-          <span class="tab-icon">—</span> YAN LIBRARY <span class="dropdown-arrow" id="arrow-library-dropdown">▸</span>
-        </button>
-        <div class="dropdown-items" id="library-dropdown" style="display:none;">
-          <button class="dropdown-item" data-tab="magazine" onclick="showTab('magazine');closeDropdowns()"> Magazine</button>
-          <button class="dropdown-item" data-tab="resources" onclick="showTab('resources');closeDropdowns()"> Resources</button>
-          <button class="dropdown-item" data-tab="calendar" onclick="showTab('calendar');closeDropdowns()"> Calendar</button>
-        </div>
-      </div>
-
-      <!-- YAN SUPPORT DROPDOWN -->
-      <div class="sidebar-dropdown">
-        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('support-dropdown')">
-          <span class="tab-icon">—</span> YAN SUPPORT <span class="dropdown-arrow" id="arrow-support-dropdown">▸</span>
-        </button>
-        <div class="dropdown-items" id="support-dropdown" style="display:none;">
-          <button class="dropdown-item" data-tab="directory" onclick="showTab('directory');closeDropdowns()"> Directory</button>
-          <button class="dropdown-item" data-tab="polls" onclick="showTab('polls');closeDropdowns()"> Polls</button>
-          <button class="dropdown-item" data-tab="meetings" onclick="showTab('meetings');closeDropdowns()"> Meetings</button>
-          <button class="dropdown-item" onclick="window.open('https://wa.me/+254700000000','_blank');"> Help Line</button>
-        </div>
-      </div>
-
-      <!-- MENTORSHIP -->
-      <button class="tab-btn" data-tab="mentorship" onclick="showTab('mentorship')"><span class="tab-icon">—</span> MENTORSHIP</button>
-
-      <!-- MY PROFILE DROPDOWN -->
-      <div class="sidebar-dropdown">
-        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('profile-dropdown')">
-          <span class="tab-icon">—</span> MY PROFILE <span class="dropdown-arrow" id="arrow-profile-dropdown">▸</span>
-        </button>
-        <div class="dropdown-items" id="profile-dropdown" style="display:none;">
-          <button class="dropdown-item" data-tab="profile" onclick="showTab('profile');closeDropdowns()"> My Profile</button>
-          <button class="dropdown-item" data-tab="achievements" onclick="showTab('achievements');closeDropdowns()"> Achievements</button>
-          <button class="dropdown-item" data-tab="messages" onclick="showTab('messages');closeDropdowns()"> Messages <span id="msg-unread-badge" style="display:none;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:0.65rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;">0</span></button>
-          <button class="dropdown-item" data-tab="notifications" onclick="showTab('notifications');closeDropdowns()"> Notifications</button>
-        </div>
-      </div>
-
-      <!-- ADMIN & HEAD (hidden by default) -->
-      <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">—</span> HEAD PANEL</button>
-      <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;"><span class="tab-icon">—</span> ADMIN PANEL</button>
+      <button class="tab-btn active" data-tab="feed" onclick="showTab('feed')"><span class="tab-icon">—</span> Main Feed</button>
+      <button class="tab-btn" data-tab="hubs" onclick="showTab('hubs')"><span class="tab-icon">—</span> YAN Hubs</button>
+      <button class="tab-btn" data-tab="meetings" onclick="showTab('meetings')"><span class="tab-icon">—</span> Meetings</button>
+      <button class="tab-btn" data-tab="profile" onclick="showTab('profile')"><span class="tab-icon">—</span> My Profile</button>
+      <button class="tab-btn" data-tab="directory" onclick="showTab('directory')"><span class="tab-icon">—</span> Directory</button>
+      <button class="tab-btn" data-tab="magazine" onclick="showTab('magazine')"><span class="tab-icon">—</span> Magazine</button>
+      <button class="tab-btn" data-tab="achievements" onclick="showTab('achievements')"><span class="tab-icon">—</span> Achievements</button>
+      <button class="tab-btn" data-tab="resources" onclick="showTab('resources')"><span class="tab-icon">—</span> Resources</button>
+      <button class="tab-btn" data-tab="messages" onclick="showTab('messages')"><span class="tab-icon">-</span> Messages <span id="msg-unread-badge" style="display:none;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:0.65rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;">0</span></button>
+      <button class="tab-btn" data-tab="polls" onclick="showTab('polls')"><span class="tab-icon">—</span> Polls</button>
+      <button class="tab-btn" data-tab="calendar" onclick="showTab('calendar')"><span class="tab-icon">—</span> Calendar</button>
+      <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">—</span> Head Panel</button>
+      <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;"><span class="tab-icon">—</span> Admin Panel</button>
     </nav>
     <div class="sidebar-logout">
       <button class="btn-logout" onclick="doLogout()"><span></span> Sign Out</button>
@@ -10826,7 +10163,6 @@ h2,h3{position:relative;}
     <div class="tab-panel" id="tab-partnerships-hub"><div id="partnerships-hub-container"></div></div>
     <div class="tab-panel" id="tab-magazine"><div id="magazine-container"></div></div>
     <div class="tab-panel" id="tab-achievements"><div id="achievements-container"></div></div>
-    <div class="tab-panel" id="tab-mentorship"><div id="mentorship-container" style="max-width:900px;margin:0 auto;padding:1rem;"></div></div>
     <div class="tab-panel" id="tab-resources"><div id="resources-container"></div></div>
     <div class="tab-panel" id="tab-messages"><div id="messages-container" style="max-width:900px;margin:0 auto;padding:1rem;"></div></div>
     <div class="tab-panel" id="tab-polls"><div id="polls-container"></div></div>
@@ -10953,10 +10289,5 @@ window.sendYANGuideFloat = async function() {
 </script>
 <!-- END YAN GUIDE FLOAT -->
 
-<script>
-function toggleDropdown(id){var el=document.getElementById(id);var arrow=document.getElementById("arrow-"+id);var isOpen=el.style.display!=="none";document.querySelectorAll(".dropdown-items").forEach(function(d){d.style.display="none";});document.querySelectorAll(".dropdown-arrow").forEach(function(a){a.classList.remove("open");});if(!isOpen){el.style.display="block";if(arrow)arrow.classList.add("open");}}
-function closeDropdowns(){document.querySelectorAll(".dropdown-items").forEach(function(d){d.style.display="none";});document.querySelectorAll(".dropdown-arrow").forEach(function(a){a.classList.remove("open");});}
-function showSubSection(s){setTimeout(function(){var b=document.querySelector("[onclick*=""+s+""]");if(b)b.click();},300);}
-</script>
 </body>
 </html>
