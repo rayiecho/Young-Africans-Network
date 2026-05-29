@@ -10001,7 +10001,11 @@ window.aiMatchMentor = async function() {
 // ===== MENTORSHIP MEETINGS =====
 window.startMentorshipMeeting = async function(menteeId, menteeNameEncoded, mentorshipId) {
   const menteeName = decodeURIComponent(menteeNameEncoded);
-  const roomName = 'YAN-MENTOR-' + [currentUser.uid, menteeId].sort().join('-').substring(0,16).toUpperCase();
+  // Find a free mentorship room
+  const availableRooms = ['YAN_GENERAL_FORUM','YAN_TRAINING_FORUM','YAN_SCHOLARSHIP_REVISION','YAN_CAREER_ROOM','YAN_ANY_BUSINESS','YAN_MENTAL_DISCUSSION'];
+  const activeMeetingsSnap = await getDocs(query(collection(db,'mentorshipMeetings'),where('active','==',true)));
+  const usedRooms = activeMeetingsSnap.docs.map(d => d.data().roomName);
+  const roomName = availableRooms.find(r => !usedRooms.includes(r)) || availableRooms[0];
   
   // Save active meeting to Firestore
   await setDoc(doc(db, 'mentorshipMeetings', mentorshipId), {
