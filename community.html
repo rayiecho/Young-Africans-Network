@@ -554,6 +554,7 @@ function loadTabContent(tab) {
   if (tab === 'head') safeLoad(tab, loadHeadPanel);
   if (tab === 'admin') safeLoad(tab, loadAdminPanel);
   if (tab === 'notifications') safeLoad(tab, loadNotifications);
+  if (tab === 'personal-notifs') safeLoad(tab, loadPersonalNotifs);
   if (tab === 'directory') safeLoad(tab, loadDirectory);
   if (tab === 'ai') safeLoad(tab, loadAI);
   if (tab === 'scholarships') safeLoad(tab, loadScholarships);
@@ -690,10 +691,15 @@ async function postNotification() {
 async function loadNotifList() {
   const container = document.getElementById('notif-list');
   if (!container) return;
-  const q = query(collection(db, 'notifications'), orderBy('createdAt', 'desc'), limit(20));
-  const snap = await getDocs(q);
-  if (snap.empty) { container.innerHTML = '<div class="empty-state">No notifications yet.</div>'; return; }
-  container.innerHTML = snap.docs.map(d => {
+  // Community notifications only - no userId means public
+  const q = query(collection(db, 'notifications'), where('userId','==',null), orderBy('createdAt', 'desc'), limit(20));
+  const snap = await getDocs(q).catch(async () => {
+    // Fallback: get all and filter client-side
+    return await getDocs(query(collection(db, 'notifications'), orderBy('createdAt', 'desc'), limit(50)));
+  });
+  const publicDocs = snap.docs.filter(d => !d.data().userId);
+  if (publicDocs.length === 0) { container.innerHTML = '<div class="empty-state">No community announcements yet.</div>'; return; }
+  container.innerHTML = publicDocs.map(d => {
     const n = d.data();
     const isRead = Array.isArray(n.readBy) && n.readBy.includes(currentUser.uid);
     const icons = { announcement:'', event:'', opportunity:'', urgent:'' };
@@ -711,6 +717,47 @@ async function loadNotifList() {
     </div>`;
   }).join('');
 }
+
+async function loadPersonalNotifs() {
+  const container = document.getElementById('personal-notifs-container');
+  if (!container) return;
+  container.innerHTML = '<p style="padding:1rem;color:var(--gray);">Loading...</p>';
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'notifications'),
+      where('userId', '==', currentUser.uid),
+      orderBy('createdAt', 'desc'),
+      limit(30)
+    ));
+    if (snap.empty) {
+      container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--gray);">No personal notifications yet.</div>';
+      return;
+    }
+    const icons = { meeting:'', certificate:'', mentorship:'', scholarship:'', announcement:'', application:'' };
+    container.innerHTML = '<div style="max-width:700px;margin:0 auto;">' +
+      '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:1.5rem;"> My Notifications</h2>' +
+      snap.docs.map(d => {
+        const n = d.data();
+        const isRead = Array.isArray(n.readBy) && n.readBy.includes(currentUser.uid);
+        return '<div style="background:' + (isRead?'var(--light)':'var(--white)') + ';border-radius:16px;padding:1.25rem;margin-bottom:0.75rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid ' + (isRead?'rgba(27,42,107,0.15)':'var(--gold)') + ';cursor:pointer;" onclick="markPersonalNotifRead('' + d.id + '')">' +
+          '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">' +
+          '<span>' + (icons[n.type]||'') + '</span>' +
+          '<strong style="font-size:0.92rem;color:var(--navy);">' + sanitize(n.title) + '</strong>' +
+          (!isRead ? '<span style="background:var(--gold);color:#fff;border-radius:50px;padding:0.1rem 0.5rem;font-size:0.65rem;font-weight:700;">NEW</span>' : '') +
+          '</div>' +
+          '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;">' + sanitize(n.message) + '</p>' +
+          '<small style="font-size:0.72rem;color:var(--gray);">' + timeAgo(n.createdAt) + '</small>' +
+          '</div>';
+      }).join('') + '</div>';
+  } catch(e) {
+    container.innerHTML = '<p style="color:var(--red);padding:1rem;">Error: ' + e.message + '</p>';
+  }
+}
+
+window.markPersonalNotifRead = async function(notifId) {
+  await updateDoc(doc(db, 'notifications', notifId), { readBy: arrayUnion(currentUser.uid) });
+  loadPersonalNotifs();
+};
 
 async function markNotifRead(notifId) {
   await updateDoc(doc(db, 'notifications', notifId), { readBy: arrayUnion(currentUser.uid) });
