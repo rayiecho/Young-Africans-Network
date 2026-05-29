@@ -4602,11 +4602,11 @@ window.showCalendarEvent = showCalendarEvent;
 // GLOBAL SEARCH
 let _searchTimeout = null;
 
-async function handleGlobalSearch(query) {
+async function handleGlobalSearch(searchQuery) {
   const dropdown = document.getElementById('search-results-dropdown');
   if (!dropdown) return;
-  query = query.trim();
-  if (!query || query.length < 2) {
+  searchQuery = searchQuery.trim();
+  if (!searchQuery || searchQuery.length < 2) {
     dropdown.innerHTML = '';
     dropdown.style.display = 'none';
     return;
@@ -4616,7 +4616,7 @@ async function handleGlobalSearch(query) {
 
   clearTimeout(_searchTimeout);
   _searchTimeout = setTimeout(async function() {
-    const q = query.toLowerCase();
+    const q = searchQuery.toLowerCase();
     const results = [];
 
     try {
@@ -4724,7 +4724,7 @@ async function handleGlobalSearch(query) {
     }
 
     if (results.length === 0) {
-      dropdown.innerHTML = '<div style="padding:1.25rem;text-align:center;color:var(--gray);font-size:0.85rem;">No results for "' + sanitize(query) + '"</div>';
+      dropdown.innerHTML = '<div style="padding:1.25rem;text-align:center;color:var(--gray);font-size:0.85rem;">No results for "' + sanitize(searchQuery) + '"</div>';
       return;
     }
 
