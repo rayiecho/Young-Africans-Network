@@ -10131,7 +10131,7 @@ async function awardPoints(action, userId, userName) {
 }
 
 async function loadLeaderboard() {
-  const container = document.getElementById('tab-achievements');
+  const container = document.getElementById('points-container');
   if (!container) return;
   try {
     const snap = await getDocs(query(collection(db, 'memberPoints'), orderBy('total', 'desc'), limit(50)));
@@ -10701,6 +10701,7 @@ h2,h3{position:relative;}
           <button class="dd-item" onclick="showTab('achievements');closeDropdowns()">Achievements</button>
           <button class="dd-item" onclick="showTab('messages');closeDropdowns()">Messages <span id="msg-unread-badge" style="display:none;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:0.65rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;">0</span></button>
           <button class="dd-item" onclick="showTab('notifications');closeDropdowns()">Notifications</button>
+          <button class="dd-item" onclick="showTab('points');closeDropdowns()">My Points</button>
         </div>
       </div>
 
@@ -10776,6 +10777,7 @@ h2,h3{position:relative;}
     <div class="tab-panel" id="tab-messages"><div id="messages-container" style="max-width:900px;margin:0 auto;padding:1rem;"></div></div>
     <div class="tab-panel" id="tab-polls"><div id="polls-container"></div></div>
     <div class="tab-panel" id="tab-calendar"><div id="calendar-container"></div></div>
+    <div class="tab-panel" id="tab-points"><div id="points-container" style="max-width:900px;margin:0 auto;padding:1rem;"></div></div>
     <div class="tab-panel" id="tab-mentorship"><div id="mentorship-container" style="max-width:900px;margin:0 auto;padding:1rem;"></div></div>
   </main>
 </div>
