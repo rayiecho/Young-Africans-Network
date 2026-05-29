@@ -499,7 +499,8 @@ function enterPlatform() {
   const adminTab = document.getElementById('tab-btn-admin');
   if (headTab) headTab.style.display = (currentUserData.isDeptHead||currentUserData.isAdmin) ? 'flex' : 'none';
   if (adminTab) adminTab.style.display = currentUserData.isAdmin ? 'flex' : 'none';
-  showTab('feed');
+  var savedTab = localStorage.getItem('yan_last_tab');
+  showTab(savedTab || 'feed');
   // Request push notification permission
   if ('Notification' in window && Notification.permission !== 'denied') {
     setTimeout(() => {
