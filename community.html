@@ -488,6 +488,11 @@ async function doForgotPassword() {
 // PLATFORM ENTRY
 function enterPlatform() {
   showScreen('screen-platform');
+  // Show launch banner
+  const launchKey = 'yan_launch_banner_seen';
+  if (!localStorage.getItem(launchKey)) {
+    setTimeout(() => showLaunchBanner(), 1500);
+  }
   document.getElementById('sidebar-name').textContent = currentUserData.name || '';
   document.getElementById('sidebar-role').textContent = currentUserData.role || 'Member';
   document.getElementById('sidebar-dept').textContent = DEPARTMENTS.find(d=>d.id===currentUserData.department)?.name || '';
@@ -9550,6 +9555,52 @@ window.submitProgramApplication = async function(programId, programTitleEncoded)
     });
   } catch(e) {
     showToast('Error: ' + e.message, 'error');
+  }
+};
+
+
+function showLaunchBanner() {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  modal.innerHTML = `
+  <div style="background:linear-gradient(135deg,#1B2A6B,#E63329);border-radius:24px;padding:0;max-width:520px;width:100%;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.4);">
+    <div style="padding:2.5rem;text-align:center;color:#fff;">
+      <div style="font-size:3rem;margin-bottom:0.5rem;">🌍</div>
+      <div style="background:rgba(255,255,255,0.15);border-radius:50px;padding:0.3rem 1.25rem;display:inline-block;font-size:0.72rem;font-weight:700;letter-spacing:2px;margin-bottom:1rem;">OFFICIAL LAUNCH</div>
+      <h1 style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;margin-bottom:0.5rem;line-height:1.2;">Young Africans Network</h1>
+      <p style="color:rgba(255,255,255,0.85);font-size:0.95rem;margin-bottom:0.25rem;">is officially live!</p>
+      <p style="color:var(--gold);font-size:1rem;font-weight:700;margin-bottom:1.5rem;">June 1, 2026 — Building the Future, Together</p>
+      <p style="color:rgba(255,255,255,0.8);font-size:0.85rem;line-height:1.7;margin-bottom:1.5rem;">
+        Welcome to Africa's fastest growing youth platform. Connect, learn, earn scholarships, build your career and shape the future of our continent.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1.5rem;">
+        <button onclick="shareLaunch('twitter')" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;">Share on X (Twitter)</button>
+        <button onclick="shareLaunch('whatsapp')" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;">Share on WhatsApp</button>
+        <button onclick="shareLaunch('linkedin')" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;">Share on LinkedIn</button>
+        <button onclick="shareLaunch('copy')" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;">Copy Link</button>
+      </div>
+      <button onclick="this.closest('div[style*=fixed]').remove();localStorage.setItem('yan_launch_banner_seen','1')" style="background:none;border:none;color:rgba(255,255,255,0.6);font-size:0.82rem;cursor:pointer;font-family:Poppins,sans-serif;">Continue to Platform</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+
+window.shareLaunch = function(platform) {
+  const text = "I just joined Young Africans Network (YAN) — Africa's platform for youth empowerment! Scholarships, career development, training programs and more. Join me! 🌍";
+  const url = "https://youngafricansnetwork.org";
+  const fullText = text + " " + url;
+  
+  if (platform === 'twitter') {
+    window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(fullText), '_blank');
+  } else if (platform === 'whatsapp') {
+    window.open("https://wa.me/?text=" + encodeURIComponent(fullText), '_blank');
+  } else if (platform === 'linkedin') {
+    window.open("https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(url), '_blank');
+  } else if (platform === 'copy') {
+    navigator.clipboard.writeText(fullText).then(() => {
+      if (typeof showToast === 'function') showToast('Link copied! Share it everywhere.');
+      else alert('Link copied!');
+    });
   }
 };
 
