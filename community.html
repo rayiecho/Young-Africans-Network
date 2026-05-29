@@ -9844,6 +9844,7 @@ h2,h3{position:relative;}
       <button class="tab-btn" data-tab="magazine" onclick="showTab('magazine')"><span class="tab-icon">—</span> Magazine</button>
       <button class="tab-btn" data-tab="achievements" onclick="showTab('achievements')"><span class="tab-icon">—</span> Achievements</button>
       <button class="tab-btn" data-tab="resources" onclick="showTab('resources')"><span class="tab-icon">—</span> Resources</button>
+      <button class="tab-btn" data-tab="messages" onclick="showTab('messages')"><span class="tab-icon">-</span> Messages <span id="msg-unread-badge" style="display:none;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:0.65rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;">0</span></button>
       <button class="tab-btn" data-tab="polls" onclick="showTab('polls')"><span class="tab-icon">—</span> Polls</button>
       <button class="tab-btn" data-tab="calendar" onclick="showTab('calendar')"><span class="tab-icon">—</span> Calendar</button>
       <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">—</span> Head Panel</button>
@@ -9915,6 +9916,7 @@ h2,h3{position:relative;}
     <div class="tab-panel" id="tab-magazine"><div id="magazine-container"></div></div>
     <div class="tab-panel" id="tab-achievements"><div id="achievements-container"></div></div>
     <div class="tab-panel" id="tab-resources"><div id="resources-container"></div></div>
+    <div class="tab-panel" id="tab-messages"><div id="messages-container" style="max-width:900px;margin:0 auto;padding:1rem;"></div></div>
     <div class="tab-panel" id="tab-polls"><div id="polls-container"></div></div>
     <div class="tab-panel" id="tab-calendar"><div id="calendar-container"></div></div>
   </main>
