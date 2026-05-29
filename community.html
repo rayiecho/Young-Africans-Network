@@ -10058,9 +10058,11 @@ window.doSignOut = async function() {
 window.resendVerificationEmail = async function() {
   try {
     await sendEmailVerification(currentUser);
-    showToast('Verification email sent! Check your inbox.');
+    if (typeof showToast === 'function') showToast('Verification email sent! Check your inbox.');
+    else alert('Verification email sent! Check your inbox.');
   } catch(e) {
-    showToast('Error: ' + e.message, 'error');
+    if (typeof showToast === 'function') showToast('Error: ' + e.message, 'error');
+    else alert('Error: ' + e.message);
   }
 };
 
@@ -10074,10 +10076,12 @@ window.checkEmailVerified = async function() {
         enterPlatform();
       }
     } else {
-      showToast('Email not verified yet. Please check your inbox.', 'error');
+      if (typeof showToast === 'function') showToast('Email not verified yet. Please check your inbox.', 'error');
+      else alert('Email not verified yet. Please check your inbox.');
     }
   } catch(e) {
-    showToast('Error: ' + e.message, 'error');
+    if (typeof showToast === 'function') showToast('Error: ' + e.message, 'error');
+    else alert('Error: ' + e.message);
   }
 };
 
