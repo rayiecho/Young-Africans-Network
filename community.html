@@ -10331,20 +10331,20 @@ window.sendYANGuideFloat = async function() {
 
 
 
-function toggleDropdown(id) {
+window.toggleDropdown = function(id) {
   var el = document.getElementById(id);
   var arrow = document.getElementById('arrow-' + id);
-  var isOpen = el.style.display !== 'none';
-  document.querySelectorAll('.dropdown-items').forEach(function(d){ d.style.display = 'none'; });
-  document.querySelectorAll('.dropdown-arrow').forEach(function(a){ a.classList.remove('open'); });
+  var isOpen = el.style.display === 'block';
+  document.querySelectorAll('.dd-items').forEach(function(d){ d.style.display = 'none'; });
+  document.querySelectorAll('.dd-arrow').forEach(function(a){ a.classList.remove('open'); });
   if (!isOpen) {
     el.style.display = 'block';
     if (arrow) arrow.classList.add('open');
   }
 }
-function closeDropdowns() {
-  document.querySelectorAll('.dropdown-items').forEach(function(d){ d.style.display = 'none'; });
-  document.querySelectorAll('.dropdown-arrow').forEach(function(a){ a.classList.remove('open'); });
+window.closeDropdowns = function() {
+  document.querySelectorAll('.dd-items').forEach(function(d){ d.style.display = 'none'; });
+  document.querySelectorAll('.dd-arrow').forEach(function(a){ a.classList.remove('open'); });
 }
 function showSubSection(s) {
   setTimeout(function() {
