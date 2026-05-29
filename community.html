@@ -9203,6 +9203,151 @@ window.showQuizFailureForm = showQuizFailureForm;
 window.submitQuizFailure = submitQuizFailure;
 window.toggleModuleLessons = toggleModuleLessons;
 
+
+async function loadCareerMatcher() {
+  const container = document.getElementById('career-container');
+  const u = currentUserData;
+
+  container.innerHTML = '<div style="max-width:700px;margin:0 auto;padding:1rem;">'
+    + '<button onclick="loadCareerHub()" style="background:none;border:none;color:var(--navy);font-family:Poppins,sans-serif;font-size:0.85rem;cursor:pointer;margin-bottom:1.5rem;font-weight:600;">Back to Career Hub</button>'
+    + '<div style="background:linear-gradient(135deg,#1B2A6B,#27AE60);border-radius:20px;padding:2rem;color:#fff;margin-bottom:1.5rem;text-align:center;">'
+    + '<div style="font-size:2.5rem;margin-bottom:0.5rem;"></div>'
+    + '<h2 style="font-family:Playfair Display,serif;font-size:1.6rem;font-weight:900;margin-bottom:0.5rem;">AI Career Matcher</h2>'
+    + '<p style="color:rgba(255,255,255,0.8);font-size:0.88rem;">Tell us about yourself and get personalized career guidance powered by AI</p>'
+    + '</div>'
+    + '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:1rem;">'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">'
+    + '<div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Your Field of Study / Expertise</label>'
+    + '<input id="cm-field" type="text" placeholder="e.g. Computer Science, Business, Medicine" value="' + (u.department || '') + '" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>'
+    + '<div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Education Level</label>'
+    + '<select id="cm-education" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;">'
+    + '<option>High School</option><option>Diploma</option><option selected>Bachelor's Degree</option><option>Master's Degree</option><option>PhD</option><option>Self-taught/Bootcamp</option>'
+    + '</select></div>'
+    + '<div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Years of Experience</label>'
+    + '<select id="cm-experience" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;">'
+    + '<option>No experience (Student/Fresh graduate)</option><option>Less than 1 year</option><option>1-3 years</option><option>3-5 years</option><option>5+ years</option>'
+    + '</select></div>'
+    + '<div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Country</label>'
+    + '<input id="cm-country" type="text" placeholder="e.g. Kenya, Nigeria, Rwanda" value="' + (u.country || '') + '" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>'
+    + '</div>'
+    + '<div style="margin-bottom:1rem;"><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Your Key Skills</label>'
+    + '<input id="cm-skills" type="text" placeholder="e.g. Python, Communication, Project Management, Design" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>'
+    + '<div style="margin-bottom:1rem;"><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Career Interests & Goals</label>'
+    + '<textarea id="cm-goals" rows="3" placeholder="What kind of work excites you? What impact do you want to make? What are your career dreams?" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;"></textarea></div>'
+    + '<div style="margin-bottom:1.5rem;"><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Work Preference</label>'
+    + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">'
+    + '<label style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;cursor:pointer;"><input type="checkbox" id="cm-remote" checked> Remote</label>'
+    + '<label style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;cursor:pointer;"><input type="checkbox" id="cm-local"> Local/In-office</label>'
+    + '<label style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;cursor:pointer;"><input type="checkbox" id="cm-international" checked> International</label>'
+    + '<label style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;cursor:pointer;"><input type="checkbox" id="cm-entrepreneurship"> Entrepreneurship</label>'
+    + '</div></div>'
+    + '<button onclick="runCareerMatcher()" id="cm-btn" style="width:100%;background:linear-gradient(135deg,#1B2A6B,#27AE60);color:#fff;border:none;padding:1rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;">Find My Best Career Matches</button>'
+    + '</div>'
+    + '<div id="cm-results" style="display:none;"></div>'
+    + '</div>';
+}
+
+window.runCareerMatcher = async function() {
+  const btn = document.getElementById('cm-btn');
+  const results = document.getElementById('cm-results');
+  btn.disabled = true;
+  btn.textContent = 'Analyzing your profile...';
+  results.style.display = 'none';
+
+  const field = document.getElementById('cm-field').value;
+  const education = document.getElementById('cm-education').value;
+  const experience = document.getElementById('cm-experience').value;
+  const country = document.getElementById('cm-country').value;
+  const skills = document.getElementById('cm-skills').value;
+  const goals = document.getElementById('cm-goals').value;
+  const remote = document.getElementById('cm-remote').checked;
+  const local = document.getElementById('cm-local').checked;
+  const international = document.getElementById('cm-international').checked;
+  const entrepreneurship = document.getElementById('cm-entrepreneurship').checked;
+
+  const workPrefs = [remote&&'Remote',local&&'Local',international&&'International',entrepreneurship&&'Entrepreneurship'].filter(Boolean).join(', ');
+
+  const prompt = `You are an expert career counselor for African youth. Based on this profile, provide personalized career guidance.
+
+PROFILE:
+- Name: ${currentUserData.name}
+- Country: ${country}
+- Field: ${field}
+- Education: ${education}
+- Experience: ${experience}
+- Skills: ${skills}
+- Goals: ${goals}
+- Work preferences: ${workPrefs}
+
+Provide a response in this EXACT JSON format (no other text):
+{
+  "summary": "2-3 sentence personalized career assessment",
+  "top_careers": [
+    {"title": "Career Title", "match": 95, "description": "Why this fits them", "salary_range": "Salary range in Africa/globally", "how_to_start": "Concrete first steps"},
+    {"title": "Career Title", "match": 88, "description": "Why this fits them", "salary_range": "Salary range", "how_to_start": "Concrete first steps"},
+    {"title": "Career Title", "match": 82, "description": "Why this fits them", "salary_range": "Salary range", "how_to_start": "Concrete first steps"}
+  ],
+  "skill_gaps": ["Skill they should develop 1", "Skill 2", "Skill 3"],
+  "recommended_courses": ["Course/certification 1", "Course 2", "Course 3"],
+  "action_plan": ["Immediate action 1", "Action 2", "Action 3", "Action 4"]
+}`;
+
+  try {
+    const resp = await fetch('https://yan-ai-worker.youngafricansn.workers.dev/ai', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: prompt})
+    });
+    const data = await resp.json();
+    const text = data.response || data.reply || '';
+    const jsonStart = text.indexOf('{');
+    const jsonEnd = text.lastIndexOf('}') + 1;
+    const result = JSON.parse(text.substring(jsonStart, jsonEnd));
+
+    results.style.display = 'block';
+    results.innerHTML = '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:1rem;">'
+      + '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Your Career Assessment</h3>'
+      + '<p style="font-size:0.88rem;color:var(--gray);line-height:1.7;">' + result.summary + '</p></div>'
+
+      + '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Top Career Matches</h3>'
+      + result.top_careers.map(c =>
+        '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:1rem;border-left:4px solid #27AE60;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">'
+        + '<h4 style="font-size:0.95rem;font-weight:800;color:var(--navy);">' + c.title + '</h4>'
+        + '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.78rem;font-weight:700;">' + c.match + '% Match</span>'
+        + '</div>'
+        + '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem;">' + c.description + '</p>'
+        + '<p style="font-size:0.78rem;color:var(--navy);font-weight:600;">Salary: ' + c.salary_range + '</p>'
+        + '<p style="font-size:0.78rem;color:var(--gray);margin-top:0.25rem;">How to start: ' + c.how_to_start + '</p>'
+        + '</div>'
+      ).join('')
+
+      + '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:1rem;">'
+      + '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Skill Gaps to Address</h3>'
+      + result.skill_gaps.map(s => '<span style="display:inline-block;background:rgba(230,51,41,0.08);color:var(--red);padding:0.25rem 0.75rem;border-radius:50px;font-size:0.78rem;font-weight:600;margin:0.2rem;">' + s + '</span>').join('')
+      + '</div>'
+
+      + '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:1rem;">'
+      + '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Recommended Courses</h3>'
+      + result.recommended_courses.map((c,i) => '<p style="font-size:0.85rem;color:var(--gray);padding:0.4rem 0;border-bottom:1px solid var(--light);">' + (i+1) + '. ' + c + '</p>').join('')
+      + '</div>'
+
+      + '<div style="background:linear-gradient(135deg,rgba(27,42,107,0.05),rgba(39,174,96,0.05));border-radius:16px;padding:1.5rem;margin-bottom:1rem;">'
+      + '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Your Action Plan</h3>'
+      + result.action_plan.map((a,i) => '<div style="display:flex;gap:0.75rem;margin-bottom:0.75rem;align-items:flex-start;"><span style="background:var(--navy);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;">' + (i+1) + '</span><p style="font-size:0.85rem;color:var(--gray);line-height:1.6;">' + a + '</p></div>').join('')
+      + '</div>'
+
+      + '<button onclick="loadCareerHub()" style="width:100%;background:var(--navy);color:#fff;border:none;padding:0.85rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Back to Career Hub</button>';
+
+  } catch(e) {
+    results.style.display = 'block';
+    results.innerHTML = '<div style="background:#fff0f0;border-radius:12px;padding:1rem;color:var(--red);">Could not load results. Please try again.</div>';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Find My Best Career Matches';
+};
+
 window.showCareerSection = showCareerSection;
 window.loadCareerPaths = loadCareerPaths;
 window.openCareerPath = openCareerPath;
