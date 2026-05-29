@@ -1194,6 +1194,35 @@ window.adminApproveCert = async function(certId) {
   const certSnap = await getDoc(doc(db, 'certificates', certId));
   const certData = certSnap.data();
   await updateDoc(doc(db, 'certificates', certId), { status: 'approved', approvedBy: 'Admin', approvedAt: serverTimestamp() });
+  // Send email notification
+  try {
+    const userSnap = await getDoc(doc(db, 'users', certData.userId));
+    const userEmail = userSnap.exists() ? userSnap.data().email : null;
+    if (userEmail) {
+      const certMsg = 'Dear ' + (certData.userName || 'Member') + ',\n\n'
+        + 'Congratulations! We are thrilled to inform you that your Certificate of Achievement has been approved by the Young Africans Network Administration.\n\n'
+        + 'PROGRAM COMPLETED: ' + (certData.programTitle || certData.department || 'YAN Program') + '\n'
+        + 'CERTIFICATE ID: YAN-' + certData.userId.substring(0,8).toUpperCase() + '\n'
+        + 'DATE ISSUED: ' + new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) + '\n\n'
+        + 'HOW TO DOWNLOAD YOUR CERTIFICATE:\n'
+        + 'Visit youngafricansnetwork.org/community.html, go to My Profile, then click the Certificates tab and click Download.\n\n'
+        + 'VERIFY YOUR CERTIFICATE:\n'
+        + 'youngafricansnetwork.org/verify.html\n\n'
+        + 'We encourage you to share this achievement on LinkedIn and with your network. You have worked hard for this and you deserve to celebrate it.\n\n'
+        + 'This certificate is a testament to your dedication, leadership and commitment to excellence. We are proud to have you as a member of the Young Africans Network family.\n\n'
+        + 'Building the Future, Together.\n\n'
+        + 'Warm regards,\n'
+        + 'YAN Administration Office\n'
+        + 'Young Africans Network\n'
+        + 'youngafricansnetwork.org | youngafricansn@gmail.com';
+      await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
+        to_email: userEmail,
+        name: certData.userName || 'Member',
+        subject: 'Your YAN Certificate of Achievement Has Been Approved!',
+        message: certMsg
+      });
+    }
+  } catch(e) { console.log('Certificate email error:', e); }
   if (certData?.userId) {
     await addDoc(collection(db, 'notifications'), {
       title: ' Certificate Approved!',
