@@ -1419,7 +1419,7 @@ async function downloadCertificate(certId) {
     ));
     if (!progressSnap.empty) {
       const prog = progressSnap.docs[0].data();
-      if (prog.programTitle) achievement = prog.programTitle;
+      if (prog.programTitle) achievement = prog.programTitle.replace(/^YAN\s+/i, '');
       if (prog.enrolledAt?.toDate) enrolledDate = prog.enrolledAt.toDate().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
       if (prog.modulesCompleted) modulesCompleted = prog.modulesCompleted.length;
       // Pull skills from actual program
