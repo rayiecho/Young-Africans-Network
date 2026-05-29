@@ -1427,7 +1427,7 @@ async function downloadCertificate(certId) {
         const colName = u.department === 'career' ? 'careerPrograms' : 'trainingPrograms';
         const progSnap = await getDoc(doc(db, colName, prog.programId));
         if (progSnap.exists() && progSnap.data().skills) skills = progSnap.data().skills;
-      }
+    }
     }
     }
   } catch(e) {}
