@@ -315,7 +315,7 @@ async function approveRecLetter(recId, memberName, scholarship) {
           + 'We believe in you and your potential. Give this application everything you have — you are ready for this.\n\n'
           + 'Building the Future, Together.\n\n'
           + 'Warm regards,\nYAN Administration Office\nYoung Africans Network\n'
-          + 'youngafricansnetwork.org | youngafricansn@gmail.com';
+          + 'youngafricansnetwork.org | info@youngafricansnetwork.org';
         await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
           to_email: userEmail, name: memberNameDecoded,
           subject: 'Your YAN Recommendation Letter Has Been Approved — ' + scholarshipDecoded,
@@ -1259,7 +1259,7 @@ window.adminApproveCert = async function(certId) {
         + 'Warm regards,\n'
         + 'YAN Administration Office\n'
         + 'Young Africans Network\n'
-        + 'youngafricansnetwork.org | youngafricansn@gmail.com';
+        + 'youngafricansnetwork.org | info@youngafricansnetwork.org';
       await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
         to_email: userEmail,
         name: certData.userName || 'Member',
