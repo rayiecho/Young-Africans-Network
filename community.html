@@ -1372,7 +1372,7 @@ async function loadProfileCerts() {
   if (snap.empty) { container.innerHTML = '<p style="color:var(--gray);font-size:0.85rem;">No certificates yet. Complete training to become eligible!</p>'; return; }
   container.innerHTML = '<h3> My Certificates</h3>' + snap.docs.map(d => {
     const c = d.data(); const dept = DEPARTMENTS.find(x => x.id === c.department);
-    return `<div class="cert-card"><div class="cert-info"><span>${dept?.icon||''}</span><div><strong>${dept?.name||c.department}</strong><p>Status: <span class="cert-status ${c.status}">${c.status}</span></p></div></div><div style="display:flex;gap:0.5rem;flex-wrap:wrap;">${c.status==='approved'?`<button class="btn-sm btn-navy" onclick="downloadCertificate('${d.id}')"> Download</button>`:''} ${c.status==='approved'?`<button class="btn-sm btn-navy" onclick="shareOnLinkedIn('${dept?.name||c.department}')"> LinkedIn</button>`:''}</div></div>`;
+    return `<div class="cert-card"><div class="cert-info"><span>${dept?.icon||''}</span><div><strong>${dept?.name||c.department}</strong><p>Status: <span class="cert-status ${c.status}">${c.status}</span></p></div></div><div style="display:flex;gap:0.5rem;flex-wrap:wrap;">${c.status==='approved'?`<button class="btn-sm btn-navy" onclick="downloadCertificate('${d.id}','${c.department}')"> Download</button>`:''} ${c.status==='approved'?`<button class="btn-sm btn-navy" onclick="shareOnLinkedIn('${dept?.name||c.department}')"> LinkedIn</button>`:''}</div></div>`;
   }).join('');
 }
 
