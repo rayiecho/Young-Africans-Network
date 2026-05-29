@@ -127,6 +127,21 @@ function showScreen(id) {
   target.classList.add('active');
   target.style.display = 'flex';
 }
+function toggleDropdown(id) {
+  var el = document.getElementById(id);
+  var arrow = document.getElementById('arrow-' + id);
+  var isOpen = el.style.display === 'block';
+  document.querySelectorAll('.dd-items').forEach(function(d){ d.style.display = 'none'; });
+  document.querySelectorAll('.dd-arrow').forEach(function(a){ a.classList.remove('open'); });
+  if (!isOpen) {
+    el.style.display = 'block';
+    if (arrow) arrow.classList.add('open');
+  }
+}
+function closeDropdowns() {
+  document.querySelectorAll('.dd-items').forEach(function(d){ d.style.display = 'none'; });
+  document.querySelectorAll('.dd-arrow').forEach(function(a){ a.classList.remove('open'); });
+}
 function showTab(tab) {
   activeTab = tab;
   if (currentUser) localStorage.setItem('yan_last_tab', tab);
@@ -9723,6 +9738,13 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 #sidebar-role{font-size:0.7rem;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.5px;}
 #sidebar-dept{font-size:0.68rem;color:var(--gold);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sidebar-nav{padding:1rem 0;flex:1;}
+.sidebar-dropdown{width:100%;}
+.dropdown-toggle{justify-content:space-between;}
+.dd-arrow{font-size:0.6rem;margin-left:auto;transition:transform 0.2s;}
+.dd-arrow.open{transform:rotate(90deg);}
+.dd-items{display:none;background:rgba(0,0,0,0.2);}
+.dd-item{display:block;width:100%;padding:0.6rem 1.25rem 0.6rem 2.5rem;color:rgba(255,255,255,0.55);font-size:0.8rem;font-weight:500;cursor:pointer;border:none;background:none;text-align:left;font-family:Poppins,sans-serif;transition:all 0.2s;}
+.dd-item:hover{color:var(--white);background:rgba(255,255,255,0.06);}
 .tab-btn{display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1.25rem;color:rgba(255,255,255,0.6);font-size:0.85rem;font-weight:500;cursor:pointer;transition:all 0.2s;border:none;background:none;width:100%;text-align:left;}
 .tab-btn:hover{color:var(--white);background:rgba(255,255,255,0.06);}
 .tab-btn.active{color:var(--white);background:rgba(255,255,255,0.12);border-left:3px solid var(--gold);}
@@ -10084,19 +10106,54 @@ h2,h3{position:relative;}
       </div>
     </div>
     <nav class="sidebar-nav">
-      <button class="tab-btn active" data-tab="feed" onclick="showTab('feed')"><span class="tab-icon">—</span> Main Feed</button>
-      <button class="tab-btn" data-tab="hubs" onclick="showTab('hubs')"><span class="tab-icon">—</span> YAN Hubs</button>
-      <button class="tab-btn" data-tab="meetings" onclick="showTab('meetings')"><span class="tab-icon">—</span> Meetings</button>
-      <button class="tab-btn" data-tab="profile" onclick="showTab('profile')"><span class="tab-icon">—</span> My Profile</button>
-      <button class="tab-btn" data-tab="directory" onclick="showTab('directory')"><span class="tab-icon">—</span> Directory</button>
-      <button class="tab-btn" data-tab="magazine" onclick="showTab('magazine')"><span class="tab-icon">—</span> Magazine</button>
-      <button class="tab-btn" data-tab="achievements" onclick="showTab('achievements')"><span class="tab-icon">—</span> Achievements</button>
-      <button class="tab-btn" data-tab="resources" onclick="showTab('resources')"><span class="tab-icon">—</span> Resources</button>
-      <button class="tab-btn" data-tab="messages" onclick="showTab('messages')"><span class="tab-icon">-</span> Messages <span id="msg-unread-badge" style="display:none;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:0.65rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;">0</span></button>
-      <button class="tab-btn" data-tab="polls" onclick="showTab('polls')"><span class="tab-icon">—</span> Polls</button>
-      <button class="tab-btn" data-tab="calendar" onclick="showTab('calendar')"><span class="tab-icon">—</span> Calendar</button>
-      <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">—</span> Head Panel</button>
-      <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;"><span class="tab-icon">—</span> Admin Panel</button>
+      <button class="tab-btn active" data-tab="feed" onclick="showTab('feed')"><span class="tab-icon">—</span> MAIN FEED</button>
+
+      <div class="sidebar-dropdown">
+        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('hubs-dd')"><span class="tab-icon">—</span> YAN HUBS <span class="dd-arrow" id="arrow-hubs-dd">&#9658;</span></button>
+        <div class="dd-items" id="hubs-dd">
+          <button class="dd-item" onclick="showTab('hubs');closeDropdowns()">Programs &amp; Training</button>
+          <button class="dd-item" onclick="showTab('scholarships');closeDropdowns()">Scholarships</button>
+          <button class="dd-item" onclick="showTab('career');closeDropdowns()">Career Development</button>
+          <button class="dd-item" onclick="showTab('community-impact');closeDropdowns()">Community Impact</button>
+          <button class="dd-item" onclick="showTab('mental-health');closeDropdowns()">Mental Health</button>
+          <button class="dd-item" onclick="showTab('comms-hub');closeDropdowns()">Communications</button>
+          <button class="dd-item" onclick="showTab('partnerships-hub');closeDropdowns()">Partnerships</button>
+        </div>
+      </div>
+
+      <div class="sidebar-dropdown">
+        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('library-dd')"><span class="tab-icon">—</span> YAN LIBRARY <span class="dd-arrow" id="arrow-library-dd">&#9658;</span></button>
+        <div class="dd-items" id="library-dd">
+          <button class="dd-item" onclick="showTab('magazine');closeDropdowns()">Magazine</button>
+          <button class="dd-item" onclick="showTab('resources');closeDropdowns()">Resources</button>
+          <button class="dd-item" onclick="showTab('calendar');closeDropdowns()">Calendar</button>
+        </div>
+      </div>
+
+      <div class="sidebar-dropdown">
+        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('support-dd')"><span class="tab-icon">—</span> YAN SUPPORT <span class="dd-arrow" id="arrow-support-dd">&#9658;</span></button>
+        <div class="dd-items" id="support-dd">
+          <button class="dd-item" onclick="showTab('directory');closeDropdowns()">Directory</button>
+          <button class="dd-item" onclick="showTab('polls');closeDropdowns()">Polls</button>
+          <button class="dd-item" onclick="showTab('meetings');closeDropdowns()">Meetings</button>
+          <button class="dd-item" onclick="window.open('https://wa.me/+254700000000','_blank')">Help Line</button>
+        </div>
+      </div>
+
+      <button class="tab-btn" data-tab="mentorship" onclick="showTab('mentorship')"><span class="tab-icon">—</span> MENTORSHIP</button>
+
+      <div class="sidebar-dropdown">
+        <button class="tab-btn dropdown-toggle" onclick="toggleDropdown('profile-dd')"><span class="tab-icon">—</span> MY PROFILE <span class="dd-arrow" id="arrow-profile-dd">&#9658;</span></button>
+        <div class="dd-items" id="profile-dd">
+          <button class="dd-item" onclick="showTab('profile');closeDropdowns()">My Profile</button>
+          <button class="dd-item" onclick="showTab('achievements');closeDropdowns()">Achievements</button>
+          <button class="dd-item" onclick="showTab('messages');closeDropdowns()">Messages <span id="msg-unread-badge" style="display:none;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:0.65rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;">0</span></button>
+          <button class="dd-item" onclick="showTab('notifications');closeDropdowns()">Notifications</button>
+        </div>
+      </div>
+
+      <button class="tab-btn" id="tab-btn-head" data-tab="head" onclick="showTab('head')" style="display:none;"><span class="tab-icon">—</span> HEAD PANEL</button>
+      <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;"><span class="tab-icon">—</span> ADMIN PANEL</button>
     </nav>
     <div class="sidebar-logout">
       <button class="btn-logout" onclick="doLogout()"><span></span> Sign Out</button>
