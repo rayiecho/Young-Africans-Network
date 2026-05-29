@@ -1395,7 +1395,7 @@ async function downloadCertificate(certId, deptOverride) {
     'communications': ['Content Creation','Social Media','Copywriting','Brand Communication','Storytelling'],
     'partnerships': ['Networking','Partnership Development','Negotiation','Stakeholder Management','Strategy']
   };
-  let skills = skillsMap[u.department] || ['Leadership','Communication','Teamwork','Problem Solving','Initiative'];
+  let skills = skillsMap[deptOverride || u.department] || ['Leadership','Communication','Teamwork','Problem Solving','Initiative'];
 
   const deptAchievements = {
     'career': 'Career Development & Public Speaking Program',
