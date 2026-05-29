@@ -10312,7 +10312,7 @@ window.startConversation = async function(otherId, otherNameEncoded, otherPhotoE
 
 // Load unread count for badge
 async function loadUnreadBadge() {
-  if (!currentUser) return;
+  if (!currentUser || !currentUser.uid) return;
   const convSnap = await getDocs(query(
     collection(db, 'conversations'),
     where('participants', 'array-contains', currentUser.uid)
