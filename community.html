@@ -521,6 +521,8 @@ function enterPlatform() {
     setTimeout(() => showOnboarding(), 1000);
   }
   updateNotifBadge();
+  // Refresh message badge every 30 seconds
+  setInterval(loadUnreadBadge, 30000);
 }
 
 function showTabError(tab) {
@@ -714,6 +716,8 @@ async function markNotifRead(notifId) {
   await updateDoc(doc(db, 'notifications', notifId), { readBy: arrayUnion(currentUser.uid) });
   loadNotifList();
   updateNotifBadge();
+  // Refresh message badge every 30 seconds
+  setInterval(loadUnreadBadge, 30000);
 }
 
 async function deleteNotification(notifId) {
@@ -721,6 +725,8 @@ async function deleteNotification(notifId) {
   await deleteDoc(doc(db, 'notifications', notifId));
   loadNotifList();
   updateNotifBadge();
+  // Refresh message badge every 30 seconds
+  setInterval(loadUnreadBadge, 30000);
 }
 
 async function updateNotifBadge() {
