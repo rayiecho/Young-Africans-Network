@@ -441,9 +441,18 @@ async function doLogout() {
 
 async function doForgotPassword() {
   const email = document.getElementById('login-email').value.trim();
-  if (!email) return showToast('Enter your email first','error');
-  await sendPasswordResetEmail(auth, email);
-  showToast('Password reset email sent!');
+  if (!email) return showToast('Please enter your email address first','error');
+  if (!isValidEmail(email)) return showToast('Please enter a valid email address','error');
+  try {
+    await sendPasswordResetEmail(auth, email);
+    showToast('Password reset email sent! Check your inbox and spam folder.');
+  } catch(e) {
+    if (e.code === 'auth/user-not-found') {
+      showToast('No account found with that email address','error');
+    } else {
+      showToast('Error: ' + e.message, 'error');
+    }
+  }
 }
 
 // PLATFORM ENTRY
