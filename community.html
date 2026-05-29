@@ -9867,6 +9867,8 @@ window.showMentorshipSection = async function(section) {
         html += '<p style="font-size:0.75rem;color:var(--gray);">Status: <span style="color:' + (m.status==='active'?'#27AE60':'var(--gray)') + ';font-weight:600;">' + (m.status||'pending') + '</span></p></div>';
         const mentorMeetingUrl = 'https://youngafricansnetwork.daily.co/YAN_MENTORSHIP_' + [currentUser.uid,m.mentorId].sort().join('').substring(0,8).toUpperCase();
         html += '<button onclick="window.open(\'' + mentorMeetingUrl + '\',\'_blank\')" style="background:#27AE60;color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;margin-right:0.5rem;">Join Meeting</button>';
+        const mentorMeetingUrl = 'https://youngafricansnetwork.daily.co/YAN_MENTORSHIP_' + [currentUser.uid,m.mentorId].sort().join('').substring(0,8).toUpperCase();
+        html += '<button onclick="window.open(\'' + mentorMeetingUrl + '\',\'_blank\')" style="background:#27AE60;color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;margin-right:0.5rem;">Join Meeting</button>';
         html += '<button onclick="showTab(\'messages\');setTimeout(()=>openConversation(\'' + [currentUser.uid,m.mentorId].sort().join('_') + '\',\'' + m.mentorId + '\',\'' + encodeURIComponent(m.mentorName||'') + '\',\''  + '\'),500)" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Chat</button>';
         html += '</div>';
       });
@@ -9882,6 +9884,8 @@ window.showMentorshipSection = async function(section) {
         if (m.status === 'pending') {
           html += '<button onclick="acceptMentorship(\'' + d.id + '\')" style="background:#27AE60;color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Accept</button>';
         }
+        const menteeMeetingUrl = 'https://youngafricansnetwork.daily.co/YAN_MENTORSHIP_' + [currentUser.uid,m.menteeId].sort().join('').substring(0,8).toUpperCase();
+        html += '<button onclick="window.open(\'' + menteeMeetingUrl + '\',\'_blank\')" style="background:#27AE60;color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Join Meeting</button>';
         const menteeMeetingUrl = 'https://youngafricansnetwork.daily.co/YAN_MENTORSHIP_' + [currentUser.uid,m.menteeId].sort().join('').substring(0,8).toUpperCase();
         html += '<button onclick="window.open(\'' + menteeMeetingUrl + '\',\'_blank\')" style="background:#27AE60;color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Join Meeting</button>';
         html += '<button onclick="logMentoringSession(\'' + d.id + '\',\'' + m.menteeId + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Log Session</button>';
@@ -10416,6 +10420,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .empty-state{text-align:center;padding:3rem 1rem;color:var(--gray);font-size:0.9rem;}
 .achieve-filter-btn{background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 1.25rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
 .achieve-filter-btn.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
+.messages-grid{display:grid;grid-template-columns:300px 1fr;gap:1rem;height:75vh;}
 .messages-grid{display:grid;grid-template-columns:300px 1fr;gap:1rem;height:75vh;}
 @media(max-width:768px){
   :root{--sidebar:0px;}
