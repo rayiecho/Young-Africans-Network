@@ -10352,7 +10352,7 @@ function showSubSection(s) {
     if (b) b.click();
   }, 300);
 }
-async function loadMentorshipTab() {
+window.loadMentorshipTab = async function() {
   const container = document.getElementById('mentorship-container');
   if (!container) return;
   container.innerHTML = '<p style="padding:1rem;color:var(--gray);">Loading...</p>';
