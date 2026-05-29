@@ -9642,6 +9642,251 @@ async function loadLeaderboard() {
 }
 window.loadLeaderboard = loadLeaderboard;
 
+
+// ===== MENTORSHIP SYSTEM =====
+async function loadMentorshipTab() {
+  const container = document.getElementById('tab-achievements');
+  if (!container) return;
+  container.innerHTML = '<p style="padding:1rem;color:var(--gray);">Loading...</p>';
+
+  try {
+    const myMentorSnap = await getDocs(query(
+      collection(db, 'mentorships'),
+      where('menteeId', '==', currentUser.uid)
+    ));
+    const myMenteesSnap = await getDocs(query(
+      collection(db, 'mentorships'),
+      where('mentorId', '==', currentUser.uid)
+    ));
+    const myProfileSnap = await getDoc(doc(db, 'mentorProfiles', currentUser.uid));
+    const myProfile = myProfileSnap.exists() ? myProfileSnap.data() : null;
+
+    let html = '<div style="max-width:800px;margin:0 auto;">';
+
+    // Header
+    html += '<div style="background:linear-gradient(135deg,#1B2A6B,#9B59B6);border-radius:20px;padding:1.5rem;margin-bottom:1.5rem;color:#fff;">';
+    html += '<h2 style="font-family:Playfair Display,serif;font-size:1.5rem;font-weight:900;margin-bottom:0.25rem;">YAN Mentorship Program</h2>';
+    html += '<p style="color:rgba(255,255,255,0.75);font-size:0.85rem;">Connect with experienced members who can guide your journey</p>';
+    html += '<div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap;">';
+    html += '<button onclick="showMentorshipSection('find')" style="background:rgba(255,255,255,0.2);color:#fff;border:1.5px solid rgba(255,255,255,0.4);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">Find a Mentor</button>';
+    html += '<button onclick="showMentorshipSection('become')" style="background:rgba(255,255,255,0.2);color:#fff;border:1.5px solid rgba(255,255,255,0.4);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">Become a Mentor</button>';
+    html += '<button onclick="showMentorshipSection('my')" style="background:rgba(255,255,255,0.2);color:#fff;border:1.5px solid rgba(255,255,255,0.4);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">My Mentorships</button>';
+    html += '</div></div>';
+    html += '<div id="mentorship-section"></div></div>';
+    container.innerHTML = html;
+    showMentorshipSection('find');
+  } catch(e) {
+    document.getElementById('tab-achievements').innerHTML = '<p style="color:var(--red);padding:1rem;">Error: ' + e.message + '</p>';
+  }
+}
+
+window.showMentorshipSection = async function(section) {
+  const container = document.getElementById('mentorship-section');
+  if (!container) return;
+  container.innerHTML = '<p style="padding:1rem;color:var(--gray);">Loading...</p>';
+
+  if (section === 'find') {
+    // Get available mentors
+    const mentorsSnap = await getDocs(query(
+      collection(db, 'mentorProfiles'),
+      where('available', '==', true)
+    ));
+    let html = '<div style="margin-top:1rem;">';
+    html += '<div style="display:flex;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;">';
+    html += '<button onclick="aiMatchMentor()" style="background:linear-gradient(135deg,#1B2A6B,#9B59B6);color:#fff;border:none;padding:0.6rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">AI Match Me</button>';
+    html += '</div>';
+
+    if (mentorsSnap.empty) {
+      html += '<div style="text-align:center;padding:2rem;color:var(--gray);font-size:0.85rem;">No mentors available yet. Be the first to become one!</div>';
+    } else {
+      mentorsSnap.docs.forEach(d => {
+        const m = d.data();
+        html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">';
+        html += '<div style="display:flex;gap:1rem;align-items:flex-start;">';
+        html += (m.photoUrl ? '<img src="'+m.photoUrl+'" style="width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
+          : '<div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--navy),#9B59B6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem;flex-shrink:0;">' + (m.name||'M').charAt(0) + '</div>');
+        html += '<div style="flex:1;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">';
+        html += '<div><h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);">' + sanitize(m.name||'') + '</h3>';
+        html += '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize(m.country||'') + ' · ' + sanitize(m.department||'') + '</p></div>';
+        html += '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">Available</span>';
+        html += '</div>';
+        html += '<p style="font-size:0.82rem;color:var(--gray);margin:0.5rem 0;line-height:1.6;">' + sanitize(m.bio||'') + '</p>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.75rem;">';
+        (m.skills||[]).forEach(s => {
+          html += '<span style="background:rgba(27,42,107,0.07);color:var(--navy);padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;">' + sanitize(s) + '</span>';
+        });
+        html += '</div>';
+        html += '<button onclick="requestMentor(\'' + d.id + '\',\'' + encodeURIComponent(m.name||'') + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">Request Mentorship</button>';
+        html += '</div></div></div>';
+      });
+    }
+    html += '</div>';
+    container.innerHTML = html;
+
+  } else if (section === 'become') {
+    const myProfile = await getDoc(doc(db, 'mentorProfiles', currentUser.uid));
+    const p = myProfile.exists() ? myProfile.data() : {};
+    container.innerHTML = '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-top:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
+      + '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Become a Mentor</h3>'
+      + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Your Bio / What you can help with</label>'
+      + '<textarea id="mentor-bio" rows="3" placeholder="e.g. I can help with CV writing, scholarship applications, web development..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;">' + (p.bio||'') + '</textarea></div>'
+      + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Your Skills (comma separated)</label>'
+      + '<input id="mentor-skills" type="text" placeholder="e.g. CV Writing, Public Speaking, Web Development" value="' + (p.skills||[]).join(', ') + '" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>'
+      + '<div style="margin-bottom:1.5rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Max Mentees at a time</label>'
+      + '<select id="mentor-max" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;">'
+      + '<option value="1"' + (p.maxMentees===1?' selected':'') + '>1 mentee</option>'
+      + '<option value="2"' + (p.maxMentees===2?' selected':'') + '>2 mentees</option>'
+      + '<option value="3"' + (!p.maxMentees||p.maxMentees===3?' selected':'') + '>3 mentees</option>'
+      + '<option value="5"' + (p.maxMentees===5?' selected':'') + '>5 mentees</option>'
+      + '</select></div>'
+      + '<button onclick="saveMentorProfile()" style="background:var(--navy);color:#fff;border:none;padding:0.85rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;width:100%;">'
+      + (myProfile.exists() ? 'Update Profile' : 'Register as Mentor') + '</button>'
+      + (myProfile.exists() ? '<button onclick="toggleMentorAvailability('+myProfile.data().available+')" style="background:'+(myProfile.data().available?'var(--red)':'rgba(39,174,96,0.1)')+';color:'+(myProfile.data().available?'#fff':'#27AE60')+';border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;width:100%;margin-top:0.75rem;">'+(myProfile.data().available?'Pause Mentoring':'Resume Mentoring')+'</button>' : '')
+      + '</div>';
+
+  } else if (section === 'my') {
+    const [asSnap, amSnap] = await Promise.all([
+      getDocs(query(collection(db,'mentorships'),where('menteeId','==',currentUser.uid))),
+      getDocs(query(collection(db,'mentorships'),where('mentorId','==',currentUser.uid)))
+    ]);
+    let html = '<div style="margin-top:1rem;">';
+    if (asSnap.empty && amSnap.empty) {
+      html += '<div style="text-align:center;padding:2rem;color:var(--gray);">No mentorships yet. Find a mentor or become one!</div>';
+    }
+    if (!asSnap.empty) {
+      html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">My Mentors</h3>';
+      asSnap.docs.forEach(d => {
+        const m = d.data();
+        html += '<div style="background:var(--white);border-radius:12px;padding:1rem;margin-bottom:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);display:flex;justify-content:space-between;align-items:center;">';
+        html += '<div><p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(m.mentorName||'') + '</p>';
+        html += '<p style="font-size:0.75rem;color:var(--gray);">Status: <span style="color:' + (m.status==='active'?'#27AE60':'var(--gray)') + ';font-weight:600;">' + (m.status||'pending') + '</span></p></div>';
+        html += '<button onclick="openConversation(\'' + [currentUser.uid,m.mentorId].sort().join('_') + '\',\'' + m.mentorId + '\',\'' + encodeURIComponent(m.mentorName||'') + '\',\''  + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Chat</button>';
+        html += '</div>';
+      });
+    }
+    if (!amSnap.empty) {
+      html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin:1rem 0 0.75rem;">My Mentees</h3>';
+      amSnap.docs.forEach(d => {
+        const m = d.data();
+        html += '<div style="background:var(--white);border-radius:12px;padding:1rem;margin-bottom:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">';
+        html += '<div><p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(m.menteeName||'') + '</p>';
+        html += '<p style="font-size:0.75rem;color:var(--gray);">Status: <span style="color:' + (m.status==='active'?'#27AE60':'var(--gray)') + ';font-weight:600;">' + (m.status||'pending') + '</span></p></div>';
+        html += '<div style="display:flex;gap:0.5rem;">';
+        if (m.status === 'pending') {
+          html += '<button onclick="acceptMentorship(\'' + d.id + '\')" style="background:#27AE60;color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Accept</button>';
+        }
+        html += '<button onclick="logMentoringSession(\'' + d.id + '\',\'' + m.menteeId + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Log Session</button>';
+        html += '<button onclick="openConversation(\'' + [currentUser.uid,m.menteeId].sort().join('_') + '\',\'' + m.menteeId + '\',\'' + encodeURIComponent(m.menteeName||'') + '\',\'' + '\')" style="background:var(--light);color:var(--navy);border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Chat</button>';
+        html += '</div></div>';
+      });
+    }
+    html += '</div>';
+    container.innerHTML = html;
+  }
+};
+
+window.saveMentorProfile = async function() {
+  const bio = document.getElementById('mentor-bio').value.trim();
+  const skills = document.getElementById('mentor-skills').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const maxMentees = parseInt(document.getElementById('mentor-max').value);
+  if (!bio) return showToast('Please add a bio', 'error');
+  await setDoc(doc(db, 'mentorProfiles', currentUser.uid), {
+    userId: currentUser.uid, name: currentUserData.name,
+    photoUrl: currentUserData.photoUrl || '',
+    country: currentUserData.country || '', department: currentUserData.department || '',
+    bio, skills, maxMentees, available: true, createdAt: serverTimestamp()
+  }, {merge: true});
+  showToast('Mentor profile saved!');
+  showMentorshipSection('find');
+};
+
+window.toggleMentorAvailability = async function(current) {
+  await updateDoc(doc(db, 'mentorProfiles', currentUser.uid), { available: !current });
+  showToast('Availability updated!');
+  showMentorshipSection('become');
+};
+
+window.requestMentor = async function(mentorId, mentorNameEncoded) {
+  const mentorName = decodeURIComponent(mentorNameEncoded);
+  if (!confirm('Request ' + mentorName + ' as your mentor?')) return;
+  const existing = await getDocs(query(collection(db,'mentorships'),where('menteeId','==',currentUser.uid),where('status','==','active')));
+  if (!existing.empty) return showToast('You already have an active mentor!', 'error');
+  await addDoc(collection(db, 'mentorships'), {
+    mentorId, mentorName, menteeId: currentUser.uid,
+    menteeName: currentUserData.name, status: 'pending',
+    createdAt: serverTimestamp()
+  });
+  await addDoc(collection(db,'notifications'), {
+    title: 'New Mentorship Request',
+    message: currentUserData.name + ' has requested you as their mentor.',
+    type: 'info', userId: mentorId, postedBy: 'YAN Mentorship',
+    createdAt: serverTimestamp(), readBy: []
+  });
+  showToast('Mentorship request sent!');
+  showMentorshipSection('my');
+};
+
+window.acceptMentorship = async function(mentorshipId) {
+  await updateDoc(doc(db,'mentorships',mentorshipId), {status:'active', acceptedAt: serverTimestamp()});
+  showToast('Mentorship accepted!');
+  showMentorshipSection('my');
+};
+
+window.logMentoringSession = async function(mentorshipId, menteeId) {
+  if (!confirm('Log a completed mentoring session? You will earn 30 points.')) return;
+  await addDoc(collection(db,'mentoringSessions'), {
+    mentorshipId, mentorId: currentUser.uid, menteeId,
+    loggedAt: serverTimestamp()
+  });
+  await awardPoints('mentoring_session');
+  showToast('Session logged! +30 points earned.');
+};
+
+window.aiMatchMentor = async function() {
+  const btn = event.target;
+  btn.textContent = 'Finding your best match...';
+  btn.disabled = true;
+  try {
+    const mentorsSnap = await getDocs(query(collection(db,'mentorProfiles'),where('available','==',true)));
+    if (mentorsSnap.empty) {
+      showToast('No mentors available yet.', 'error');
+      btn.textContent = 'AI Match Me';
+      btn.disabled = false;
+      return;
+    }
+    const mentors = mentorsSnap.docs.map(d => ({id:d.id,...d.data()}));
+    const prompt = 'You are a mentorship matcher for YAN (Young Africans Network). Match this mentee with the best mentor from the list.\n\nMentee: Name=' + currentUserData.name + ', Department=' + currentUserData.department + ', Country=' + currentUserData.country + ', Role=' + currentUserData.role + '\n\nMentors: ' + JSON.stringify(mentors.map(m=>({id:m.id,name:m.name,department:m.department,country:m.country,skills:m.skills,bio:m.bio}))) + '\n\nReturn JSON only: {"bestMatchId":"mentor_id","reason":"why this is the best match in 2 sentences"}';
+    const resp = await fetch('https://yan-ai-worker.youngafricansn.workers.dev/ai', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({message: prompt})
+    });
+    const data = await resp.json();
+    const text = data.response || '';
+    const result = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}')+1));
+    const match = mentors.find(m => m.id === result.bestMatchId) || mentors[0];
+    showToast('Best match found: ' + match.name + '!');
+    // Scroll to matched mentor
+    const container = document.getElementById('mentorship-section');
+    container.innerHTML = '<div style="background:linear-gradient(135deg,rgba(27,42,107,0.05),rgba(155,89,182,0.05));border-radius:16px;padding:1.5rem;margin-top:1rem;border:2px solid #9B59B6;">'
+      + '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:0.5rem;">Your AI Match</h3>'
+      + '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:1rem;">' + sanitize(result.reason) + '</p>'
+      + (match.photoUrl ? '<img src="'+match.photoUrl+'" style="width:52px;height:52px;border-radius:50%;object-fit:cover;margin-bottom:0.75rem;">'
+        : '<div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--navy),#9B59B6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem;margin-bottom:0.75rem;">' + (match.name||'M').charAt(0) + '</div>')
+      + '<h4 style="font-size:0.95rem;font-weight:800;color:var(--navy);">' + sanitize(match.name||'') + '</h4>'
+      + '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize(match.country||'') + ' · ' + sanitize(match.department||'') + '</p>'
+      + '<p style="font-size:0.82rem;color:var(--gray);margin:0.5rem 0;">' + sanitize(match.bio||'') + '</p>'
+      + '<button onclick="requestMentor(\'' + match.id + '\',\'' + encodeURIComponent(match.name||'') + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.6rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;margin-top:0.75rem;">Request This Mentor</button>'
+      + '<button onclick="showMentorshipSection('find')" style="background:none;border:none;color:var(--gray);font-size:0.82rem;cursor:pointer;margin-left:1rem;">View All Mentors</button>'
+      + '</div>';
+  } catch(e) {
+    showToast('AI matching failed. Browse mentors manually.', 'error');
+    showMentorshipSection('find');
+  }
+  btn.textContent = 'AI Match Me';
+  btn.disabled = false;
+};
+
 // ===== MESSAGING SYSTEM =====
 let activeConversationId = null;
 let messageUnsubscribe = null;
