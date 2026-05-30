@@ -1340,8 +1340,8 @@ async function loadMentorApplications(c) {
         html += '<div><div style="font-weight:800;color:var(--navy);">'+sanitize(p.name||'')+'</div>';
         html += '<div style="font-size:0.78rem;color:var(--gray);">'+sanitize(p.country||'')+' · '+sanitize(p.department||'')+'</div></div></div>';
         html += '<div style="display:flex;gap:0.5rem;">';
-        html += '<button onclick="approveMentor(''+d.id+'')" style="background:#27AE60;color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">✅ Approve</button>';
-        html += '<button onclick="rejectMentor(''+d.id+'')" style="background:var(--red);color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">❌ Reject</button>';
+        html += '<button onclick="approveMentor('" + d.id + "')" style="background:#27AE60;color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">✅ Approve</button>';
+        html += '<button onclick="rejectMentor('" + d.id + "')" style="background:var(--red);color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">❌ Reject</button>';
         html += '</div></div>';
         html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">';
         html += '<div><div style="font-size:0.75rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Motivation</div><div style="font-size:0.82rem;color:var(--gray);">'+sanitize(p.bio||'')+'</div></div>';
@@ -1360,7 +1360,7 @@ async function loadMentorApplications(c) {
         html += '<div style="background:var(--white);border-radius:12px;padding:1rem;margin-bottom:0.5rem;display:flex;justify-content:space-between;align-items:center;border-left:4px solid #27AE60;">';
         html += '<div><div style="font-weight:700;color:var(--navy);">'+sanitize(p.name||'')+'</div>';
         html += '<div style="font-size:0.75rem;color:var(--gray);">'+(p.skills||[]).join(', ')+'</div></div>';
-        html += '<button onclick="rejectMentor(''+d.id+'')" style="background:var(--light);color:var(--red);border:none;padding:0.35rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Revoke</button>';
+        html += '<button onclick="rejectMentor('" + d.id + "')" style="background:var(--light);color:var(--red);border:none;padding:0.35rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Revoke</button>';
         html += '</div>';
       });
     }
