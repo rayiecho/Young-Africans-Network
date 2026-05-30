@@ -618,7 +618,7 @@ window.loadSection = async function(section) {
   }[section] || section;
   const container = document.getElementById('content-area');
   container.innerHTML = '<div class="loading">Loading...</div>';
-  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: loadAnalytics, assignments: loadAssignments, programs: loadProgramsAdmin, applications: loadProgramApplications, notifications: loadNotificationCenter, finance: loadFinance, recommendations: (...args) => window.loadRecommendations(...args), mentors: loadMentorApplications };
+  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: loadAnalytics, assignments: loadAssignments, programs: loadProgramsAdmin, applications: (...args) => window.loadProgramApplications(...args), notifications: loadNotificationCenter, finance: loadFinance, recommendations: (...args) => window.loadRecommendations(...args), mentors: loadMentorApplications };
   if (fns[section]) {
     try {
       await fns[section](container);
@@ -1378,7 +1378,7 @@ window.approveMentor = async function(userId) {
     type:'info', userId, postedBy:'YAN Admin', createdAt: serverTimestamp(), readBy:[]
   });
   showToast('Mentor approved!');
-  loadMentorApplications(document.getElementById('content'));
+  loadMentorApplications(document.getElementById('content-area'));
 };
 
 window.rejectMentor = async function(userId) {
@@ -1390,7 +1390,7 @@ window.rejectMentor = async function(userId) {
     type:'info', userId, postedBy:'YAN Admin', createdAt: serverTimestamp(), readBy:[]
   });
   showToast('Application rejected.');
-  loadMentorApplications(document.getElementById('content'));
+  loadMentorApplications(document.getElementById('content-area'));
 };
 
 async function loadMembers(c) {
