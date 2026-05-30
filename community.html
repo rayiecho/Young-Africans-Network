@@ -4793,8 +4793,11 @@ async function handleGlobalSearch(searchQuery) {
     let html = '';
     Object.keys(grouped).forEach(function(type) {
       html += '<div style="padding:0.5rem 1rem;font-size:0.68rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;background:var(--light);">' + (typeLabels[type]||type) + 's</div>';
-      grouped[type].slice(0,4).forEach(function(r) {
-        html += '<div onclick="' + r.action.replace('showTab(', 'window.showTab(') + ';document.getElementById(\'global-search-input\').value=\'\';document.getElementById(\'search-results-dropdown\').style.display=\'none\';" ' +
+      grouped[type].slice(0,4).forEach(function(r, i) {
+        var key = type + '_' + i;
+        window._searchActions = window._searchActions || {};
+        window._searchActions[key] = r.action;
+        html += '<div onmousedown="window._doSearchNav('' + key + '')" ' +
           'style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;cursor:pointer;transition:background 0.15s;" ' +
           'onmouseover="this.style.background=\'var(--light)\'" onmouseout="this.style.background=\'transparent\'">' +
           r.icon +
@@ -10966,6 +10969,14 @@ window.toggleDropdown = function(id) {
     if (arrow) arrow.classList.add('open');
   }
 }
+window._doSearchNav = function(key) {
+  var action = window._searchActions && window._searchActions[key];
+  if (!action) return;
+  document.getElementById('global-search-input').value = '';
+  document.getElementById('search-results-dropdown').style.display = 'none';
+  try { eval(action); } catch(e) { console.log('Search nav error:', e); }
+};
+
 window.closeDropdowns = function() {
   document.querySelectorAll('.dd-items').forEach(function(d){ d.style.display = 'none'; });
   document.querySelectorAll('.dd-arrow').forEach(function(a){ a.classList.remove('open'); });
