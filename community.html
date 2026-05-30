@@ -511,6 +511,7 @@ function enterPlatform() {
   }
   updateNotifBadge();
   startNotifListener();
+  startMessageListener();
   // Track online presence
   if (currentUser) {
     const onlineRef = doc(db, 'onlineUsers', currentUser.uid);
