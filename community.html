@@ -6956,22 +6956,7 @@ async function loadAllPrograms() {
 }
 
 async function enrollInProgram(programId) {
-  if (!confirm('Enroll in this program? You can only be enrolled in one program at a time.')) return;
-
-  // Check if already enrolled in another program
-  const activeSnap = await getDocs(query(
-    collection(db, 'learningProgress'),
-    where('userId', '==', currentUser.uid),
-    where('status', '==', 'enrolled')
-  ));
-
-  if (!activeSnap.empty) {
-    const active = activeSnap.docs[0].data();
-    const activeProgSnap = await getDoc(doc(db, 'trainingPrograms', active.programId));
-    if (activeProgSnap.exists()) {
-      return showToast('You are already enrolled in "' + (active.programTitle||'a program') + '". Complete it first before enrolling in another.', 'error');
-    }
-    // Program no longer exists - silently ignore and allow new enrollment
+  if (!confirm('Enroll in this program?')) return;
   }
 
   const ref = doc(db, 'trainingPrograms', programId);
