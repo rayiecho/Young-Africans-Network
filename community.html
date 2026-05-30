@@ -10178,11 +10178,20 @@ window.showMentorshipSection = async function(section) {
     const myProfile = await getDoc(doc(db, 'mentorProfiles', currentUser.uid));
     const p = myProfile.exists() ? myProfile.data() : {};
     container.innerHTML = '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-top:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">'
-      + '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Become a Mentor</h3>'
-      + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Your Bio / What you can help with</label>'
-      + '<textarea id="mentor-bio" rows="3" placeholder="e.g. I can help with CV writing, scholarship applications, web development..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;">' + (p.bio||'') + '</textarea></div>'
-      + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Your Skills (comma separated)</label>'
-      + '<input id="mentor-skills" type="text" placeholder="e.g. CV Writing, Public Speaking, Web Development" value="' + (p.skills||[]).join(', ') + '" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>'
+      + '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:0.25rem;">Become a YAN Mentor</h3>'
+      + '<p style="font-size:0.78rem;color:var(--gray);margin-bottom:1rem;">Your application will be reviewed and approved by the YAN admin team.</p>'
+      + (p.status === 'pending' ? '<div style="background:rgba(245,166,35,0.1);border:1px solid #F5A623;border-radius:10px;padding:0.75rem;margin-bottom:1rem;font-size:0.82rem;color:#B8860B;font-weight:600;">⏳ Your application is pending admin approval.</div>' : '')
+      + (p.status === 'approved' ? '<div style="background:rgba(39,174,96,0.1);border:1px solid #27AE60;border-radius:10px;padding:0.75rem;margin-bottom:1rem;font-size:0.82rem;color:#27AE60;font-weight:600;">✅ You are an approved YAN Mentor!</div>' : '')
+      + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Why do you want to be a mentor? *</label>'
+      + '<textarea id="mentor-bio" rows="3" placeholder="e.g. I want to help young Africans achieve their goals through my experience in..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;">' + (p.bio||'') + '</textarea></div>'
+      + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Your Qualifications *</label>'
+      + '<textarea id="mentor-qualifications" rows="2" placeholder="e.g. BSc Computer Science - University of Nairobi, AWS Certified Developer..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;">' + (p.qualifications||'') + '</textarea></div>'
+      + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Work Experience *</label>'
+      + '<textarea id="mentor-experience" rows="2" placeholder="e.g. 3 years as Software Engineer at Safaricom, Volunteer at UNICEF..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;">' + (p.experience||'') + '</textarea></div>'
+      + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Skills & Areas of Expertise *</label>'
+      + '<input id="mentor-skills" type="text" placeholder="e.g. CV Writing, Public Speaking, Web Development, Scholarships" value="' + (p.skills||[]).join(', ') + '" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>'
+      + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">LinkedIn Profile (optional)</label>'
+      + '<input id="mentor-linkedin" type="text" placeholder="https://linkedin.com/in/yourname" value="' + (p.linkedin||'') + '" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>'
       + '<div style="margin-bottom:1.5rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Max Mentees at a time</label>'
       + '<select id="mentor-max" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;">'
       + '<option value="1"' + (p.maxMentees===1?' selected':'') + '>1 mentee</option>'
@@ -10191,7 +10200,7 @@ window.showMentorshipSection = async function(section) {
       + '<option value="5"' + (p.maxMentees===5?' selected':'') + '>5 mentees</option>'
       + '</select></div>'
       + '<button onclick="saveMentorProfile()" style="background:var(--navy);color:#fff;border:none;padding:0.85rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;width:100%;">'
-      + (myProfile.exists() ? 'Update Profile' : 'Register as Mentor') + '</button>'
+      + (myProfile.exists() ? 'Update Application' : 'Submit Application') + '</button>'
       + (myProfile.exists() ? '<button onclick="toggleMentorAvailability('+myProfile.data().available+')" style="background:'+(myProfile.data().available?'var(--red)':'rgba(39,174,96,0.1)')+';color:'+(myProfile.data().available?'#fff':'#27AE60')+';border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;width:100%;margin-top:0.75rem;">'+(myProfile.data().available?'Pause Mentoring':'Resume Mentoring')+'</button>' : '')
       + '</div>';
 
@@ -10241,18 +10250,36 @@ window.showMentorshipSection = async function(section) {
 };
 
 window.saveMentorProfile = async function() {
-  const bio = document.getElementById('mentor-bio').value.trim();
-  const skills = document.getElementById('mentor-skills').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const maxMentees = parseInt(document.getElementById('mentor-max').value);
-  if (!bio) return showToast('Please add a bio', 'error');
+  const bio = document.getElementById('mentor-bio')?.value.trim();
+  const qualifications = document.getElementById('mentor-qualifications')?.value.trim();
+  const experience = document.getElementById('mentor-experience')?.value.trim();
+  const skills = document.getElementById('mentor-skills')?.value.split(',').map(s=>s.trim()).filter(Boolean);
+  const linkedin = document.getElementById('mentor-linkedin')?.value.trim();
+  const maxMentees = parseInt(document.getElementById('mentor-max')?.value);
+  if (!bio) return showToast('Please add your motivation', 'error');
+  if (!qualifications) return showToast('Please add your qualifications', 'error');
+  if (!experience) return showToast('Please add your experience', 'error');
+  if (!skills.length) return showToast('Please add your skills', 'error');
+  const existing = await getDoc(doc(db,'mentorProfiles',currentUser.uid));
+  const isUpdate = existing.exists();
   await setDoc(doc(db, 'mentorProfiles', currentUser.uid), {
     userId: currentUser.uid, name: currentUserData.name,
     photoUrl: currentUserData.photoUrl || '',
     country: currentUserData.country || '', department: currentUserData.department || '',
-    bio, skills, maxMentees, available: true, createdAt: serverTimestamp()
+    bio, qualifications, experience, skills, linkedin, maxMentees,
+    available: false,
+    status: isUpdate ? (existing.data().status || 'pending') : 'pending',
+    appliedAt: serverTimestamp()
   }, {merge: true});
-  showToast('Mentor profile saved!');
-  showMentorshipSection('find');
+  // Notify admin
+  await addDoc(collection(db,'notifications'),{
+    title: 'New Mentor Application',
+    message: currentUserData.name + ' has applied to become a YAN Mentor. Please review their application.',
+    type: 'info', userId: 'tNbO0jryVeadlpIkKQnv6mjYJn42',
+    postedBy: 'YAN System', createdAt: serverTimestamp(), readBy: []
+  });
+  showToast(isUpdate ? 'Application updated! Awaiting admin review.' : 'Application submitted! Admin will review shortly.');
+  showMentorshipSection('become');
 };
 
 window.toggleMentorAvailability = async function(current) {

@@ -618,7 +618,7 @@ window.loadSection = async function(section) {
   }[section] || section;
   const container = document.getElementById('content-area');
   container.innerHTML = '<div class="loading">Loading...</div>';
-  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: loadAnalytics, assignments: loadAssignments, programs: loadProgramsAdmin, applications: loadProgramApplications, notifications: loadNotificationCenter, finance: loadFinance, recommendations: (...args) => window.loadRecommendations(...args) };
+  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: loadAnalytics, assignments: loadAssignments, programs: loadProgramsAdmin, applications: loadProgramApplications, notifications: loadNotificationCenter, finance: loadFinance, recommendations: (...args) => window.loadRecommendations(...args), mentors: loadMentorApplications };
   if (fns[section]) {
     try {
       await fns[section](container);
@@ -1313,6 +1313,86 @@ window.adminRejectCert = async function(certId) {
 };
 
 // ===== MEMBERS =====
+async function loadMentorApplications(c) {
+  c.innerHTML = '<div class="loading">Loading mentor applications...</div>';
+  try {
+    const snap = await getDocs(collection(db,'mentorProfiles'));
+    const pending = snap.docs.filter(d => d.data().status === 'pending' || !d.data().status);
+    const approved = snap.docs.filter(d => d.data().status === 'approved');
+    const rejected = snap.docs.filter(d => d.data().status === 'rejected');
+    let html = '<div style="max-width:900px;margin:0 auto;">';
+    html += '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">🎓 Mentor Applications</h2>';
+    html += '<p style="color:var(--gray);font-size:0.82rem;margin-bottom:1.5rem;">Review and approve mentor applications from YAN members.</p>';
+    html += '<div style="display:flex;gap:1rem;margin-bottom:1.5rem;">';
+    html += '<div style="background:rgba(245,166,35,0.1);border-radius:12px;padding:1rem;flex:1;text-align:center;"><div style="font-size:1.5rem;font-weight:900;color:#B8860B;">' + pending.length + '</div><div style="font-size:0.78rem;color:#B8860B;">Pending</div></div>';
+    html += '<div style="background:rgba(39,174,96,0.1);border-radius:12px;padding:1rem;flex:1;text-align:center;"><div style="font-size:1.5rem;font-weight:900;color:#27AE60;">' + approved.length + '</div><div style="font-size:0.78rem;color:#27AE60;">Approved</div></div>';
+    html += '<div style="background:rgba(230,51,41,0.1);border-radius:12px;padding:1rem;flex:1;text-align:center;"><div style="font-size:1.5rem;font-weight:900;color:var(--red);">' + rejected.length + '</div><div style="font-size:0.78rem;color:var(--red);">Rejected</div></div>';
+    html += '</div>';
+    if (pending.length > 0) {
+      html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">⏳ Pending Review</h3>';
+      pending.forEach(d => {
+        const p = d.data();
+        html += '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);border-left:4px solid #F5A623;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;margin-bottom:1rem;">';
+        html += '<div style="display:flex;align-items:center;gap:0.75rem;">';
+        if (p.photoUrl) html += '<img src="'+p.photoUrl+'" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">';
+        else html += '<div style="width:48px;height:48px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">'+(p.name||'?')[0]+'</div>';
+        html += '<div><div style="font-weight:800;color:var(--navy);">'+sanitize(p.name||'')+'</div>';
+        html += '<div style="font-size:0.78rem;color:var(--gray);">'+sanitize(p.country||'')+' · '+sanitize(p.department||'')+'</div></div></div>';
+        html += '<div style="display:flex;gap:0.5rem;">';
+        html += '<button onclick="approveMentor(''+d.id+'')" style="background:#27AE60;color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">✅ Approve</button>';
+        html += '<button onclick="rejectMentor(''+d.id+'')" style="background:var(--red);color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">❌ Reject</button>';
+        html += '</div></div>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">';
+        html += '<div><div style="font-size:0.75rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Motivation</div><div style="font-size:0.82rem;color:var(--gray);">'+sanitize(p.bio||'')+'</div></div>';
+        html += '<div><div style="font-size:0.75rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Qualifications</div><div style="font-size:0.82rem;color:var(--gray);">'+sanitize(p.qualifications||'')+'</div></div>';
+        html += '<div><div style="font-size:0.75rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Experience</div><div style="font-size:0.82rem;color:var(--gray);">'+sanitize(p.experience||'')+'</div></div>';
+        html += '<div><div style="font-size:0.75rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Skills</div><div style="font-size:0.82rem;color:var(--gray);">'+(p.skills||[]).join(', ')+'</div></div>';
+        html += '</div>';
+        if (p.linkedin) html += '<a href="'+p.linkedin+'" target="_blank" style="font-size:0.78rem;color:var(--navy);">🔗 LinkedIn Profile</a>';
+        html += '</div>';
+      });
+    }
+    if (approved.length > 0) {
+      html += '<h3 style="font-size:0.95rem;font-weight:800;color:#27AE60;margin:1.5rem 0 1rem;">✅ Approved Mentors ('+approved.length+')</h3>';
+      approved.forEach(d => {
+        const p = d.data();
+        html += '<div style="background:var(--white);border-radius:12px;padding:1rem;margin-bottom:0.5rem;display:flex;justify-content:space-between;align-items:center;border-left:4px solid #27AE60;">';
+        html += '<div><div style="font-weight:700;color:var(--navy);">'+sanitize(p.name||'')+'</div>';
+        html += '<div style="font-size:0.75rem;color:var(--gray);">'+(p.skills||[]).join(', ')+'</div></div>';
+        html += '<button onclick="rejectMentor(''+d.id+'')" style="background:var(--light);color:var(--red);border:none;padding:0.35rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Revoke</button>';
+        html += '</div>';
+      });
+    }
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: '+e.message+'</p>'; }
+}
+
+window.approveMentor = async function(userId) {
+  await updateDoc(doc(db,'mentorProfiles',userId), { status:'approved', available:true, approvedAt: serverTimestamp() });
+  const p = (await getDoc(doc(db,'mentorProfiles',userId))).data();
+  await addDoc(collection(db,'notifications'),{
+    title:'🎉 Mentor Application Approved!',
+    message:'Congratulations! Your YAN Mentor application has been approved. You can now receive mentorship requests.',
+    type:'info', userId, postedBy:'YAN Admin', createdAt: serverTimestamp(), readBy:[]
+  });
+  showToast('Mentor approved!');
+  loadMentorApplications(document.getElementById('content'));
+};
+
+window.rejectMentor = async function(userId) {
+  if (!confirm('Reject this mentor application?')) return;
+  await updateDoc(doc(db,'mentorProfiles',userId), { status:'rejected', available:false });
+  await addDoc(collection(db,'notifications'),{
+    title:'Mentor Application Update',
+    message:'Thank you for applying to be a YAN Mentor. Unfortunately your application was not approved at this time. You may reapply after updating your profile.',
+    type:'info', userId, postedBy:'YAN Admin', createdAt: serverTimestamp(), readBy:[]
+  });
+  showToast('Application rejected.');
+  loadMentorApplications(document.getElementById('content'));
+};
+
 async function loadMembers(c) {
   const snap = await getDocs(collection(db, 'users'));
   c.innerHTML = `
