@@ -10027,14 +10027,25 @@ window.sendMessage = async function(convId, otherId) {
     senderId:currentUser.uid, senderName:currentUserData.name, text, createdAt:serverTimestamp()
   });
   const otherSnap = await getDoc(doc(db,'users',otherId));
-  await setDoc(doc(db,'conversations',convId),{
-    participants:[currentUser.uid,otherId],
-    participantNames:{[currentUser.uid]:currentUserData.name,[otherId]:otherSnap.data()?.name||'Member'},
-    participantPhotos:{[currentUser.uid]:currentUserData.photoUrl||'',[otherId]:otherSnap.data()?.photoUrl||''},
-    lastMessage:text, lastMessageAt:serverTimestamp(),
-    lastSenderName:currentUserData.name, lastSenderId:currentUser.uid,
-    ['unreadCount.'+otherId]:increment(1),['unreadCount.'+currentUser.uid]:0
-  },{merge:true});
+  const convRef = doc(db,'conversations',convId);
+  const convSnap = await getDoc(convRef);
+  if (!convSnap.exists()) {
+    await setDoc(convRef,{
+      participants:[currentUser.uid,otherId],
+      participantNames:{[currentUser.uid]:currentUserData.name,[otherId]:otherSnap.data()?.name||'Member'},
+      participantPhotos:{[currentUser.uid]:currentUserData.photoUrl||'',[otherId]:otherSnap.data()?.photoUrl||''},
+      lastMessage:text, lastMessageAt:serverTimestamp(),
+      lastSenderName:currentUserData.name, lastSenderId:currentUser.uid,
+      unreadCount:{[currentUser.uid]:0,[otherId]:1}
+    });
+  } else {
+    await updateDoc(convRef,{
+      lastMessage:text, lastMessageAt:serverTimestamp(),
+      lastSenderName:currentUserData.name, lastSenderId:currentUser.uid,
+      ['unreadCount.'+otherId]:increment(1),
+      ['unreadCount.'+currentUser.uid]:0
+    });
+  }
 };
 
 window.showNewMessageModal = async function() {
