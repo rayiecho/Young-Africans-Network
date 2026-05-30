@@ -837,6 +837,7 @@ async function updateNotifBadge() {
 
 // MAIN FEED
 function loadFeed() {
+  loadFeedMembers();
   const container = document.getElementById('feed-posts');
   container.innerHTML = '<div class="loading">Loading posts...</div>';
   const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(30));
@@ -883,6 +884,37 @@ function renderPost(post) {
     </div>
     <div class="replies-container" id="replies-${post.id}"></div>
   </div>`;
+}
+
+async function loadFeedMembers() {
+  const panel = document.getElementById('feed-members-list');
+  if (!panel) return;
+  try {
+    const snap = await getDocs(query(collection(db,'users'), limit(50)));
+    let html = '';
+    snap.docs.forEach(d => {
+      if (d.id === currentUser.uid) return;
+      const u = d.data();
+      const isOnline = window._onlineUsers && window._onlineUsers[d.id];
+      const convId = [currentUser.uid, d.id].sort().join('_');
+      const encodedName = encodeURIComponent(u.name||'');
+      const encodedPhoto = encodeURIComponent(u.photoUrl||'');
+      html += '<div style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0;border-bottom:1px solid var(--light);cursor:pointer;" onclick="showTab('messages');setTimeout(function(){openConversation('' + convId + '','' + d.id + '','' + encodedName + '','' + encodedPhoto + '');},500)">';
+      html += '<div style="position:relative;flex-shrink:0;">';
+      if (u.photoUrl) {
+        html += '<img src="' + u.photoUrl + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">';
+      } else {
+        html += '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.85rem;">' + (u.name||'?')[0] + '</div>';
+      }
+      html += '<span style="position:absolute;bottom:0;right:0;width:9px;height:9px;border-radius:50%;background:' + (isOnline?'#27AE60':'#ccc') + ';border:2px solid #fff;"></span>';
+      html += '</div>';
+      html += '<div style="flex:1;min-width:0;">';
+      html += '<div style="font-size:0.8rem;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + sanitize(u.name||'') + '</div>';
+      html += '<div style="font-size:0.68rem;color:' + (isOnline?'#27AE60':'var(--gray)') + ';">' + (isOnline?'Online':'Offline') + '</div>';
+      html += '</div></div>';
+    });
+    panel.innerHTML = html || '<div style="color:var(--gray);font-size:0.8rem;">No members yet.</div>';
+  } catch(e) { panel.innerHTML = '<div style="color:var(--gray);font-size:0.8rem;">Could not load members.</div>'; }
 }
 
 async function submitPost() {
@@ -10348,6 +10380,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 #sidebar-role{font-size:0.7rem;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.5px;}
 #sidebar-dept{font-size:0.68rem;color:var(--gold);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sidebar-nav{padding:1rem 0;flex:1;}
+@media(max-width:768px){#feed-members-panel{display:none;}}
 .sidebar-dropdown{width:100%;}
 .dropdown-toggle{justify-content:space-between;}
 .dd-arrow{font-size:0.6rem;margin-left:auto;transition:transform 0.2s;}
@@ -10798,6 +10831,8 @@ h2,h3{position:relative;}
     </div>
 
     <div class="tab-panel active" id="tab-feed">
+      <div style="display:flex;gap:1.5rem;align-items:flex-start;">
+      <div style="flex:1;min-width:0;">
       <div class="post-composer">
         <textarea id="post-input" placeholder="Share something with the community... use @name to tag members " rows="3"></textarea>
         <div class="post-composer-row">
@@ -10813,6 +10848,12 @@ h2,h3{position:relative;}
         </div>
       </div>
       <div id="feed-posts"></div>
+      </div>
+      <div id="feed-members-panel" style="width:240px;flex-shrink:0;background:var(--white);border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06);padding:1rem;position:sticky;top:80px;max-height:80vh;overflow-y:auto;">
+        <h3 style="font-size:0.85rem;font-weight:800;color:var(--navy);margin-bottom:1rem;"> YAN Members</h3>
+        <div id="feed-members-list"><div style="color:var(--gray);font-size:0.8rem;">Loading...</div></div>
+      </div>
+      </div>
     </div>
 
     <div class="tab-panel" id="tab-hubs"><div id="hubs-container"></div></div>
