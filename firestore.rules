@@ -556,6 +556,17 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /memberGrades/{gradeId} {
+      allow read: if isLoggedIn() && (
+        resource.data.userId == request.auth.uid || isAdminOrHead()
+      );
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn() && (
+        resource.data.userId == request.auth.uid || isAdminOrHead()
+      );
+      allow delete: if isAdmin();
+    }
+
     match /quizAttempts/{attemptId} {
       allow read, write: if isLoggedIn();
     }

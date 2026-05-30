@@ -571,6 +571,7 @@ function loadTabContent(tab) {
   if (tab === 'partnerships-hub') safeLoad(tab, loadPartnershipsHub);
   if (tab === 'magazine') safeLoad(tab, loadMagazine);
   if (tab === 'achievements') safeLoad(tab, loadAchievements);
+  if (tab === 'grades') safeLoad(tab, loadGradesTab);
   if (tab === 'points') safeLoad(tab, loadLeaderboard);
   if (tab === 'resources') safeLoad(tab, loadResources);
   if (tab === 'polls') safeLoad(tab, loadPolls);
@@ -1635,6 +1636,151 @@ function loadProfile() {
   if (bar) bar.style.width = pct + '%';
   if (pctEl) pctEl.textContent = pct + '%';
   if (nudge) nudge.textContent = pct === 100 ? 'Your profile is complete!' : 'To complete: ' + missing[0];
+}
+
+async function loadGradesTab() {
+  const container = document.getElementById('grades-container');
+  if (!container) return;
+  container.innerHTML = '<p style="font-size:0.82rem;color:var(--gray);padding:1rem;">Loading your grades...</p>';
+  try {
+    const [gradesSnap, quizFailSnap] = await Promise.all([
+      getDocs(query(collection(db, 'memberGrades'), where('userId','==',currentUser.uid))),
+      getDocs(query(collection(db, 'quizFailures'), where('userId','==',currentUser.uid)))
+    ]);
+
+    if (gradesSnap.empty) {
+      container.innerHTML = '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);text-align:center;"><p style="font-size:1.5rem;">📊</p><p style="font-size:0.88rem;color:var(--gray);margin-top:0.5rem;">No grades yet. Complete a quiz or submit an assignment to see your progress here.</p></div>';
+      return;
+    }
+
+    let html = '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:1.25rem;">📊 My Grades & Progress</h2>';
+
+    gradesSnap.docs.forEach(d => {
+      const g = d.data();
+      const modules = g.modules || {};
+
+      // Calculate overall grade
+      let moduleGrades = [];
+      Object.entries(modules).forEach(([modKey, modData]) => {
+        const quizAvg = modData.quizAverage || 0;
+        const ag = modData.assignmentGrade;
+        const assignFinal = ag ? (ag.finalScore || ag.adminScore || ag.aiScore || 0) : null;
+        let modGrade = null;
+        if (assignFinal !== null) {
+          modGrade = Math.round(quizAvg * 0.6 + assignFinal * 0.4);
+        } else if (quizAvg > 0) {
+          modGrade = quizAvg;
+        }
+        if (modGrade !== null) moduleGrades.push(modGrade);
+      });
+      const overallGrade = moduleGrades.length > 0 ? Math.round(moduleGrades.reduce((s,v)=>s+v,0)/moduleGrades.length) : null;
+      const passed = overallGrade !== null && overallGrade >= 70;
+      const overallColor = passed ? '#27AE60' : overallGrade !== null ? '#F5A623' : 'var(--gray)';
+
+      html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">';
+
+      // Program header
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1.5px solid rgba(27,42,107,0.08);">';
+      html += '<div><p style="font-size:0.92rem;font-weight:800;color:var(--navy);">📚 ' + sanitize(g.programId || 'Program') + '</p>';
+      html += '<p style="font-size:0.72rem;color:var(--gray);">Grade formula: Quiz avg (60%) + Assignment (40%)</p></div>';
+      if (overallGrade !== null) {
+        html += '<div style="text-align:center;">';
+        html += '<div style="width:56px;height:56px;border-radius:50%;border:3px solid ' + overallColor + ';display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:900;color:' + overallColor + ';margin:0 auto;">' + overallGrade + '%</div>';
+        html += '<p style="font-size:0.65rem;color:var(--gray);margin-top:0.25rem;">' + (passed ? '✅ PASSED' : '❌ BELOW 70%') + '</p>';
+        html += '</div>';
+      }
+      html += '</div>';
+
+      // Modules
+      Object.entries(modules).forEach(([modKey, modData]) => {
+        const quizGrades = modData.quizGrades || {};
+        const ag = modData.assignmentGrade;
+        const modGrade = modData.moduleGrade;
+        const modColor = modGrade >= 70 ? '#27AE60' : modGrade >= 50 ? '#F5A623' : '#dc3545';
+
+        html += '<div style="background:var(--light);border-radius:10px;padding:0.85rem;margin-bottom:0.75rem;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;">';
+        html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);">' + modKey.replace('module-','Module ') + '</p>';
+        if (modGrade !== undefined) {
+          html += '<span style="background:' + modColor + '18;color:' + modColor + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.75rem;font-weight:700;">' + modGrade + '%</span>';
+        }
+        html += '</div>';
+
+        // Quiz scores
+        if (Object.keys(quizGrades).length > 0) {
+          html += '<p style="font-size:0.7rem;font-weight:700;color:var(--gray);margin-bottom:0.35rem;">QUIZ SCORES</p>';
+          html += '<div style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:0.5rem;">';
+          Object.entries(quizGrades).forEach(([lk, qg]) => {
+            const finalScore = qg.adminScore || qg.score;
+            const qc = finalScore >= 70 ? '#27AE60' : '#dc3545';
+            html += '<div style="background:white;border-radius:8px;padding:0.35rem 0.6rem;border-left:3px solid ' + qc + ';">';
+            html += '<p style="font-size:0.68rem;color:var(--gray);">' + sanitize(lk.replace(/-/g,' ')) + '</p>';
+            html += '<p style="font-size:0.78rem;font-weight:700;color:' + qc + ';">' + finalScore + '%</p>';
+            if (qg.adminScore && qg.adminScore !== qg.score) html += '<p style="font-size:0.65rem;color:var(--gray);">Original: ' + qg.score + '%</p>';
+            html += '</div>';
+          });
+          html += '</div>';
+          html += '<p style="font-size:0.72rem;color:var(--gray);">Quiz average: <strong>' + (modData.quizAverage||0) + '%</strong></p>';
+        }
+
+        // Assignment
+        if (ag) {
+          html += '<div style="background:white;border-radius:8px;padding:0.6rem 0.75rem;margin-top:0.5rem;">';
+          html += '<p style="font-size:0.7rem;font-weight:700;color:var(--gray);margin-bottom:0.35rem;">ASSIGNMENT</p>';
+          html += '<div style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;margin-bottom:0.35rem;">';
+          if (ag.aiScore) html += '<span style="font-size:0.72rem;color:#0A66C2;background:rgba(10,102,194,0.08);padding:0.15rem 0.5rem;border-radius:50px;">🤖 AI: ' + ag.aiScore + '%</span>';
+          if (ag.adminScore) html += '<span style="font-size:0.72rem;color:var(--navy);background:rgba(27,42,107,0.08);padding:0.15rem 0.5rem;border-radius:50px;">✍️ Admin: ' + ag.adminScore + '%</span>';
+          if (ag.finalScore) html += '<span style="font-size:0.72rem;color:#27AE60;background:rgba(39,174,96,0.1);padding:0.15rem 0.5rem;border-radius:50px;font-weight:700;">✅ Final: ' + ag.finalScore + '%</span>';
+          const sc = ag.status === 'approved' ? '#27AE60' : ag.status === 'rejected' ? '#dc3545' : '#F5A623';
+          html += '<span style="font-size:0.7rem;font-weight:700;color:' + sc + ';">' + (ag.status||'pending').toUpperCase() + '</span>';
+          html += '</div>';
+          if (ag.adminFeedback) html += '<p style="font-size:0.75rem;color:var(--gray);font-style:italic;line-height:1.5;">💬 ' + sanitize(ag.adminFeedback) + '</p>';
+          if (ag.fileUrl) html += '<a href="' + ag.fileUrl + '" target="_blank" style="font-size:0.72rem;color:#0A66C2;text-decoration:underline;display:inline-block;margin-top:0.25rem;">📎 View my submitted file</a>';
+          html += '</div>';
+        }
+        html += '</div>'; // end module
+      });
+
+      // Certificate
+      if (g.certificateApproved) {
+        html += '<div style="background:rgba(39,174,96,0.08);border-radius:10px;padding:0.85rem;margin-top:0.5rem;display:flex;align-items:center;gap:0.75rem;">';
+        html += '<span style="font-size:1.5rem;">🏆</span>';
+        html += '<div><p style="font-size:0.85rem;font-weight:700;color:#27AE60;">Certificate Approved!</p>';
+        html += '<p style="font-size:0.75rem;color:var(--gray);">Go to My Profile → My Certificates to download.</p></div>';
+        html += '</div>';
+      } else if (passed) {
+        html += '<div style="background:rgba(245,166,35,0.08);border-radius:10px;padding:0.85rem;margin-top:0.5rem;display:flex;align-items:center;gap:0.75rem;">';
+        html += '<span style="font-size:1.5rem;">⏳</span>';
+        html += '<div><p style="font-size:0.85rem;font-weight:700;color:#F5A623;">You passed! Awaiting admin certificate approval.</p>';
+        html += '<p style="font-size:0.75rem;color:var(--gray);">You will be notified once your certificate is approved.</p></div>';
+        html += '</div>';
+      }
+
+      html += '</div>'; // end program card
+    });
+
+    // Quiz failures
+    if (!quizFailSnap.empty) {
+      html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">';
+      html += '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">⚠️ Quiz Attempts Status</p>';
+      quizFailSnap.docs.forEach(d => {
+        const q = d.data();
+        if (q.reviewed) {
+          html += '<div style="background:rgba(39,174,96,0.06);border-radius:8px;padding:0.6rem 0.75rem;margin-bottom:0.4rem;border-left:3px solid #27AE60;">';
+          html += '<p style="font-size:0.78rem;color:#27AE60;font-weight:600;">✅ Attempts reset — <strong>' + sanitize(q.programId||'') + '</strong>. You can now retake the quiz.</p>';
+        } else {
+          html += '<div style="background:rgba(245,166,35,0.06);border-radius:8px;padding:0.6rem 0.75rem;margin-bottom:0.4rem;border-left:3px solid #F5A623;">';
+          html += '<p style="font-size:0.78rem;color:#F5A623;font-weight:600;">⏳ Quiz failure under review — <strong>' + sanitize(q.programId||'') + '</strong>. Score: ' + (q.score||0) + '%. Admin will reset your attempts soon.</p>';
+        }
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<p style="color:var(--gray);font-size:0.82rem;padding:1rem;">Could not load grades: ' + e.message + '</p>';
+  }
 }
 
 async function saveProfile() {
@@ -11521,6 +11667,7 @@ h2,h3{position:relative;}
           <button class="dd-item" onclick="showTab('messages');closeDropdowns()">Messages <span id="msg-unread-badge" style="display:none;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:0.65rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;">0</span></button>
           <button class="dd-item" onclick="showTab('notifications');closeDropdowns()">Notifications</button>
           <button class="dd-item" onclick="showTab('points');closeDropdowns()">My Points</button>
+          <button class="dd-item" onclick="showTab('grades');closeDropdowns()">📊 My Grades</button>
         </div>
       </div>
 
@@ -11606,6 +11753,7 @@ h2,h3{position:relative;}
     <div class="tab-panel" id="tab-polls"><div id="polls-container"></div></div>
     <div class="tab-panel" id="tab-calendar"><div id="calendar-container"></div></div>
     <div class="tab-panel" id="tab-points"><div id="points-container" style="max-width:900px;margin:0 auto;padding:1rem;"></div></div>
+    <div class="tab-panel" id="tab-grades"><div id="grades-container" style="max-width:900px;margin:0 auto;padding:1rem;"></div></div>
     <div class="tab-panel" id="tab-mentorship"><div id="mentorship-container" style="max-width:900px;margin:0 auto;padding:1rem;"></div></div>
   </main>
 <div id="members-drawer" style="display:none;position:fixed;bottom:0;left:0;right:0;background:var(--white);border-radius:20px 20px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,0.15);z-index:9990;max-height:70vh;overflow-y:auto;padding:1rem;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;"><h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);">&#x1F465; YAN Members</h3><button onclick="toggleMembersDrawer()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--gray);">&#x2715;</button></div><div id="members-drawer-list"><div style="color:var(--gray);font-size:0.8rem;text-align:center;padding:1rem;">Loading...</div></div></div>
