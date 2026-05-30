@@ -10004,13 +10004,13 @@ window.openConversation = async function(convId, otherId, otherNameEncoded, othe
           msgContent += '</div>';
         }
         if (msg.meetingRoom) {
-          msgContent += '<div style="margin-top:0.5rem;">'
+          msgContent += '<div style="margin-top:0.5rem;"><button onclick="openMentorshipMeetingRoom(\'' + msg.meetingRoom + '\',\'' + (isMe ? \'Mentee\' : \'Mentor\') + '\')" style="background:#27AE60;color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;display:inline-block;">&#x1F3A5; Join Meeting</button></div>';
             + '<button onclick="openMentorshipMeetingRoom(\"' + msg.meetingRoom + '\",\"' + (isMe ? 'Mentee' : 'Mentor') + '\")" style="background:#27AE60;color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;">🎥 Join Meeting</button>'
             + 'style="background:#27AE60;color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;">🎥 Join Meeting</button>'
             + '</div>';
         }
         msgDiv.innerHTML += '<div style="display:flex;flex-direction:column;align-items:'+(isMe?'flex-end':'flex-start')+';margin-bottom:0.25rem;">'
-          + '<div style="max-width:70%;background:'+(isMe?'var(--navy)':'var(--light)')+';color:'+(isMe?'#fff':'var(--navy)')+';padding:0.6rem 1rem;border-radius:'+(isMe?'16px 16px 4px 16px':'16px 16px 16px 4px')+';font-size:0.85rem;line-height:1.5;">'
+          + '<div style="max-width:85%;word-break:break-word;overflow-wrap:break-word;background:'+(isMe?'var(--navy)':'var(--light)')+';color:'+(isMe?'#fff':'var(--navy)')+';padding:0.6rem 1rem;border-radius:'+(isMe?'16px 16px 4px 16px':'16px 16px 16px 4px')+';font-size:0.85rem;line-height:1.5;">' + 
           + msgContent+'</div><span style="font-size:0.65rem;color:var(--gray);margin-top:2px;">'+time+'</span></div>';
       });
       msgDiv.scrollTop = msgDiv.scrollHeight;
