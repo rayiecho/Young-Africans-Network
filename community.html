@@ -10372,7 +10372,7 @@ window.submitAvailability = async function(mentorshipId) {
   const slotsText = slots.map((s,i) => (i+1)+'. '+s.label).join(' | ');
   await addDoc(collection(db,'conversations',convId,'messages'), {
     senderId: currentUser.uid, senderName: currentUserData.name,
-    text: '\u{1F4C5} I have accepted your mentorship request! Please pick a time for our first session: ' + slotsText,
+    text: '📅 I have accepted your mentorship request! Please pick a time for our first session: ' + slotsText,
     mentorshipSlots: slots, mentorshipId,
     createdAt: serverTimestamp()
   });
