@@ -9823,6 +9823,88 @@ window.checkEmailVerified = async function() {
 let activeConversationId = null;
 let messageUnsubscribe = null;
 
+function startMessageListener() {
+  if (!currentUser) return;
+  // Listen to all conversations for new messages
+  const q = query(
+    collection(db, 'conversations'),
+    where('participants', 'array-contains', currentUser.uid)
+  );
+  const unsub = onSnapshot(q, function(snap) {
+    snap.docChanges().forEach(function(change) {
+      if (change.type === 'modified') {
+        const data = change.doc.data();
+        const unread = data.unreadCount && data.unreadCount[currentUser.uid] || 0;
+        const lastMsg = data.lastMessage || '';
+        const lastSender = data.lastSenderName || 'Someone';
+        const lastSenderId = data.lastSenderId || '';
+        const convId = change.doc.id;
+        // Only show if not already in messages tab and message is from someone else
+        const inMessages = document.getElementById('tab-messages') && 
+          document.getElementById('tab-messages').classList.contains('active');
+        if (unread > 0 && lastSenderId !== currentUser.uid && !inMessages) {
+          showMessageToast(lastSender, lastMsg, convId, lastSenderId, data.otherName, data.otherPhoto);
+        }
+      }
+    });
+    // Update badge
+    let total = 0;
+    snap.docs.forEach(function(d) {
+      total += (d.data().unreadCount && d.data().unreadCount[currentUser.uid]) || 0;
+    });
+    const badge = document.getElementById('msg-unread-badge');
+    if (badge) {
+      badge.textContent = total;
+      badge.style.display = total > 0 ? 'inline-flex' : 'none';
+    }
+  });
+  unsubscribers.push(unsub);
+}
+
+function showMessageToast(senderName, message, convId, senderId, otherName, otherPhoto) {
+  // Remove existing message toast
+  const existing = document.getElementById('msg-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'msg-toast';
+  toast.style.cssText = 'position:fixed;bottom:5rem;left:1rem;background:var(--navy);color:#fff;border-radius:16px;padding:1rem 1.25rem;z-index:99990;box-shadow:0 8px 32px rgba(0,0,0,0.3);max-width:320px;cursor:pointer;display:flex;align-items:center;gap:0.75rem;animation:slideInLeft 0.3s ease;';
+
+  const avatar = otherPhoto
+    ? '<img src="' + otherPhoto + '" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
+    : '<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;flex-shrink:0;">' + (senderName||'?')[0] + '</div>';
+
+  toast.innerHTML = avatar +
+    '<div style="flex:1;min-width:0;">' +
+    '<div style="font-size:0.82rem;font-weight:700;margin-bottom:0.2rem;">💬 ' + sanitize(senderName) + '</div>' +
+    '<div style="font-size:0.75rem;color:rgba(255,255,255,0.75);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + sanitize(message.substring(0,50)) + '</div>' +
+    '<div style="font-size:0.68rem;color:var(--gold);margin-top:0.2rem;">Tap to reply →</div>' +
+    '</div>' +
+    '<button onclick="document.getElementById('msg-toast').remove()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:1rem;cursor:pointer;padding:0;flex-shrink:0;">✕</button>';
+
+  // Click to open conversation
+  toast.addEventListener('click', function(e) {
+    if (e.target.tagName === 'BUTTON') return;
+    toast.remove();
+    const encodedName = encodeURIComponent(senderName||'');
+    const encodedPhoto = encodeURIComponent(otherPhoto||'');
+    showTab('messages');
+    setTimeout(function() {
+      openConversation(convId, senderId, encodedName, encodedPhoto);
+    }, 500);
+  });
+
+  document.body.appendChild(toast);
+
+  // Auto dismiss after 6 seconds
+  setTimeout(function() {
+    if (document.getElementById('msg-toast')) {
+      toast.style.animation = 'slideOutLeft 0.3s ease';
+      setTimeout(function() { if (toast.parentNode) toast.remove(); }, 300);
+    }
+  }, 6000);
+}
+
 async function loadUnreadBadge() {
   if (!currentUser || !currentUser.uid) return;
   try {
@@ -10482,6 +10564,8 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
   #yan-guide-widget{bottom:5rem !important;}
   .toast{bottom:5rem !important;}
 }
+@keyframes slideInLeft{from{transform:translateX(-120%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+@keyframes slideOutLeft{from{transform:translateX(0);opacity:1;}to{transform:translateX(-120%);opacity:0;}}
 .toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);color:var(--white);padding:0.85rem 1.5rem;border-radius:12px;font-size:0.88rem;font-weight:500;z-index:9999;transform:translateY(100px);opacity:0;transition:all 0.3s;pointer-events:none;max-width:320px;}
 .toast.show{transform:translateY(0);opacity:1;}
 .toast.error{background:var(--red);}
