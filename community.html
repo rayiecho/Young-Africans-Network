@@ -10533,6 +10533,43 @@ async function loadLeaderboard() {
 }
 window.loadLeaderboard = loadLeaderboard;
 
+
+window.toggleMembersDrawer = function() {
+  var drawer = document.getElementById('members-drawer');
+  if (!drawer) return;
+  if (drawer.style.display === 'none') {
+    drawer.style.display = 'block';
+    // Load members into drawer
+    var list = document.getElementById('members-drawer-list');
+    if (list && list.innerHTML.includes('Loading')) {
+      getDocs(query(collection(db,'users'), limit(50))).then(function(snap) {
+        var html = '';
+        snap.docs.forEach(function(d) {
+          if (d.id === currentUser.uid) return;
+          var u = d.data();
+          var isOnline = window._onlineUsers && window._onlineUsers[d.id];
+          var convId = [currentUser.uid, d.id].sort().join('_');
+          var encodedName = encodeURIComponent(u.name||'');
+          var encodedPhoto = encodeURIComponent(u.photoUrl||'');
+          html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--light);cursor:pointer;" onclick="toggleMembersDrawer();showTab(\'messages\');setTimeout(function(){openConversation(\'' + convId + '\',\'' + d.id + '\',\'' + encodedName + '\',\'' + encodedPhoto + '\');},500)">';
+          if (u.photoUrl) {
+            html += '<div style="position:relative;"><img src="' + u.photoUrl + '" style="width:42px;height:42px;border-radius:50%;object-fit:cover;">';
+          } else {
+            html += '<div style="position:relative;"><div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">' + (u.name||'?')[0] + '</div>';
+          }
+          html += '<span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:' + (isOnline?'#27AE60':'#ccc') + ';border:2px solid #fff;"></span></div>';
+          html += '<div><div style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + (u.name||'') + '</div>';
+          html += '<div style="font-size:0.72rem;color:' + (isOnline?'#27AE60':'var(--gray)') + ';">' + (isOnline?'Online':'Offline') + ' · ' + (u.country||'') + '</div></div>';
+          html += '<div style="margin-left:auto;background:var(--navy);color:#fff;border:none;padding:0.3rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">Message</div>';
+          html += '</div>';
+        });
+        list.innerHTML = html || '<div style="color:var(--gray);text-align:center;padding:1rem;">No members yet.</div>';
+      });
+    }
+  } else {
+    drawer.style.display = 'none';
+  }
+};
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -11255,42 +11292,7 @@ window._doSearchNav = function(key) {
   try { eval(action); } catch(e) { console.log('Search nav error:', e); }
 };
 
-window.toggleMembersDrawer = function() {
-  var drawer = document.getElementById('members-drawer');
-  if (!drawer) return;
-  if (drawer.style.display === 'none') {
-    drawer.style.display = 'block';
-    // Load members into drawer
-    var list = document.getElementById('members-drawer-list');
-    if (list && list.innerHTML.includes('Loading')) {
-      getDocs(query(collection(db,'users'), limit(50))).then(function(snap) {
-        var html = '';
-        snap.docs.forEach(function(d) {
-          if (d.id === currentUser.uid) return;
-          var u = d.data();
-          var isOnline = window._onlineUsers && window._onlineUsers[d.id];
-          var convId = [currentUser.uid, d.id].sort().join('_');
-          var encodedName = encodeURIComponent(u.name||'');
-          var encodedPhoto = encodeURIComponent(u.photoUrl||'');
-          html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--light);cursor:pointer;" onclick="toggleMembersDrawer();showTab(\'messages\');setTimeout(function(){openConversation(\'' + convId + '\',\'' + d.id + '\',\'' + encodedName + '\',\'' + encodedPhoto + '\');},500)">';
-          if (u.photoUrl) {
-            html += '<div style="position:relative;"><img src="' + u.photoUrl + '" style="width:42px;height:42px;border-radius:50%;object-fit:cover;">';
-          } else {
-            html += '<div style="position:relative;"><div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">' + (u.name||'?')[0] + '</div>';
-          }
-          html += '<span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:' + (isOnline?'#27AE60':'#ccc') + ';border:2px solid #fff;"></span></div>';
-          html += '<div><div style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + (u.name||'') + '</div>';
-          html += '<div style="font-size:0.72rem;color:' + (isOnline?'#27AE60':'var(--gray)') + ';">' + (isOnline?'Online':'Offline') + ' · ' + (u.country||'') + '</div></div>';
-          html += '<div style="margin-left:auto;background:var(--navy);color:#fff;border:none;padding:0.3rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">Message</div>';
-          html += '</div>';
-        });
-        list.innerHTML = html || '<div style="color:var(--gray);text-align:center;padding:1rem;">No members yet.</div>';
-      });
-    }
-  } else {
-    drawer.style.display = 'none';
-  }
-};
+// toggleMembersDrawer moved to module scope
 
 window.closeDropdowns = function() {
   document.querySelectorAll('.dd-items').forEach(function(d){ d.style.display = 'none'; });
