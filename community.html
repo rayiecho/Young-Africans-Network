@@ -824,10 +824,78 @@ async function updateNotifBadge() {
 }
 
 // MAIN FEED
+const AFRICAN_QUOTES = [
+  { quote: "Education is the most powerful weapon which you can use to change the world.", author: "Nelson Mandela", country: "South Africa" },
+  { quote: "If you want to go fast, go alone. If you want to go far, go together.", author: "African Proverb", country: "Africa" },
+  { quote: "I am not African because I was born in Africa, but because Africa was born in me.", author: "Kwame Nkrumah", country: "Ghana" },
+  { quote: "The youth of today are the leaders of tomorrow.", author: "Nelson Mandela", country: "South Africa" },
+  { quote: "Africa is not a problem to be solved, it is an opportunity to be embraced.", author: "Paul Kagame", country: "Rwanda" },
+  { quote: "Until the lion learns to write, every story will glorify the hunter.", author: "African Proverb", country: "Africa" },
+  { quote: "A child who is not embraced by the village will burn it down to feel its warmth.", author: "African Proverb", country: "Africa" },
+  { quote: "In the moment of crisis, the wise build bridges and the foolish build dams.", author: "Nigerian Proverb", country: "Nigeria" },
+  { quote: "The strength of the crocodile is the water.", author: "African Proverb", country: "Africa" },
+  { quote: "Knowledge is like a garden: if it is not cultivated, it cannot be harvested.", author: "African Proverb", country: "Africa" },
+  { quote: "We must use time wisely and forever realize that the time is always ripe to do right.", author: "Nelson Mandela", country: "South Africa" },
+  { quote: "The task ahead of us is never as great as the power behind us.", author: "African Proverb", country: "Africa" },
+  { quote: "It takes a village to raise a child.", author: "African Proverb", country: "Africa" },
+  { quote: "He who learns, teaches.", author: "Ethiopian Proverb", country: "Ethiopia" },
+  { quote: "When the music changes, so does the dance.", author: "African Proverb", country: "Africa" },
+  { quote: "A tree is straightened while it is young.", author: "Kenyan Proverb", country: "Kenya" },
+  { quote: "Unity is strength, division is weakness.", author: "Swahili Proverb", country: "East Africa" },
+  { quote: "Rain does not fall on one roof alone.", author: "Cameroonian Proverb", country: "Cameroon" },
+  { quote: "However long the night, the dawn will break.", author: "African Proverb", country: "Africa" },
+  { quote: "Do not look where you fell, but where you slipped.", author: "African Proverb", country: "Africa" },
+  { quote: "The future belongs to those who prepare for it today.", author: "Malcolm X", country: "African Diaspora" },
+  { quote: "I am not afraid of storms, for I am learning how to sail my ship.", author: "African Proverb", country: "Africa" },
+  { quote: "Our greatest glory is not in never falling, but in rising every time we fall.", author: "African Proverb", country: "Africa" },
+  { quote: "Be a yardstick of quality. Some people aren't used to an environment where excellence is expected.", author: "Wangari Maathai", country: "Kenya" },
+  { quote: "The best time to plant a tree was 20 years ago. The second best time is now.", author: "African Proverb", country: "Africa" },
+  { quote: "Strive not to be a success, but rather to be of value.", author: "African Proverb", country: "Africa" },
+  { quote: "When spider webs unite, they can tie up a lion.", author: "Ethiopian Proverb", country: "Ethiopia" },
+  { quote: "A person is a person because of other people.", author: "Ubuntu Philosophy", country: "Africa" },
+  { quote: "Cross the river in a crowd and the crocodile won't eat you.", author: "African Proverb", country: "Africa" },
+  { quote: "Wisdom is like a baobab tree; no one individual can embrace it.", author: "Akan Proverb", country: "Ghana" },
+];
+
+function getDailyQuote() {
+  const day = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+  return AFRICAN_QUOTES[day % AFRICAN_QUOTES.length];
+}
+
+function renderQuoteOfDay() {
+  const q = getDailyQuote();
+  return `<div style="background:linear-gradient(135deg,var(--navy),#2D3F7B);border-radius:20px;padding:1.5rem;margin-bottom:1.5rem;color:#fff;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-20px;right:-10px;font-size:8rem;opacity:0.08;font-family:Georgia,serif;">"</div>
+    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold);margin-bottom:0.75rem;">✨ Quote of the Day</div>
+    <p style="font-size:0.95rem;font-style:italic;line-height:1.7;margin-bottom:1rem;color:rgba(255,255,255,0.92);">"${q.quote}"</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <p style="font-size:0.82rem;font-weight:700;color:var(--gold);">— ${q.author}</p>
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.5);">${q.country}</p>
+      </div>
+      <button onclick="shareQuote('${q.quote.replace(/'/g,"\\'").substring(0,50)}...')" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Share</button>
+    </div>
+  </div>`;
+}
+
+window.shareQuote = function(quote) {
+  const text = '"' + quote + '" — YAN Quote of the Day';
+  if (navigator.share) {
+    navigator.share({ text, url: 'https://youngafricansnetwork.org' });
+  } else {
+    navigator.clipboard.writeText(text);
+    showToast('Quote copied to clipboard!');
+  }
+};
+
 function loadFeed() {
   loadFeedMembers();
   const container = document.getElementById('feed-posts');
   container.innerHTML = '<div class="loading">Loading posts...</div>';
+  // Add quote of the day at top
+  const quoteEl = document.createElement('div');
+  quoteEl.innerHTML = renderQuoteOfDay();
+  container.parentElement.insertBefore(quoteEl, container);
   const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(30));
   const unsub = onSnapshot(q, snap => {
     if (snap.empty) { container.innerHTML = '<div class="empty-state">No posts yet. Be the first to post! </div>'; return; }
