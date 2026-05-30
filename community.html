@@ -7342,9 +7342,9 @@ async function openLessonContent(programId, lessonId, colName) {
     html += '<p style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;line-height:1.7;">' + sanitize(l.assignment) + '</p>'
     html += '<textarea id="assignment-' + lessonId + '" rows="5" style="width:100%;background:white;border:1.5px solid rgba(27,42,107,0.12);border-radius:10px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;box-sizing:border-box;" placeholder="Write your assignment response here... (optional if uploading a file)"></textarea>'
     html += '<div style="margin-top:0.75rem;background:var(--light);border-radius:10px;padding:1rem;">'
-    html += '<p style="font-size:0.78rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">📎 Upload File (PDF, DOCX, ZIP — optional)</p>'
-    html += '<input type="file" id="assignment-file-' + lessonId + '" accept=".pdf,.doc,.docx,.zip,.ppt,.pptx,.xls,.xlsx,.txt" style="width:100%;font-size:0.82rem;font-family:Poppins,sans-serif;">'
-    html += '<p style="font-size:0.72rem;color:var(--gray);margin-top:0.35rem;">Accepted: PDF, Word, PowerPoint, Excel, ZIP, Text</p>'
+    html += '<p style="font-size:0.78rem;font-weight:700;color:var(--navy);margin-bottom:0.35rem;">📎 Submit File via Google Drive (optional)</p>'
+    html += '<p style="font-size:0.72rem;color:var(--gray);margin-bottom:0.5rem;">Upload to Google Drive → right-click → Share → Anyone with the link → Copy link → paste below.</p>'
+    html += '<input type="url" id="assignment-file-' + lessonId + '" placeholder="https://drive.google.com/file/d/..." style="width:100%;padding:0.5rem 0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;box-sizing:border-box;">'
     html += '</div>'
     html += '<div id="upload-progress-' + lessonId + '" style="margin-top:0.5rem;"></div>'
     html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;margin-top:0.75rem;" onclick="submitLessonAssignment(\'' + programId + '\',\'' + lessonId + '\',\'' + colName + '\')">' + 'Submit Assignment</button>'
@@ -7487,32 +7487,23 @@ async function submitLessonAssignment(programId, lessonId, colName) {
   if (!textarea) return;
   const text = textarea.value.trim();
   const fileInput = document.getElementById('assignment-file-' + lessonId);
-  const file = fileInput && fileInput.files[0];
-  if (!text && !file) return showToast('Write a response or upload a file first', 'error');
+  const file = null;
+  if (!text && !(fileInput && fileInput.value.trim())) return showToast('Write a response or paste a Google Drive link first', 'error');
   const resultDiv = document.getElementById('assignment-result-' + lessonId);
   const progressDiv = document.getElementById('upload-progress-' + lessonId);
   const progressCol = colName === 'careerPrograms' ? 'careerLearningProgress' : 'learningProgress';
 
   // Upload file if provided
+  // Google Drive link
   let fileUrl = '';
   let fileName = '';
-  if (file) {
-    if (progressDiv) progressDiv.innerHTML = '<p style="font-size:0.78rem;color:#0A66C2;">⏳ Uploading file...</p>';
-    try {
-      const fd = new FormData();
-      const fd2 = new FormData();
-      fd2.append('file', file);
-      fd2.append('upload_preset', 'yan_files');
-      fd2.append('resource_type', 'auto');
-      const uploadRes = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/auto/upload', {method:'POST', body:fd2});
-      const uploadData = await uploadRes.json();
-      fileUrl = uploadData.secure_url || '';
-      fileName = file.name;
-      if (progressDiv) progressDiv.innerHTML = '<p style="font-size:0.78rem;color:#27AE60;">✅ File uploaded: ' + sanitize(fileName) + '</p>';
-    } catch(e) {
-      if (progressDiv) progressDiv.innerHTML = '<p style="font-size:0.78rem;color:var(--red);">❌ Upload failed. Submitting text only.</p>';
-    }
+  const driveLink = fileInput ? fileInput.value.trim() : '';
+  if (driveLink) {
+    fileUrl = driveLink;
+    fileName = 'Google Drive File';
+    if (progressDiv) progressDiv.innerHTML = '<p style="font-size:0.78rem;color:#27AE60;">✅ Google Drive link added</p>';
   }
+
 
   // Show loading
   if (resultDiv) resultDiv.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;"><p style="font-size:0.85rem;color:var(--gray);">🤖 AI is grading your assignment...</p></div>';
