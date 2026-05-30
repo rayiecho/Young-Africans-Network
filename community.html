@@ -10333,7 +10333,6 @@ window.submitAvailability = async function(mentorshipId) {
     text: '\u{1F4C5} I have accepted your mentorship request! Please pick a time for our first session: ' + slotsText,
     mentorshipSlots: slots, mentorshipId,
     createdAt: serverTimestamp()
-    createdAt: serverTimestamp()
   });
   await setDoc(doc(db,'conversations',convId), {
     participants: [currentUser.uid, m.menteeId],
