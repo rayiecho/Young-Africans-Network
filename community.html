@@ -7500,9 +7500,13 @@ async function submitLessonAssignment(programId, lessonId, colName) {
     if (progressDiv) progressDiv.innerHTML = '<p style="font-size:0.78rem;color:#0A66C2;">⏳ Uploading file...</p>';
     try {
       const fd = new FormData();
-      const storageRef = ref(storage, 'assignments/' + currentUser.uid + '/' + Date.now() + '_' + file.name);
-      const uploadTask = await uploadBytesResumable(storageRef, file);
-      fileUrl = await getDownloadURL(uploadTask.ref);
+      const fd2 = new FormData();
+      fd2.append('file', file);
+      fd2.append('upload_preset', 'yan_files');
+      fd2.append('resource_type', 'auto');
+      const uploadRes = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/auto/upload', {method:'POST', body:fd2});
+      const uploadData = await uploadRes.json();
+      fileUrl = uploadData.secure_url || '';
       fileName = file.name;
       if (progressDiv) progressDiv.innerHTML = '<p style="font-size:0.78rem;color:#27AE60;">✅ File uploaded: ' + sanitize(fileName) + '</p>';
     } catch(e) {
