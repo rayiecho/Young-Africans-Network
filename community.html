@@ -5267,7 +5267,7 @@ async function loadJobBoard() {
     + '</div>'
     + '<div id="jobs-list">' + jobsHtml + '</div>';
   // Reset filter to show all
-  setTimeout(function(){ var s=document.getElementById('job-filter-type'); if(s){s.value='';filterJobs();} }, 100);
+  setTimeout(function(){ var s=document.getElementById('job-filter-type'); if(s){s.value='';} var f=document.getElementById('job-filter-field'); if(f){f.value='';} filterJobs(); }, 200);
 }
 
 function renderJobCard(id, j) {
