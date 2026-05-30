@@ -511,7 +511,7 @@ function enterPlatform() {
   }
   updateNotifBadge();
   startNotifListener();
-  if (typeof startMessageListener === "function") startMessageListener(); else setTimeout(()=>window.startMessageListener&&window.startMessageListener(),2000);
+  setTimeout(function(){ if(window.startMessageListener) window.startMessageListener(); }, 2500);
   // Track online presence
   if (currentUser) {
     const onlineRef = doc(db, 'onlineUsers', currentUser.uid);
