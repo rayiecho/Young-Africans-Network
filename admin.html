@@ -75,7 +75,7 @@ window.doAdminLogout = function() {
 };
 
 // ===== UTILS =====
-function showToast(msg, type='success') {
+window.showToast = function showToast(msg, type='success') {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'toast show ' + type;
