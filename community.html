@@ -4964,7 +4964,7 @@ const CAREER_PATHS = [
   { id: 'international', icon: '', title: 'Working Internationally', desc: 'Navigate global job markets and work across borders', color: '#1ABC9C', lessons: 4 },
 ];
 
-const JOB_TYPES = ['Full-time','Part-time','Internship','Volunteer','Freelance','Remote'];
+const JOB_TYPES = ['Full-time','Part-time','Internship','Fellowship','Volunteer','Freelance','Remote'];
 const JOB_FIELDS = ['Technology','Finance','Communications','Community Development','Education','Health','Engineering','Business','Arts & Media','Research','Other'];
 
 async function loadCareerHub() {
@@ -5234,6 +5234,12 @@ async function loadJobBoard() {
     + '<button class="btn-primary" onclick="postCareerJob()">Post Opportunity</button>'
     + '<button class="btn-outline" onclick="toggleJobForm()">Cancel</button>'
     + '</div></div>'
+    + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;">'
+    + '<button onclick="document.getElementById(\'job-filter-type\').value=\'\';filterJobs()" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">All</button>'
+    + '<button onclick="document.getElementById(\'job-filter-type\').value=\'Internship\';filterJobs()" style="background:rgba(39,174,96,0.1);color:#27AE60;border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">🎓 Internships</button>'
+    + '<button onclick="document.getElementById(\'job-filter-type\').value=\'Fellowship\';filterJobs()" style="background:rgba(155,89,182,0.1);color:#9B59B6;border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">🌟 Fellowships</button>'
+    + '<button onclick="document.getElementById(\'job-filter-type\').value=\'Full-time\';filterJobs()" style="background:rgba(27,42,107,0.1);color:var(--navy);border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">💼 Jobs</button>'
+    + '</div>'
     + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.25rem;">'
     + '<select id="job-filter-type" onchange="filterJobs()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;"><option value="">All Types</option>' + typeOpts + '</select>'
     + '<select id="job-filter-field" onchange="filterJobs()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;"><option value="">All Fields</option>' + fieldOpts + '</select>'
