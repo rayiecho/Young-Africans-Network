@@ -1759,7 +1759,7 @@ async function loadAssignments(c) {
           html += '<span style="font-size:1.4rem;">📎</span>';
           html += '<div style="flex:1;"><p style="font-size:0.82rem;font-weight:700;color:var(--navy);">' + sanitize(a.fileName || 'Uploaded File') + '</p>';
           html += '<p style="font-size:0.72rem;color:var(--gray);">File submission</p></div>';
-          html += '<a href="' + a.fileUrl + '" target="_blank" style="padding:0.4rem 0.9rem;background:var(--navy);color:white;border-radius:8px;font-size:0.78rem;font-weight:700;text-decoration:none;font-family:Poppins,sans-serif;">📥 Open File</a>';
+          html += '<a href="' + sanitize(a.fileUrl) + '" target="_blank" rel="noopener" style="padding:0.4rem 0.9rem;background:var(--navy);color:white;border-radius:8px;font-size:0.78rem;font-weight:700;text-decoration:none;font-family:Poppins,sans-serif;">📥 Open File</a>';
           html += '</div>';
         }
 
