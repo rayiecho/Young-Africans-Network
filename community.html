@@ -5241,7 +5241,7 @@ async function loadJobBoard() {
     + '<button onclick="document.getElementById(\'job-filter-type\').value=\'Full-time\';filterJobs()" style="background:rgba(27,42,107,0.1);color:var(--navy);border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">💼 Jobs</button>'
     + '</div>'
     + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.25rem;">'
-    + '<select id="job-filter-type" onchange="filterJobs()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;"><option value="">All Types</option>' + typeOpts + '</select>'
+    + '<select id="job-filter-type" onchange="filterJobs()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;"><option value="" selected>All Types</option>' + typeOpts + '</select>'
     + '<select id="job-filter-field" onchange="filterJobs()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;"><option value="">All Fields</option>' + fieldOpts + '</select>'
     + '<input type="text" id="job-filter-search" placeholder="Search..." oninput="filterJobs()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;flex:1;min-width:150px;">'
     + '</div>'
