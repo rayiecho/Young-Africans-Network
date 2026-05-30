@@ -10445,7 +10445,7 @@ window.aiMatchMentor = async function() {
   btn.textContent = 'Finding your best match...';
   btn.disabled = true;
   try {
-    const mentorsSnap = await getDocs(query(collection(db,'mentorProfiles'),where('available','==',true)));
+    const mentorsSnap = await getDocs(query(collection(db,'mentorProfiles'),where('available','==',true),where('status','==','approved')));
     if (mentorsSnap.empty) {
       showToast('No mentors available yet.', 'error');
       btn.textContent = 'AI Match Me';
