@@ -9823,7 +9823,7 @@ window.openConversation = async function(convId, otherId, otherNameEncoded, othe
     + '<div id="chat-messages" style="flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.5rem;"></div>'
     + '<div style="padding:1rem;border-top:1px solid var(--light);display:flex;gap:0.5rem;">'
     + '<input id="chat-input" type="text" placeholder="Type a message..." onkeydown="if(event.key===\'Enter\')sendMessage(\''+convId+'\',\''+otherId+'\')" style="flex:1;padding:0.75rem 1rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:50px;font-family:Poppins,sans-serif;font-size:0.85rem;outline:none;">'
-    + '<button onclick="sendMessage(\''+convId+'\',\''+otherId+'\')" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;">Send</button></div>';
+    + '<button onclick="sendMessage(\''+convId+'\',\''+otherId+'\')" style="background:var(--navy);color:#fff;border:none;width:44px;height:44px;border-radius:50%;font-size:1.1rem;cursor:pointer;flex-shrink:0;">➤</button></div>';
   await updateDoc(doc(db,'conversations',convId),{['unreadCount.'+currentUser.uid]:0}).catch(()=>{});
   if (messageUnsubscribe) messageUnsubscribe();
   messageUnsubscribe = onSnapshot(
@@ -10946,7 +10946,7 @@ h2,h3{position:relative;}
     <div class="tab-panel" id="tab-magazine"><div id="magazine-container"></div></div>
     <div class="tab-panel" id="tab-achievements"><div id="achievements-container"></div></div>
     <div class="tab-panel" id="tab-resources"><div id="resources-container"></div></div>
-    <div class="tab-panel" id="tab-messages"><div id="messages-container" style="max-width:900px;margin:0 auto;padding:1rem;"></div></div>
+    <div class="tab-panel" id="tab-messages"><div id="messages-container" style="max-width:900px;margin:0 auto;padding:0.5rem;"></div></div>
     <div class="tab-panel" id="tab-polls"><div id="polls-container"></div></div>
     <div class="tab-panel" id="tab-calendar"><div id="calendar-container"></div></div>
     <div class="tab-panel" id="tab-points"><div id="points-container" style="max-width:900px;margin:0 auto;padding:1rem;"></div></div>
