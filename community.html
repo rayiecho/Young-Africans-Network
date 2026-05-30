@@ -9803,7 +9803,18 @@ window.openConversation = async function(convId, otherId, otherNameEncoded, othe
   const chatArea = document.getElementById('chat-area');
   if (!chatArea) return;
   chatArea.style.cssText = 'background:var(--white);border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06);display:flex;flex-direction:column;';
+  // On mobile, hide conversation list and show chat
+  const isMobile = window.innerWidth < 768;
+  const convList = document.getElementById('conversations-list');
+  if (isMobile && convList) {
+    convList.style.display = 'none';
+    chatArea.style.gridColumn = '1';
+  }
+
+  const backBtn = isMobile ? '<button onclick="document.getElementById(\'conv-list\').style.display=\'block\';document.getElementById(\'chat-area\').innerHTML=\'\';activeConversationId=null;" style="background:none;border:none;color:var(--navy);font-size:1.2rem;cursor:pointer;padding:0 0.5rem 0 0;">←</button>' : '';
+
   chatArea.innerHTML = '<div style="padding:1rem;border-bottom:1px solid var(--light);display:flex;align-items:center;gap:0.75rem;">'
+    + backBtn
     + (otherPhoto ? '<img src="' + otherPhoto + '" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">'
       : '<div style="width:38px;height:38px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">' + otherName.charAt(0) + '</div>')
     + '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);">' + sanitize(otherName) + '</h3></div>'
