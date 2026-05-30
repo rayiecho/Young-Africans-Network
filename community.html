@@ -806,22 +806,41 @@ async function deleteNotification(notifId) {
 }
 
 async function updateNotifBadge() {
-  const q = query(collection(db, 'notifications'), orderBy('createdAt', 'desc'), limit(20));
-  const snap = await getDocs(q);
-  let unread = 0;
-  snap.forEach(d => {
-    const readBy = d.data().readBy || [];
-    if (!readBy.includes(currentUser.uid)) unread++;
-  });
-  const badge = document.getElementById('notif-badge');
-  if (badge) {
-    if (unread > 0) {
-      badge.style.display = 'flex';
-      badge.textContent = unread;
-    } else {
-      badge.style.display = 'none';
+  try {
+    // Count unread community notifications
+    const communitySnap = await getDocs(query(collection(db,'notifications'), orderBy('createdAt','desc'), limit(30)));
+    let unread = 0;
+    communitySnap.docs.forEach(d => {
+      const data = d.data();
+      const readBy = data.readBy || [];
+      if (!readBy.includes(currentUser.uid)) unread++;
+    });
+    const badge = document.getElementById('notif-badge');
+    if (badge) {
+      if (unread > 0) { badge.style.display='flex'; badge.textContent=unread; }
+      else { badge.style.display='none'; }
     }
-  }
+  } catch(e) { console.log('Badge error:', e); }
+}
+
+function startNotifListener() {
+  if (!currentUser) return;
+  // Real-time listener for new notifications
+  const q = query(collection(db,'notifications'), orderBy('createdAt','desc'), limit(30));
+  const unsub = onSnapshot(q, snap => {
+    let unread = 0;
+    snap.docs.forEach(d => {
+      const data = d.data();
+      const readBy = data.readBy || [];
+      if (!readBy.includes(currentUser.uid)) unread++;
+    });
+    const badge = document.getElementById('notif-badge');
+    if (badge) {
+      if (unread > 0) { badge.style.display='flex'; badge.textContent=unread; }
+      else { badge.style.display='none'; }
+    }
+  }, err => console.log('Notif listener error:', err));
+  unsubscribers.push(unsub);
 }
 
 // MAIN FEED
