@@ -10017,6 +10017,7 @@ window.sendMessage = async function(convId, otherId) {
     participantNames:{[currentUser.uid]:currentUserData.name,[otherId]:otherSnap.data()?.name||'Member'},
     participantPhotos:{[currentUser.uid]:currentUserData.photoUrl||'',[otherId]:otherSnap.data()?.photoUrl||''},
     lastMessage:text, lastMessageAt:serverTimestamp(),
+    lastSenderName:currentUserData.name, lastSenderId:currentUser.uid,
     ['unreadCount.'+otherId]:increment(1),['unreadCount.'+currentUser.uid]:0
   },{merge:true});
 };
