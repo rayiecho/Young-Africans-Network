@@ -2760,7 +2760,7 @@ async function loadRecommendationSection() {
             </div>
             <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
               <span style="background:rgba(0,0,0,0.05);color:${statusColor};padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">${r.status?.toUpperCase()}</span>
-              ${r.status === 'approved' ? `<button class="btn-sm btn-navy" onclick="downloadRecommendationLetter('${sanitize(r.scholarship)}','${sanitize(r.recommender)}','${sanitize(r.reason||'')}','${sanitize(r.deadline)}')"> Download Letter</button>` : ''}
+              ${r.status === 'approved' ? `<button class="btn-sm btn-navy" onclick="downloadRecommendationLetter('${d.id}')"> Download Letter</button>` : ''}
             </div>
           </div>
         </div>`;
@@ -2834,7 +2834,19 @@ async function rejectRecommendation(recId) {
   loadRecommendationSection();
 }
 
-function downloadRecommendationLetter(scholarship, recommender, reason, deadline) {
+async function downloadRecommendationLetter(recId) {
+  let scholarship, recommender, reason, deadline;
+  try {
+    const recSnap = await getDoc(doc(db, 'recommendations', recId));
+    if (!recSnap.exists()) return showToast('Letter not found', 'error');
+    const r = recSnap.data();
+    scholarship = r.scholarship || '';
+    recommender = r.recommender || '';
+    reason = r.reason || '';
+    deadline = r.deadline || '';
+  } catch(e) {
+    return showToast('Error loading letter', 'error');
+  }
   const u = currentUserData;
   const refNum = 'YAN/REC/2026/' + String(Math.floor(Math.random()*9000)+1000);
   const dateStr = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
