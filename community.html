@@ -4622,29 +4622,29 @@ async function handleGlobalSearch(searchQuery) {
     try {
       // Search tabs
       const tabs = [
-        {name:'Main Feed', keywords:['feed','home','posts','news','announcements','wall','timeline'], tab:'feed', icon:'🏠'},
-        {name:'YAN Hubs', keywords:['hubs','hub','yan hubs','departments','dept'], tab:'hubs', icon:'🏛️'},
-        {name:'Programs & Training', keywords:['programs','training','lessons','courses','learn','study','materials','quizzes','quiz','department','dept','certificate','certify'], tab:'hubs', icon:'📚'},
-        {name:'Scholarships', keywords:['scholarship','scholarships','opportunity','opportunities','funding','grant','bursary','apply','application','education funding','study abroad'], tab:'scholarships', icon:'🎓'},
-        {name:'Career Development', keywords:['career','cv','resume','interview','job','linkedin','public speaking','salary','negotiate','work','employment','pitch','pitching'], tab:'career', icon:'💼'},
-        {name:'Community Impact', keywords:['community','impact','volunteer','volunteering','tasks','projects','social','africa','change','service'], tab:'community-impact', icon:'🌍'},
-        {name:'Mental Health', keywords:['mental','health','wellbeing','support','counselling','stress','anxiety','mood','therapy','peer support','crisis'], tab:'mental-health', icon:'💚'},
-        {name:'Mentorship', keywords:['mentor','mentorship','mentee','guide','coach','coaching','find mentor','become mentor'], tab:'mentorship', icon:'🤝'},
-        {name:'YAN Library', keywords:['library','yan library','magazine','resources','calendar','digest','newsletter','pdf','guides','templates','cv template','events'], tab:'magazine', icon:'📖'},
-        {name:'Magazine', keywords:['magazine','digest','monthly','edition','stories','newsletter'], tab:'magazine', icon:'📰'},
-        {name:'Resources', keywords:['resources','resource','cv template','cover letter','guide','pdf','download','template','tools'], tab:'resources', icon:'📁'},
-        {name:'Calendar', keywords:['calendar','events','schedule','upcoming','dates','webinar','workshop'], tab:'calendar', icon:'📅'},
-        {name:'YAN Support', keywords:['support','yan support','help','directory','polls','meetings','helpline','whatsapp'], tab:'directory', icon:'🆘'},
-        {name:'Directory', keywords:['directory','members','find people','find member','search member','connect','network'], tab:'directory', icon:'👥'},
-        {name:'Polls', keywords:['polls','poll','vote','survey','opinion','feedback'], tab:'polls', icon:'📊'},
-        {name:'Meetings', keywords:['meetings','meeting','video call','zoom','conference','attend'], tab:'meetings', icon:'🎥'},
-        {name:'My Profile', keywords:['profile','my profile','account','settings','edit profile','photo','bio'], tab:'profile', icon:'👤'},
-        {name:'Achievements', keywords:['achievements','achievement','certificates','certificate','badges','awards','wins'], tab:'achievements', icon:'🏆'},
-        {name:'My Points', keywords:['points','my points','tier','leaderboard','rewards','rank','ranking'], tab:'points', icon:'⭐'},
-        {name:'Messages', keywords:['messages','message','chat','inbox','dm','direct message','conversation'], tab:'messages', icon:'💬'},
-        {name:'Notifications', keywords:['notifications','notification','alerts','updates','bell'], tab:'notifications', icon:'🔔'},
-        {name:'Partnerships', keywords:['partnerships','partners','partner','sponsor','collaborate','organizations'], tab:'partnerships-hub', icon:'🤝'},
-        {name:'Communications', keywords:['communications','comms','media','content','social media','newsletter studio','newsroom'], tab:'comms-hub', icon:'📣'},
+        {name:'Main Feed', keywords:['feed','home','posts','news','announcements','wall','timeline'], tab:'feed', icon:''},
+        {name:'YAN Hubs', keywords:['hubs','hub','yan hubs','departments','dept'], tab:'hubs', icon:''},
+        {name:'Programs & Training', keywords:['programs','training','lessons','courses','learn','study','materials','quizzes','quiz','department','dept','certificate','certify'], tab:'hubs', icon:''},
+        {name:'Scholarships', keywords:['scholarship','scholarships','opportunity','opportunities','funding','grant','bursary','apply','application','education funding','study abroad'], tab:'scholarships', icon:''},
+        {name:'Career Development', keywords:['career','cv','resume','interview','job','linkedin','public speaking','salary','negotiate','work','employment','pitch','pitching'], tab:'career', icon:''},
+        {name:'Community Impact', keywords:['community','impact','volunteer','volunteering','tasks','projects','social','africa','change','service'], tab:'community-impact', icon:''},
+        {name:'Mental Health', keywords:['mental','health','wellbeing','support','counselling','stress','anxiety','mood','therapy','peer support','crisis'], tab:'mental-health', icon:''},
+        {name:'Mentorship', keywords:['mentor','mentorship','mentee','guide','coach','coaching','find mentor','become mentor'], tab:'mentorship', icon:''},
+        {name:'YAN Library', keywords:['library','yan library','magazine','resources','calendar','digest','newsletter','pdf','guides','templates','cv template','events'], tab:'magazine', icon:''},
+        {name:'Magazine', keywords:['magazine','digest','monthly','edition','stories','newsletter'], tab:'magazine', icon:''},
+        {name:'Resources', keywords:['resources','resource','cv template','cover letter','guide','pdf','download','template','tools'], tab:'resources', icon:''},
+        {name:'Calendar', keywords:['calendar','events','schedule','upcoming','dates','webinar','workshop'], tab:'calendar', icon:''},
+        {name:'YAN Support', keywords:['support','yan support','help','directory','polls','meetings','helpline','whatsapp'], tab:'directory', icon:''},
+        {name:'Directory', keywords:['directory','members','find people','find member','search member','connect','network'], tab:'directory', icon:''},
+        {name:'Polls', keywords:['polls','poll','vote','survey','opinion','feedback'], tab:'polls', icon:''},
+        {name:'Meetings', keywords:['meetings','meeting','video call','zoom','conference','attend'], tab:'meetings', icon:''},
+        {name:'My Profile', keywords:['profile','my profile','account','settings','edit profile','photo','bio'], tab:'profile', icon:''},
+        {name:'Achievements', keywords:['achievements','achievement','certificates','certificate','badges','awards','wins'], tab:'achievements', icon:''},
+        {name:'My Points', keywords:['points','my points','tier','leaderboard','rewards','rank','ranking'], tab:'points', icon:''},
+        {name:'Messages', keywords:['messages','message','chat','inbox','dm','direct message','conversation'], tab:'messages', icon:''},
+        {name:'Notifications', keywords:['notifications','notification','alerts','updates','bell'], tab:'notifications', icon:''},
+        {name:'Partnerships', keywords:['partnerships','partners','partner','sponsor','collaborate','organizations'], tab:'partnerships-hub', icon:''},
+        {name:'Communications', keywords:['communications','comms','media','content','social media','newsletter studio','newsroom'], tab:'comms-hub', icon:''},
       ];
       tabs.forEach(function(t) {
         if (t.name.toLowerCase().includes(q) || t.keywords.some(function(k){ return k.includes(q); })) {
@@ -4733,7 +4733,7 @@ async function handleGlobalSearch(searchQuery) {
       return;
     }
 
-    const typeLabels = { tab:' Navigation', member:' Member', post:' Post', scholarship:' Scholarship', resource:' Resource' };
+    const typeLabels = { tab:'Navigation', member:'Member', post:'Post', scholarship:'Scholarship', resource:'Resource' };
     const grouped = {};
     results.forEach(function(r) {
       if (!grouped[r.type]) grouped[r.type] = [];
@@ -4744,7 +4744,7 @@ async function handleGlobalSearch(searchQuery) {
     Object.keys(grouped).forEach(function(type) {
       html += '<div style="padding:0.5rem 1rem;font-size:0.68rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;background:var(--light);">' + (typeLabels[type]||type) + 's</div>';
       grouped[type].slice(0,4).forEach(function(r) {
-        html += '<div onclick="' + r.action + ';document.getElementById(\'global-search-input\').value=\'\';document.getElementById(\'search-results-dropdown\').style.display=\'none\';" ' +
+        html += '<div onclick="' + r.action.replace('showTab(', 'window.showTab(') + ';document.getElementById(\'global-search-input\').value=\'\';document.getElementById(\'search-results-dropdown\').style.display=\'none\';" ' +
           'style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;cursor:pointer;transition:background 0.15s;" ' +
           'onmouseover="this.style.background=\'var(--light)\'" onmouseout="this.style.background=\'transparent\'">' +
           r.icon +
@@ -10083,11 +10083,11 @@ const POINTS_MAP = {
 };
 
 const TIERS = [
-  {name:'Legend', min:2000, reward:'Full YAN Recognition Package + Special Role', icon:'L', color:'#9B59B6'},
-  {name:'Diamond', min:1000, reward:'YAN T-Shirt + Website Feature', icon:'D', color:'#1ABC9C'},
-  {name:'Gold', min:500, reward:'YAN Book + Recognition Post', icon:'G', color:'#F5A623'},
-  {name:'Silver', min:200, reward:'YAN Certificate of Excellence', icon:'S', color:'#95A5A6'},
-  {name:'Bronze', min:0, reward:'Recognition Badge', icon:'B', color:'#CD7F32'},
+  {name:'Legend', min:2000, reward:'Full YAN Recognition Package + Special Role', icon:'', color:'#9B59B6'},
+  {name:'Diamond', min:1000, reward:'YAN T-Shirt + Website Feature', icon:'', color:'#1ABC9C'},
+  {name:'Gold', min:500, reward:'YAN Book + Recognition Post', icon:'', color:'#F5A623'},
+  {name:'Silver', min:200, reward:'YAN Certificate of Excellence', icon:'', color:'#95A5A6'},
+  {name:'Bronze', min:0, reward:'Recognition Badge', icon:'', color:'#CD7F32'},
 ];
 
 function getTier(points) {
