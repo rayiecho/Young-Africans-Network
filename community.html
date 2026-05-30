@@ -9995,7 +9995,14 @@ window.openConversation = async function(convId, otherId, otherNameEncoded, othe
         const msg = d.data();
         const isMe = msg.senderId === currentUser.uid;
         const time = msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '';
-        let msgContent = sanitize(msg.text);
+        let msgContent = sanitize(msg.text).replace(/\n/g,'<br>');
+        if (msg.mentorshipSlots && Array.isArray(msg.mentorshipSlots)) {
+          msgContent += '<div style="margin-top:0.75rem;display:flex;flex-direction:column;gap:0.5rem;">';
+          msg.mentorshipSlots.forEach(function(slot, i) {
+            msgContent += '<button onclick="confirmMentoringSlot(\''+msg.mentorshipId+'\','+i+')" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;text-align:left;">📅 ' + slot.label + '</button>';
+          });
+          msgContent += '</div>';
+        }
         if (msg.meetingRoom) {
           msgContent += '<div style="margin-top:0.5rem;">'
             + '<button onclick="openMentorshipMeetingRoom(\"' + msg.meetingRoom + '\",\"' + (isMe ? 'Mentee' : 'Mentor') + '\")" style="background:#27AE60;color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;">🎥 Join Meeting</button>'
@@ -10266,7 +10273,124 @@ window.requestMentor = async function(mentorId, mentorNameEncoded) {
 window.acceptMentorship = async function(mentorshipId) {
   await updateDoc(doc(db,'mentorships',mentorshipId), {status:'active', acceptedAt: serverTimestamp()});
   showToast('Mentorship accepted!');
+  // Open availability picker
+  showAvailabilityPicker(mentorshipId);
+};
+
+window.showAvailabilityPicker = function(mentorshipId) {
+  const modal = document.createElement('div');
+  modal.id = 'availability-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  const today = new Date().toISOString().split('T')[0];
+  modal.innerHTML = '<div style="background:var(--white);border-radius:20px;padding:2rem;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;">' +
+    '<h3 style="font-family:Playfair Display,serif;font-size:1.2rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">📅 Share Your Availability</h3>' +
+    '<p style="color:var(--gray);font-size:0.82rem;margin-bottom:1.5rem;">Share 3 available time slots with your mentee. They will pick one.</p>' +
+    '<div id="slot-list">' +
+    buildSlotHTML(1) + buildSlotHTML(2) + buildSlotHTML(3) +
+    '</div>' +
+    '<div style="display:flex;gap:0.75rem;margin-top:1.5rem;">' +
+    '<button onclick="submitAvailability('' + mentorshipId + '')" style="flex:1;background:var(--navy);color:#fff;border:none;padding:0.75rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Send to Mentee</button>' +
+    '<button onclick="document.getElementById('availability-modal').remove()" style="background:var(--light);color:var(--navy);border:none;padding:0.75rem 1.25rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;">Skip</button>' +
+    '</div></div>';
+  document.body.appendChild(modal);
+};
+
+function buildSlotHTML(n) {
+  const today = new Date().toISOString().split('T')[0];
+  return '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">' +
+    '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Slot ' + n + '</p>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">' +
+    '<input type="date" id="slot-date-' + n + '" min="' + today + '" style="padding:0.5rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;color:var(--navy);background:var(--white);outline:none;">' +
+    '<input type="time" id="slot-time-' + n + '" style="padding:0.5rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;color:var(--navy);background:var(--white);outline:none;">' +
+    '</div></div>';
+}
+
+window.submitAvailability = async function(mentorshipId) {
+  const slots = [];
+  for (let i = 1; i <= 3; i++) {
+    const date = document.getElementById('slot-date-' + i)?.value;
+    const time = document.getElementById('slot-time-' + i)?.value;
+    if (date && time) slots.push({ date, time, label: formatSlot(date, time) });
+  }
+  if (slots.length === 0) { showToast('Please add at least one time slot', 'error'); return; }
+  
+  // Get mentorship data
+  const mSnap = await getDoc(doc(db,'mentorships',mentorshipId));
+  const m = mSnap.data();
+  
+  // Save slots to Firestore
+  await setDoc(doc(db,'mentorshipSlots',mentorshipId), {
+    mentorId: currentUser.uid, menteeId: m.menteeId,
+    mentorName: currentUserData.name, menteeName: m.menteeName,
+    slots, status: 'pending', createdAt: serverTimestamp()
+  });
+
+  // Send message to mentee with slot options
+  const convId = [currentUser.uid, m.menteeId].sort().join('_');
+  const slotsText = slots.map((s,i) => (i+1)+'. '+s.label).join(' | ');
+  await addDoc(collection(db,'conversations',convId,'messages'), {
+    senderId: currentUser.uid, senderName: currentUserData.name,
+    text: '📅 I have accepted your mentorship request! Please pick a time for our first session:
+' + slotsText,
+    mentorshipSlots: slots, mentorshipId,
+    createdAt: serverTimestamp()
+  });
+  await setDoc(doc(db,'conversations',convId), {
+    participants: [currentUser.uid, m.menteeId],
+    participantNames: {[currentUser.uid]: currentUserData.name, [m.menteeId]: m.menteeName},
+    lastMessage: '📅 Please pick a time for our first session',
+    lastMessageAt: serverTimestamp(),
+    lastSenderName: currentUserData.name, lastSenderId: currentUser.uid,
+    ['unreadCount.' + m.menteeId]: increment(1), ['unreadCount.' + currentUser.uid]: 0
+  }, {merge: true});
+
+  document.getElementById('availability-modal').remove();
+  showToast('Availability sent to ' + m.menteeName + '!');
   showMentorshipSection('my');
+};
+
+function formatSlot(date, time) {
+  const d = new Date(date + 'T' + time);
+  return d.toLocaleDateString('en-GB', {weekday:'short',day:'numeric',month:'short'}) + ' at ' + d.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+}
+
+window.confirmMentoringSlot = async function(mentorshipId, slotIndex) {
+  const sSnap = await getDoc(doc(db,'mentorshipSlots',mentorshipId));
+  if (!sSnap.exists()) return;
+  const s = sSnap.data();
+  const slot = s.slots[slotIndex];
+
+  // Save confirmed session
+  await addDoc(collection(db,'mentoringSessions'), {
+    mentorshipId, mentorId: s.mentorId, menteeId: s.menteeId,
+    mentorName: s.mentorName, menteeName: s.menteeName,
+    scheduledDate: slot.date, scheduledTime: slot.time,
+    scheduledLabel: slot.label, status: 'scheduled',
+    createdAt: serverTimestamp()
+  });
+
+  // Update slot status
+  await updateDoc(doc(db,'mentorshipSlots',mentorshipId), {status:'confirmed', confirmedSlot: slot});
+
+  // Send confirmation message to both
+  const convId = [currentUser.uid, s.mentorId].sort().join('_');
+  const meetingUrl = 'https://youngafricansnetwork.daily.co/YAN_GENERAL_FORUM';
+  await addDoc(collection(db,'conversations',convId,'messages'), {
+    senderId: currentUser.uid, senderName: currentUserData.name,
+    text: '✅ Session confirmed for ' + slot.label + '! I will be ready.',
+    createdAt: serverTimestamp()
+  });
+
+  // Notify mentor
+  await addDoc(collection(db,'notifications'), {
+    title: '✅ Session Confirmed!',
+    message: s.menteeName + ' confirmed your mentorship session for ' + slot.label,
+    type: 'info', userId: s.mentorId,
+    createdAt: serverTimestamp(), readBy: []
+  });
+
+  showToast('Session confirmed for ' + slot.label + '!');
+  loadMentorshipTab();
 };
 
 window.logMentoringSession = async function(mentorshipId, menteeId) {
