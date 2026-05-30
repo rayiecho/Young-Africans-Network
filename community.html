@@ -521,6 +521,19 @@ function enterPlatform() {
     setTimeout(() => showOnboarding(), 1000);
   }
   updateNotifBadge();
+  // Track online presence
+  if (currentUser) {
+    const onlineRef = doc(db, 'onlineUsers', currentUser.uid);
+    setDoc(onlineRef, { online: true, lastSeen: serverTimestamp(), name: currentUserData.name }, { merge: true });
+    window.addEventListener('beforeunload', function() {
+      setDoc(onlineRef, { online: false, lastSeen: serverTimestamp() }, { merge: true });
+    });
+    // Load online users
+    getDocs(collection(db, 'onlineUsers')).then(snap => {
+      window._onlineUsers = {};
+      snap.docs.forEach(d => { if (d.data().online) window._onlineUsers[d.id] = true; });
+    });
+  }
   // Refresh message badge every 30 seconds
   setInterval(loadUnreadBadge, 30000);
 }
@@ -764,6 +777,19 @@ async function markNotifRead(notifId) {
   await updateDoc(doc(db, 'notifications', notifId), { readBy: arrayUnion(currentUser.uid) });
   loadNotifList();
   updateNotifBadge();
+  // Track online presence
+  if (currentUser) {
+    const onlineRef = doc(db, 'onlineUsers', currentUser.uid);
+    setDoc(onlineRef, { online: true, lastSeen: serverTimestamp(), name: currentUserData.name }, { merge: true });
+    window.addEventListener('beforeunload', function() {
+      setDoc(onlineRef, { online: false, lastSeen: serverTimestamp() }, { merge: true });
+    });
+    // Load online users
+    getDocs(collection(db, 'onlineUsers')).then(snap => {
+      window._onlineUsers = {};
+      snap.docs.forEach(d => { if (d.data().online) window._onlineUsers[d.id] = true; });
+    });
+  }
   // Refresh message badge every 30 seconds
   setInterval(loadUnreadBadge, 30000);
 }
@@ -773,6 +799,19 @@ async function deleteNotification(notifId) {
   await deleteDoc(doc(db, 'notifications', notifId));
   loadNotifList();
   updateNotifBadge();
+  // Track online presence
+  if (currentUser) {
+    const onlineRef = doc(db, 'onlineUsers', currentUser.uid);
+    setDoc(onlineRef, { online: true, lastSeen: serverTimestamp(), name: currentUserData.name }, { merge: true });
+    window.addEventListener('beforeunload', function() {
+      setDoc(onlineRef, { online: false, lastSeen: serverTimestamp() }, { merge: true });
+    });
+    // Load online users
+    getDocs(collection(db, 'onlineUsers')).then(snap => {
+      window._onlineUsers = {};
+      snap.docs.forEach(d => { if (d.data().online) window._onlineUsers[d.id] = true; });
+    });
+  }
   // Refresh message badge every 30 seconds
   setInterval(loadUnreadBadge, 30000);
 }
@@ -812,13 +851,23 @@ function renderPost(post) {
   const canDelete = post.authorId === currentUser?.uid || currentUserData?.isAdmin;
   const likesArr = Array.isArray(post.likes) ? post.likes : Object.keys(post.likes || {});
   const liked = likesArr.includes(currentUser?.uid);
+  const isOnline = window._onlineUsers && window._onlineUsers[post.authorId];
+  const avatarHtml = post.authorPhoto
+    ? `<img src="${post.authorPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+    : (post.authorName||'?')[0].toUpperCase();
+  const convId = post.authorId !== currentUser?.uid ? [currentUser.uid, post.authorId].sort().join('_') : null;
+  const nameClick = convId
+    ? `onclick="showTab('messages');setTimeout(function(){openConversation('${convId}','${post.authorId}','${encodeURIComponent(post.authorName||'')}','${encodeURIComponent(post.authorPhoto||'')}');},500)" style="cursor:pointer;color:var(--navy);font-weight:700;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'"`
+    : '';
   return `
   <div class="post-card">
     <div class="post-header">
-      <div class="post-avatar">${(post.authorName||'?')[0].toUpperCase()}</div>
+      <div class="post-avatar" style="position:relative;">${avatarHtml}
+        <span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:${isOnline?'#27AE60':'#ccc'};border:2px solid #fff;"></span>
+      </div>
       <div class="post-meta">
-        <div class="post-author">${sanitize(post.authorName)}</div>
-        <div class="post-time">${timeAgo(post.createdAt)} · ${sanitize(post.category||'General')}</div>
+        <div class="post-author" ${nameClick}>${sanitize(post.authorName)}</div>
+        <div class="post-time">${isOnline?'<span style="color:#27AE60;font-size:0.7rem;font-weight:600;">Online · </span>':''}${timeAgo(post.createdAt)} · ${sanitize(post.category||'General')}</div>
       </div>
       ${canDelete ? `<button class="post-delete" onclick="deletePost('${post.id}')"></button>` : ''}
     </div>
@@ -867,6 +916,7 @@ async function submitPost() {
   await addDoc(collection(db, 'posts'), {
     content: cleanContent, category, link: cleanLink,
     authorId: currentUser.uid, authorName: currentUserData.name,
+    authorPhoto: currentUserData.photoUrl || '',
     likes: [], createdAt: serverTimestamp()
   });
   document.getElementById('post-input').value = '';
