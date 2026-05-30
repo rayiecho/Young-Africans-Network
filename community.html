@@ -10523,7 +10523,7 @@ window.joinMentorshipMeeting = async function(mentorId, mentorNameEncoded) {
   openMentorshipMeetingRoom(roomName, mentorName);
 };
 
-function openMentorshipMeetingRoom(roomName, otherPersonName) {
+window.openMentorshipMeetingRoom = function openMentorshipMeetingRoom(roomName, otherPersonName) {
   const meetingUrl = 'https://youngafricansnetwork.daily.co/' + roomName + '?showLeaveButton=0&showFullscreenButton=1';
   const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
