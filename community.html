@@ -2330,6 +2330,7 @@ async function loadScholarships() {
           <button class="btn-outline" onclick="showScholarshipSection('recommendation')"> Recommendation Letter</button>
           <button class="btn-outline" onclick="requestCertificate('scholarships')">Request Certificate</button>
           <button class="btn-outline" onclick="showScholarshipSection('stories')"> Success Stories</button>
+          <button class="btn-outline" onclick="showScholarshipSection('grants')"> Grants & Funding</button>
           <button onclick="showScholarshipSection('matcher')" style="background:linear-gradient(135deg,#1B2A6B,#E63329);color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(230,51,41,0.3);animation:pulse-btn 2s infinite;"> AI Scholarship Matcher</button>
         </div>
       </div>
@@ -2381,8 +2382,52 @@ async function loadScholarships() {
       <div id="scholarship-section-recommendation" style="display:none;"></div>
       <div id="scholarship-section-stories" style="display:none;"></div>
       <div id="scholarship-section-matcher" style="display:none;"></div>
+      <div id="scholarship-section-grants" style="display:none;"></div>
     </div>`;
   loadScholarshipOpportunities();
+}
+
+async function loadScholarshipGrants() {
+  const container = document.getElementById('scholarship-section-grants');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading grants...</div>';
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'scholarships'),
+      where('category', '==', 'grant'),
+      orderBy('postedAt', 'desc'),
+      limit(20)
+    ));
+    if (snap.empty) {
+      container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--gray);">No grants posted yet. Check back soon!</div>';
+      return;
+    }
+    let html = '<div style="margin-bottom:1.5rem;">';
+    html += '<div style="background:linear-gradient(135deg,#1B2A6B,#27AE60);border-radius:16px;padding:1.25rem;margin-bottom:1.5rem;color:#fff;">';
+    html += '<h3 style="font-family:Playfair Display,serif;font-size:1.2rem;font-weight:900;margin-bottom:0.25rem;">💰 Grants & Funding</h3>';
+    html += '<p style="color:rgba(255,255,255,0.75);font-size:0.82rem;">Verified grants and funding opportunities for African youth and organizations</p>';
+    html += '</div>';
+    snap.docs.forEach(d => {
+      const g = d.data();
+      html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);border-left:4px solid #27AE60;">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">';
+      html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);">' + sanitize(g.title||'') + '</h3>';
+      html += '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">💰 ' + sanitize(g.amount||g.funding||'') + '</span>';
+      html += '</div>';
+      html += '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.75rem;">' + sanitize(g.eligibility||g.description||'') + '</p>';
+      html += '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;">';
+      if (g.provider) html += '<span style="background:var(--light);color:var(--navy);padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;">🏢 ' + sanitize(g.provider) + '</span>';
+      if (g.countries) html += '<span style="background:var(--light);color:var(--navy);padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;">🌍 ' + sanitize(g.countries) + '</span>';
+      if (g.deadline) html += '<span style="background:rgba(245,166,35,0.1);color:#B8860B;padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;">⏰ ' + sanitize(g.deadline) + '</span>';
+      html += '</div>';
+      if (g.link) html += '<a href="' + sanitize(g.link) + '" target="_blank" style="display:inline-block;background:var(--navy);color:#fff;padding:0.5rem 1.25rem;border-radius:50px;font-size:0.78rem;font-weight:700;text-decoration:none;">Apply Now →</a>';
+      html += '</div>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<p style="color:var(--red);padding:1rem;">Error: ' + e.message + '</p>';
+  }
 }
 
 function previewScholarship() {
