@@ -2312,6 +2312,66 @@ window.filterRecs = function(status) {
     card.style.display = status === 'all' || card.dataset.status === status ? 'block' : 'none';
   });
 }
+
+window.loadProgramApplications = async function(c) {
+  try {
+    const [pendingSnap, allSnap] = await Promise.all([
+      getDocs(query(collection(db,'programApplications'), where('status','==','pending'), orderBy('appliedAt','desc'))).catch(()=>getDocs(collection(db,'programApplications'))),
+      getDocs(query(collection(db,'programApplications'), orderBy('appliedAt','desc'))).catch(()=>getDocs(collection(db,'programApplications')))
+    ]);
+
+    let html = '<div style="max-width:900px;margin:0 auto;">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">';
+    html += '<div><h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);">Program Applications</h2>';
+    html += '<p style="color:var(--gray);font-size:0.82rem;">' + pendingSnap.size + ' pending review</p></div>';
+    html += '<div style="display:flex;gap:0.5rem;">';
+    html += '<button onclick="filterApps(\'pending\')" class="btn-sm btn-navy">Pending</button>';
+    html += '<button onclick="filterApps(\'approved\')" class="btn-sm" style="background:rgba(39,174,96,0.1);color:#27AE60;border:none;">Approved</button>';
+    html += '<button onclick="filterApps(\'rejected\')" class="btn-sm btn-red">Rejected</button>';
+    html += '<button onclick="filterApps(\'all\')" class="btn-sm btn-outline">All</button>';
+    html += '</div></div>';
+
+    if (allSnap.empty) {
+      html += '<div style="text-align:center;padding:3rem;color:var(--gray);">No applications yet.</div>';
+    } else {
+      html += '<div id="apps-list">';
+      allSnap.docs.forEach(d => {
+        const app = d.data();
+        const statusColor = app.status === 'approved' ? '#27AE60' : app.status === 'rejected' ? 'var(--red)' : '#F5A623';
+        const statusBg = app.status === 'approved' ? 'rgba(39,174,96,0.1)' : app.status === 'rejected' ? 'rgba(230,51,41,0.1)' : 'rgba(245,166,35,0.1)';
+        html += '<div class="app-card" data-status="' + app.status + '" style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid ' + statusColor + ';">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;">';
+        html += '<div><h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);">' + sanitize(app.userName||'') + '</h3>';
+        html += '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize(app.userEmail||'') + ' · ' + sanitize(app.userCountry||'') + '</p>';
+        html += '<p style="font-size:0.82rem;color:var(--navy);font-weight:600;margin-top:0.25rem;">Program: ' + sanitize(app.programTitle||'') + '</p>';
+        html += '<p style="font-size:0.72rem;color:var(--gray);">Commitment: ' + sanitize(app.commitment||'') + ' · Applied: ' + (app.appliedAt?.toDate ? app.appliedAt.toDate().toLocaleDateString() : '') + '</p></div>';
+        html += '<span style="background:' + statusBg + ';color:' + statusColor + ';padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;">' + (app.status||'pending').toUpperCase() + '</span>';
+        html += '</div>';
+        html += '<div style="background:var(--light);border-radius:10px;padding:1rem;margin-bottom:0.75rem;">';
+        html += '<p style="font-size:0.75rem;font-weight:700;color:var(--gray);margin-bottom:0.25rem;">MOTIVATION</p>';
+        html += '<p style="font-size:0.85rem;color:var(--navy);line-height:1.6;">' + sanitize(app.motivation||'') + '</p></div>';
+        html += '<div style="background:var(--light);border-radius:10px;padding:1rem;margin-bottom:0.75rem;">';
+        html += '<p style="font-size:0.75rem;font-weight:700;color:var(--gray);margin-bottom:0.25rem;">BACKGROUND</p>';
+        html += '<p style="font-size:0.85rem;color:var(--navy);line-height:1.6;">' + sanitize(app.background||'') + '</p></div>';
+        html += '<div style="background:var(--light);border-radius:10px;padding:1rem;margin-bottom:1rem;">';
+        html += '<p style="font-size:0.75rem;font-weight:700;color:var(--gray);margin-bottom:0.25rem;">GOALS AFTER COMPLETION</p>';
+        html += '<p style="font-size:0.85rem;color:var(--navy);line-height:1.6;">' + sanitize(app.goals||'') + '</p></div>';
+        if (app.status === 'pending') {
+          html += '<div style="display:flex;gap:0.75rem;flex-wrap:wrap;">';
+          html += '<button onclick="approveApplication(\'' + d.id + '\',\'' + encodeURIComponent(app.userId) + '\',\'' + encodeURIComponent(app.programId) + '\',\'' + encodeURIComponent(app.programTitle||'') + '\',\'' + encodeURIComponent(app.userEmail||'') + '\',\'' + encodeURIComponent(app.userName||'') + '\')" style="background:#27AE60;color:#fff;border:none;padding:0.6rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">Approve & Enroll</button>';
+          html += '<button onclick="rejectApplication(\'' + d.id + '\',\'' + encodeURIComponent(app.userEmail||'') + '\',\'' + encodeURIComponent(app.userName||'') + '\',\'' + encodeURIComponent(app.programTitle||'') + '\')" style="background:var(--red);color:#fff;border:none;padding:0.6rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">Reject</button>';
+          html += '</div>';
+        }
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) {
+    c.innerHTML = '<p style="color:var(--red);padding:1rem;">Error: ' + e.message + '</p>';
+  }
+};
 </script>
 
 <style>
@@ -2559,65 +2619,7 @@ document.addEventListener('click', function(e) {
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>emailjs.init('NyhRgF1xCbrxy7XEG');
 
-window.loadProgramApplications = async function(c) {
-  try {
-    const [pendingSnap, allSnap] = await Promise.all([
-      getDocs(query(collection(db,'programApplications'), where('status','==','pending'), orderBy('appliedAt','desc'))).catch(()=>getDocs(collection(db,'programApplications'))),
-      getDocs(query(collection(db,'programApplications'), orderBy('appliedAt','desc'))).catch(()=>getDocs(collection(db,'programApplications')))
-    ]);
 
-    let html = '<div style="max-width:900px;margin:0 auto;">';
-    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">';
-    html += '<div><h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);">Program Applications</h2>';
-    html += '<p style="color:var(--gray);font-size:0.82rem;">' + pendingSnap.size + ' pending review</p></div>';
-    html += '<div style="display:flex;gap:0.5rem;">';
-    html += '<button onclick="filterApps(\'pending\')" class="btn-sm btn-navy">Pending</button>';
-    html += '<button onclick="filterApps(\'approved\')" class="btn-sm" style="background:rgba(39,174,96,0.1);color:#27AE60;border:none;">Approved</button>';
-    html += '<button onclick="filterApps(\'rejected\')" class="btn-sm btn-red">Rejected</button>';
-    html += '<button onclick="filterApps(\'all\')" class="btn-sm btn-outline">All</button>';
-    html += '</div></div>';
-
-    if (allSnap.empty) {
-      html += '<div style="text-align:center;padding:3rem;color:var(--gray);">No applications yet.</div>';
-    } else {
-      html += '<div id="apps-list">';
-      allSnap.docs.forEach(d => {
-        const app = d.data();
-        const statusColor = app.status === 'approved' ? '#27AE60' : app.status === 'rejected' ? 'var(--red)' : '#F5A623';
-        const statusBg = app.status === 'approved' ? 'rgba(39,174,96,0.1)' : app.status === 'rejected' ? 'rgba(230,51,41,0.1)' : 'rgba(245,166,35,0.1)';
-        html += '<div class="app-card" data-status="' + app.status + '" style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid ' + statusColor + ';">';
-        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;">';
-        html += '<div><h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);">' + sanitize(app.userName||'') + '</h3>';
-        html += '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize(app.userEmail||'') + ' · ' + sanitize(app.userCountry||'') + '</p>';
-        html += '<p style="font-size:0.82rem;color:var(--navy);font-weight:600;margin-top:0.25rem;">Program: ' + sanitize(app.programTitle||'') + '</p>';
-        html += '<p style="font-size:0.72rem;color:var(--gray);">Commitment: ' + sanitize(app.commitment||'') + ' · Applied: ' + (app.appliedAt?.toDate ? app.appliedAt.toDate().toLocaleDateString() : '') + '</p></div>';
-        html += '<span style="background:' + statusBg + ';color:' + statusColor + ';padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;">' + (app.status||'pending').toUpperCase() + '</span>';
-        html += '</div>';
-        html += '<div style="background:var(--light);border-radius:10px;padding:1rem;margin-bottom:0.75rem;">';
-        html += '<p style="font-size:0.75rem;font-weight:700;color:var(--gray);margin-bottom:0.25rem;">MOTIVATION</p>';
-        html += '<p style="font-size:0.85rem;color:var(--navy);line-height:1.6;">' + sanitize(app.motivation||'') + '</p></div>';
-        html += '<div style="background:var(--light);border-radius:10px;padding:1rem;margin-bottom:0.75rem;">';
-        html += '<p style="font-size:0.75rem;font-weight:700;color:var(--gray);margin-bottom:0.25rem;">BACKGROUND</p>';
-        html += '<p style="font-size:0.85rem;color:var(--navy);line-height:1.6;">' + sanitize(app.background||'') + '</p></div>';
-        html += '<div style="background:var(--light);border-radius:10px;padding:1rem;margin-bottom:1rem;">';
-        html += '<p style="font-size:0.75rem;font-weight:700;color:var(--gray);margin-bottom:0.25rem;">GOALS AFTER COMPLETION</p>';
-        html += '<p style="font-size:0.85rem;color:var(--navy);line-height:1.6;">' + sanitize(app.goals||'') + '</p></div>';
-        if (app.status === 'pending') {
-          html += '<div style="display:flex;gap:0.75rem;flex-wrap:wrap;">';
-          html += '<button onclick="approveApplication(\'' + d.id + '\',\'' + encodeURIComponent(app.userId) + '\',\'' + encodeURIComponent(app.programId) + '\',\'' + encodeURIComponent(app.programTitle||'') + '\',\'' + encodeURIComponent(app.userEmail||'') + '\',\'' + encodeURIComponent(app.userName||'') + '\')" style="background:#27AE60;color:#fff;border:none;padding:0.6rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">Approve & Enroll</button>';
-          html += '<button onclick="rejectApplication(\'' + d.id + '\',\'' + encodeURIComponent(app.userEmail||'') + '\',\'' + encodeURIComponent(app.userName||'') + '\',\'' + encodeURIComponent(app.programTitle||'') + '\')" style="background:var(--red);color:#fff;border:none;padding:0.6rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">Reject</button>';
-          html += '</div>';
-        }
-        html += '</div>';
-      });
-      html += '</div>';
-    }
-    html += '</div>';
-    c.innerHTML = html;
-  } catch(e) {
-    c.innerHTML = '<p style="color:var(--red);padding:1rem;">Error: ' + e.message + '</p>';
-  }
-};
 
 window.filterApps = function(status) {
   document.querySelectorAll('.app-card').forEach(card => {
