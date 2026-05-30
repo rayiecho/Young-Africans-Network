@@ -1360,7 +1360,7 @@ async function loadMentorApplications(c) {
         html += '<div style="background:var(--white);border-radius:12px;padding:1rem;margin-bottom:0.5rem;display:flex;justify-content:space-between;align-items:center;border-left:4px solid #27AE60;">';
         html += '<div><div style="font-weight:700;color:var(--navy);">'+sanitize(p.name||'')+'</div>';
         html += '<div style="font-size:0.75rem;color:var(--gray);">'+(p.skills||[]).join(', ')+'</div></div>';
-        html += '<button onclick="rejectMentor('" + d.id + "')" style="background:var(--light);color:var(--red);border:none;padding:0.35rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Revoke</button>';
+        html += '<button onclick="rejectMentor(\'' + d.id + '\')" style="background:var(--light);color:var(--red);border:none;padding:0.35rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Revoke</button>';
         html += '</div>';
       });
     }
