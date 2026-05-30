@@ -8207,7 +8207,10 @@ async function postTrainingProgram() {
     partnerName: isPartner ? partnerName : '',
     description: desc, postedBy: currentUserData.name,
     postedById: currentUser.uid, enrolledBy: [],
-    createdAt: serverTimestamp(), active: true
+    createdAt: serverTimestamp(), active: true,
+    isYANProgram: true, isOpen: true,
+    enrollmentOpen: true, requiresApplication: true,
+    openDate: new Date().toISOString().split('T')[0]
   });
   await addDoc(collection(db, 'notifications'), {
     title: 'New Training Program: ' + title,
