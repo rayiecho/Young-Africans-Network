@@ -1702,10 +1702,11 @@ window.toggleProgram = async function(colName, progId, isOpen) {
 async function loadAssignments(c) {
   c.innerHTML = '<div class="loading">Loading assignments...</div>';
   try {
-    const [techAssign, careerAssign, quizFails] = await Promise.all([
+    const [techAssign, careerAssign, quizFails, gradesDocs] = await Promise.all([
       getDocs(query(collection(db, 'programAssignments'), orderBy('submittedAt', 'desc'))),
       getDocs(query(collection(db, 'careerAssignments'), orderBy('submittedAt', 'desc'))),
-      getDocs(query(collection(db, 'quizFailures'), orderBy('createdAt', 'desc')))
+      getDocs(query(collection(db, 'quizFailures'), orderBy('createdAt', 'desc'))),
+      getDocs(query(collection(db, 'memberGrades'), orderBy('updatedAt', 'desc')))
     ]);
 
     const all = [
@@ -1716,52 +1717,238 @@ async function loadAssignments(c) {
     const pending = all.filter(a => !a.status || a.status === 'pending');
     const reviewed = all.filter(a => a.status && a.status !== 'pending');
 
-    let html = '<div class="section-card">';
-    html += '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;"> Pending Assignments (' + pending.length + ')</h3>';
+    // TAB NAVIGATION
+    let html = '<div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">';
+    html += '<button id="tab-assign" onclick="showAssignTab(\'assign\')" style="padding:0.5rem 1rem;border-radius:8px;font-size:0.82rem;font-weight:700;font-family:Poppins,sans-serif;cursor:pointer;background:var(--navy);color:white;border:none;">📝 Assignments (' + pending.length + ' pending)</button>';
+    html += '<button id="tab-quizzes" onclick="showAssignTab(\'quizzes\')" style="padding:0.5rem 1rem;border-radius:8px;font-size:0.82rem;font-weight:700;font-family:Poppins,sans-serif;cursor:pointer;background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);">📊 Quiz Scores</button>';
+    html += '<button id="tab-records" onclick="showAssignTab(\'records\')" style="padding:0.5rem 1rem;border-radius:8px;font-size:0.82rem;font-weight:700;font-family:Poppins,sans-serif;cursor:pointer;background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);">🎓 Grade Records</button>';
+    html += '<button id="tab-failures" onclick="showAssignTab(\'failures\')" style="padding:0.5rem 1rem;border-radius:8px;font-size:0.82rem;font-weight:700;font-family:Poppins,sans-serif;cursor:pointer;background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);">⚠️ Quiz Failures (' + quizFails.size + ')</button>';
+    html += '</div>';
 
+    // ===== TAB: ASSIGNMENTS =====
+    html += '<div id="tab-content-assign">';
+    html += '<div class="section-card">';
+    html += '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">📝 Pending Assignments (' + pending.length + ')</h3>';
     if (pending.length === 0) {
       html += '<p style="color:var(--gray);font-size:0.85rem;">No pending assignments.</p>';
     } else {
       pending.forEach(a => {
         const col = a.type === 'Tech' ? 'programAssignments' : 'careerAssignments';
-        html += '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:1rem;">';
-        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">';
-        html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(a.userName || a.userId || 'Member') + '</p>';
-        html += '<p style="font-size:0.72rem;color:var(--gray);">' + a.type + ' Hub · ' + sanitize(a.programId || '') + ' · Module ' + (a.moduleWeek || '') + '</p></div>';
+        const aiScore = a.aiScore || 0;
+        const aiColor = aiScore >= 70 ? '#27AE60' : aiScore >= 50 ? '#F5A623' : '#dc3545';
+        html += '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:1.25rem;border-left:4px solid var(--navy);">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;">';
+        html += '<div><p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(a.userName || a.userId || 'Member') + '</p>';
+        html += '<p style="font-size:0.72rem;color:var(--gray);">' + a.type + ' Hub · ' + sanitize(a.programId || '') + ' · ' + sanitize(a.lessonId || '') + '</p></div>';
+        html += '<div style="display:flex;gap:0.5rem;align-items:center;">';
+        if (aiScore > 0) html += '<span style="background:' + aiColor + '18;color:' + aiColor + ';padding:0.2rem 0.7rem;border-radius:50px;font-size:0.72rem;font-weight:700;">🤖 AI: ' + aiScore + '%</span>';
         html += '<span style="background:rgba(245,166,35,0.1);color:#F5A623;padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">PENDING</span>';
-        html += '</div>';
-        html += '<p style="font-size:0.82rem;color:var(--navy);background:white;padding:0.75rem;border-radius:8px;margin-bottom:0.75rem;white-space:pre-wrap;">' + sanitize(a.answer || a.submission || 'No text submission') + '</p>';
-        if (a.fileUrl) {
-          html += '<div style="background:rgba(10,102,194,0.06);border-radius:8px;padding:0.75rem;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.75rem;">';
-          html += '<span style="font-size:1.2rem;">📎</span>';
-          html += '<div style="flex:1;"><p style="font-size:0.78rem;font-weight:700;color:var(--navy);">' + sanitize(a.fileName || 'Uploaded File') + '</p></div>';
-          html += '<a href="' + a.fileUrl + '" target="_blank" class="btn-sm btn-navy" style="text-decoration:none;">View / Download</a>';
+        html += '</div></div>';
+
+        // Text submission
+        if (a.submission || a.answer) {
+          html += '<div style="background:white;border-radius:8px;padding:0.75rem;margin-bottom:0.75rem;">';
+          html += '<p style="font-size:0.72rem;font-weight:700;color:var(--gray);margin-bottom:0.35rem;">TEXT SUBMISSION</p>';
+          html += '<p style="font-size:0.82rem;color:var(--navy);white-space:pre-wrap;line-height:1.6;">' + sanitize(a.submission || a.answer) + '</p>';
           html += '</div>';
         }
-        html += '<textarea id="feedback-' + a.id + '" placeholder="Write feedback..." style="width:100%;padding:0.5rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;margin-bottom:0.5rem;resize:vertical;min-height:60px;"></textarea>';
+
+        // File attachment
+        if (a.fileUrl) {
+          html += '<div style="background:rgba(10,102,194,0.06);border-radius:8px;padding:0.75rem;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.75rem;">';
+          html += '<span style="font-size:1.4rem;">📎</span>';
+          html += '<div style="flex:1;"><p style="font-size:0.82rem;font-weight:700;color:var(--navy);">' + sanitize(a.fileName || 'Uploaded File') + '</p>';
+          html += '<p style="font-size:0.72rem;color:var(--gray);">File submission</p></div>';
+          html += '<a href="' + a.fileUrl + '" target="_blank" style="padding:0.4rem 0.9rem;background:var(--navy);color:white;border-radius:8px;font-size:0.78rem;font-weight:700;text-decoration:none;font-family:Poppins,sans-serif;">📥 Open File</a>';
+          html += '</div>';
+        }
+
+        // AI feedback preview
+        if (a.aiFeedback) {
+          html += '<div style="background:rgba(27,42,107,0.04);border-radius:8px;padding:0.75rem;margin-bottom:0.75rem;">';
+          html += '<p style="font-size:0.72rem;font-weight:700;color:var(--navy);margin-bottom:0.35rem;">🤖 AI FEEDBACK</p>';
+          html += '<p style="font-size:0.78rem;color:var(--gray);line-height:1.5;">' + sanitize(a.aiFeedback) + '</p>';
+          if (a.aiStrengths) html += '<p style="font-size:0.75rem;color:#27AE60;margin-top:0.35rem;"><strong>✅ Strengths:</strong> ' + sanitize(a.aiStrengths) + '</p>';
+          if (a.aiWeaknesses) html += '<p style="font-size:0.75rem;color:#dc3545;margin-top:0.25rem;"><strong>📝 Improve:</strong> ' + sanitize(a.aiWeaknesses) + '</p>';
+          html += '</div>';
+        }
+
+        // Admin grading
+        html += '<div style="background:white;border-radius:8px;padding:0.75rem;margin-bottom:0.75rem;">';
+        html += '<p style="font-size:0.72rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">✍️ ADMIN GRADE & FEEDBACK</p>';
+        html += '<div style="display:flex;gap:0.75rem;align-items:center;margin-bottom:0.5rem;">';
+        html += '<label style="font-size:0.78rem;color:var(--gray);font-weight:600;">Final Score (0–100):</label>';
+        html += '<input type="number" id="admin-score-' + a.id + '" min="0" max="100" placeholder="e.g. 78" style="width:80px;padding:0.35rem 0.5rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:6px;font-family:Poppins,sans-serif;font-size:0.85rem;">';
+        html += '</div>';
+        html += '<textarea id="feedback-' + a.id + '" placeholder="Write feedback for the member..." style="width:100%;padding:0.5rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;margin-bottom:0.5rem;resize:vertical;min-height:70px;box-sizing:border-box;"></textarea>';
+        html += '</div>';
+
         html += '<div style="display:flex;gap:0.5rem;">';
-        html += '<button class="btn-sm btn-navy" onclick="reviewAssignment(\''+col+'\',\''+a.id+'\',\'approved\')"> Approve</button>';
-        html += '<button class="btn-sm btn-red" onclick="reviewAssignment(\''+col+'\',\''+a.id+'\',\'rejected\')"> Reject</button>';
+        html += '<button class="btn-sm btn-navy" onclick="reviewAssignment(\''+col+'\',\''+a.id+'\',\'approved\',\''+sanitize(a.userId||'')+'\',\''+sanitize(a.programId||'')+'\',\''+sanitize(a.lessonId||'')+'\')">✅ Approve</button>';
+        html += '<button class="btn-sm btn-red" onclick="reviewAssignment(\''+col+'\',\''+a.id+'\',\'rejected\',\''+sanitize(a.userId||'')+'\',\''+sanitize(a.programId||'')+'\',\''+sanitize(a.lessonId||'')+'\')">❌ Request Revision</button>';
         html += '</div></div>';
       });
     }
     html += '</div>';
 
     if (reviewed.length > 0) {
-      html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;"> Reviewed Assignments (' + reviewed.length + ')</h3>';
+      html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">✅ Reviewed Assignments (' + reviewed.length + ')</h3>';
       reviewed.forEach(a => {
         const statusColor = a.status === 'approved' ? '#27AE60' : '#E63329';
         html += '<div style="background:var(--light);border-radius:12px;padding:0.75rem;margin-bottom:0.75rem;display:flex;justify-content:space-between;align-items:center;">';
         html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(a.userName || a.userId || 'Member') + '</p>';
-        html += '<p style="font-size:0.72rem;color:var(--gray);">' + a.type + ' · ' + sanitize(a.programId || '') + '</p></div>';
+        html += '<p style="font-size:0.72rem;color:var(--gray);">' + a.type + ' · ' + sanitize(a.programId || '') + ' · ' + sanitize(a.lessonId || '') + '</p>';
+        if (a.adminScore) html += '<p style="font-size:0.72rem;color:var(--navy);font-weight:700;">Final: ' + a.adminScore + '%</p>';
+        html += '</div>';
         html += '<span style="background:' + statusColor + '18;color:' + statusColor + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + a.status.toUpperCase() + '</span>';
         html += '</div>';
       });
       html += '</div>';
     }
+    html += '</div>'; // end tab-content-assign
 
-    // Quiz Failures Section
-    html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;"> Quiz Failures & Feedback (' + quizFails.size + ')</h3>';
+    // ===== TAB: QUIZ SCORES =====
+    html += '<div id="tab-content-quizzes" style="display:none;">';
+    html += '<div class="section-card">';
+    html += '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">📊 Member Quiz Scores</h3>';
+
+    const gradeRecords = gradesDocs.docs.map(d => ({...d.data(), id: d.id}));
+    if (gradeRecords.length === 0) {
+      html += '<p style="color:var(--gray);font-size:0.85rem;">No quiz scores recorded yet.</p>';
+    } else {
+      gradeRecords.forEach(g => {
+        if (!g.modules) return;
+        Object.entries(g.modules).forEach(([modKey, modData]) => {
+          if (!modData.quizGrades || Object.keys(modData.quizGrades).length === 0) return;
+          html += '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:1rem;">';
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">';
+          html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(g.userName || g.userId || 'Member') + '</p>';
+          html += '<p style="font-size:0.72rem;color:var(--gray);">' + sanitize(g.programId || '') + ' · ' + modKey + '</p></div>';
+          if (modData.quizAverage !== undefined) {
+            const avgColor = modData.quizAverage >= 70 ? '#27AE60' : '#dc3545';
+            html += '<span style="background:' + avgColor + '18;color:' + avgColor + ';padding:0.25rem 0.75rem;border-radius:50px;font-size:0.78rem;font-weight:700;">Avg: ' + modData.quizAverage + '%</span>';
+          }
+          html += '</div>';
+          Object.entries(modData.quizGrades).forEach(([lessonKey, qg]) => {
+            const qColor = qg.score >= 70 ? '#27AE60' : '#dc3545';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;background:white;border-radius:8px;padding:0.6rem 0.75rem;margin-bottom:0.4rem;">';
+            html += '<div><p style="font-size:0.78rem;font-weight:600;color:var(--navy);">' + sanitize(lessonKey) + '</p>';
+            html += '<p style="font-size:0.7rem;color:var(--gray);">' + (qg.correct||0) + '/' + (qg.total||0) + ' correct · ' + (qg.attempts||1) + ' attempt(s)</p></div>';
+            html += '<div style="display:flex;gap:0.5rem;align-items:center;">';
+            html += '<span style="background:' + qColor + '18;color:' + qColor + ';padding:0.15rem 0.6rem;border-radius:50px;font-size:0.75rem;font-weight:700;">' + qg.score + '%</span>';
+            if (qg.adminScore) html += '<span style="background:var(--navy)18;color:var(--navy);padding:0.15rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">Admin: ' + qg.adminScore + '%</span>';
+            html += '<input type="number" id="qoverride-' + g.id + '-' + modKey + '-' + lessonKey + '" min="0" max="100" placeholder="Override" style="width:75px;padding:0.25rem 0.4rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:6px;font-family:Poppins,sans-serif;font-size:0.75rem;" title="Override score">';
+            html += '<button onclick="overrideQuizScore(\'' + g.id + '\',\'' + modKey + '\',\'' + lessonKey + '\')" style="padding:0.25rem 0.6rem;background:var(--navy);color:white;border:none;border-radius:6px;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">Save</button>';
+            html += '</div></div>';
+          });
+          html += '</div>';
+        });
+      });
+    }
+    html += '</div>';
+    html += '</div>'; // end tab-content-quizzes
+
+    // ===== TAB: GRADE RECORDS =====
+    html += '<div id="tab-content-records" style="display:none;">';
+    html += '<div class="section-card">';
+    html += '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">🎓 Member Grade Records</h3>';
+
+    if (gradeRecords.length === 0) {
+      html += '<p style="color:var(--gray);font-size:0.85rem;">No grade records yet.</p>';
+    } else {
+      // Group by member
+      const byMember = {};
+      gradeRecords.forEach(g => {
+        const key = g.userId || g.id;
+        if (!byMember[key]) byMember[key] = [];
+        byMember[key].push(g);
+      });
+
+      Object.values(byMember).forEach(memberRecords => {
+        const firstName = memberRecords[0].userName || memberRecords[0].userId || 'Member';
+        html += '<div style="background:var(--light);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;">';
+        html += '<p style="font-size:0.92rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">👤 ' + sanitize(firstName) + '</p>';
+
+        memberRecords.forEach(g => {
+          // Calculate overall grade
+          let moduleGrades = [];
+          const modules = g.modules || {};
+          Object.entries(modules).forEach(([modKey, modData]) => {
+            const quizAvg = modData.quizAverage || 0;
+            const assignData = modData.assignmentGrade;
+            const assignFinal = assignData ? (assignData.finalScore || assignData.adminScore || assignData.aiScore || 0) : null;
+            let modGrade = null;
+            if (assignFinal !== null) {
+              modGrade = Math.round(quizAvg * 0.6 + assignFinal * 0.4);
+            } else if (quizAvg > 0) {
+              modGrade = quizAvg;
+            }
+            if (modGrade !== null) moduleGrades.push(modGrade);
+          });
+          const overallGrade = moduleGrades.length > 0 ? Math.round(moduleGrades.reduce((s,v) => s+v, 0) / moduleGrades.length) : null;
+          const passed = overallGrade !== null && overallGrade >= 70;
+
+          html += '<div style="background:white;border-radius:10px;padding:1rem;margin-bottom:1rem;">';
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">';
+          html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);">📚 ' + sanitize(g.programId || '') + '</p>';
+          if (overallGrade !== null) {
+            const overallColor = passed ? '#27AE60' : '#dc3545';
+            html += '<div style="display:flex;align-items:center;gap:0.75rem;">';
+            html += '<span style="background:' + overallColor + '18;color:' + overallColor + ';padding:0.3rem 0.8rem;border-radius:50px;font-size:0.82rem;font-weight:800;">Overall: ' + overallGrade + '%' + (passed ? ' ✅' : ' ❌') + '</span>';
+            if (passed && !g.certificateApproved) {
+              html += '<button onclick="approveCertificate(\'' + g.id + '\',\'' + sanitize(g.userId||'') + '\',\'' + sanitize(g.programId||'') + '\')" style="padding:0.3rem 0.8rem;background:#27AE60;color:white;border:none;border-radius:8px;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">🏆 Approve Certificate</button>';
+            } else if (g.certificateApproved) {
+              html += '<span style="background:#27AE6018;color:#27AE60;padding:0.3rem 0.8rem;border-radius:50px;font-size:0.75rem;font-weight:700;">🏆 Cert Approved</span>';
+            }
+            html += '</div>';
+          }
+          html += '</div>';
+
+          // Per-module breakdown
+          Object.entries(modules).forEach(([modKey, modData]) => {
+            html += '<div style="background:rgba(27,42,107,0.03);border-radius:8px;padding:0.75rem;margin-bottom:0.5rem;">';
+            html += '<p style="font-size:0.78rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">' + modKey.replace('module-','Module ') + '</p>';
+
+            // Quiz grades
+            const quizGrades = modData.quizGrades || {};
+            if (Object.keys(quizGrades).length > 0) {
+              html += '<div style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:0.5rem;">';
+              Object.entries(quizGrades).forEach(([lk, qg]) => {
+                const qc = qg.score >= 70 ? '#27AE60' : '#dc3545';
+                html += '<span style="background:' + qc + '18;color:' + qc + ';padding:0.15rem 0.5rem;border-radius:50px;font-size:0.7rem;font-weight:700;" title="' + sanitize(lk) + '">';
+                html += 'Q: ' + qg.score + '%</span>';
+              });
+              html += '</div>';
+              html += '<p style="font-size:0.7rem;color:var(--gray);">Quiz avg: ' + (modData.quizAverage||0) + '%</p>';
+            }
+
+            // Assignment grade
+            const ag = modData.assignmentGrade;
+            if (ag) {
+              html += '<div style="margin-top:0.5rem;padding:0.5rem;background:white;border-radius:6px;">';
+              html += '<p style="font-size:0.72rem;font-weight:700;color:var(--navy);">Assignment</p>';
+              html += '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.25rem;">';
+              if (ag.aiScore) html += '<span style="font-size:0.7rem;color:#0A66C2;background:rgba(10,102,194,0.08);padding:0.15rem 0.5rem;border-radius:50px;">🤖 AI: ' + ag.aiScore + '%</span>';
+              if (ag.adminScore) html += '<span style="font-size:0.7rem;color:var(--navy);background:rgba(27,42,107,0.08);padding:0.15rem 0.5rem;border-radius:50px;">✍️ Admin: ' + ag.adminScore + '%</span>';
+              if (ag.finalScore) html += '<span style="font-size:0.7rem;color:#27AE60;background:rgba(39,174,96,0.1);padding:0.15rem 0.5rem;border-radius:50px;font-weight:700;">✅ Final: ' + ag.finalScore + '%</span>';
+              if (ag.fileUrl) html += '<a href="' + ag.fileUrl + '" target="_blank" style="font-size:0.7rem;color:#0A66C2;text-decoration:underline;">📎 View File</a>';
+              html += '</div>';
+              if (ag.adminFeedback) html += '<p style="font-size:0.72rem;color:var(--gray);margin-top:0.35rem;font-style:italic;">' + sanitize(ag.adminFeedback) + '</p>';
+              html += '</div>';
+            }
+            html += '</div>';
+          });
+          html += '</div>'; // end program card
+        });
+        html += '</div>'; // end member card
+      });
+    }
+    html += '</div>';
+    html += '</div>'; // end tab-content-records
+
+    // ===== TAB: QUIZ FAILURES =====
+    html += '<div id="tab-content-failures" style="display:none;">';
+    html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">⚠️ Quiz Failures & Feedback (' + quizFails.size + ')</h3>';
     if (quizFails.empty) {
       html += '<p style="color:var(--gray);font-size:0.85rem;">No quiz failures yet.</p>';
     } else {
@@ -1776,12 +1963,13 @@ async function loadAssignments(c) {
         html += '</div>';
         html += '<p style="font-size:0.82rem;color:var(--navy);background:white;padding:0.75rem;border-radius:8px;margin-bottom:0.75rem;"><strong>Difficulty feedback:</strong> ' + sanitize(q.message || q.difficulty || q.feedback || 'No feedback') + '</p>';
         html += '<div style="display:flex;gap:0.5rem;">';
-        html += '<button class="btn-sm btn-navy" onclick="resetQuizAttempts(\'' + d.id + '\',\'' + (q.userId||'') + '\',\'' + (q.programId||'') + '\',\'' + (q.lessonId||q.moduleWeek||'') + '\',\'' + (q.collection||'trainingPrograms') + '\')">Reset Attempts</button>';
-        html += '<button class="btn-sm" style="background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);" onclick="markQuizReviewed(\'' + d.id + '\')"> Mark Reviewed</button>';
+        html += '<button class="btn-sm btn-navy" onclick="resetQuizAttempts(\'' + d.id + '\',\'' + (q.userId||'') + '\',\'' + (q.programId||'') + '\',\'' + (q.lessonId||q.moduleWeek||'') + '\',\'' + (q.collection||'trainingPrograms') + '\')">🔄 Reset Attempts</button>';
+        html += '<button class="btn-sm" style="background:var(--light);border:1px solid rgba(27,42,107,0.15);color:var(--navy);" onclick="markQuizReviewed(\'' + d.id + '\')">✅ Mark Reviewed</button>';
         html += '</div></div>';
       });
     }
     html += '</div>';
+    html += '</div>'; // end tab-content-failures
 
     c.innerHTML = html;
   } catch(e) {
@@ -1789,63 +1977,158 @@ async function loadAssignments(c) {
   }
 }
 
+window.showAssignTab = function(tab) {
+  ['assign','quizzes','records','failures'].forEach(function(t) {
+    const content = document.getElementById('tab-content-' + t);
+    const btn = document.getElementById('tab-' + t);
+    if (content) content.style.display = t === tab ? '' : 'none';
+    if (btn) {
+      btn.style.background = t === tab ? 'var(--navy)' : 'var(--light)';
+      btn.style.color = t === tab ? 'white' : 'var(--navy)';
+      btn.style.border = t === tab ? 'none' : '1.5px solid rgba(27,42,107,0.15)';
+    }
+  });
+};
+
+window.overrideQuizScore = async function(gradeDocId, moduleKey, lessonKey) {
+  const inputId = 'qoverride-' + gradeDocId + '-' + moduleKey + '-' + lessonKey;
+  const val = parseInt(document.getElementById(inputId)?.value || '');
+  if (isNaN(val) || val < 0 || val > 100) return showToast('Enter a score 0–100', 'error');
+  try {
+    const gradeRef = doc(db, 'memberGrades', gradeDocId);
+    const gradeSnap = await getDoc(gradeRef);
+    if (!gradeSnap.exists()) return showToast('Record not found', 'error');
+    const data = gradeSnap.data();
+    data.modules[moduleKey].quizGrades[lessonKey].adminScore = val;
+    // Recalculate quiz average using admin scores where available
+    const quizGrades = Object.values(data.modules[moduleKey].quizGrades);
+    const quizAvg = Math.round(quizGrades.reduce(function(s, g) { return s + (g.adminScore || g.score); }, 0) / quizGrades.length);
+    data.modules[moduleKey].quizAverage = quizAvg;
+    data.updatedAt = serverTimestamp();
+    await setDoc(gradeRef, data, {merge: true});
+    showToast('Quiz score updated!');
+    loadSection('assignments');
+  } catch(e) { showToast(e.message, 'error'); }
+};
+
+window.approveCertificate = async function(gradeDocId, userId, programId) {
+  if (!confirm('Approve certificate for ' + programId + '?')) return;
+  try {
+    await setDoc(doc(db, 'memberGrades', gradeDocId), { certificateApproved: true, certApprovedAt: serverTimestamp() }, {merge: true});
+    if (userId) {
+      await addDoc(collection(db, 'notifications'), {
+        title: '🏆 Certificate Approved!',
+        message: 'Congratulations! Your certificate for ' + programId + ' has been approved by the YAN team. You can now download it from your profile.',
+        type: 'success',
+        userId: userId,
+        postedBy: 'YAN Admin',
+        createdAt: serverTimestamp(),
+        readBy: []
+      });
+    }
+    showToast('🏆 Certificate approved! Member notified.');
+    loadSection('assignments');
+  } catch(e) { showToast(e.message, 'error'); }
+};
+
 window.resetQuizAttempts = async function(failureId, userId, programId, lessonId, colName) {
   if (!confirm('Reset quiz attempts for this member?')) return;
   try {
-    const attemptId = userId + '_' + programId + '_' + lessonId;
+    const attemptId = userId + '_' + lessonId;
     await deleteDoc(doc(db, 'quizAttempts', attemptId));
     await updateDoc(doc(db, 'quizFailures', failureId), { reviewed: true, resetAt: serverTimestamp(), resetBy: 'Admin' });
     await addDoc(collection(db, 'notifications'), {
-      title: ' Quiz Attempts Reset',
-      message: 'Your quiz attempts for ' + lessonId + ' in ' + programId + ' have been reset by the admin. You can now retake the quiz.',
+      title: '🔄 Quiz Attempts Reset',
+      message: 'Your quiz attempts for ' + lessonId + ' in ' + programId + ' have been reset. You can now retake the quiz.',
       type: 'info',
       userId: userId,
       postedBy: 'YAN Admin',
       createdAt: serverTimestamp(),
       readBy: []
     });
-    showToast(' Quiz attempts reset! Member has been notified.');
+    showToast('Quiz attempts reset! Member notified.');
     loadSection('assignments');
-  } catch(e) {
-    showToast(e.message, 'error');
-  }
+  } catch(e) { showToast(e.message, 'error'); }
 };
 
 window.markQuizReviewed = async function(failureId) {
   try {
     await updateDoc(doc(db, 'quizFailures', failureId), { reviewed: true, reviewedAt: serverTimestamp() });
-    showToast(' Marked as reviewed');
+    showToast('Marked as reviewed');
     loadSection('assignments');
-  } catch(e) {
-    showToast(e.message, 'error');
-  }
+  } catch(e) { showToast(e.message, 'error'); }
 };
 
-window.reviewAssignment = async function(colName, assignId, status) {
+window.reviewAssignment = async function(colName, assignId, status, userId, programId, lessonId) {
   const feedback = document.getElementById('feedback-' + assignId)?.value || '';
+  const adminScoreVal = parseInt(document.getElementById('admin-score-' + assignId)?.value || '');
+  const adminScore = isNaN(adminScoreVal) ? null : adminScoreVal;
+  if (status === 'approved' && adminScore === null) {
+    return showToast('Please enter a final score before approving', 'error');
+  }
   try {
     const assignSnap = await getDoc(doc(db, colName, assignId));
     const assignData = assignSnap.data();
+    const uid = userId || assignData?.userId;
+    const pid = programId || assignData?.programId;
+    const lid = lessonId || assignData?.lessonId;
+
     await updateDoc(doc(db, colName, assignId), {
       status: status,
       feedback: feedback,
+      adminScore: adminScore,
       reviewedAt: serverTimestamp(),
       reviewedBy: 'Admin'
     });
-    if (assignData?.userId) {
+
+    // Update memberGrades with admin score and final score
+    if (uid && pid && lid) {
+      const gradeId = uid + '_' + pid;
+      const gradeRef = doc(db, 'memberGrades', gradeId);
+      const gradeSnap = await getDoc(gradeRef);
+      if (gradeSnap.exists()) {
+        const gradeData = gradeSnap.data();
+        const parts = lid.split('-');
+        const moduleKey = 'module-' + (parts[1] || '1');
+        if (gradeData.modules && gradeData.modules[moduleKey] && gradeData.modules[moduleKey].assignmentGrade) {
+          gradeData.modules[moduleKey].assignmentGrade.adminScore = adminScore;
+          gradeData.modules[moduleKey].assignmentGrade.adminFeedback = feedback;
+          gradeData.modules[moduleKey].assignmentGrade.finalScore = adminScore;
+          gradeData.modules[moduleKey].assignmentGrade.status = status;
+          // Recalculate module grade
+          const quizAvg = gradeData.modules[moduleKey].quizAverage || 0;
+          if (adminScore !== null) {
+            gradeData.modules[moduleKey].moduleGrade = Math.round(quizAvg * 0.6 + adminScore * 0.4);
+          }
+          // Recalculate overall grade
+          const modGrades = Object.values(gradeData.modules)
+            .map(m => m.moduleGrade)
+            .filter(v => v !== undefined && v !== null);
+          if (modGrades.length > 0) {
+            gradeData.overallGrade = Math.round(modGrades.reduce((s,v) => s+v, 0) / modGrades.length);
+            gradeData.passed = gradeData.overallGrade >= 70;
+          }
+          gradeData.updatedAt = serverTimestamp();
+          await setDoc(gradeRef, gradeData, {merge: true});
+        }
+      }
+    }
+
+    // Notify member
+    if (uid) {
       await addDoc(collection(db, 'notifications'), {
-        title: status === 'approved' ? ' Assignment Approved!' : ' Assignment Feedback',
+        title: status === 'approved' ? '✅ Assignment Approved!' : '📝 Assignment Feedback',
         message: status === 'approved'
-          ? 'Your assignment for ' + (assignData.programId || 'your program') + ' has been approved! ' + (feedback ? 'Feedback: ' + feedback : 'Great work!')
-          : 'Your assignment for ' + (assignData.programId || 'your program') + ' needs revision. Feedback: ' + (feedback || 'Please review and resubmit.'),
+          ? 'Your assignment for ' + (pid || 'your program') + ' has been approved! Final score: ' + (adminScore !== null ? adminScore + '%.' : '') + (feedback ? ' Feedback: ' + feedback : ' Great work!')
+          : 'Your assignment for ' + (pid || 'your program') + ' needs revision. ' + (feedback ? 'Feedback: ' + feedback : 'Please review and resubmit.'),
         type: status === 'approved' ? 'success' : 'info',
-        userId: assignData.userId,
+        userId: uid,
         postedBy: 'YAN Admin',
         createdAt: serverTimestamp(),
         readBy: []
       });
     }
-    showToast(status === 'approved' ? ' Assignment approved! Member notified.' : ' Assignment rejected! Member notified.');
+    showToast(status === 'approved' ? '✅ Assignment approved! Member notified.' : '📝 Revision requested. Member notified.');
     loadSection('assignments');
   } catch(e) {
     showToast(e.message, 'error');

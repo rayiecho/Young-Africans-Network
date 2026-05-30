@@ -7211,15 +7211,30 @@ async function submitLessonQuiz(programId, lessonId, colName) {
   const quiz = window['lesson_quiz_' + lessonId] || [];
   if (!quiz.length) return showToast('Quiz not loaded', 'error');
   const resultDiv = document.getElementById('quiz-result-' + lessonId);
-  let correct = 0;
-  quiz.forEach(function(q, qi) {
-    const sel = document.querySelector('input[name="lq_' + lessonId + '_' + qi + '"]:checked');
-    if (sel && parseInt(sel.value) === q.correctIndex) correct++;
-  });
-  const score = Math.round((correct / quiz.length) * 100);
-  const passed = score >= 70;
   const progressCol = colName === 'careerPrograms' ? 'careerLearningProgress' : 'learningProgress';
 
+  // Grade each question
+  let correct = 0;
+  const questionResults = [];
+  quiz.forEach(function(q, qi) {
+    const sel = document.querySelector('input[name="lq_' + lessonId + '_' + qi + '"]:checked');
+    const selected = sel ? parseInt(sel.value) : -1;
+    const isCorrect = selected === q.correctIndex;
+    if (isCorrect) correct++;
+    questionResults.push({
+      question: q.question,
+      selected: selected,
+      correctIndex: q.correctIndex,
+      isCorrect: isCorrect,
+      selectedText: selected >= 0 ? q.options[selected] : 'Not answered',
+      correctText: q.options[q.correctIndex]
+    });
+  });
+
+  const score = Math.round((correct / quiz.length) * 100);
+  const passed = score >= 70;
+
+  // Check attempts
   const attRef = doc(db, 'quizAttempts', currentUser.uid + '_' + lessonId);
   const attSnap = await getDoc(attRef);
   const attempts = attSnap.exists() ? (attSnap.data().attempts || 0) : 0;
@@ -7231,9 +7246,67 @@ async function submitLessonQuiz(programId, lessonId, colName) {
 
   await setDoc(attRef, {attempts: attempts + 1, lastScore: score, passed: passed, updatedAt: serverTimestamp()}, {merge: true});
 
+  // Show detailed results
+  let resultsHtml = '<div style="background:' + (passed ? 'rgba(39,174,96,0.06)' : 'rgba(220,53,69,0.06)') + ';border-radius:12px;padding:1rem;border-left:3px solid ' + (passed ? '#27AE60' : '#dc3545') + ';margin-top:0.75rem;">';
+  resultsHtml += '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">' + (passed ? '✅' : '❌') + ' Score: ' + score + '% ' + (passed ? '— Passed!' : '— Need 70%') + '</p>';
+  questionResults.forEach(function(r, i) {
+    resultsHtml += '<div style="margin-bottom:0.5rem;padding:0.5rem;background:white;border-radius:8px;border-left:3px solid ' + (r.isCorrect ? '#27AE60' : '#dc3545') + ';">';
+    resultsHtml += '<p style="font-size:0.78rem;font-weight:600;color:var(--navy);">' + (i+1) + '. ' + sanitize(r.question) + '</p>';
+    resultsHtml += '<p style="font-size:0.75rem;color:' + (r.isCorrect ? '#27AE60' : '#dc3545') + ';">Your answer: ' + sanitize(r.selectedText) + (r.isCorrect ? ' ✓' : ' ✗') + '</p>';
+    if (!r.isCorrect) {
+      resultsHtml += '<p style="font-size:0.75rem;color:#27AE60;">Correct answer: ' + sanitize(r.correctText) + '</p>';
+    }
+    resultsHtml += '</div>';
+  });
+  if (!passed) {
+    const attLeft = Math.max(0, 3 - (attempts + 1));
+    resultsHtml += '<p style="font-size:0.78rem;color:var(--gray);margin-top:0.5rem;">' + (attLeft > 0 ? attLeft + ' attempt(s) remaining.' : 'No attempts left.') + '</p>';
+  }
+  resultsHtml += '</div>';
+  if (resultDiv) resultDiv.innerHTML = resultsHtml;
+
   if (passed) {
-    if (resultDiv) resultDiv.innerHTML = '<div style="background:rgba(39,174,96,0.08);border-radius:10px;padding:0.75rem;border-left:3px solid #27AE60;font-size:0.85rem;color:var(--navy);"> Passed! Score: ' + score + '%</div>';
-    showToast('Quiz passed! Score: ' + score + '% ');
+    showToast('Quiz passed! Score: ' + score + '% 🎉');
+
+    // Save grade to memberGrades
+    const gradeRef = doc(db, 'memberGrades', currentUser.uid + '_' + programId);
+    const gradeSnap = await getDoc(gradeRef);
+    const gradeData = gradeSnap.exists() ? gradeSnap.data() : {
+      userId: currentUser.uid,
+      userName: currentUserData.name,
+      programId: programId,
+      collection: colName,
+      modules: {}
+    };
+
+    // Extract module week from lessonId (format: module-X-lesson-Y)
+    const parts = lessonId.split('-');
+    const moduleKey = 'module-' + (parts[1] || '1');
+    const lessonKey = lessonId;
+
+    if (!gradeData.modules) gradeData.modules = {};
+    if (!gradeData.modules[moduleKey]) gradeData.modules[moduleKey] = {quizGrades: {}, assignmentGrade: null};
+    if (!gradeData.modules[moduleKey].quizGrades) gradeData.modules[moduleKey].quizGrades = {};
+
+    gradeData.modules[moduleKey].quizGrades[lessonKey] = {
+      score: score,
+      correct: correct,
+      total: quiz.length,
+      attempts: attempts + 1,
+      passed: true,
+      questionResults: questionResults,
+      gradedAt: Date.now()
+    };
+
+    // Recalculate module quiz average
+    const quizGrades = Object.values(gradeData.modules[moduleKey].quizGrades);
+    const quizAvg = Math.round(quizGrades.reduce(function(s, g) { return s + g.score; }, 0) / quizGrades.length);
+    gradeData.modules[moduleKey].quizAverage = quizAvg;
+    gradeData.updatedAt = serverTimestamp();
+
+    await setDoc(gradeRef, gradeData, {merge: true});
+
+    // Save progress
     const progressRef = doc(db, progressCol, currentUser.uid + '_' + programId);
     const progressSnap = await getDoc(progressRef);
     const progressData = progressSnap.exists() ? progressSnap.data() : {};
@@ -7248,22 +7321,22 @@ async function submitLessonQuiz(programId, lessonId, colName) {
         updatedAt: serverTimestamp()
       }), {merge: true});
     }
-    // Refresh program view
+
     if (colName === 'careerPrograms') {
       openCareerProgram(programId);
     } else {
       openProgram(programId);
     }
   } else {
+    showToast('Score: ' + score + '%. Need 70%.', 'error');
     const attLeft = Math.max(0, 3 - (attempts + 1));
-    if (resultDiv) resultDiv.innerHTML = '<div style="background:rgba(220,53,69,0.06);border-radius:10px;padding:0.75rem;border-left:3px solid #dc3545;font-size:0.85rem;color:var(--navy);"> Score: ' + score + '%. Need 70%. ' + (attLeft > 0 ? attLeft + ' attempt(s) left.' : 'No attempts left — please contact YAN.') + '</div>';
-    showToast('Score: ' + score + '%. Need 70%. ' + (attLeft > 0 ? attLeft + ' attempt(s) left.' : 'Contact YAN for help.'), 'error');
     if (attLeft === 0) showQuizFailureForm(programId, lessonId, score, attempts + 1, colName);
   }
 }
 
 async function submitLessonAssignment(programId, lessonId, colName) {
   const textarea = document.getElementById('assignment-' + lessonId);
+  if (!textarea) return;
   const text = textarea.value.trim();
   const fileInput = document.getElementById('assignment-file-' + lessonId);
   const file = fileInput && fileInput.files[0];
@@ -7272,6 +7345,7 @@ async function submitLessonAssignment(programId, lessonId, colName) {
   const progressDiv = document.getElementById('upload-progress-' + lessonId);
   const progressCol = colName === 'careerPrograms' ? 'careerLearningProgress' : 'learningProgress';
 
+  // Upload file if provided
   let fileUrl = '';
   let fileName = '';
   if (file) {
@@ -7286,54 +7360,146 @@ async function submitLessonAssignment(programId, lessonId, colName) {
       fileName = file.name;
       if (progressDiv) progressDiv.innerHTML = '<p style="font-size:0.78rem;color:#27AE60;">✅ File uploaded: ' + sanitize(fileName) + '</p>';
     } catch(e) {
-      if (progressDiv) progressDiv.innerHTML = '<p style="font-size:0.78rem;color:var(--red);">❌ File upload failed. Submitting text only.</p>';
+      if (progressDiv) progressDiv.innerHTML = '<p style="font-size:0.78rem;color:var(--red);">❌ Upload failed. Submitting text only.</p>';
     }
   }
+
+  // Show loading
+  if (resultDiv) resultDiv.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;"><p style="font-size:0.85rem;color:var(--gray);">🤖 AI is grading your assignment...</p></div>';
+
+  // AI grading
+  let aiScore = 0;
+  let aiFeedback = '';
+  let aiStrengths = '';
+  let aiWeaknesses = '';
 
   try {
-    await addDoc(collection(db, 'programAssignments'), {
-      userId: currentUser.uid,
-      userName: currentUserData.name,
-      country: currentUserData.country || '',
-      programId: programId,
-      lessonId: lessonId,
-      collection: colName,
-      submission: text,
-      response: text,
-      fileUrl: fileUrl,
-      fileName: fileName,
-      status: 'pending',
-      submittedAt: serverTimestamp()
+    const lessonSnap = await getDoc(doc(db, colName, programId, 'lessons', lessonId));
+    const lessonData = lessonSnap.exists() ? lessonSnap.data() : {};
+    const assignmentInstructions = lessonData.assignment || '';
+
+    const aiPrompt = 'You are a YAN (Young Africans Network) assignment grader. Grade this assignment submission. Assignment Instructions: ' + assignmentInstructions + ' Student Submission: ' + (text || '[File submitted — see attachment]') + ' Grade this assignment out of 100. Be fair, encouraging and specific. Return ONLY valid JSON: {"score": 75, "feedback": "Overall feedback here", "strengths": "What they did well", "weaknesses": "What needs improvement", "suggestions": "Specific suggestions to improve"}';
+
+    const aiRes = await fetch('https://yan-ai-worker.youngafricansn.workers.dev', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 800,
+        messages: [{role: 'user', content: aiPrompt}]
+      })
     });
-
-    const progressRef = doc(db, progressCol, currentUser.uid + '_' + programId);
-    const progressSnap = await getDoc(progressRef);
-    const progressData = progressSnap.exists() ? progressSnap.data() : {};
-    const lessonsCompleted = progressData.lessonsCompleted || [];
-    const completionDates = progressData.completionDates || {};
-    if (!lessonsCompleted.includes(lessonId)) {
-      lessonsCompleted.push(lessonId);
-      completionDates[lessonId] = Date.now();
-      await setDoc(progressRef, Object.assign(progressData, {
-        lessonsCompleted: lessonsCompleted,
-        completionDates: completionDates,
-        updatedAt: serverTimestamp()
-      }), {merge: true});
-    }
-
-    if (resultDiv) resultDiv.innerHTML = '<div style="background:rgba(39,174,96,0.06);border-radius:12px;padding:1rem;border-left:3px solid #27AE60;"><p style="font-size:0.85rem;color:var(--navy);"> Assignment submitted! Your facilitator will review it. Module ' + (colName === 'careerPrograms' ? '' : '') + ' unlocks in 7 days.</p></div>';
-    textarea.disabled = true;
-    document.querySelector('[onclick*="submitLessonAssignment(\''+programId+'\',\''+lessonId+'\']') && (document.querySelector('[onclick*="submitLessonAssignment(\''+programId+'\',\''+lessonId+'\']').disabled = true);
-    showToast('Assignment submitted! ');
-
-    if (colName === 'careerPrograms') {
-      setTimeout(function(){ openCareerProgram(programId); }, 1000);
-    } else {
-      setTimeout(function(){ openProgram(programId); }, 1000);
-    }
+    const aiData = await aiRes.json();
+    const aiText = aiData.content[0].text;
+    const aiClean = aiText.replace(/```json|```/g, '').trim();
+    const aiParsed = JSON.parse(aiClean);
+    aiScore = aiParsed.score || 0;
+    aiFeedback = aiParsed.feedback || '';
+    aiStrengths = aiParsed.strengths || '';
+    aiWeaknesses = aiParsed.weaknesses || '';
   } catch(e) {
-    showToast('Failed to submit. Try again.', 'error');
+    aiScore = 0;
+    aiFeedback = 'Assignment received. Your facilitator will review it shortly.';
   }
+
+  // Save to programAssignments
+  const assignDoc = await addDoc(collection(db, 'programAssignments'), {
+    userId: currentUser.uid,
+    userName: currentUserData.name,
+    country: currentUserData.country || '',
+    programId: programId,
+    lessonId: lessonId,
+    collection: colName,
+    submission: text,
+    response: text,
+    fileUrl: fileUrl,
+    fileName: fileName,
+    aiScore: aiScore,
+    aiFeedback: aiFeedback,
+    aiStrengths: aiStrengths,
+    aiWeaknesses: aiWeaknesses,
+    status: 'pending',
+    submittedAt: serverTimestamp()
+  });
+
+  // Save to memberGrades
+  const gradeRef = doc(db, 'memberGrades', currentUser.uid + '_' + programId);
+  const gradeSnap = await getDoc(gradeRef);
+  const gradeData = gradeSnap.exists() ? gradeSnap.data() : {
+    userId: currentUser.uid,
+    userName: currentUserData.name,
+    programId: programId,
+    collection: colName,
+    modules: {}
+  };
+
+  const parts = lessonId.split('-');
+  const moduleKey = 'module-' + (parts[1] || '1');
+
+  if (!gradeData.modules) gradeData.modules = {};
+  if (!gradeData.modules[moduleKey]) gradeData.modules[moduleKey] = {quizGrades: {}, assignmentGrade: null};
+
+  gradeData.modules[moduleKey].assignmentGrade = {
+    assignmentDocId: assignDoc.id,
+    submission: text,
+    fileUrl: fileUrl,
+    fileName: fileName,
+    aiScore: aiScore,
+    aiFeedback: aiFeedback,
+    aiStrengths: aiStrengths,
+    aiWeaknesses: aiWeaknesses,
+    adminScore: null,
+    adminFeedback: null,
+    finalScore: null,
+    status: 'pending',
+    submittedAt: Date.now()
+  };
+
+  gradeData.updatedAt = serverTimestamp();
+  await setDoc(gradeRef, gradeData, {merge: true});
+
+  // Show AI feedback to member
+  const scoreColor = aiScore >= 70 ? '#27AE60' : aiScore >= 50 ? '#F5A623' : '#dc3545';
+  let feedbackHtml = '<div style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1.25rem;border-left:3px solid var(--navy);">';
+  feedbackHtml += '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">🤖 AI Preliminary Grade</p>';
+  if (aiScore > 0) {
+    feedbackHtml += '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">';
+    feedbackHtml += '<div style="width:60px;height:60px;border-radius:50%;background:' + scoreColor + '18;border:3px solid ' + scoreColor + ';display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;color:' + scoreColor + ';">' + aiScore + '%</div>';
+    feedbackHtml += '<div><p style="font-size:0.85rem;color:var(--navy);line-height:1.6;">' + sanitize(aiFeedback) + '</p></div>';
+    feedbackHtml += '</div>';
+    if (aiStrengths) feedbackHtml += '<div style="background:rgba(39,174,96,0.06);border-radius:8px;padding:0.75rem;margin-bottom:0.5rem;"><p style="font-size:0.75rem;font-weight:700;color:#27AE60;margin-bottom:0.25rem;">✅ Strengths</p><p style="font-size:0.82rem;color:var(--navy);">' + sanitize(aiStrengths) + '</p></div>';
+    if (aiWeaknesses) feedbackHtml += '<div style="background:rgba(220,53,69,0.06);border-radius:8px;padding:0.75rem;margin-bottom:0.5rem;"><p style="font-size:0.75rem;font-weight:700;color:#dc3545;margin-bottom:0.25rem;">📝 Areas to Improve</p><p style="font-size:0.82rem;color:var(--navy);">' + sanitize(aiWeaknesses) + '</p></div>';
+  }
+  feedbackHtml += '<p style="font-size:0.75rem;color:var(--gray);margin-top:0.75rem;font-style:italic;">This is an AI preliminary grade. Your facilitator will review and give the final grade.</p>';
+  feedbackHtml += '</div>';
+
+  if (resultDiv) resultDiv.innerHTML = feedbackHtml;
+  textarea.disabled = true;
+  showToast('Assignment submitted! AI grade: ' + aiScore + '%');
+
+  // Mark lesson complete in progress
+  const progressRef = doc(db, progressCol, currentUser.uid + '_' + programId);
+  const progressSnap = await getDoc(progressRef);
+  const progressData = progressSnap.exists() ? progressSnap.data() : {};
+  const lessonsCompleted = progressData.lessonsCompleted || [];
+  const completionDates = progressData.completionDates || {};
+  if (!lessonsCompleted.includes(lessonId)) {
+    lessonsCompleted.push(lessonId);
+    completionDates[lessonId] = Date.now();
+    await setDoc(progressRef, Object.assign(progressData, {
+      lessonsCompleted: lessonsCompleted,
+      completionDates: completionDates,
+      updatedAt: serverTimestamp()
+    }), {merge: true});
+  }
+
+  setTimeout(function() {
+    if (colName === 'careerPrograms') {
+      openCareerProgram(programId);
+    } else {
+      openProgram(programId);
+    }
+  }, 2000);
 }
 
 function showQuizFailureForm(programId, lessonId, score, attempts, colName) {
