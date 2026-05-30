@@ -2842,27 +2842,64 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <div>Young Africans Network <span>Admin CMS</span></div>
     </div>
     <nav class="admin-nav">
-      <button class="nav-item" data-section="overview" onclick="loadSection('overview')"><span class="nav-icon"></span> Overview</button>
-      <button class="nav-item" data-section="gallery" onclick="loadSection('gallery')"><span class="nav-icon"></span> Gallery</button>
-      <button class="nav-item" data-section="team" onclick="loadSection('team')"><span class="nav-icon"></span> Team</button>
-      <button class="nav-item" data-section="stories" onclick="loadSection('stories')"><span class="nav-icon"></span> Journey Stories</button>
-      <button class="nav-item" data-section="events" onclick="loadSection('events')"><span class="nav-icon"></span> Events</button>
-      <button class="nav-item" data-section="materials" onclick="loadSection('materials')"><span class="nav-icon"></span> Training Materials</button>
-      <button class="nav-item" data-section="certificates" onclick="loadSection('certificates')"><span class="nav-icon"></span> Certificates</button>
-      <button class="nav-item" data-section="members" onclick="loadSection('members')"><span class="nav-icon"></span> Members</button>
-      <button class="nav-item" data-section="moderation" onclick="loadSection('moderation')"><span class="nav-icon"></span> Moderation</button>
-      <button class="nav-item" data-section="forms" onclick="loadSection('forms')"><span class="nav-icon"></span> Form Submissions</button>
-      <button class="nav-item" data-section="hubs" onclick="loadSection('hubs')"><span class="nav-icon"></span> YAN Hubs</button>
-      <button class="nav-item" data-section="partnerships" onclick="loadSection('partnerships')"><span class="nav-icon"></span> Partnerships</button>
-      <button class="nav-item" data-section="newsletters" onclick="loadSection('newsletters')"><span class="nav-icon"></span> Newsletters</button>
-      <button class="nav-item" data-section="analytics" onclick="loadSection('analytics')"><span class="nav-icon"></span> Analytics</button>
-      <button class="nav-item" data-section="assignments" onclick="loadSection('assignments')"><span class="nav-icon"></span> Assignments</button>
-      <button class="nav-item" data-section="programs" onclick="loadSection('programs')"><span class="nav-icon"></span> Programs Manager</button>
-      <button class="nav-item" data-section="applications" onclick="loadSection('applications')"><span class="nav-icon"></span> Program Applications</button>
-      <button class="nav-item" data-section="notifications" onclick="loadSection('notifications')"><span class="nav-icon"></span> Notifications</button>
-      <button class="nav-item" data-section="finance" onclick="loadSection('finance')"><span class="nav-icon"></span> Finance</button>
-      <button class="nav-item" data-section="recommendations" onclick="loadSection('recommendations')"><span class="nav-icon"></span> Recommendations</button>
-      <button class="nav-item" data-section="mentors" onclick="loadSection('mentors')"><span class="nav-icon">🎓</span> Mentor Applications</button>
+      <!-- Dashboard -->
+      <button class="nav-item" data-section="overview" onclick="loadSection('overview')"><span class="nav-icon">📊</span> Overview</button>
+      <button class="nav-item" data-section="analytics" onclick="loadSection('analytics')"><span class="nav-icon">📈</span> Analytics</button>
+      <button class="nav-item" data-section="finance" onclick="loadSection('finance')"><span class="nav-icon">💰</span> Finance</button>
+
+      <!-- Community -->
+      <div class="nav-group">
+        <button class="nav-group-header" onclick="toggleNavGroup('community')">
+          <span>👥 Community</span><span class="nav-arrow" id="arrow-community">▶</span>
+        </button>
+        <div class="nav-group-items" id="group-community" style="display:none;">
+          <button class="nav-item nav-sub" data-section="members" onclick="loadSection('members')"><span class="nav-icon">👤</span> Members</button>
+          <button class="nav-item nav-sub" data-section="moderation" onclick="loadSection('moderation')"><span class="nav-icon">🛡️</span> Moderation</button>
+          <button class="nav-item nav-sub" data-section="forms" onclick="loadSection('forms')"><span class="nav-icon">📋</span> Form Submissions</button>
+          <button class="nav-item nav-sub" data-section="notifications" onclick="loadSection('notifications')"><span class="nav-icon">🔔</span> Notifications</button>
+        </div>
+      </div>
+
+      <!-- Programs & Learning -->
+      <div class="nav-group">
+        <button class="nav-group-header" onclick="toggleNavGroup('programs')">
+          <span>🎓 Programs & Learning</span><span class="nav-arrow" id="arrow-programs">▶</span>
+        </button>
+        <div class="nav-group-items" id="group-programs" style="display:none;">
+          <button class="nav-item nav-sub" data-section="programs" onclick="loadSection('programs')"><span class="nav-icon">📚</span> Programs Manager</button>
+          <button class="nav-item nav-sub" data-section="applications" onclick="loadSection('applications')"><span class="nav-icon">📝</span> Program Applications</button>
+          <button class="nav-item nav-sub" data-section="mentors" onclick="loadSection('mentors')"><span class="nav-icon">🎓</span> Mentor Applications</button>
+          <button class="nav-item nav-sub" data-section="assignments" onclick="loadSection('assignments')"><span class="nav-icon">✏️</span> Assignments</button>
+          <button class="nav-item nav-sub" data-section="certificates" onclick="loadSection('certificates')"><span class="nav-icon">🏆</span> Certificates</button>
+          <button class="nav-item nav-sub" data-section="materials" onclick="loadSection('materials')"><span class="nav-icon">📖</span> Training Materials</button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="nav-group">
+        <button class="nav-group-header" onclick="toggleNavGroup('content')">
+          <span>🌍 Content</span><span class="nav-arrow" id="arrow-content">▶</span>
+        </button>
+        <div class="nav-group-items" id="group-content" style="display:none;">
+          <button class="nav-item nav-sub" data-section="gallery" onclick="loadSection('gallery')"><span class="nav-icon">🖼️</span> Gallery</button>
+          <button class="nav-item nav-sub" data-section="events" onclick="loadSection('events')"><span class="nav-icon">📅</span> Events</button>
+          <button class="nav-item nav-sub" data-section="stories" onclick="loadSection('stories')"><span class="nav-icon">📖</span> Journey Stories</button>
+          <button class="nav-item nav-sub" data-section="newsletters" onclick="loadSection('newsletters')"><span class="nav-icon">📧</span> Newsletters</button>
+          <button class="nav-item nav-sub" data-section="hubs" onclick="loadSection('hubs')"><span class="nav-icon">🏛️</span> YAN Hubs</button>
+        </div>
+      </div>
+
+      <!-- Partnerships -->
+      <div class="nav-group">
+        <button class="nav-group-header" onclick="toggleNavGroup('partnerships')">
+          <span>🤝 Partnerships</span><span class="nav-arrow" id="arrow-partnerships">▶</span>
+        </button>
+        <div class="nav-group-items" id="group-partnerships" style="display:none;">
+          <button class="nav-item nav-sub" data-section="partnerships" onclick="loadSection('partnerships')"><span class="nav-icon">🌐</span> Partnerships</button>
+          <button class="nav-item nav-sub" data-section="recommendations" onclick="loadSection('recommendations')"><span class="nav-icon">⭐</span> Recommendations</button>
+          <button class="nav-item nav-sub" data-section="team" onclick="loadSection('team')"><span class="nav-icon">👨‍💼</span> Team</button>
+        </div>
+      </div>
     </nav>
     <div class="admin-sidebar-footer">
       <button class="btn-logout-admin" onclick="doAdminLogout()"> Sign Out</button>
