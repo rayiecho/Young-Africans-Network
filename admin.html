@@ -1730,7 +1730,14 @@ async function loadAssignments(c) {
         html += '<p style="font-size:0.72rem;color:var(--gray);">' + a.type + ' Hub · ' + sanitize(a.programId || '') + ' · Module ' + (a.moduleWeek || '') + '</p></div>';
         html += '<span style="background:rgba(245,166,35,0.1);color:#F5A623;padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">PENDING</span>';
         html += '</div>';
-        html += '<p style="font-size:0.82rem;color:var(--navy);background:white;padding:0.75rem;border-radius:8px;margin-bottom:0.75rem;">' + sanitize(a.answer || a.submission || 'No content') + '</p>';
+        html += '<p style="font-size:0.82rem;color:var(--navy);background:white;padding:0.75rem;border-radius:8px;margin-bottom:0.75rem;white-space:pre-wrap;">' + sanitize(a.answer || a.submission || 'No text submission') + '</p>';
+        if (a.fileUrl) {
+          html += '<div style="background:rgba(10,102,194,0.06);border-radius:8px;padding:0.75rem;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.75rem;">';
+          html += '<span style="font-size:1.2rem;">📎</span>';
+          html += '<div style="flex:1;"><p style="font-size:0.78rem;font-weight:700;color:var(--navy);">' + sanitize(a.fileName || 'Uploaded File') + '</p></div>';
+          html += '<a href="' + a.fileUrl + '" target="_blank" class="btn-sm btn-navy" style="text-decoration:none;">View / Download</a>';
+          html += '</div>';
+        }
         html += '<textarea id="feedback-' + a.id + '" placeholder="Write feedback..." style="width:100%;padding:0.5rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;margin-bottom:0.5rem;resize:vertical;min-height:60px;"></textarea>';
         html += '<div style="display:flex;gap:0.5rem;">';
         html += '<button class="btn-sm btn-navy" onclick="reviewAssignment(\''+col+'\',\''+a.id+'\',\'approved\')"> Approve</button>';
