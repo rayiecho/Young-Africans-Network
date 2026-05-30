@@ -9835,6 +9835,7 @@ function startMessageListener() {
     snap.docChanges().forEach(function(change) {
       if (change.type === 'modified' || change.type === 'added') {
         const data = change.doc.data();
+        console.log('MSG CHANGE:', change.type, 'unread:', data.unreadCount, 'lastSender:', data.lastSenderId, 'me:', currentUser.uid);
         const unread = data.unreadCount && data.unreadCount[currentUser.uid] || 0;
         const lastMsg = data.lastMessage || '';
         const lastSender = data.lastSenderName || 'Someone';
