@@ -9841,12 +9841,12 @@ function startMessageListener() {
         const lastSender = data.lastSenderName || 'Someone';
         const lastSenderId = data.lastSenderId || '';
         const convId = change.doc.id;
-        const convId = change.doc.id;
         const activeTab = document.querySelector('.tab-panel.active');
         const inMessages = activeTab && activeTab.id === 'tab-messages';
         console.log('TOAST unread='+unread+' sender='+lastSenderId+' me='+currentUser.uid);
         if (unread > 0 && lastSenderId && lastSenderId !== currentUser.uid) {
           showMessageToast(lastSender, lastMsg, convId, lastSenderId, data.lastSenderPhoto||'', '');
+        }
       }
     });
     // Update badge
