@@ -9864,14 +9864,14 @@ async function enrollCareerProgram(programId) {
     modulesCompleted:[], enrolledAt:serverTimestamp()
   },{merge:true});
 }
-  await setDoc(doc(db, 'careerLearningProgress', currentUser.uid + '_' + programId), {
-    userId: currentUser.uid, programId,
-    programTitle: data.title, status: 'enrolled',
-    modulesCompleted: [], enrolledAt: serverTimestamp()
-  }, {merge: true});
-  showToast('Enrolled! Go to Programs to start.');
-  loadCareerPrograms();
-}
+
+
+
+
+
+
+
+
 
 async function openCareerProgram(programId) {
   const box = document.getElementById('career-program-modules-' + programId);
