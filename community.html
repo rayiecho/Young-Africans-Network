@@ -9863,7 +9863,7 @@ function startMessageListener() {
   unsubscribers.push(unsub);
 }
 
-function showMessageToast(senderName, message, convId, senderId, otherName, otherPhoto) {
+window.showMessageToast = function showMessageToast(senderName, message, convId, senderId, otherName, otherPhoto) {
   // Remove existing message toast
   const existing = document.getElementById('msg-toast');
   if (existing) existing.remove();
