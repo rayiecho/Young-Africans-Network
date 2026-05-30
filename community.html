@@ -11111,7 +11111,7 @@ window.toggleMembersDrawer = function() {
           var convId = [currentUser.uid, d.id].sort().join('_');
           var encodedName = encodeURIComponent(u.name||'');
           var encodedPhoto = encodeURIComponent(u.photoUrl||'');
-          html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--light);cursor:pointer;" onclick="toggleMembersDrawer();showTab('messages');setTimeout(function(){openConversation('' + convId + '','' + d.id + '','' + encodedName + '','' + encodedPhoto + '');},500)">';
+          html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--light);cursor:pointer;" onclick="toggleMembersDrawer();showTab(\'messages\');setTimeout(function(){openConversation(\'' + convId + '\',\'' + d.id + '\',\'' + encodedName + '\',\'' + encodedPhoto + '\');},500)">';
           if (u.photoUrl) {
             html += '<div style="position:relative;"><img src="' + u.photoUrl + '" style="width:42px;height:42px;border-radius:50%;object-fit:cover;">';
           } else {
