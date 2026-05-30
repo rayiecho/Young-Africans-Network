@@ -9824,7 +9824,7 @@ window.checkEmailVerified = async function() {
 let activeConversationId = null;
 let messageUnsubscribe = null;
 
-function startMessageListener() {
+window.startMessageListener = function startMessageListener() {
   if (!currentUser) return;
   // Listen to all conversations for new messages
   const q = query(
