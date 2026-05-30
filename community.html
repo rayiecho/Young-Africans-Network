@@ -265,7 +265,7 @@ onAuthStateChanged(auth, async user => {
 
 async function doRegister() {
   const name = document.getElementById('reg-name').value.trim();
-  // Validate name — must have 2 words, letters only
+  // Validate name - must have 2 words, letters only
   const nameParts = name.split(' ').filter(p => p.length > 0);
   if (nameParts.length < 2) return showToast('Please enter your full name (first and last name)','error');
   if (!/^[a-zA-Z\s]+$/.test(name)) return showToast('Name must contain letters only — no numbers or symbols','error');
@@ -421,7 +421,7 @@ async function handleGoogleRedirect() {
     // Check if user exists in Firestore
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     if (!userDoc.exists()) {
-      // New user — create profile
+      // New user - create profile
       await setDoc(doc(db, 'users', user.uid), {
         name: user.displayName || 'YAN Member',
         email: user.email,
@@ -4429,7 +4429,7 @@ async function loadReferralSection() {
     '<div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">' +
     '<input type="text" value="' + referralUrl + '" readonly id="referral-url-input" style="flex:1;background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:8px;font-family:\'Poppins\',sans-serif;font-size:0.72rem;outline:none;min-width:0;">' +
     '<button class="btn-sm btn-navy" onclick="copyReferralLink()">Copy</button>' +
-    '<a href="https://wa.me/?text=' + encodeURIComponent('Join me on Young Africans Network — the pan-African youth community! Register here: ' + referralUrl) + '" target="_blank" class="btn-sm btn-navy" style="text-decoration:none;">WhatsApp</a>' +
+    '<a href="https://wa.me/?text=' + encodeURIComponent('Join me on Young Africans Network - the pan-African youth community! Register here: ' + referralUrl) + '" target="_blank" class="btn-sm btn-navy" style="text-decoration:none;">WhatsApp</a>' +
     '</div></div>' +
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">' +
     '<div style="background:var(--light);border-radius:10px;padding:1rem;text-align:center;">' +
@@ -4515,7 +4515,7 @@ function showLinkedInPromptAfterDownload(deptName) {
 window.shareOnLinkedIn = shareOnLinkedIn;
 window.showLinkedInPromptAfterDownload = showLinkedInPromptAfterDownload;
 
-// HEAD PANEL — DEPT NOTIFICATION
+// HEAD PANEL - DEPT NOTIFICATION
 async function sendDeptNotification(dept) {
   const title = document.getElementById('head-notif-title').value.trim();
   const message = document.getElementById('head-notif-message').value.trim();
@@ -4535,7 +4535,7 @@ async function sendDeptNotification(dept) {
   showToast('Notification sent to ' + (deptInfo ? deptInfo.name : dept) + '!');
 }
 
-// HEAD PANEL — SCHEDULE MEETING
+// HEAD PANEL - SCHEDULE MEETING
 async function scheduleHeadMeeting(dept) {
   const title = document.getElementById('head-mtg-title').value.trim();
   const topic = document.getElementById('head-mtg-topic').value.trim();
@@ -4576,7 +4576,7 @@ async function scheduleHeadMeeting(dept) {
   loadHeadMeetings(dept);
 }
 
-// HEAD PANEL — LOAD DEPT MEETINGS
+// HEAD PANEL - LOAD DEPT MEETINGS
 async function loadHeadMeetings(dept) {
   const list = document.getElementById('head-meetings-list');
   if (!list) return;
@@ -4599,7 +4599,7 @@ async function loadHeadMeetings(dept) {
     }).join('');
 }
 
-// HEAD PANEL — LOAD DEPT MEMBERS
+// HEAD PANEL - LOAD DEPT MEMBERS
 async function loadHeadMembers(dept) {
   const container = document.getElementById('head-members-list');
   if (!container) return;
@@ -10567,7 +10567,7 @@ window.openMentorshipMeetingRoom = function openMentorshipMeetingRoom(roomName, 
   const meetingUrl = 'https://youngafricansnetwork.daily.co/' + roomName + '?showLeaveButton=0&showFullscreenButton=1';
   const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
-  // On mobile, iframe camera/mic permissions are blocked — open in new tab instead
+  // On mobile, iframe camera/mic permissions are blocked - open in new tab instead
   if (isMobile) {
     window.open(meetingUrl, '_blank');
     showToast('Meeting opened in your browser. Return here when done.');
