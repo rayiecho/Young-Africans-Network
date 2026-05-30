@@ -2491,10 +2491,10 @@ window.loadProgramApplications = async function(c) {
     html += '<div><h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);">Program Applications</h2>';
     html += '<p style="color:var(--gray);font-size:0.82rem;">' + pendingSnap.size + ' pending review</p></div>';
     html += '<div style="display:flex;gap:0.5rem;">';
-    html += '<button onclick="filterApps('pending')" class="btn-sm btn-navy">Pending</button>';
-    html += '<button onclick="filterApps('approved')" class="btn-sm" style="background:rgba(39,174,96,0.1);color:#27AE60;border:none;">Approved</button>';
-    html += '<button onclick="filterApps('rejected')" class="btn-sm btn-red">Rejected</button>';
-    html += '<button onclick="filterApps('all')" class="btn-sm btn-outline">All</button>';
+    html += '<button onclick="filterApps(\'pending\')" class="btn-sm btn-navy">Pending</button>';
+    html += '<button onclick="filterApps(\'approved\')" class="btn-sm" style="background:rgba(39,174,96,0.1);color:#27AE60;border:none;">Approved</button>';
+    html += '<button onclick="filterApps(\'rejected\')" class="btn-sm btn-red">Rejected</button>';
+    html += '<button onclick="filterApps(\'all\')" class="btn-sm btn-outline">All</button>';
     html += '</div></div>';
 
     if (allSnap.empty) {
