@@ -10343,9 +10343,28 @@ window.startMentorshipMeeting = async function(menteeId, menteeNameEncoded, ment
     postedBy: 'YAN Mentorship', createdAt: serverTimestamp(), readBy: []
   });
 
+  // Send meeting link as a direct message to mentee
+  const meetingUrl = 'https://youngafricansnetwork.daily.co/' + roomName;
+  const convId = [currentUser.uid, menteeId].sort().join('_');
+  await addDoc(collection(db,'conversations',convId,'messages'),{
+    senderId: currentUser.uid,
+    senderName: currentUserData.name,
+    text: '🎥 I have started our mentorship meeting! Click the link to join now: ' + meetingUrl,
+    createdAt: serverTimestamp()
+  });
+  await setDoc(doc(db,'conversations',convId),{
+    participants:[currentUser.uid,menteeId],
+    participantNames:{[currentUser.uid]:currentUserData.name,[menteeId]:menteeName},
+    lastMessage:'🎥 Mentorship meeting started! Click to join.',
+    lastMessageAt:serverTimestamp(),
+    lastSenderName:currentUserData.name,
+    lastSenderId:currentUser.uid,
+    ['unreadCount.'+menteeId]:increment(1),
+    ['unreadCount.'+currentUser.uid]:0
+  },{merge:true});
   // Open meeting inside platform
   openMentorshipMeetingRoom(roomName, menteeName);
-  showToast(menteeName + ' has been notified to join!');
+  showToast(menteeName + ' has been notified via message!');
 };
 
 window.joinMentorshipMeeting = async function(mentorId, mentorNameEncoded) {
