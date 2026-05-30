@@ -2703,6 +2703,13 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .nav-item:hover{color:var(--white);background:rgba(255,255,255,0.06);}
 .nav-item.active{color:var(--white);background:rgba(255,255,255,0.12);border-left:3px solid var(--gold);}
 .nav-item .nav-icon{font-size:1rem;width:22px;text-align:center;}
+.nav-group{margin-bottom:0.25rem;}
+.nav-group-header{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;padding:0.7rem 1.25rem;border:none;background:none;color:rgba(255,255,255,0.5);font-family:'Poppins',sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;letter-spacing:0.05em;text-transform:uppercase;}
+.nav-group-header:hover{color:rgba(255,255,255,0.8);}
+.nav-group-items{border-left:2px solid rgba(255,255,255,0.08);margin-left:1.5rem;}
+.nav-sub{padding:0.6rem 1rem !important;font-size:0.78rem !important;}
+.nav-arrow{font-size:0.6rem;transition:transform 0.2s;opacity:0.5;}
+.nav-arrow.open{transform:rotate(90deg);}
 .admin-sidebar-footer{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,0.08);}
 .btn-logout-admin{display:flex;align-items:center;gap:0.5rem;color:rgba(255,255,255,0.5);font-size:0.82rem;background:none;border:none;cursor:pointer;padding:0.5rem;transition:color 0.2s;}
 .btn-logout-admin:hover{color:var(--red);}
@@ -2945,6 +2952,14 @@ document.addEventListener('click', function(e) {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>emailjs.init('NyhRgF1xCbrxy7XEG');
+function toggleNavGroup(group) {
+  const items = document.getElementById('group-' + group);
+  const arrow = document.getElementById('arrow-' + group);
+  if (!items) return;
+  const isOpen = items.style.display !== 'none';
+  items.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.classList.toggle('open', !isOpen);
+}
 
 
 
