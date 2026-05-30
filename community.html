@@ -510,6 +510,7 @@ function enterPlatform() {
     setTimeout(() => showOnboarding(), 1000);
   }
   updateNotifBadge();
+  startNotifListener();
   // Track online presence
   if (currentUser) {
     const onlineRef = doc(db, 'onlineUsers', currentUser.uid);
