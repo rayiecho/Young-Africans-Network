@@ -7162,7 +7162,7 @@ async function applyForProgram(programId, type) {
           <option value="8+ hours">8+ hours per week</option>
         </select>
       </div>
-      <button onclick="submitProgramApplication('${programId}','${type}','${data.title.replace(/'/g,'\'')}')" style="width:100%;background:var(--navy);color:#fff;border:none;padding:0.85rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.95rem;">Submit Application</button>
+      <button id="apply-submit-btn" data-pid="${programId}" data-type="${type}" data-title="${data.title}" onclick="submitProgramApplication(this.dataset.pid,this.dataset.type,this.dataset.title)" style="width:100%;background:var(--navy);color:#fff;border:none;padding:0.85rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.95rem;">Submit Application</button>
     </div>`;
   document.body.appendChild(modal);
 }
