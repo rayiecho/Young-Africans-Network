@@ -2481,7 +2481,7 @@ function showScholarshipForm() {
 }
 
 function showScholarshipSection(section) {
-  ['opportunities','tracker','resources','recommendation','stories','matcher'].forEach(s => {
+  ['opportunities','tracker','resources','recommendation','stories','matcher','grants'].forEach(s => {
     const el = document.getElementById(`scholarship-section-${s}`);
     if (el) el.style.display = s === section ? 'block' : 'none';
   });
@@ -2491,6 +2491,7 @@ function showScholarshipSection(section) {
   if (section === 'recommendation') loadRecommendationSection();
   if (section === 'stories') loadScholarshipStories();
   if (section === 'matcher') loadScholarshipMatcher();
+  if (section === 'grants') loadScholarshipGrants();
 }
 
 async function postScholarship() {
