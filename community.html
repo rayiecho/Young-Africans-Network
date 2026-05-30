@@ -206,7 +206,7 @@ onAuthStateChanged(auth, async user => {
         const lastTab = localStorage.getItem('yan_last_tab');
         const lastUid = localStorage.getItem('yan_last_uid');
         if (lastTab && lastUid === user.uid && lastTab !== 'feed') {
-          setTimeout(() => { showTab(lastTab); localStorage.removeItem('yan_last_tab'); }, 300);
+          setTimeout(() => { showTab(lastTab); }, 300);
         }
         // Refresh data in background
         getDoc(doc(db, 'users', user.uid)).then(snap => {
@@ -246,7 +246,7 @@ onAuthStateChanged(auth, async user => {
         const lastTab = localStorage.getItem('yan_last_tab');
         const lastUid = localStorage.getItem('yan_last_uid');
         if (lastTab && lastUid === user.uid && lastTab !== 'feed') {
-          setTimeout(() => { showTab(lastTab); localStorage.removeItem('yan_last_tab'); }, 300);
+          setTimeout(() => { showTab(lastTab); }, 300);
         }
       } else {
         showScreen('screen-register');
