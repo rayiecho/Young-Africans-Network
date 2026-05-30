@@ -7499,7 +7499,7 @@ async function submitLessonAssignment(programId, lessonId, colName) {
     try {
       const fd = new FormData();
       fd.append('file', file);
-      fd.append('upload_preset', CLOUDINARY_PRESET);
+      fd.append('upload_preset', 'yan_files');
       const uploadRes = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/raw/upload', {method:'POST', body:fd});
       const uploadData = await uploadRes.json();
       fileUrl = uploadData.secure_url || '';
