@@ -9836,7 +9836,6 @@ function startMessageListener() {
       if (change.type === 'modified') {
         const data = change.doc.data();
         console.log('MSG CHANGE:', change.type, 'unread:', data.unreadCount, 'lastSender:', data.lastSenderId, 'me:', currentUser.uid);
-        showToast('DEBUG: msg change detected - unread:' + JSON.stringify(data.unreadCount));
         const unread = data.unreadCount && data.unreadCount[currentUser.uid] || 0;
         const lastMsg = data.lastMessage || '';
         const lastSender = data.lastSenderName || 'Someone';
