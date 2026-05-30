@@ -7189,13 +7189,19 @@ async function openLessonContent(programId, lessonId, colName) {
   }
 
   if (l.isLastLesson && l.assignment) {
-    html += '<div id="assignment-section-' + lessonId + '" style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--navy);">';
-    html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;"> Module Assignment</p>';
-    html += '<p style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;line-height:1.7;">' + sanitize(l.assignment) + '</p>';
-    html += '<textarea id="assignment-' + lessonId + '" rows="5" style="width:100%;background:white;border:1.5px solid rgba(27,42,107,0.12);border-radius:10px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;box-sizing:border-box;" placeholder="Write your assignment response here..."></textarea>';
-    html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;margin-top:0.75rem;" onclick="submitLessonAssignment(\'' + programId + '\',\'' + lessonId + '\',\'' + colName + '\')">Submit Assignment</button>';
-    html += '<div id="assignment-result-' + lessonId + '" style="margin-top:0.75rem;"></div>';
-    html += '</div>';
+    html += '<div id="assignment-section-' + lessonId + '" style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--navy);">'
+    html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">📝 Module Assignment</p>'
+    html += '<p style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;line-height:1.7;">' + sanitize(l.assignment) + '</p>'
+    html += '<textarea id="assignment-' + lessonId + '" rows="5" style="width:100%;background:white;border:1.5px solid rgba(27,42,107,0.12);border-radius:10px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;box-sizing:border-box;" placeholder="Write your assignment response here... (optional if uploading a file)"></textarea>'
+    html += '<div style="margin-top:0.75rem;background:var(--light);border-radius:10px;padding:1rem;">'
+    html += '<p style="font-size:0.78rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">📎 Upload File (PDF, DOCX, ZIP — optional)</p>'
+    html += '<input type="file" id="assignment-file-' + lessonId + '" accept=".pdf,.doc,.docx,.zip,.ppt,.pptx,.xls,.xlsx,.txt" style="width:100%;font-size:0.82rem;font-family:Poppins,sans-serif;">'
+    html += '<p style="font-size:0.72rem;color:var(--gray);margin-top:0.35rem;">Accepted: PDF, Word, PowerPoint, Excel, ZIP, Text</p>'
+    html += '</div>'
+    html += '<div id="upload-progress-' + lessonId + '" style="margin-top:0.5rem;"></div>'
+    html += '<button class="btn-primary" style="width:auto;padding:0.6rem 1.25rem;margin-top:0.75rem;" onclick="submitLessonAssignment(\'' + programId + '\',\'' + lessonId + '\',\'' + colName + '\')">' + 'Submit Assignment</button>'
+    html += '<div id="assignment-result-' + lessonId + '" style="margin-top:0.75rem;"></div>'
+    html += '</div>'
   }
 
   contentDiv.innerHTML = html || '<p style="font-size:0.85rem;color:var(--gray);">No content yet for this lesson.</p>';
@@ -7258,11 +7264,31 @@ async function submitLessonQuiz(programId, lessonId, colName) {
 
 async function submitLessonAssignment(programId, lessonId, colName) {
   const textarea = document.getElementById('assignment-' + lessonId);
-  if (!textarea) return;
   const text = textarea.value.trim();
-  if (!text) return showToast('Write your assignment first', 'error');
+  const fileInput = document.getElementById('assignment-file-' + lessonId);
+  const file = fileInput && fileInput.files[0];
+  if (!text && !file) return showToast('Write a response or upload a file first', 'error');
   const resultDiv = document.getElementById('assignment-result-' + lessonId);
+  const progressDiv = document.getElementById('upload-progress-' + lessonId);
   const progressCol = colName === 'careerPrograms' ? 'careerLearningProgress' : 'learningProgress';
+
+  let fileUrl = '';
+  let fileName = '';
+  if (file) {
+    if (progressDiv) progressDiv.innerHTML = '<p style="font-size:0.78rem;color:#0A66C2;">⏳ Uploading file...</p>';
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('upload_preset', CLOUDINARY_PRESET);
+      const uploadRes = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/raw/upload', {method:'POST', body:fd});
+      const uploadData = await uploadRes.json();
+      fileUrl = uploadData.secure_url || '';
+      fileName = file.name;
+      if (progressDiv) progressDiv.innerHTML = '<p style="font-size:0.78rem;color:#27AE60;">✅ File uploaded: ' + sanitize(fileName) + '</p>';
+    } catch(e) {
+      if (progressDiv) progressDiv.innerHTML = '<p style="font-size:0.78rem;color:var(--red);">❌ File upload failed. Submitting text only.</p>';
+    }
+  }
 
   try {
     await addDoc(collection(db, 'programAssignments'), {
@@ -7274,6 +7300,8 @@ async function submitLessonAssignment(programId, lessonId, colName) {
       collection: colName,
       submission: text,
       response: text,
+      fileUrl: fileUrl,
+      fileName: fileName,
       status: 'pending',
       submittedAt: serverTimestamp()
     });
