@@ -163,13 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (loading) { loading.classList.add('active'); loading.style.display = 'flex'; }
   }
   document.getElementById('screen-landing') && (document.getElementById('screen-landing').style.display = 'none');
-  // Show slow message after 5 seconds
-  setTimeout(() => {
-    const slowMsg = document.getElementById('loading-slow-msg');
-    if (slowMsg && document.getElementById('screen-loading').classList.contains('active')) {
-      slowMsg.style.display = 'block';
-    }
-  }, 5000);
+
   // Redirect to landing if still loading after 25 seconds
   setTimeout(() => {
     const loading = document.getElementById('screen-loading');
@@ -10659,7 +10653,6 @@ h2,h3{position:relative;}
     <p style="color:rgba(255,255,255,0.75);font-size:0.85rem;margin-bottom:0.25rem;">Building the Future, Together</p>
     <p id="loading-message" style="color:rgba(255,255,255,0.5);font-size:0.8rem;margin-bottom:1.5rem;">Connecting to platform...</p>
     <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.2);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1.5rem;"></div>
-    <p id="loading-slow-msg" style="color:rgba(255,255,255,0.4);font-size:0.75rem;display:none;">Taking longer than usual...<br>Please check your internet connection.</p>
   </div>
 </div>
 <!-- VERIFY EMAIL -->
@@ -10780,7 +10773,6 @@ h2,h3{position:relative;}
           <button class="dd-item" onclick="showTab('directory');closeDropdowns()">Directory</button>
           <button class="dd-item" onclick="showTab('polls');closeDropdowns()">Polls</button>
           <button class="dd-item" onclick="showTab('meetings');closeDropdowns()">Meetings</button>
-          <button class="dd-item" onclick="window.open('https://wa.me/+254700000000','_blank')">Help Line</button>
         </div>
       </div>
 
