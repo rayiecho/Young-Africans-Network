@@ -10541,6 +10541,74 @@ function openMentorshipMeetingRoom(roomName, otherPersonName) {
 window.endMentorshipMeeting = async function() {
   const modal = document.getElementById('mentorship-meeting-modal');
   if (modal) modal.remove();
+  // Show session notes form for mentor
+  showSessionNotesForm();
+};
+
+window.showSessionNotesForm = function() {
+  const modal = document.createElement('div');
+  modal.id = 'session-notes-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  modal.innerHTML = '<div style="background:var(--white);border-radius:20px;padding:2rem;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;">' +
+    '<h3 style="font-family:Playfair Display,serif;font-size:1.2rem;font-weight:900;color:var(--navy);margin-bottom:0.25rem;">📝 Session Notes</h3>' +
+    '<p style="color:var(--gray);font-size:0.82rem;margin-bottom:1.5rem;">Record what was discussed to track your mentee's progress.</p>' +
+    '<div class="form-group" style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Topics Discussed *</label>' +
+    '<textarea id="sn-topics" rows="3" placeholder="What topics did you cover in this session?" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;resize:vertical;"></textarea></div>' +
+    '<div class="form-group" style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Action Items for Mentee</label>' +
+    '<textarea id="sn-actions" rows="2" placeholder="What should the mentee do before the next session?" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;resize:vertical;"></textarea></div>' +
+    '<div class="form-group" style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Next Session Goals</label>' +
+    '<textarea id="sn-goals" rows="2" placeholder="What will you focus on next time?" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;resize:vertical;"></textarea></div>' +
+    '<div class="form-group" style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Session Rating</label>' +
+    '<div style="display:flex;gap:0.5rem;" id="sn-stars">' +
+    [1,2,3,4,5].map(function(n){ return '<button onclick="setSessionRating('+n+')" id="star-'+n+'" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#ccc;">★</button>'; }).join('') +
+    '</div></div>' +
+    '<div class="form-group" style="margin-bottom:1.5rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Private Notes (only you can see)</label>' +
+    '<textarea id="sn-private" rows="2" placeholder="Any private observations about this session..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;resize:vertical;"></textarea></div>' +
+    '<div style="display:flex;gap:0.75rem;">' +
+    '<button onclick="saveSessionNotes()" style="flex:1;background:var(--navy);color:#fff;border:none;padding:0.75rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Save Notes</button>' +
+    '<button onclick="document.getElementById('session-notes-modal').remove()" style="background:var(--light);color:var(--navy);border:none;padding:0.75rem 1.25rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;">Skip</button>' +
+    '</div></div>';
+  document.body.appendChild(modal);
+  window._sessionRating = 0;
+};
+
+window.setSessionRating = function(n) {
+  window._sessionRating = n;
+  for (let i = 1; i <= 5; i++) {
+    const star = document.getElementById('star-' + i);
+    if (star) star.style.color = i <= n ? '#F5A623' : '#ccc';
+  }
+};
+
+window.saveSessionNotes = async function() {
+  const topics = document.getElementById('sn-topics')?.value.trim();
+  if (!topics) { showToast('Please add topics discussed', 'error'); return; }
+  const actions = document.getElementById('sn-actions')?.value.trim();
+  const goals = document.getElementById('sn-goals')?.value.trim();
+  const privateNotes = document.getElementById('sn-private')?.value.trim();
+  const rating = window._sessionRating || 0;
+  try {
+    await addDoc(collection(db,'sessionNotes'), {
+      mentorId: currentUser.uid,
+      mentorName: currentUserData.name,
+      topics, actions, goals, privateNotes, rating,
+      sessionDate: new Date().toISOString().split('T')[0],
+      createdAt: serverTimestamp()
+    });
+    // Award points for completing session
+    await addDoc(collection(db,'pointsHistory'), {
+      userId: currentUser.uid, action: 'mentoring_session',
+      points: 30, description: 'Mentoring session completed',
+      createdAt: serverTimestamp()
+    });
+    await setDoc(doc(db,'memberPoints',currentUser.uid), {
+      points: increment(30)
+    }, {merge: true});
+    document.getElementById('session-notes-modal').remove();
+    showToast('Session notes saved! +30 points earned 🎉');
+  } catch(e) {
+    showToast('Error saving notes: ' + e.message, 'error');
+  }
 };
 
 // ===== YAN POINTS SYSTEM =====
