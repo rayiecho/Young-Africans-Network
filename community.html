@@ -9880,7 +9880,7 @@ function showMessageToast(senderName, message, convId, senderId, otherName, othe
     '<div style="font-size:0.75rem;color:rgba(255,255,255,0.75);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + sanitize(message.substring(0,50)) + '</div>' +
     '<div style="font-size:0.68rem;color:var(--gold);margin-top:0.2rem;">Tap to reply →</div>' +
     '</div>' +
-    '<button onclick="document.getElementById('msg-toast').remove()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:1rem;cursor:pointer;padding:0;flex-shrink:0;">✕</button>';
+    '<button onclick="document.getElementById(\'msg-toast\').remove()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:1rem;cursor:pointer;padding:0;flex-shrink:0;">✕</button>';
 
   // Click to open conversation
   toast.addEventListener('click', function(e) {
