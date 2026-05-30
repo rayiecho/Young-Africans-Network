@@ -155,9 +155,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // For returning users - show nothing, let auth load silently
   const wasLoggedIn = localStorage.getItem('yan_last_tab');
   const loading = document.getElementById('screen-loading');
+  if (!wasLoggedIn) {
     if (loading) { loading.classList.add('active'); loading.style.display = 'flex'; }
   }
-  document.getElementById('screen-landing') && (document.getElementById('screen-landing').style.display = 'none');
 
   // Redirect to landing if still loading after 25 seconds
   setTimeout(() => {
