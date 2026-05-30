@@ -10010,8 +10010,8 @@ window.openConversation = async function(convId, otherId, otherNameEncoded, othe
             + '</div>';
         }
         msgDiv.innerHTML += '<div style="display:flex;flex-direction:column;align-items:'+(isMe?'flex-end':'flex-start')+';margin-bottom:0.25rem;">'
-          + '<div style="max-width:85%;word-break:break-word;overflow-wrap:break-word;background:'+(isMe?'var(--navy)':'var(--light)')+';color:'+(isMe?'#fff':'var(--navy)')+';padding:0.6rem 1rem;border-radius:'+(isMe?'16px 16px 4px 16px':'16px 16px 16px 4px')+';font-size:0.85rem;line-height:1.5;">' + 
-          + msgContent+'</div><span style="font-size:0.65rem;color:var(--gray);margin-top:2px;">'+time+'</span></div>';
+          + '<div style="max-width:85%;word-break:break-word;overflow-wrap:break-word;background:'+(isMe?'var(--navy)':'var(--light)')+';color:'+(isMe?'#fff':'var(--navy)')+';padding:0.6rem 1rem;border-radius:'+(isMe?'16px 16px 4px 16px':'16px 16px 16px 4px')+';font-size:0.85rem;line-height:1.5;">' + msgContent + '</div><span style="font-size:0.65rem;color:var(--gray);margin-top:2px;">'+time+'</span></div>';
+
       });
       msgDiv.scrollTop = msgDiv.scrollHeight;
     }
