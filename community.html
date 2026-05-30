@@ -10403,6 +10403,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:var(--navy);}
 @media(max-width:768px){
+  #members-mobile-btn{display:flex !important;}
   #yan-guide-widget{bottom:5rem !important;}
   .toast{bottom:5rem !important;}
 }
@@ -10458,7 +10459,8 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 #sidebar-dept{font-size:0.68rem;color:var(--gold);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sidebar-nav{padding:1rem 0;flex:1;}
 @media(min-width:769px){.members-panel{display:block !important;}}
-@media(max-width:768px){#feed-members-panel{display:none !important;}}
+@media(max-width:768px){
+  #members-mobile-btn{display:flex !important;}#feed-members-panel{display:none !important;}}
 .sidebar-dropdown{width:100%;}
 .dropdown-toggle{justify-content:space-between;}
 .dd-arrow{font-size:0.6rem;margin-left:auto;transition:transform 0.2s;}
@@ -10657,6 +10659,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .achieve-filter-btn{background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 1.25rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
 .achieve-filter-btn.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
 @media(max-width:768px){
+  #members-mobile-btn{display:flex !important;}
   :root{--sidebar:0px;}
   .sidebar{position:fixed;transform:translateX(-100%);transition:transform 0.3s;width:260px;z-index:100;}
   .sidebar.open{transform:translateX(0);}
@@ -10882,6 +10885,7 @@ h2,h3{position:relative;}
       <button class="hamburger-mobile" id="hamburger-mobile" onclick="document.getElementById('sidebar').classList.toggle('open')">
         <span></span><span></span><span></span>
       </button>
+      <button onclick="toggleMembersDrawer()" style="display:none;" id="members-mobile-btn" class="hamburger-mobile" style="background:var(--navy);color:#fff;border:none;border-radius:50px;padding:0.3rem 0.75rem;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">👥</button>
       <div class="topbar-title" style="display:none;" id="topbar-title-text">YAN Community</div>
       <div style="flex:1;max-width:400px;position:relative;margin:0 1rem;">
         <input type="text" id="global-search-input" placeholder=" YAN GOOGLE"
@@ -11088,6 +11092,43 @@ window._doSearchNav = function(key) {
   document.getElementById('global-search-input').value = '';
   document.getElementById('search-results-dropdown').style.display = 'none';
   try { eval(action); } catch(e) { console.log('Search nav error:', e); }
+};
+
+window.toggleMembersDrawer = function() {
+  var drawer = document.getElementById('members-drawer');
+  if (!drawer) return;
+  if (drawer.style.display === 'none') {
+    drawer.style.display = 'block';
+    // Load members into drawer
+    var list = document.getElementById('members-drawer-list');
+    if (list && list.innerHTML.includes('Loading')) {
+      getDocs(query(collection(db,'users'), limit(50))).then(function(snap) {
+        var html = '';
+        snap.docs.forEach(function(d) {
+          if (d.id === currentUser.uid) return;
+          var u = d.data();
+          var isOnline = window._onlineUsers && window._onlineUsers[d.id];
+          var convId = [currentUser.uid, d.id].sort().join('_');
+          var encodedName = encodeURIComponent(u.name||'');
+          var encodedPhoto = encodeURIComponent(u.photoUrl||'');
+          html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--light);cursor:pointer;" onclick="toggleMembersDrawer();showTab('messages');setTimeout(function(){openConversation('' + convId + '','' + d.id + '','' + encodedName + '','' + encodedPhoto + '');},500)">';
+          if (u.photoUrl) {
+            html += '<div style="position:relative;"><img src="' + u.photoUrl + '" style="width:42px;height:42px;border-radius:50%;object-fit:cover;">';
+          } else {
+            html += '<div style="position:relative;"><div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">' + (u.name||'?')[0] + '</div>';
+          }
+          html += '<span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:' + (isOnline?'#27AE60':'#ccc') + ';border:2px solid #fff;"></span></div>';
+          html += '<div><div style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + (u.name||'') + '</div>';
+          html += '<div style="font-size:0.72rem;color:' + (isOnline?'#27AE60':'var(--gray)') + ';">' + (isOnline?'Online':'Offline') + ' · ' + (u.country||'') + '</div></div>';
+          html += '<div style="margin-left:auto;background:var(--navy);color:#fff;border:none;padding:0.3rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">Message</div>';
+          html += '</div>';
+        });
+        list.innerHTML = html || '<div style="color:var(--gray);text-align:center;padding:1rem;">No members yet.</div>';
+      });
+    }
+  } else {
+    drawer.style.display = 'none';
+  }
 };
 
 window.closeDropdowns = function() {
