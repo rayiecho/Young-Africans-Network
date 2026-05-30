@@ -2929,16 +2929,20 @@ window.approveApplication = async function(appId, userIdEnc, programIdEnc, progr
     await updateDoc(doc(db,'programApplications',appId), {
       status: 'approved', approvedAt: serverTimestamp(), approvedBy: 'Admin'
     });
-    // Get program data
-    const progSnap = await getDoc(doc(db,'trainingPrograms',programId));
+    // Get program data - check both training and career
+    const appSnap = await getDoc(doc(db,'programApplications',appId));
+    const programType = appSnap.data().programType || 'training';
+    const colName = programType === 'career' ? 'careerPrograms' : 'trainingPrograms';
+    const progressCol = programType === 'career' ? 'careerLearningProgress' : 'learningProgress';
+    const progSnap = await getDoc(doc(db,colName,programId));
     const progData = progSnap.data();
     // Enroll the member
     const enrolledBy = progData.enrolledBy || [];
     if (!enrolledBy.includes(userId)) {
       enrolledBy.push(userId);
-      await updateDoc(doc(db,'trainingPrograms',programId), {enrolledBy});
+      await updateDoc(doc(db,colName,programId), {enrolledBy});
     }
-    await setDoc(doc(db,'learningProgress', userId + '_' + programId), {
+    await setDoc(doc(db,progressCol, userId + '_' + programId), {
       userId, programId, programTitle,
       status: 'enrolled', progress: 0,
       modulesCompleted: [], enrolledAt: serverTimestamp()
