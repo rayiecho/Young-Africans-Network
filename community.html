@@ -10289,8 +10289,8 @@ window.showAvailabilityPicker = function(mentorshipId) {
     buildSlotHTML(1) + buildSlotHTML(2) + buildSlotHTML(3) +
     '</div>' +
     '<div style="display:flex;gap:0.75rem;margin-top:1.5rem;">' +
-    '<button onclick="submitAvailability('' + mentorshipId + '')" style="flex:1;background:var(--navy);color:#fff;border:none;padding:0.75rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Send to Mentee</button>' +
-    '<button onclick="document.getElementById('availability-modal').remove()" style="background:var(--light);color:var(--navy);border:none;padding:0.75rem 1.25rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;">Skip</button>' +
+    '<button onclick="submitAvailability(\'' + mentorshipId + '\')" style="flex:1;background:var(--navy);color:#fff;border:none;padding:0.75rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Send to Mentee</button>' +
+    '<button onclick="document.getElementById(\'availability-modal\').remove()" style="background:var(--light);color:var(--navy);border:none;padding:0.75rem 1.25rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;">Skip</button>' +
     '</div></div>';
   document.body.appendChild(modal);
 };
@@ -10330,9 +10330,9 @@ window.submitAvailability = async function(mentorshipId) {
   const slotsText = slots.map((s,i) => (i+1)+'. '+s.label).join(' | ');
   await addDoc(collection(db,'conversations',convId,'messages'), {
     senderId: currentUser.uid, senderName: currentUserData.name,
-    text: '📅 I have accepted your mentorship request! Please pick a time for our first session:
-' + slotsText,
+    text: '\u{1F4C5} I have accepted your mentorship request! Please pick a time for our first session: ' + slotsText,
     mentorshipSlots: slots, mentorshipId,
+    createdAt: serverTimestamp()
     createdAt: serverTimestamp()
   });
   await setDoc(doc(db,'conversations',convId), {
