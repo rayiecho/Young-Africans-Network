@@ -9995,9 +9995,16 @@ window.openConversation = async function(convId, otherId, otherNameEncoded, othe
         const msg = d.data();
         const isMe = msg.senderId === currentUser.uid;
         const time = msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '';
+        let msgContent = sanitize(msg.text);
+        if (msg.meetingRoom) {
+          msgContent += '<div style="margin-top:0.5rem;">'
+            + '<button onclick="openMentorshipMeetingRoom(\'' + msg.meetingRoom + '\',\''+ (isMe ? \'Mentee\' : \'Mentor\') + '\')" '
+            + 'style="background:#27AE60;color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;">🎥 Join Meeting</button>'
+            + '</div>';
+        }
         msgDiv.innerHTML += '<div style="display:flex;flex-direction:column;align-items:'+(isMe?'flex-end':'flex-start')+';margin-bottom:0.25rem;">'
           + '<div style="max-width:70%;background:'+(isMe?'var(--navy)':'var(--light)')+';color:'+(isMe?'#fff':'var(--navy)')+';padding:0.6rem 1rem;border-radius:'+(isMe?'16px 16px 4px 16px':'16px 16px 16px 4px')+';font-size:0.85rem;line-height:1.5;">'
-          + sanitize(msg.text)+'</div><span style="font-size:0.65rem;color:var(--gray);margin-top:2px;">'+time+'</span></div>';
+          + msgContent+'</div><span style="font-size:0.65rem;color:var(--gray);margin-top:2px;">'+time+'</span></div>';
       });
       msgDiv.scrollTop = msgDiv.scrollHeight;
     }
@@ -10349,7 +10356,8 @@ window.startMentorshipMeeting = async function(menteeId, menteeNameEncoded, ment
   await addDoc(collection(db,'conversations',convId,'messages'),{
     senderId: currentUser.uid,
     senderName: currentUserData.name,
-    text: '🎥 I have started our mentorship meeting! Click the link to join now: ' + meetingUrl,
+    text: '🎥 I have started our mentorship meeting! Click the button below to join now.',
+    meetingRoom: roomName,
     createdAt: serverTimestamp()
   });
   await setDoc(doc(db,'conversations',convId),{
