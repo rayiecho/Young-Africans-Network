@@ -2955,13 +2955,17 @@ function downloadRecommendationLetter(scholarship, recommender, reason, deadline
 </body>
 </html>`;
 
-  const printWin = window.open('', '_blank');
-  printWin.document.write(html);
-  printWin.document.close();
-  setTimeout(() => {
-    printWin.focus();
-    printWin.print();
-  }, 1200);
+  // Download as HTML file
+  const blob = new Blob([html], {type: 'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'YAN_Recommendation_Letter_' + (currentUserData.name||'').replace(/\s+/g,'_') + '.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Recommendation letter downloaded!');
 }
 async function loadScholarshipMatcher() {
   const container = document.getElementById('scholarship-section-matcher');
