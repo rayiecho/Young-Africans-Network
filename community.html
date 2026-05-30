@@ -9429,17 +9429,9 @@ async function loadCareerPrograms() {
 }
 
 async function enrollCareerProgram(programId) {
-  if (!confirm('Enroll in this program? You can only be enrolled in one career program at a time.')) return;
+  if (!confirm('Enroll in this program?')) return;
 
-  const activeSnap = await getDocs(query(
-    collection(db, 'careerLearningProgress'),
-    where('userId', '==', currentUser.uid),
-    where('status', '==', 'enrolled')
-  ));
-  if (!activeSnap.empty) {
-    const active = activeSnap.docs[0].data();
-    return showToast('Already enrolled in "' + (active.programTitle||'a program') + '". Complete it first!', 'error');
-  }
+
 
   const ref = doc(db, 'careerPrograms', programId);
   const snap = await getDoc(ref);
