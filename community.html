@@ -9833,7 +9833,7 @@ function startMessageListener() {
   );
   const unsub = onSnapshot(q, function(snap) {
     snap.docChanges().forEach(function(change) {
-      if (change.type === 'modified' || change.type === 'added') {
+      if (change.type === 'modified') {
         const data = change.doc.data();
         console.log('MSG CHANGE:', change.type, 'unread:', data.unreadCount, 'lastSender:', data.lastSenderId, 'me:', currentUser.uid);
         showToast('DEBUG: msg change detected - unread:' + JSON.stringify(data.unreadCount));
