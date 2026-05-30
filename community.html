@@ -899,7 +899,7 @@ async function loadFeedMembers() {
       const convId = [currentUser.uid, d.id].sort().join('_');
       const encodedName = encodeURIComponent(u.name||'');
       const encodedPhoto = encodeURIComponent(u.photoUrl||'');
-      html += '<div style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0;border-bottom:1px solid var(--light);cursor:pointer;" onclick="showTab('messages');setTimeout(function(){openConversation('' + convId + '','' + d.id + '','' + encodedName + '','' + encodedPhoto + '');},500)">';
+      html += '<div style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0;border-bottom:1px solid var(--light);cursor:pointer;" onclick="showTab(\'messages\');setTimeout(function(){openConversation(\'' + convId + '\',\'' + d.id + '\',\'' + encodedName + '\',\'' + encodedPhoto + '\');},500)">';
       html += '<div style="position:relative;flex-shrink:0;">';
       if (u.photoUrl) {
         html += '<img src="' + u.photoUrl + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">';
