@@ -7115,23 +7115,43 @@ async function loadAllPrograms() {
   ].join('');
 }
 
-async function enrollInProgram(programId) {
-  if (!confirm('Enroll in this program?')) return;
-
-  const ref = doc(db, 'trainingPrograms', programId);
-  const snap = await getDoc(ref);
+async function applyForProgram(programId, type) {
+  if (!confirm('Apply for this program? Your application will be reviewed by the YAN admin team.')) return;
+  const colName = type === 'career' ? 'careerPrograms' : 'trainingPrograms';
+  const snap = await getDoc(doc(db, colName, programId));
   const data = snap.data();
-  const enrolledBy = data.enrolledBy || [];
-  if (enrolledBy.includes(currentUser.uid)) return showToast('Already enrolled!', 'error');
-  enrolledBy.push(currentUser.uid);
-  await updateDoc(ref, {enrolledBy: enrolledBy});
-  await setDoc(doc(db, 'learningProgress', currentUser.uid + '_' + programId), {
-    userId: currentUser.uid, programId: programId,
-    programTitle: data.title, status: 'enrolled',
-    progress: 0, modulesCompleted: [], enrolledAt: serverTimestamp()
-  }, {merge: true});
-  showToast('Enrolled successfully! Go to My Learning to start.');
-  loadAllPrograms();
+  const existingApp = await getDocs(query(collection(db,'programApplications'),where('userId','==',currentUser.uid),where('programId','==',programId)));
+  if (!existingApp.empty) {
+    const st = existingApp.docs[0].data().status;
+    if (st==='pending') return showToast('Already applied! Awaiting admin review.','error');
+    if (st==='approved') return showToast('You are already enrolled!','error');
+    if (st==='rejected') return showToast('Your application was rejected. Contact admin.','error');
+  }
+  await addDoc(collection(db,'programApplications'),{
+    userId:currentUser.uid, userName:currentUserData.name,
+    userEmail:currentUserData.email||'', userPhoto:currentUserData.photoUrl||'',
+    userCountry:currentUserData.country||'', programId, programTitle:data.title,
+    programType:type, status:'pending', appliedAt:serverTimestamp()
+  });
+  await addDoc(collection(db,'notifications'),{
+    title:'New Program Application',
+    message:currentUserData.name+' has applied for '+data.title+'. Please review.',
+    type:'info', userId:'tNbO0jryVeadlpIkKQnv6mjYJn42',
+    postedBy:'YAN System', createdAt:serverTimestamp(), readBy:[]
+  });
+  showToast('Application submitted! You will be notified once approved.');
+  if (type==='career') loadCareerPrograms(); else loadAllPrograms();
+}
+async function enrollInProgram(programId) {
+  const snap = await getDoc(doc(db,'trainingPrograms',programId));
+  const data = snap.data();
+  const enrolledBy = data.enrolledBy||[];
+  if (!enrolledBy.includes(currentUser.uid)) enrolledBy.push(currentUser.uid);
+  await updateDoc(doc(db,'trainingPrograms',programId),{enrolledBy});
+  await setDoc(doc(db,'learningProgress',currentUser.uid+'_'+programId),{
+    userId:currentUser.uid, programId, programTitle:data.title, status:'enrolled',
+    progress:0, modulesCompleted:[], enrolledAt:serverTimestamp()
+  },{merge:true});
 }
 
 async function openProgram(programId) {
@@ -9275,7 +9295,7 @@ window.rejectContentSubmission = rejectContentSubmission;
 window.loadProgramsHub = loadProgramsHub;
 window.showProgramsSection = showProgramsSection;
 window.loadAllPrograms = loadAllPrograms;
-window.enrollInProgram = enrollInProgram;
+window.enrollInProgram = enrollInProgram; window.applyForProgram = applyForProgram;
 
 
 async function submitModuleQuiz(programId, moduleId, quiz) {
@@ -9776,17 +9796,16 @@ async function loadCareerPrograms() {
 }
 
 async function enrollCareerProgram(programId) {
-  if (!confirm('Enroll in this program?')) return;
-
-
-
-  const ref = doc(db, 'careerPrograms', programId);
-  const snap = await getDoc(ref);
+  const snap = await getDoc(doc(db,'careerPrograms',programId));
   const data = snap.data();
-  const enrolledBy = data.enrolledBy || [];
-  if (enrolledBy.includes(currentUser.uid)) return showToast('Already enrolled!', 'error');
-  enrolledBy.push(currentUser.uid);
-  await updateDoc(ref, {enrolledBy});
+  const enrolledBy = data.enrolledBy||[];
+  if (!enrolledBy.includes(currentUser.uid)) enrolledBy.push(currentUser.uid);
+  await updateDoc(doc(db,'careerPrograms',programId),{enrolledBy});
+  await setDoc(doc(db,'careerLearningProgress',currentUser.uid+'_'+programId),{
+    userId:currentUser.uid, programId, programTitle:data.title, status:'enrolled',
+    modulesCompleted:[], enrolledAt:serverTimestamp()
+  },{merge:true});
+}
   await setDoc(doc(db, 'careerLearningProgress', currentUser.uid + '_' + programId), {
     userId: currentUser.uid, programId,
     programTitle: data.title, status: 'enrolled',
