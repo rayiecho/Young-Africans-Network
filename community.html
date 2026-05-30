@@ -9763,7 +9763,8 @@ async function loadMessagesTab() {
   container.innerHTML = '<p style="padding:1rem;color:var(--gray);">Loading...</p>';
   try {
     const convSnap = await getDocs(query(collection(db,'conversations'),where('participants','array-contains',currentUser.uid)));
-    let html = '<div style="display:grid;grid-template-columns:300px 1fr;gap:1rem;height:75vh;">';
+    const isMob = window.innerWidth < 768;
+    let html = '<div style="display:grid;grid-template-columns:' + (isMob ? '1fr' : '300px 1fr') + ';gap:1rem;height:' + (isMob ? '85vh' : '75vh') + ';">';
     html += '<div style="background:var(--white);border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06);overflow:hidden;display:flex;flex-direction:column;">';
     html += '<div style="padding:1rem;border-bottom:1px solid var(--light);display:flex;justify-content:space-between;align-items:center;">';
     html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);">Messages</h3>';
@@ -10439,7 +10440,8 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 #sidebar-role{font-size:0.7rem;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.5px;}
 #sidebar-dept{font-size:0.68rem;color:var(--gold);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sidebar-nav{padding:1rem 0;flex:1;}
-@media(max-width:768px){#feed-members-panel{display:none;}}
+@media(min-width:769px){.members-panel{display:block !important;}}
+@media(max-width:768px){#feed-members-panel{display:none !important;}}
 .sidebar-dropdown{width:100%;}
 .dropdown-toggle{justify-content:space-between;}
 .dd-arrow{font-size:0.6rem;margin-left:auto;transition:transform 0.2s;}
@@ -10902,7 +10904,7 @@ h2,h3{position:relative;}
       </div>
       <div id="feed-posts"></div>
       </div>
-      <div id="feed-members-panel" style="width:240px;flex-shrink:0;background:var(--white);border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06);padding:1rem;position:sticky;top:80px;max-height:80vh;overflow-y:auto;">
+      <div id="feed-members-panel" style="width:240px;flex-shrink:0;background:var(--white);border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06);padding:1rem;position:sticky;top:80px;max-height:80vh;overflow-y:auto;display:none;" class="members-panel">
         <h3 style="font-size:0.85rem;font-weight:800;color:var(--navy);margin-bottom:1rem;"> YAN Members</h3>
         <div id="feed-members-list"><div style="color:var(--gray);font-size:0.8rem;">Loading...</div></div>
       </div>
