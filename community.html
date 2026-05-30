@@ -11525,7 +11525,7 @@ window.sendYANGuideFloat = async function() {
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 1000,
-        messages: [{role:'user', content: 'You are the Young Africans Network Guide for YAN — a pan-African youth organization. Help with scholarships, career advice, YAN programs and African opportunities. Be warm and concise. Contact: info@youngafricansnetwork.org (general), tech@youngafricansnetwork.org (technical), marketing@youngafricansnetwork.org (partnerships). Website: youngafricansnetwork.org. Question: ' + message}]
+        messages: [{role:'user', content: 'You are the Young Africans Network Guide for YAN - a pan-African youth organization. Help with scholarships, career advice, YAN programs and African opportunities. Be warm and concise. Contact: info@youngafricansnetwork.org (general), tech@youngafricansnetwork.org (technical), marketing@youngafricansnetwork.org (partnerships). Website: youngafricansnetwork.org. Question: ' + message}]
       })
     });
     var data = await response.json();
