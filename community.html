@@ -6957,7 +6957,6 @@ async function loadAllPrograms() {
 
 async function enrollInProgram(programId) {
   if (!confirm('Enroll in this program?')) return;
-  }
 
   const ref = doc(db, 'trainingPrograms', programId);
   const snap = await getDoc(ref);
