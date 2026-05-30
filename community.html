@@ -5230,9 +5230,7 @@ async function loadJobBoard() {
   let formTypeOpts = JOB_TYPES.map(function(t) { return '<option value="' + t + '">' + t + '</option>'; }).join('');
   let formFieldOpts = JOB_FIELDS.map(function(f) { return '<option value="' + f + '">' + f + '</option>'; }).join('');
 
-  let jobsHtml = snap.empty
-    ? '<div class="empty-state"><div style="font-size:3rem;margin-bottom:1rem;"></div><p>No opportunities posted yet.</p><p style="font-size:0.82rem;color:var(--gray);">Be the first to post a job or internship!</p></div>'
-    : snap.docs.map(function(d) { return renderJobCard(d.id, d.data()); }).join('');
+  let jobsHtml = '<div id="jobs-list-inner"></div>';
 
   container.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">'
     + '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);"> Job & Opportunity Board</h3>'
@@ -5265,9 +5263,13 @@ async function loadJobBoard() {
     + '<select id="job-filter-field" onchange="filterJobs()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;"><option value="">All Fields</option>' + fieldOpts + '</select>'
     + '<input type="text" id="job-filter-search" placeholder="Search..." oninput="filterJobs()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;flex:1;min-width:150px;">'
     + '</div>'
-    + '<div id="jobs-list">' + jobsHtml + '</div>';
-  // Reset filter to show all
-  setTimeout(function(){ var s=document.getElementById('job-filter-type'); if(s){s.value='';} var f=document.getElementById('job-filter-field'); if(f){f.value='';} filterJobs(); }, 200);
+    + '<div id="jobs-list"></div>';
+  // Always reset and show all
+  var sel = document.getElementById('job-filter-type');
+  if (sel) sel.value = '';
+  var fsel = document.getElementById('job-filter-field');
+  if (fsel) fsel.value = '';
+  filterJobs();
 }
 
 function renderJobCard(id, j) {
