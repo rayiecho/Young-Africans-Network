@@ -10700,14 +10700,24 @@ window.submitAvailability = async function(mentorshipId) {
     mentorshipSlots: slots, mentorshipId,
     createdAt: serverTimestamp()
   });
-  await setDoc(doc(db,'conversations',convId), {
-    participants: [currentUser.uid, m.menteeId],
-    participantNames: {[currentUser.uid]: currentUserData.name, [m.menteeId]: m.menteeName},
-    lastMessage: '📅 Please pick a time for our first session',
-    lastMessageAt: serverTimestamp(),
-    lastSenderName: currentUserData.name, lastSenderId: currentUser.uid,
-    ['unreadCount.' + m.menteeId]: increment(1), ['unreadCount.' + currentUser.uid]: 0
-  }, {merge: true});
+  const convSnap3 = await getDoc(doc(db,'conversations',convId));
+  if (!convSnap3.exists()) {
+    await setDoc(doc(db,'conversations',convId), {
+      participants: [currentUser.uid, m.menteeId],
+      participantNames: {[currentUser.uid]: currentUserData.name, [m.menteeId]: m.menteeName},
+      lastMessage: '📅 Please pick a time for our first session',
+      lastMessageAt: serverTimestamp(),
+      lastSenderName: currentUserData.name, lastSenderId: currentUser.uid,
+      unreadCount: {[m.menteeId]: 1, [currentUser.uid]: 0}
+    });
+  } else {
+    await updateDoc(doc(db,'conversations',convId), {
+      lastMessage: '📅 Please pick a time for our first session',
+      lastMessageAt: serverTimestamp(),
+      lastSenderName: currentUserData.name, lastSenderId: currentUser.uid,
+      ['unreadCount.' + m.menteeId]: increment(1), ['unreadCount.' + currentUser.uid]: 0
+    });
+  }
 
   document.getElementById('availability-modal').remove();
   showToast('Availability sent to ' + m.menteeName + '!');
