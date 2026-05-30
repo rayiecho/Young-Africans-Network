@@ -832,6 +832,9 @@ function loadFeed() {
   const unsub = onSnapshot(q, snap => {
     if (snap.empty) { container.innerHTML = '<div class="empty-state">No posts yet. Be the first to post! </div>'; return; }
     container.innerHTML = snap.docs.map(d => renderPost({ id: d.id, ...d.data() })).join('');
+  }, err => {
+    console.error('Feed error:', err);
+    container.innerHTML = '<div class="empty-state">Could not load posts. Please refresh.</div>';
   });
   unsubscribers.push(unsub);
 }
