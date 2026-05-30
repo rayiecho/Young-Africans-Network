@@ -46,6 +46,33 @@ GRANTS = [
     {'title':'Wellcome Trust Africa Grants','provider':'Wellcome Trust','amount':'Up to 250,000 GBP','deadline':'Rolling','eligibility':'African researchers in health and science','link':'https://wellcome.org/grant-funding/schemes/african-programmes','countries':'All African countries','category':'grant'},
 ]
 
+
+INTERNSHIPS = [
+    {'title':'UN Youth Volunteer Programme 2025','company':'United Nations','location':'Various African offices','type':'Internship','deadline':'Rolling','link':'https://www.unv.org','description':'6-12 month volunteer internship with UN agencies across Africa','category':'internship','duration':'6-12 months','stipend':'Monthly allowance provided'},
+    {'title':'African Development Bank Internship','company':'African Development Bank','location':'Abidjan, Ivory Coast','type':'Internship','deadline':'March & September annually','link':'https://www.afdb.org/en/careers/internships','description':'6-month internship in finance, economics, or development','category':'internship','duration':'6 months','stipend':'Paid'},
+    {'title':'World Health Organization Africa Internship','company':'WHO Africa','location':'Brazzaville, Congo','type':'Internship','deadline':'Rolling','link':'https://www.who.int/careers/internships','description':'Health policy and program internship in Africa','category':'internship','duration':'6 months','stipend':'Unpaid with allowance'},
+    {'title':'Google Africa Developer Internship','company':'Google','location':'Remote / Nairobi / Lagos','type':'Internship','deadline':'Rolling','link':'https://careers.google.com','description':'Software engineering internship for African developers','category':'internship','duration':'3-6 months','stipend':'Paid'},
+    {'title':'Microsoft Africa Research Institute Internship','company':'Microsoft','location':'Nairobi, Kenya','type':'Internship','deadline':'Rolling','link':'https://www.microsoft.com/en-us/research/lab/microsoft-research-africa','description':'AI and technology research internship','category':'internship','duration':'3-6 months','stipend':'Paid'},
+    {'title':'UNICEF Africa Internship Programme','company':'UNICEF','location':'Various African countries','type':'Internship','deadline':'Rolling','link':'https://www.unicef.org/careers/internships','description':'Work on child rights and development programs','category':'internship','duration':'6 months','stipend':'Stipend provided'},
+    {'title':'African Union Commission Internship','company':'African Union','location':'Addis Ababa, Ethiopia','type':'Internship','deadline':'January & July annually','link':'https://au.int/en/internship','description':'Policy and governance internship at AU headquarters','category':'internship','duration':'6 months','stipend':'Paid'},
+    {'title':'GIZ Africa Internship','company':'GIZ Germany','location':'Various African countries','type':'Internship','deadline':'Rolling','link':'https://www.giz.de/en/html/jobs.html','description':'Development cooperation internship across Africa','category':'internship','duration':'3-6 months','stipend':'Paid'},
+    {'title':'Safaricom Internship Programme','company':'Safaricom','location':'Nairobi, Kenya','type':'Internship','deadline':'Rolling','link':'https://www.safaricom.co.ke/careers','description':'Tech and business internship at Africa leading telco','category':'internship','duration':'3 months','stipend':'Paid'},
+    {'title':'MTN Group Internship','company':'MTN Group','location':'Johannesburg / Various African countries','type':'Internship','deadline':'Rolling','link':'https://www.mtn.com/careers','description':'Telecommunications and digital services internship','category':'internship','duration':'3-6 months','stipend':'Paid'},
+]
+
+FELLOWSHIPS = [
+    {'title':'Obama Foundation Leaders Africa Program','company':'Obama Foundation','location':'Various African cities','type':'Fellowship','deadline':'February annually','link':'https://www.obama.org/programs/leaders/africa','description':'Leadership fellowship for African change-makers under 40','category':'fellowship','duration':'1 year','stipend':'Fully funded'},
+    {'title':'Mandela Washington Fellowship','company':'US Department of State','location':'USA + home country','type':'Fellowship','deadline':'November annually','link':'https://yali.state.gov/mwf','description':'6-week leadership institute in USA for African youth','category':'fellowship','duration':'6 weeks','stipend':'Fully funded'},
+    {'title':'Acumen East Africa Fellowship','company':'Acumen','location':'East Africa','type':'Fellowship','deadline':'February annually','link':'https://acumen.org/fellowships','description':'Social enterprise leadership fellowship','category':'fellowship','duration':'1 year','stipend':'Stipend provided'},
+    {'title':'African Leadership Academy Fellowship','company':'African Leadership Academy','location':'Johannesburg, South Africa','type':'Fellowship','deadline':'October annually','link':'https://www.africanleadershipacademy.org','description':'Leadership development for young African leaders','category':'fellowship','duration':'2 years','stipend':'Scholarship + stipend'},
+    {'title':'Aspen New Voices Fellowship','company':'Aspen Institute','location':'Various','type':'Fellowship','deadline':'Rolling','link':'https://www.aspeninstitute.org','description':'Fellowship for African development thinkers and practitioners','category':'fellowship','duration':'1 year','stipend':'Fully funded'},
+    {'title':'Atlantic Fellows for Social and Economic Equity','company':'Atlantic Institute','location':'London + Africa','type':'Fellowship','deadline':'January annually','link':'https://www.atlanticfellows.org','description':'Fellowship addressing inequality in Africa','category':'fellowship','duration':'1 year','stipend':'Fully funded'},
+    {'title':'Schwarzman Scholars Program','company':'Schwarzman College','location':'Beijing, China','type':'Fellowship','deadline':'September annually','link':'https://www.schwarzmanscholars.org','description':'Masters degree fellowship at Tsinghua University','category':'fellowship','duration':'1 year','stipend':'Fully funded'},
+    {'title':'African Development Bank Young Professionals','company':'African Development Bank','location':'Abidjan, Ivory Coast','type':'Fellowship','deadline':'January annually','link':'https://www.afdb.org/en/careers/young-professionals-program','description':'3-year professional fellowship at AfDB','category':'fellowship','duration':'3 years','stipend':'Full salary'},
+    {'title':'TED Fellows Program','company':'TED','location':'Remote + TED Conference','type':'Fellowship','deadline':'May annually','link':'https://fellowships.ted.com','description':'Fellowship for innovative African thinkers and doers','category':'fellowship','duration':'2 years','stipend':'Travel + support'},
+    {'title':'Hubert H. Humphrey Fellowship','company':'US Department of State','location':'USA','type':'Fellowship','deadline':'October annually','link':'https://www.humphreyfellowship.org','description':'10-month professional development fellowship in USA','category':'fellowship','duration':'10 months','stipend':'Fully funded'},
+]
+
 def post_opportunities():
     now = datetime.now(timezone.utc)
     week = now.strftime("%Y-W%U")
@@ -64,6 +91,18 @@ def post_opportunities():
         db.collection("careerJobs").document(doc_id).set({**j,"postedAt":now,"postedById":"yan-bot","weekRef":week,"verified":True,"status":"active"})
         posted += 1
         print(f"  ✅ {j['title'][:50]}")
+    print("\n🎓 Posting internships...")
+    for i in INTERNSHIPS:
+        doc_id = f"weekly-{week}-intern-{i['title'][:25].replace(' ','-').lower()}"
+        db.collection("careerJobs").document(doc_id).set({**i,"postedAt":now,"postedById":"yan-bot","weekRef":week,"verified":True,"status":"active"})
+        posted += 1
+        print(f"  ✅ {i['title'][:50]}")
+    print("\n🌟 Posting fellowships...")
+    for f in FELLOWSHIPS:
+        doc_id = f"weekly-{week}-fellow-{f['title'][:25].replace(' ','-').lower()}"
+        db.collection("careerJobs").document(doc_id).set({**f,"postedAt":now,"postedById":"yan-bot","weekRef":week,"verified":True,"status":"active"})
+        posted += 1
+        print(f"  ✅ {f['title'][:50]}")
     print("\n💰 Posting grants...")
     for g in GRANTS:
         doc_id = f"weekly-{week}-grant-{g['title'][:30].replace(' ','-').lower()}"
@@ -71,7 +110,7 @@ def post_opportunities():
         posted += 1
         print(f"  ✅ {g['title'][:50]}")
     try:
-        db.collection("notifications").add({"title":"🌍 New Opportunities This Week!","message":"10 scholarships, 10 jobs and 10 grants posted this week. Check YAN Scholarships and Career tabs now!","type":"opportunity","postedBy":"YAN Opportunities Bot","createdAt":now,"readBy":[]})
+        db.collection("notifications").add({"title":"🌍 New Opportunities This Week!","message":"10 scholarships, 10 jobs, 10 internships, 10 fellowships and 10 grants posted this week. Check YAN now!","type":"opportunity","postedBy":"YAN Opportunities Bot","createdAt":now,"readBy":[]})
         print(f"\n🔔 Notification sent to all members!")
     except Exception as e:
         print(f"⚠️  Notification failed: {e}")
