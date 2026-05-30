@@ -152,10 +152,12 @@ window.addEventListener('beforeunload', function() {
 document.addEventListener('DOMContentLoaded', function() {
   // Hide ALL screens immediately to prevent flash
   document.querySelectorAll('.screen').forEach(s => { s.style.display = 'none'; s.classList.remove('active'); });
-  // Always show loading screen briefly, but skip if auth confirms quickly
+  // Show loading screen, but hide quickly if user was previously logged in
   const wasLoggedIn = localStorage.getItem('yan_last_tab');
   const loading = document.getElementById('screen-loading');
   if (loading) { loading.classList.add('active'); loading.style.display = 'flex'; }
+  // If previously logged in, hide loading after 1.5s max
+  if (wasLoggedIn) { setTimeout(() => { if (loading && loading.classList.contains('active')) { loading.style.display = 'none'; loading.classList.remove('active'); } }, 1500); }
   document.getElementById('screen-landing') && (document.getElementById('screen-landing').style.display = 'none');
 
   // Redirect to landing if still loading after 25 seconds
