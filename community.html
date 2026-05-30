@@ -10494,16 +10494,25 @@ window.startMentorshipMeeting = async function(menteeId, menteeNameEncoded, ment
     meetingRoom: roomName,
     createdAt: serverTimestamp()
   });
-  await setDoc(doc(db,'conversations',convId),{
-    participants:[currentUser.uid,menteeId],
-    participantNames:{[currentUser.uid]:currentUserData.name,[menteeId]:menteeName},
-    lastMessage:'🎥 Mentorship meeting started! Click to join.',
-    lastMessageAt:serverTimestamp(),
-    lastSenderName:currentUserData.name,
-    lastSenderId:currentUser.uid,
-    ['unreadCount.'+menteeId]:increment(1),
-    ['unreadCount.'+currentUser.uid]:0
-  },{merge:true});
+  const convSnap2 = await getDoc(doc(db,'conversations',convId));
+  if (!convSnap2.exists()) {
+    await setDoc(doc(db,'conversations',convId),{
+      participants:[currentUser.uid,menteeId],
+      participantNames:{[currentUser.uid]:currentUserData.name,[menteeId]:menteeName},
+      lastMessage:'🎥 Mentorship meeting started! Click to join.',
+      lastMessageAt:serverTimestamp(),
+      lastSenderName:currentUserData.name, lastSenderId:currentUser.uid,
+      unreadCount:{[currentUser.uid]:0,[menteeId]:1}
+    });
+  } else {
+    await updateDoc(doc(db,'conversations',convId),{
+      lastMessage:'🎥 Mentorship meeting started! Click to join.',
+      lastMessageAt:serverTimestamp(),
+      lastSenderName:currentUserData.name, lastSenderId:currentUser.uid,
+      ['unreadCount.'+menteeId]:increment(1),
+      ['unreadCount.'+currentUser.uid]:0
+    });
+  }
   // Open meeting inside platform
   openMentorshipMeetingRoom(roomName, menteeName);
   showToast(menteeName + ' has been notified via message!');
