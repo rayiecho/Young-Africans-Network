@@ -618,7 +618,7 @@ window.loadSection = async function(section) {
   }[section] || section;
   const container = document.getElementById('content-area');
   container.innerHTML = '<div class="loading">Loading...</div>';
-  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: loadAnalytics, assignments: loadAssignments, programs: loadProgramsAdmin, applications: (...args) => window.loadProgramApplications(...args), notifications: loadNotificationCenter, finance: loadFinance, recommendations: (...args) => window.loadRecommendations(...args), mentors: loadMentorApplications };
+  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: loadAnalytics, assignments: loadAssignments, programs: loadProgramsAdmin, applications: (...args) => window.loadProgramApplications(...args), notifications: loadNotificationCenter, finance: loadFinance, recommendations: (...args) => window.loadRecommendations(...args), mentors: loadMentorApplications, opportunities: loadOpportunitiesManager };
   if (fns[section]) {
     try {
       await fns[section](container);
@@ -2662,6 +2662,213 @@ window.loadProgramApplications = async function(c) {
     c.innerHTML = '<p style="color:var(--red);padding:1rem;">Error: ' + e.message + '</p>';
   }
 };
+// ============ OPPORTUNITIES MANAGER ============
+async function loadOpportunitiesManager() {
+  const main = document.getElementById('main-content');
+  main.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--gray);">Loading opportunities...</div>';
+
+  const [schSnap, jobsSnap] = await Promise.all([
+    getDocs(collection(db,'scholarships')),
+    getDocs(collection(db,'careerJobs'))
+  ]);
+
+  const all = [];
+  schSnap.forEach(d => all.push({id:d.id, col:'scholarships', ...d.data()}));
+  jobsSnap.forEach(d => all.push({id:d.id, col:'careerJobs', ...d.data()}));
+  all.sort((a,b) => (b.postedAt?.seconds||0) - (a.postedAt?.seconds||0));
+
+  const cats = ['all','scholarship','job','internship','fellowship','grant'];
+  const statusColors = {open:'#27AE60', pending:'#F39C12', closed:'#E74C3C', draft:'#95A5A6'};
+
+  main.innerHTML = `
+    <div style="padding:1.5rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+        <div>
+          <h2 style="font-size:1.4rem;font-weight:800;color:var(--navy);margin:0;">🌍 Opportunities Manager</h2>
+          <p style="color:var(--gray);font-size:0.82rem;margin:0.25rem 0 0;">${all.length} total opportunities</p>
+        </div>
+        <button onclick="showAddOpportunityModal()" style="background:var(--navy);color:#fff;border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">+ Add Opportunity</button>
+      </div>
+
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+        ${cats.map(cat => `<button onclick="filterOpportunities('${cat}')" id="opp-filter-${cat}" style="padding:0.4rem 1rem;border-radius:50px;border:1.5px solid var(--navy);background:${cat==='all'?'var(--navy)':'transparent'};color:${cat==='all'?'#fff':'var(--navy)'};font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">${cat.charAt(0).toUpperCase()+cat.slice(1)}</button>`).join('')}
+        <button onclick="filterOpportunitiesByStatus('pending')" style="padding:0.4rem 1rem;border-radius:50px;border:1.5px solid #F39C12;background:transparent;color:#F39C12;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">⏳ Pending</button>
+        <button onclick="filterOpportunitiesByStatus('open')" style="padding:0.4rem 1rem;border-radius:50px;border:1.5px solid #27AE60;background:transparent;color:#27AE60;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">✅ Open</button>
+        <button onclick="filterOpportunitiesByStatus('closed')" style="padding:0.4rem 1rem;border-radius:50px;border:1.5px solid #E74C3C;background:transparent;color:#E74C3C;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">🔴 Closed</button>
+      </div>
+
+      <div id="opp-list">
+        ${all.map(o => `
+          <div class="opp-card" data-cat="${o.category||'other'}" data-status="${o.status||'pending'}" style="background:#fff;border-radius:12px;padding:1.25rem;margin-bottom:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);border-left:4px solid ${statusColors[o.status||'pending']||'#95A5A6'};">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
+              <div style="flex:1;">
+                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;margin-bottom:0.4rem;">
+                  <span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.6rem;border-radius:50px;font-size:0.7rem;font-weight:700;text-transform:uppercase;">${o.category||'other'}</span>
+                  <span style="background:${statusColors[o.status||'pending']}20;color:${statusColors[o.status||'pending']};padding:0.2rem 0.6rem;border-radius:50px;font-size:0.7rem;font-weight:700;text-transform:uppercase;">${o.status||'pending'}</span>
+                </div>
+                <h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin:0 0 0.25rem;">${o.title||'Untitled'}</h4>
+                <p style="font-size:0.78rem;color:var(--gray);margin:0 0 0.25rem;">${o.provider||o.company||''} ${o.location?'· '+o.location:''}</p>
+                <p style="font-size:0.78rem;color:var(--gray);margin:0;">Deadline: ${o.deadline||'Rolling'} ${o.funding||o.amount?'· '+(o.funding||o.amount):''}</p>
+              </div>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                ${(o.status||'pending')==='pending' ? `<button onclick="publishOpportunity('${o.id}','${o.col}')" style="background:#27AE60;color:#fff;border:none;padding:0.4rem 0.8rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;">✅ Publish</button>` : ''}
+                ${(o.status||'pending')==='open' ? `<button onclick="closeOpportunity('${o.id}','${o.col}')" style="background:#E74C3C;color:#fff;border:none;padding:0.4rem 0.8rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;">🔴 Close</button>` : ''}
+                ${(o.status||'pending')==='closed' ? `<button onclick="publishOpportunity('${o.id}','${o.col}')" style="background:#27AE60;color:#fff;border:none;padding:0.4rem 0.8rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;">♻️ Reopen</button>` : ''}
+                <button onclick="editOpportunityModal('${o.id}','${o.col}')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 0.8rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;">✏️ Edit</button>
+                <button onclick="deleteOpportunity('${o.id}','${o.col}')" style="background:#E74C3C;color:#fff;border:none;padding:0.4rem 0.8rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;">🗑️</button>
+                ${o.link ? `<a href="${o.link}" target="_blank" style="background:rgba(27,42,107,0.08);color:var(--navy);border:none;padding:0.4rem 0.8rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;text-decoration:none;">🔗 Link</a>` : ''}
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+window.filterOpportunities = function(cat) {
+  document.querySelectorAll('[id^="opp-filter-"]').forEach(b => {
+    b.style.background = 'transparent';
+    b.style.color = 'var(--navy)';
+  });
+  const btn = document.getElementById('opp-filter-'+cat);
+  if(btn){ btn.style.background='var(--navy)'; btn.style.color='#fff'; }
+  document.querySelectorAll('.opp-card').forEach(card => {
+    card.style.display = (cat==='all' || card.dataset.cat===cat) ? 'block' : 'none';
+  });
+};
+
+window.filterOpportunitiesByStatus = function(status) {
+  document.querySelectorAll('.opp-card').forEach(card => {
+    card.style.display = card.dataset.status===status ? 'block' : 'none';
+  });
+};
+
+window.publishOpportunity = async function(id, col) {
+  await updateDoc(doc(db, col, id), {status:'open'});
+  showToast('Opportunity published! Members can now see it.');
+  loadOpportunitiesManager();
+};
+
+window.closeOpportunity = async function(id, col) {
+  await updateDoc(doc(db, col, id), {status:'closed'});
+  showToast('Opportunity closed.');
+  loadOpportunitiesManager();
+};
+
+window.deleteOpportunity = async function(id, col) {
+  if(!confirm('Delete this opportunity?')) return;
+  await deleteDoc(doc(db, col, id));
+  showToast('Deleted!');
+  loadOpportunitiesManager();
+};
+
+window.editOpportunityModal = async function(id, col) {
+  const snap = await getDoc(doc(db, col, id));
+  const o = snap.data();
+  const modal = document.createElement('div');
+  modal.id = 'edit-opp-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:20px;padding:2rem;max-width:540px;width:100%;max-height:90vh;overflow-y:auto;">
+      <h3 style="font-size:1.1rem;font-weight:800;color:var(--navy);margin-bottom:1.25rem;">✏️ Edit Opportunity</h3>
+      <div style="display:grid;gap:0.75rem;">
+        <div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.25rem;">Title *</label><input id="eo-title" value="${o.title||''}" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+        <div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.25rem;">Provider / Company</label><input id="eo-provider" value="${o.provider||o.company||''}" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+        <div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.25rem;">Category</label>
+          <select id="eo-cat" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;">
+            ${['scholarship','job','internship','fellowship','grant'].map(c=>`<option value="${c}" ${o.category===c?'selected':''}>${c}</option>`).join('')}
+          </select></div>
+        <div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.25rem;">Funding / Amount</label><input id="eo-funding" value="${o.funding||o.amount||''}" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+        <div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.25rem;">Deadline</label><input id="eo-deadline" value="${o.deadline||''}" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+        <div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.25rem;">Eligibility</label><input id="eo-eligibility" value="${o.eligibility||o.description||''}" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+        <div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.25rem;">Countries</label><input id="eo-countries" value="${o.countries||'All African countries'}" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+        <div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.25rem;">Link *</label><input id="eo-link" value="${o.link||''}" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
+        <button onclick="saveEditedOpportunity('${id}','${col}')" style="flex:1;background:var(--navy);color:#fff;border:none;padding:0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Save Changes</button>
+        <button onclick="document.getElementById('edit-opp-modal').remove()" style="flex:1;background:rgba(27,42,107,0.08);color:var(--navy);border:none;padding:0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Cancel</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+};
+
+window.saveEditedOpportunity = async function(id, col) {
+  const cat = document.getElementById('eo-cat').value;
+  const updates = {
+    title: document.getElementById('eo-title').value.trim(),
+    provider: document.getElementById('eo-provider').value.trim(),
+    company: document.getElementById('eo-provider').value.trim(),
+    category: cat,
+    funding: document.getElementById('eo-funding').value.trim(),
+    amount: document.getElementById('eo-funding').value.trim(),
+    deadline: document.getElementById('eo-deadline').value.trim(),
+    eligibility: document.getElementById('eo-eligibility').value.trim(),
+    description: document.getElementById('eo-eligibility').value.trim(),
+    countries: document.getElementById('eo-countries').value.trim(),
+    link: document.getElementById('eo-link').value.trim(),
+  };
+  await updateDoc(doc(db, col, id), updates);
+  document.getElementById('edit-opp-modal').remove();
+  showToast('Opportunity updated!');
+  loadOpportunitiesManager();
+};
+
+window.showAddOpportunityModal = function() {
+  const modal = document.createElement('div');
+  modal.id = 'add-opp-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:20px;padding:2rem;max-width:540px;width:100%;max-height:90vh;overflow-y:auto;">
+      <h3 style="font-size:1.1rem;font-weight:800;color:var(--navy);margin-bottom:1.25rem;">🌍 Add New Opportunity</h3>
+      <div style="display:grid;gap:0.75rem;">
+        <div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.25rem;">Title *</label><input id="ao-title" placeholder="e.g. Chevening Scholarship 2026" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+        <div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.25rem;">Provider / Company *</label><input id="ao-provider" placeholder="e.g. UK Government" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+        <div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.25rem;">Category *</label>
+          <select id="ao-cat" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;">
+            <option value="scholarship">Scholarship</option>
+            <option value="job">Job</option>
+            <option value="internship">Internship</option>
+            <option value="fellowship">Fellowship</option>
+            <option value="grant">Grant</option>
+          </select></div>
+        <div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.25rem;">Funding / Amount</label><input id="ao-funding" placeholder="e.g. Full Scholarship or $5,000" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+        <div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.25rem;">Deadline</label><input id="ao-deadline" placeholder="e.g. November annually" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+        <div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.25rem;">Eligibility / Description</label><textarea id="ao-eligibility" placeholder="Who can apply?" rows="2" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;resize:vertical;"></textarea></div>
+        <div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.25rem;">Countries</label><input id="ao-countries" value="All African countries" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+        <div><label style="font-size:0.8rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.25rem;">Official Link *</label><input id="ao-link" placeholder="https://..." style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.2);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
+        <button onclick="submitNewOpportunity()" style="flex:1;background:var(--navy);color:#fff;border:none;padding:0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Add Opportunity</button>
+        <button onclick="document.getElementById('add-opp-modal').remove()" style="flex:1;background:rgba(27,42,107,0.08);color:var(--navy);border:none;padding:0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Cancel</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+};
+
+window.submitNewOpportunity = async function() {
+  const title = document.getElementById('ao-title').value.trim();
+  const link = document.getElementById('ao-link').value.trim();
+  if(!title || !link) return showToast('Title and link are required','error');
+  const cat = document.getElementById('ao-cat').value;
+  const col = (cat==='scholarship'||cat==='grant') ? 'scholarships' : 'careerJobs';
+  await addDoc(collection(db, col), {
+    title, category: cat,
+    provider: document.getElementById('ao-provider').value.trim(),
+    company: document.getElementById('ao-provider').value.trim(),
+    funding: document.getElementById('ao-funding').value.trim(),
+    amount: document.getElementById('ao-funding').value.trim(),
+    deadline: document.getElementById('ao-deadline').value.trim(),
+    eligibility: document.getElementById('ao-eligibility').value.trim(),
+    description: document.getElementById('ao-eligibility').value.trim(),
+    countries: document.getElementById('ao-countries').value.trim(),
+    link, status: 'pending',
+    postedAt: new Date(), postedBy: 'Admin', verified: false,
+  });
+  document.getElementById('add-opp-modal').remove();
+  showToast('Opportunity added! Review and publish when ready.');
+  loadOpportunitiesManager();
+};
+// ============ END OPPORTUNITIES MANAGER ============
+
 window.approveApplication = async function(appId, userIdEnc, programIdEnc, programTitleEnc, emailEnc, nameEnc) {
   const userId = decodeURIComponent(userIdEnc);
   const programId = decodeURIComponent(programIdEnc);
@@ -3004,6 +3211,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
           <button class="nav-item nav-sub" data-section="stories" onclick="loadSection('stories')"><span class="nav-icon">📖</span> Journey Stories</button>
           <button class="nav-item nav-sub" data-section="newsletters" onclick="loadSection('newsletters')"><span class="nav-icon">📧</span> Newsletters</button>
           <button class="nav-item nav-sub" data-section="hubs" onclick="loadSection('hubs')"><span class="nav-icon">🏛️</span> YAN Hubs</button>
+          <button class="nav-item nav-sub" data-section="opportunities" onclick="loadSection('opportunities')"><span class="nav-icon">🌍</span> Opportunities Manager</button>
         </div>
       </div>
 
