@@ -7943,6 +7943,29 @@ async function submitProgramAssignment(moduleId, programId) {
   });
   showToast('Assignment submitted!');
   document.getElementById('prog-assign-' + moduleId).style.display = 'none';
+  // Auto-complete and issue certificate on final module
+  try {
+    let progSnap = await getDoc(doc(db, 'trainingPrograms', programId));
+    if (!progSnap.exists()) progSnap = await getDoc(doc(db, 'careerPrograms', programId));
+    const totalModules = progSnap.exists() ? (progSnap.data().modules || 1) : 1;
+    const modNum = parseInt(moduleId.replace('module-','')) || 1;
+    if (modNum >= totalModules) {
+      const progressId = currentUser.uid + '_' + programId;
+      const title = progSnap.exists() ? (progSnap.data().title || programId) : programId;
+      await setDoc(doc(db,'learningProgress',progressId), {
+        userId: currentUser.uid, programId, programTitle: title,
+        status: 'completed', certificateIssued: true,
+        completedAt: serverTimestamp()
+      }, {merge: true});
+      await setDoc(doc(db,'certificates', currentUser.uid + '_' + programId), {
+        userId: currentUser.uid, userName: currentUserData.name,
+        programId, programTitle: title, department: 'programs',
+        status: 'approved', issuedAt: serverTimestamp(), type: 'program'
+      });
+      showToast('🎉 Program complete! Certificate issued. Check My Grades.');
+      try { await emailjs.send('service_0ygnc65','template_r1eeakd',{to_name:currentUserData.name,to_email:currentUserData.email,subject:'🎓 Your YAN Certificate is Ready!',message:'Congratulations '+currentUserData.name+'! You completed '+title+'. Check My Grades to download your certificate.'}); } catch(e) {}
+    }
+  } catch(e) { console.log('Cert error:',e); }
 }
 
 async function markModuleDone(moduleId, programId) {
