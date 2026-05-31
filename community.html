@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- cache-bust: v16 -->
+<!-- cache-bust: v17 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1714,7 +1714,11 @@ async function loadGradesTab() {
 
     // Show certificates section
     let certHtml = '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:1.25rem;">🏆 My Certificates</h2>';
-    if (certsSnap.empty) {
+    const approvedFromGrades = gradesSnap.docs.filter(d => d.data().certificateApproved === true);
+    const collectionProgramIds = new Set(certsSnap.docs.map(d => d.data().programId));
+    const uniqueGradeCerts = approvedFromGrades.filter(d => !collectionProgramIds.has(d.data().programId));
+
+    if (certsSnap.empty && uniqueGradeCerts.length === 0) {
       certHtml += '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);text-align:center;margin-bottom:1.5rem;"><p style="font-size:1.5rem;">🏆</p><p style="font-size:0.88rem;color:var(--gray);margin-top:0.5rem;">No certificates yet. Complete a program to earn your first certificate!</p></div>';
     } else {
       certHtml += '<div style="display:grid;gap:1rem;margin-bottom:1.5rem;">';
@@ -1729,6 +1733,16 @@ async function loadGradesTab() {
         if (isApproved) {
           certHtml += '<button onclick="downloadCertificate(\'' + d.id + '\',\'programs\')" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">⬇️ Download</button>';
         }
+        certHtml += '</div>';
+      });
+      uniqueGradeCerts.forEach(d => {
+        const g = d.data();
+        const title = g.programTitle || g.programId || 'YAN Certificate';
+        certHtml += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid #27AE60;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">';
+        certHtml += '<div><p style="font-size:0.95rem;font-weight:800;color:var(--navy);">🏆 ' + sanitize(title) + '</p>';
+        certHtml += '<p style="font-size:0.75rem;color:var(--gray);">Issued to ' + sanitize(g.userName || currentUserData.name) + '</p>';
+        certHtml += '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.6rem;border-radius:50px;font-size:0.7rem;font-weight:700;">✅ APPROVED</span></div>';
+        certHtml += '<button onclick="downloadCertificate(\'' + d.id + '\',\'grades\')" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">⬇️ Download</button>';
         certHtml += '</div>';
       });
       certHtml += '</div>';
