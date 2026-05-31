@@ -1727,7 +1727,7 @@ async function loadGradesTab() {
         certHtml += '<p style="font-size:0.75rem;color:var(--gray);">Issued to ' + sanitize(cert.userName||currentUserData.name) + '</p>';
         certHtml += '<span style="background:' + (isApproved?'rgba(39,174,96,0.1)':'rgba(245,166,35,0.1)') + ';color:' + (isApproved?'#27AE60':'#b37800') + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + (isApproved?'✅ APPROVED':'⏳ PENDING') + '</span></div>';
         if (isApproved) {
-          certHtml += '<button onclick="generateCertPDF(\'' + d.id + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">⬇️ Download</button>';
+          certHtml += '<button onclick="downloadCertificate(\'' + d.id + '\',\'programs\')" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">⬇️ Download</button>';
         }
         certHtml += '</div>';
       });
