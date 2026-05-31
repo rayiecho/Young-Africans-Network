@@ -9574,6 +9574,28 @@ async function submitAssignment(programId, moduleId) {
       + '</div>';
   }
 
+  // Auto-complete program and issue certificate on final module assignment
+  try {
+    const progSnap = await getDoc(doc(db, 'trainingPrograms', programId));
+    const totalModules = progSnap.exists() ? (progSnap.data().modules || 1) : 1;
+    const modNum = parseInt(moduleId.replace('module-','')) || 1;
+    if (modNum >= totalModules) {
+      const progressId = currentUser.uid + '_' + programId;
+      const title = progSnap.exists() ? (progSnap.data().title || programId) : programId;
+      await setDoc(doc(db,'learningProgress',progressId), {
+        userId: currentUser.uid, programId, programTitle: title,
+        status: 'completed', certificateIssued: true,
+        completedAt: serverTimestamp()
+      }, {merge: true});
+      await setDoc(doc(db,'certificates', currentUser.uid + '_' + programId), {
+        userId: currentUser.uid, userName: currentUserData.name,
+        programId, programTitle: title, department: 'programs',
+        status: 'approved', issuedAt: serverTimestamp(), type: 'program'
+      });
+      showToast('🎉 Program complete! Certificate issued. Check My Profile.');
+    }
+  } catch(e) { console.log('Completion error:', e); }
+
   btn.disabled = false;
   btn.textContent = 'Submit Assignment';
 }
