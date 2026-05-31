@@ -7571,7 +7571,7 @@ async function submitLessonQuiz(programId, lessonId, colName) {
     resultsHtml += '<p style="font-size:0.78rem;font-weight:600;color:var(--navy);">' + (i+1) + '. ' + sanitize(r.question) + '</p>';
     resultsHtml += '<p style="font-size:0.75rem;color:' + (r.isCorrect ? '#27AE60' : '#dc3545') + ';">Your answer: ' + sanitize(r.selectedText) + (r.isCorrect ? ' ✓' : ' ✗') + '</p>';
     if (!r.isCorrect) {
-      resultsHtml += '<p style="font-size:0.75rem;color:#27AE60;">Correct answer: ' + sanitize(r.correctText) + '</p>';
+      if ((3 - (attempts + 1)) <= 0) resultsHtml += '<p style="font-size:0.75rem;color:#27AE60;">Correct answer: ' + sanitize(r.correctText) + '</p>';
     }
     resultsHtml += '</div>';
   });
