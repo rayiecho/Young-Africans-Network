@@ -1945,7 +1945,7 @@ async function downloadCertificate(certId, deptOverride, programId) {
     'yan-leadership': ['Leadership','Team Management','Decision Making','Strategic Thinking','Communication']
   };
   // Look up skills by programId first, then department
-  let skills = skillsMap[programId] || skillsMap[gradeProgramTitle] || skillsMap[deptOverride || u.department] || ['Leadership','Communication','Teamwork','Problem Solving','Initiative'];
+  let skills = skillsMap[programId] || skillsMap[deptOverride || u.department] || ['Leadership','Communication','Teamwork','Problem Solving','Initiative'];
 
   const deptAchievements = {
     'career': 'Career Development & Public Speaking Program',
