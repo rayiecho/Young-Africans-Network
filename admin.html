@@ -2535,6 +2535,7 @@ window.editProgram = async function(colName, progId) {
     '<div class="form-group"><label>Duration</label><input type="text" id="edit-prog-dur" value="' + sanitize(p.duration||'4 Weeks') + '" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>' +
     '<div class="form-group"><label>Level</label><select id="edit-prog-level" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;"><option ' + (p.level==="Beginner"?"selected":"") + '>Beginner</option><option ' + (p.level==="Intermediate"?"selected":"") + '>Intermediate</option><option ' + (p.level==="Advanced"?"selected":"") + '>Advanced</option></select></div>' +
     '<div class="form-group"><label>Modules Count</label><input type="number" id="edit-prog-modules" value="' + (p.modules||4) + '" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>' +
+    '<div class="form-group" style="grid-column:1/-1;"><label>Skills Earned (comma separated — shown on certificate)</label><input type="text" id="edit-prog-skills" value="' + sanitize((p.skills||[]).join(', ')) + '" placeholder="e.g. Google Docs, Google Sheets, Gmail, Google Drive" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>' +
     '</div>' +
     '<div style="display:flex;gap:0.75rem;margin-top:1rem;">' +
     '<button onclick="saveEditProgram(\''+colName+'\',\''+progId+'\')" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Save Changes</button>' +
@@ -2549,9 +2550,11 @@ window.saveEditProgram = async function(colName, progId) {
   const duration = document.getElementById('edit-prog-dur').value.trim();
   const level = document.getElementById('edit-prog-level').value;
   const modules = parseInt(document.getElementById('edit-prog-modules').value)||4;
+  const skillsRaw = document.getElementById('edit-prog-skills').value.trim();
+  const skills = skillsRaw ? skillsRaw.split(',').map(s=>s.trim()).filter(s=>s) : [];
   if (!title) return showToast('Title is required','error');
   try {
-    await updateDoc(doc(db,colName,progId),{title,description,category,duration,level,modules,updatedAt:serverTimestamp()});
+    await updateDoc(doc(db,colName,progId),{title,description,category,duration,level,modules,skills,updatedAt:serverTimestamp()});
     showToast(' Program updated!');
     loadSection('programs');
   } catch(e) { showToast(e.message,'error'); }
