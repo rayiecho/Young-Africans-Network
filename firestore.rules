@@ -128,7 +128,7 @@ service cloud.firestore {
     match /recommendations/{recId} {
       allow read: if isLoggedIn();
       allow create: if isLoggedIn();
-      allow update: if isAdminOrHead();
+      allow update: if isLoggedIn();
       allow delete: if isAdmin();
     }
 
@@ -173,7 +173,7 @@ service cloud.firestore {
     match /careerAssignments/{assignId} {
       allow read: if isLoggedIn();
       allow create: if isLoggedIn();
-      allow update: if isAdminOrHead();
+      allow update: if isLoggedIn();
       allow delete: if isAdmin();
     }
 
@@ -196,7 +196,7 @@ service cloud.firestore {
     match /communityReports/{reportId} {
       allow read: if isLoggedIn();
       allow create: if isLoggedIn();
-      allow update: if isAdminOrHead();
+      allow update: if isLoggedIn();
       allow delete: if isAdmin();
     }
 
@@ -224,7 +224,7 @@ service cloud.firestore {
     match /peerRequests/{reqId} {
       allow read: if isLoggedIn();
       allow create: if isLoggedIn();
-      allow update: if isAdminOrHead();
+      allow update: if isLoggedIn();
     }
 
     match /memberIds/{memberId} { allow read: if true; allow write: if isLoggedIn(); }
@@ -266,7 +266,7 @@ service cloud.firestore {
     match /programAssignments/{assignId} {
       allow read: if isLoggedIn();
       allow create: if isLoggedIn();
-      allow update: if isAdminOrHead();
+      allow update: if isLoggedIn();
       allow delete: if isAdmin();
     }
 
