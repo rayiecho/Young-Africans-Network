@@ -557,6 +557,7 @@ function loadTabContent(tab) {
   if (tab === 'feed') safeLoad(tab, loadFeed);
   if (tab === 'hubs') safeLoad(tab, loadYANHubs);
   if (tab === 'meetings') safeLoad(tab, loadMeetings);
+  if (tab === 'helpline') safeLoad(tab, loadHelpline);
   if (tab === 'profile') safeLoad(tab, loadProfile);
   if (tab === 'head') safeLoad(tab, loadHeadPanel);
   if (tab === 'admin') safeLoad(tab, loadAdminPanel);
@@ -1410,6 +1411,63 @@ async function sendDeptChat(dept) {
 }
 
 // MEETINGS
+async function loadHelpline() {
+  const container = document.getElementById('helpline-container');
+  if (!container) return;
+  container.innerHTML = `
+  <div style="max-width:700px;margin:0 auto;padding:1rem;">
+    <div style="background:linear-gradient(135deg,var(--navy),#2D3F7B);border-radius:20px;padding:2rem;color:#fff;margin-bottom:1.5rem;text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:0.5rem;">🆘</div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;margin-bottom:0.5rem;">YAN Helpline</h2>
+      <p style="opacity:0.85;font-size:0.88rem;line-height:1.7;">You are not alone. YAN is here to support you. Reach out through any of the channels below.</p>
+    </div>
+
+    <div style="display:grid;gap:1rem;margin-bottom:1.5rem;">
+      <div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);display:flex;align-items:center;gap:1rem;">
+        <div style="width:48px;height:48px;border-radius:50%;background:rgba(37,211,102,0.1);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">💬</div>
+        <div style="flex:1;">
+          <h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.2rem;">WhatsApp Support</h4>
+          <p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem;">Chat with a YAN support volunteer directly</p>
+          <a href="https://wa.me/254700000000" target="_blank" style="background:#25D366;color:#fff;padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;text-decoration:none;display:inline-block;">Chat on WhatsApp</a>
+        </div>
+      </div>
+
+      <div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);display:flex;align-items:center;gap:1rem;">
+        <div style="width:48px;height:48px;border-radius:50%;background:rgba(27,42,107,0.1);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">📧</div>
+        <div style="flex:1;">
+          <h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.2rem;">Email Support</h4>
+          <p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem;">Send us an email and we'll respond within 24 hours</p>
+          <a href="mailto:support@youngafricansnetwork.org" style="background:var(--navy);color:#fff;padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;text-decoration:none;display:inline-block;">Send Email</a>
+        </div>
+      </div>
+
+      <div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);display:flex;align-items:center;gap:1rem;">
+        <div style="width:48px;height:48px;border-radius:50%;background:rgba(231,76,60,0.1);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">🧠</div>
+        <div style="flex:1;">
+          <h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.2rem;">Mental Health Support</h4>
+          <p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem;">Join our Mental Health & Wellbeing hub for peer support</p>
+          <button onclick="showTab('hubs')" style="background:var(--red);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">Go to Mental Hub</button>
+        </div>
+      </div>
+
+      <div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);display:flex;align-items:center;gap:1rem;">
+        <div style="width:48px;height:48px;border-radius:50%;background:rgba(243,156,18,0.1);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">🤝</div>
+        <div style="flex:1;">
+          <h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.2rem;">Peer Mentorship</h4>
+          <p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem;">Connect with a YAN mentor for guidance and support</p>
+          <button onclick="showTab('mentorship')" style="background:var(--gold);color:var(--navy);border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">Find a Mentor</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:rgba(27,42,107,0.04);border-radius:16px;padding:1.25rem;text-align:center;">
+      <p style="font-size:0.85rem;color:var(--navy);font-weight:700;margin-bottom:0.5rem;">🌍 YAN Community WhatsApp</p>
+      <p style="font-size:0.82rem;color:var(--gray);margin-bottom:1rem;">Join our main community group for announcements and support</p>
+      <a href="https://chat.whatsapp.com/BlvxC0j6sUUBfWjbIW9dH9" target="_blank" style="background:#25D366;color:#fff;padding:0.6rem 1.5rem;border-radius:50px;font-size:0.85rem;font-weight:700;text-decoration:none;display:inline-block;">Join WhatsApp Community</a>
+    </div>
+  </div>`;
+}
+
 async function loadMeetings() {
   const container = document.getElementById('meetings-container');
   container.innerHTML = `
@@ -11816,6 +11874,7 @@ h2,h3{position:relative;}
           <button class="dd-item" onclick="showTab('directory');closeDropdowns()">Directory</button>
           <button class="dd-item" onclick="showTab('polls');closeDropdowns()">Polls</button>
           <button class="dd-item" onclick="showTab('meetings');closeDropdowns()">Meetings</button>
+          <button class="dd-item" onclick="showTab('helpline');closeDropdowns()">Helpline</button>
         </div>
       </div>
 
