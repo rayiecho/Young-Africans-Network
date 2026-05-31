@@ -2007,6 +2007,8 @@ async function downloadCertificate(certId, deptOverride, programId) {
 
   const css = [
     '@import url(https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Montserrat:wght@300;400;600;700;800&display=swap);',
+    '@page{size:A4 landscape;margin:0;}',
+    '@media print{body{margin:0;padding:0;}html,body{width:297mm;height:210mm;}}',
     '*{margin:0;padding:0;box-sizing:border-box;}',
     'body{background:#f0ece4;display:flex;align-items:center;justify-content:center;min-height:100vh;}',
     '.cert{width:297mm;height:210mm;background:#fff;position:relative;overflow:hidden;display:flex;font-family:Montserrat,sans-serif;box-shadow:0 20px 60px rgba(0,0,0,0.2);}',
