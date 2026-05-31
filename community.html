@@ -1958,7 +1958,7 @@ async function downloadCertificate(certId, deptOverride, programId) {
     'programs': 'Technology & Web Development Program'
   };
 
-  // When called from grades tab, read the real program title from memberGrades
+  // When called from grades tab, read the real program title and skills from memberGrades
   let gradeProgramTitle = '';
   if (deptOverride === 'grades') {
     try {
@@ -1966,6 +1966,13 @@ async function downloadCertificate(certId, deptOverride, programId) {
       if (gradeSnap.exists()) {
         const gd = gradeSnap.data();
         gradeProgramTitle = gd.programTitle || gd.programId || '';
+        if (gd.programId) {
+          const pSnap = await getDoc(doc(db, 'trainingPrograms', gd.programId)).catch(()=>null);
+          const pSnap2 = (!pSnap?.exists()) ? await getDoc(doc(db, 'careerPrograms', gd.programId)).catch(()=>null) : null;
+          const pData = pSnap?.exists() ? pSnap.data() : pSnap2?.exists() ? pSnap2.data() : null;
+          if (pData?.skills) skills = pData.skills;
+          if (pData?.title) gradeProgramTitle = pData.title.replace(/^YAN\s+/i, '');
+        }
       }
     } catch(e) {}
   }
