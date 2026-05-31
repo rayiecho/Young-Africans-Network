@@ -1949,21 +1949,11 @@ async function downloadCertificate(certId, deptOverride, programId) {
     'programs': 'Technology & Web Development Program'
   };
 
-  // When called from grades tab, read the real program title from memberGrades
-  let gradeProgramTitle = '';
-  if (deptOverride === 'grades') {
-    try {
-      const gradeSnap = await getDoc(doc(db, 'memberGrades', certId));
-      if (gradeSnap.exists()) {
-        const gd = gradeSnap.data();
-        gradeProgramTitle = gd.programTitle || gd.programId || '';
-      }
-    } catch(e) {}
-  }
-  let achievement = gradeProgramTitle || deptAchievements[deptOverride || u.department] || (dept?.name ? 'Active Contribution to ' + dept.name : 'YAN Program');
+  let achievement = deptAchievements[deptOverride || u.department] || (dept?.name ? 'Active Contribution to ' + dept.name : 'YAN Program');
   let enrolledDate = '';
   let modulesCompleted = 0;
-  const hubDept = (deptOverride === 'grades') ? u.department : (deptOverride || u.department);
+
+  const hubDept = deptOverride || u.department;
   try {
     if (hubDept === 'programs' || hubDept === 'tech' || hubDept === 'career') {
       const progressColName = hubDept === 'career' ? 'careerLearningProgress' : 'learningProgress';
@@ -7953,7 +7943,7 @@ async function submitProgramAssignment(moduleId, programId) {
   });
   showToast('Assignment submitted!');
   document.getElementById('prog-assign-' + moduleId).style.display = 'none';
-}
+
 async function markModuleDone(moduleId, programId) {
   await setDoc(doc(db, 'moduleProgress', currentUser.uid + '_' + moduleId), {
     userId: currentUser.uid, moduleId: moduleId,

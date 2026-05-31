@@ -2015,13 +2015,6 @@ window.approveCertificate = async function(gradeDocId, userId, programId) {
   if (!confirm('Approve certificate for ' + programId + '?')) return;
   try {
     await setDoc(doc(db, 'memberGrades', gradeDocId), { certificateApproved: true, certApprovedAt: serverTimestamp() }, {merge: true});
-    // Fix gate: also mark certificateIssued in learningProgress so applyForProgram() unlocks
-    if (userId && programId) {
-      const lpId = userId + '_' + programId;
-      await setDoc(doc(db, 'learningProgress', lpId), { certificateIssued: true, certificateApprovedAt: serverTimestamp() }, {merge: true});
-      // Also check careerLearningProgress
-      await setDoc(doc(db, 'careerLearningProgress', lpId), { certificateIssued: true, certificateApprovedAt: serverTimestamp() }, {merge: true}).catch(()=>{});
-    }
     if (userId) {
       await addDoc(collection(db, 'notifications'), {
         title: '🏆 Certificate Approved!',

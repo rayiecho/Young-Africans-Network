@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yan-cache-v17';
+const CACHE_NAME = 'yan-cache-v20';
 const STATIC_ASSETS = [
   '/images/logo.jpeg'
 ];
