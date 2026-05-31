@@ -7124,13 +7124,14 @@ async function applyForProgram(programId, type) {
     if (certSnap.empty) {
       const modal = document.createElement('div');
       modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
-      modal.innerHTML = `<div style="background:#fff;border-radius:20px;padding:2rem;max-width:460px;width:100%;text-align:center;">
-        <div style="font-size:3rem;margin-bottom:1rem;">🎓</div>
-        <h3 style="font-size:1.1rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Complete Foundation Program First</h3>
-        <p style="color:var(--gray);font-size:0.85rem;line-height:1.7;margin-bottom:1.5rem;">You must complete the <strong>YAN Google Workspace Essentials</strong> program and earn your certificate before applying to other programs. This ensures you have the digital skills needed to succeed.</p>
-        <button onclick="this.closest('div[style*=fixed]').remove();showProgramsSection('tech');" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;width:100%;margin-bottom:0.75rem;">Go to Google Workspace Program</button>
-        <button onclick="this.closest('div[style*=fixed]').remove()" style="background:rgba(27,42,107,0.08);color:var(--navy);border:none;padding:0.75rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;width:100%;">Cancel</button>
-      </div>`;
+      modal.innerHTML = '<div style="background:#fff;border-radius:20px;padding:2rem;max-width:460px;width:100%;text-align:center;">'
+        + '<div style="font-size:3rem;margin-bottom:1rem;">🎓</div>'
+        + '<h3 style="font-size:1.1rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Complete Foundation Program First</h3>'
+        + '<p style="color:var(--gray);font-size:0.85rem;line-height:1.7;margin-bottom:1.5rem;">You must complete the <strong>YAN Google Workspace Essentials</strong> program and earn your certificate before applying to other programs.</p>'
+        + '<button onclick="document.getElementById(\'gate-modal\').remove();showProgramsSection(\'tech\');" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;width:100%;margin-bottom:0.75rem;">Go to Google Workspace Program</button>'
+        + '<button onclick="document.getElementById(\'gate-modal\').remove()" style="background:rgba(27,42,107,0.08);color:var(--navy);border:none;padding:0.75rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;width:100%;">Cancel</button>'
+        + '</div>';
+      modal.id = 'gate-modal';
       document.body.appendChild(modal);
       return;
     }
