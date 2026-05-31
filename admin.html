@@ -2128,6 +2128,43 @@ window.reviewAssignment = async function(colName, assignId, status, userId, prog
         readBy: []
       });
     }
+    // Issue certificate if approved and it's a program assignment
+    if (status === 'approved' && uid && pid) {
+      try {
+        const progRef = doc(db, 'trainingPrograms', pid);
+        let progSnap = await getDoc(progRef);
+        if (!progSnap.exists()) progSnap = await getDoc(doc(db, 'careerPrograms', pid));
+        const title = progSnap.exists() ? (progSnap.data().title || pid) : pid;
+        const totalModules = progSnap.exists() ? (progSnap.data().modules || 1) : 1;
+        const modNum = lid ? parseInt((lid.split('-lesson-')[0] || '').replace('module-','')) || 1 : 1;
+        if (modNum >= totalModules) {
+          // Get member name
+          const userSnap = await getDoc(doc(db, 'users', uid));
+          const userName = userSnap.exists() ? userSnap.data().name : 'Member';
+          // Mark program as completed
+          await setDoc(doc(db, 'learningProgress', uid + '_' + pid), {
+            userId: uid, programId: pid, programTitle: title,
+            status: 'completed', certificateIssued: true,
+            completedAt: serverTimestamp()
+          }, {merge: true});
+          // Issue certificate
+          await setDoc(doc(db, 'certificates', uid + '_' + pid), {
+            userId: uid, userName: userName,
+            programId: pid, programTitle: title,
+            department: 'programs', status: 'approved',
+            issuedAt: serverTimestamp(), type: 'program'
+          });
+          // Notify member about certificate
+          await addDoc(collection(db, 'notifications'), {
+            title: '🎓 Certificate Issued!',
+            message: 'Congratulations! Your certificate for ' + title + ' has been issued. Go to My Grades to download it.',
+            type: 'success', userId: uid,
+            postedBy: 'YAN Admin',
+            createdAt: serverTimestamp(), readBy: []
+          });
+        }
+      } catch(certErr) { console.log('Cert error:', certErr); }
+    }
     showToast(status === 'approved' ? '✅ Assignment approved! Member notified.' : '📝 Revision requested. Member notified.');
     loadSection('assignments');
   } catch(e) {
