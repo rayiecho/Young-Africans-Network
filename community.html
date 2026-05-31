@@ -1709,7 +1709,7 @@ async function loadGradesTab() {
     ]);
 
     // Load certificates too
-    const certsSnap = await getDocs(query(collection(db,'certificates'),where('userId','==',currentUser.uid)));
+    const certsSnap = await getDocs(query(collection(db,'certificates'),where('userId','==',currentUser.uid),where('type','==','program')));
     const progressSnap = await getDocs(query(collection(db,'learningProgress'),where('userId','==',currentUser.uid)));
 
     // Show certificates section
