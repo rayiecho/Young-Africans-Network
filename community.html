@@ -2154,11 +2154,18 @@ async function downloadCertificate(certId, deptOverride, programId) {
   const printWin = window.open('', '_blank', 'width=1400,height=850');
   printWin.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><sty' + 'le>' + css + '@media print{.no-print{display:none!important;}@page{size:297mm 210mm landscape;margin:0;}html,body{width:297mm;height:210mm;}}<\/sty' + 'le><\/he' + 'ad><bo' + 'dy style="margin:0;padding:0;">'
     + '<div class="no-print" style="background:#f0ece4;padding:10px;font-family:Montserrat,sans-serif;font-size:11px;color:#666;text-align:center;margin-bottom:8px;">'
-    + '&#9432; When printing: set <strong>Orientation = Landscape</strong>, <strong>Paper = A4</strong>, margins = None, disable headers/footers'
-    + ' &nbsp;|&nbsp; <button onclick="window.print()" style="background:#1B2A6B;color:#fff;border:none;padding:4px 16px;border-radius:4px;cursor:pointer;font-weight:700;">Print / Save PDF</button>'
+    + '&#9432; <strong style="color:#E63329;">IMPORTANT:</strong> When print dialog opens → set <strong>Orientation = Landscape</strong>, <strong>Paper = A4</strong>, Margins = None, uncheck headers/footers'
+    + ' &nbsp;|&nbsp; <button onclick="window.print()" style="background:#1B2A6B;color:#fff;border:none;padding:4px 16px;border-radius:4px;cursor:pointer;font-weight:700;">🖨️ Print / Save PDF</button>'
     + '</div>'
     + body
-    + '<scr' + 'ipt>setTimeout(function(){window.print();},1500);<\/script><\/bo' + 'dy><\/html>');
+    + '<scr' + 'ipt>'
+    + 'setTimeout(function(){'
+    + '  var style = document.createElement("style");'
+    + '  style.textContent = "@page{size:297mm 210mm landscape!important;margin:0!important;}";'
+    + '  document.head.appendChild(style);'
+    + '  window.print();'
+    + '},1500);'
+    + '<\/script><\/bo' + 'dy><\/html>');
   printWin.document.close();
 }
 
