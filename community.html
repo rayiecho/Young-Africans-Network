@@ -1927,6 +1927,7 @@ async function downloadCertificate(certId, deptOverride, programId) {
   const photoUrl = u.photoUrl || '';
 
   const skillsMap = {
+    // By department
     'tech': ['HTML & CSS','JavaScript','Responsive Design','Web Hosting','Git Basics'],
     'programs': ['HTML & CSS','JavaScript','Responsive Design','Web Hosting','Git Basics'],
     'career': ['CV Writing','Interview Skills','LinkedIn Branding','Public Speaking','Salary Negotiation'],
@@ -1934,9 +1935,17 @@ async function downloadCertificate(certId, deptOverride, programId) {
     'community': ['Community Development','Project Management','Leadership','Communication','Teamwork'],
     'mental': ['Mental Wellness','Peer Support','Resilience','Stress Management','Self-Awareness'],
     'communications': ['Content Creation','Social Media','Copywriting','Brand Communication','Storytelling'],
-    'partnerships': ['Networking','Partnership Development','Negotiation','Stakeholder Management','Strategy']
+    'partnerships': ['Networking','Partnership Development','Negotiation','Stakeholder Management','Strategy'],
+    // By programId
+    'yan-google-workspace-essentials': ['Google Docs','Google Sheets','Google Slides','Gmail & Calendar','Google Drive'],
+    'yan-web-development': ['HTML & CSS','JavaScript','Responsive Design','Web Hosting','Git Basics'],
+    'yan-public-speaking': ['Public Speaking','Presentation Skills','Storytelling','Confidence Building','Debate'],
+    'yan-cv-writing': ['CV Writing','Cover Letters','LinkedIn Branding','Personal Branding','Interview Skills'],
+    'yan-digital-marketing': ['Digital Marketing','Social Media','SEO Basics','Content Strategy','Analytics'],
+    'yan-leadership': ['Leadership','Team Management','Decision Making','Strategic Thinking','Communication']
   };
-  let skills = skillsMap[deptOverride || u.department] || ['Leadership','Communication','Teamwork','Problem Solving','Initiative'];
+  // Look up skills by programId first, then department
+  let skills = skillsMap[programId] || skillsMap[gradeProgramTitle] || skillsMap[deptOverride || u.department] || ['Leadership','Communication','Teamwork','Problem Solving','Initiative'];
 
   const deptAchievements = {
     'career': 'Career Development & Public Speaking Program',
