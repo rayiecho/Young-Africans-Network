@@ -1708,12 +1708,39 @@ async function loadGradesTab() {
       getDocs(query(collection(db, 'quizFailures'), where('userId','==',currentUser.uid)))
     ]);
 
-    if (gradesSnap.empty) {
-      container.innerHTML = '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);text-align:center;"><p style="font-size:1.5rem;">📊</p><p style="font-size:0.88rem;color:var(--gray);margin-top:0.5rem;">No grades yet. Complete a quiz or submit an assignment to see your progress here.</p></div>';
-      return;
+    // Load certificates too
+    const certsSnap = await getDocs(query(collection(db,'certificates'),where('userId','==',currentUser.uid)));
+    const progressSnap = await getDocs(query(collection(db,'learningProgress'),where('userId','==',currentUser.uid)));
+
+    // Show certificates section
+    let certHtml = '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:1.25rem;">🏆 My Certificates</h2>';
+    if (certsSnap.empty) {
+      certHtml += '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);text-align:center;margin-bottom:1.5rem;"><p style="font-size:1.5rem;">🏆</p><p style="font-size:0.88rem;color:var(--gray);margin-top:0.5rem;">No certificates yet. Complete a program to earn your first certificate!</p></div>';
+    } else {
+      certHtml += '<div style="display:grid;gap:1rem;margin-bottom:1.5rem;">';
+      certsSnap.docs.forEach(d => {
+        const cert = d.to_dict ? d.to_dict() : d.data();
+        const isApproved = cert.status === 'approved';
+        const title = cert.programTitle || cert.department || cert.programId || 'YAN Certificate';
+        certHtml += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid ' + (isApproved ? '#27AE60' : '#F5A623') + ';display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">';
+        certHtml += '<div><p style="font-size:0.95rem;font-weight:800;color:var(--navy);">🏆 ' + sanitize(title) + '</p>';
+        certHtml += '<p style="font-size:0.75rem;color:var(--gray);">Issued to ' + sanitize(cert.userName||currentUserData.name) + '</p>';
+        certHtml += '<span style="background:' + (isApproved?'rgba(39,174,96,0.1)':'rgba(245,166,35,0.1)') + ';color:' + (isApproved?'#27AE60':'#b37800') + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + (isApproved?'✅ APPROVED':'⏳ PENDING') + '</span></div>';
+        if (isApproved) {
+          certHtml += '<button onclick="generateCertPDF('' + d.id + '')" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">⬇️ Download</button>';
+        }
+        certHtml += '</div>';
+      });
+      certHtml += '</div>';
     }
 
-    let html = '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:1.25rem;">📊 My Grades & Progress</h2>';
+    if (gradesSnap.empty) {
+      container.innerHTML = certHtml + '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);text-align:center;"><p style="font-size:1.5rem;">📊</p><p style="font-size:0.88rem;color:var(--gray);margin-top:0.5rem;">No grades yet. Complete a quiz or submit an assignment to see your progress here.</p></div>';
+      return;
+    }
+    container._certHtml = certHtml;
+
+    let html = (container._certHtml || '') + '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:1.25rem;">📊 My Grades & Progress</h2>';
 
     gradesSnap.docs.forEach(d => {
       const g = d.data();
@@ -7178,7 +7205,8 @@ async function applyForProgram(programId, type) {
   if (programId !== 'yan-google-workspace-essentials') {
     const progressSnap = await getDoc(doc(db,'learningProgress',currentUser.uid+'_yan-google-workspace-essentials'));
     const progressData = progressSnap.exists() ? progressSnap.data() : {};
-    const gwCompleted = progressData.status === 'completed' || progressData.certificateIssued;
+    const certRef = await getDoc(doc(db,'certificates',currentUser.uid+'_yan-google-workspace-essentials'));
+    const gwCompleted = progressData.status === 'completed' || progressData.certificateIssued || certRef.exists();
     if (!gwCompleted) {
       const modal = document.createElement('div');
       modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
