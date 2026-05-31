@@ -423,11 +423,11 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
           <div class="hero-stat-label">Members</div>
         </div>
         <div>
-          <div class="hero-stat-num">8+</div>
+          <div class="hero-stat-num" id="hero-country-count">8+</div>
           <div class="hero-stat-label">Countries</div>
         </div>
         <div>
-          <div class="hero-stat-num">8</div>
+          <div class="hero-stat-num" id="hero-dept-count">8</div>
           <div class="hero-stat-label">Departments</div>
         </div>
       </div>
@@ -877,6 +877,8 @@ async function loadLiveStats() {
     // Update hero
     const heroCount = document.getElementById('hero-member-count');
     if (heroCount) heroCount.textContent = members + '+';
+    const heroCountry = document.getElementById('hero-country-count');
+    if (heroCountry) heroCountry.textContent = countries + '+';
 
     // Update stats section
     const statMembers = document.getElementById('stat-members');
