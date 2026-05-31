@@ -7222,7 +7222,7 @@ window.submitProgramApplication = async function(programId, type, programTitle) 
 };
 async function enrollInProgram(programId) {
   // Show loading on button
-  const btn = document.querySelector('[onclick*="enrollInProgram(\''+programId+'\'"]');
+  const btn = event && event.target ? event.target : null;
   if (btn) { btn.textContent = 'Enrolling...'; btn.disabled = true; }
   try {
     const snap = await getDoc(doc(db,'trainingPrograms',programId));
