@@ -2163,6 +2163,12 @@ async function downloadCertificate(certId, deptOverride, programId) {
     + '  var style = document.createElement("style");'
     + '  style.textContent = "@page{size:297mm 210mm landscape!important;margin:0!important;}";'
     + '  document.head.appendChild(style);'
+    + '  var cert = document.querySelector(".cert");'
+    + '  if(cert){'
+    + '    var scale = Math.min(window.innerWidth/1122, window.innerHeight/794);'
+    + '    if(scale < 1) cert.style.transform = "scale("+scale+")";'
+    + '    cert.style.transformOrigin = "top left";'
+    + '  }'
     + '  window.print();'
     + '},1500);'
     + '<\/script><\/bo' + 'dy><\/html>');
