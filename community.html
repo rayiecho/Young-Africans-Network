@@ -7092,7 +7092,7 @@ async function loadAllPrograms() {
           ? '<span style="background:rgba(245,166,35,0.1);color:#b37800;padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;"> Coming Soon</span>'
           : enrolled
             ? '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;">Enrolled</span>'
-            : (p.requiresApplication===false ? '<button class="btn-sm btn-navy" onclick="enrollInProgram(\'" + p.id + "\')">' + 'Enroll Now</button>' : '<button class="btn-sm btn-navy" onclick="applyForProgram(\'" + p.id + "\',\'training\')">' + 'Apply Now</button>'),
+            : (p.requiresApplication===false ? '<button class="btn-sm btn-navy" onclick="enrollInProgram(\'' + p.id + '\')">Enroll Now</button>' : '<button class="btn-sm btn-navy" onclick="applyForProgram(\'' + p.id + '\',\'training\')">Apply Now</button>'),
         p.isOpen !== false && enrolled ? '<button class="btn-sm btn-navy" onclick="openProgram(\'' + p.id + '\')">Continue</button>' : '',
         isAdminOrHead ? '<button class="btn-sm btn-red" onclick="deleteTrainingProgram(\'' + p.id + '\')">Delete</button>' : '',
         '</div></div>',
