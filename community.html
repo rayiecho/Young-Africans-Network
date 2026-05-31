@@ -7220,15 +7220,28 @@ window.submitProgramApplication = async function(programId, type, programTitle) 
   }
 };
 async function enrollInProgram(programId) {
-  const snap = await getDoc(doc(db,'trainingPrograms',programId));
-  const data = snap.data();
-  const enrolledBy = data.enrolledBy||[];
-  if (!enrolledBy.includes(currentUser.uid)) enrolledBy.push(currentUser.uid);
-  await updateDoc(doc(db,'trainingPrograms',programId),{enrolledBy});
-  await setDoc(doc(db,'learningProgress',currentUser.uid+'_'+programId),{
-    userId:currentUser.uid, programId, programTitle:data.title, status:'enrolled',
-    progress:0, modulesCompleted:[], enrolledAt:serverTimestamp()
-  },{merge:true});
+  // Show loading on button
+  const btn = document.querySelector('[onclick*="enrollInProgram(\''+programId+'\'"]');
+  if (btn) { btn.textContent = 'Enrolling...'; btn.disabled = true; }
+  try {
+    const snap = await getDoc(doc(db,'trainingPrograms',programId));
+    const data = snap.data();
+    const enrolledBy = data.enrolledBy||[];
+    if (!enrolledBy.includes(currentUser.uid)) enrolledBy.push(currentUser.uid);
+    // Run both writes in parallel
+    await Promise.all([
+      updateDoc(doc(db,'trainingPrograms',programId),{enrolledBy}),
+      setDoc(doc(db,'learningProgress',currentUser.uid+'_'+programId),{
+        userId:currentUser.uid, programId, programTitle:data.title, status:'enrolled',
+        progress:0, modulesCompleted:[], enrolledAt:serverTimestamp()
+      },{merge:true})
+    ]);
+    showToast('Enrolled! Click the program to start.');
+    loadAllPrograms();
+  } catch(e) {
+    showToast('Error enrolling: '+e.message,'error');
+    if (btn) { btn.textContent = 'Enroll Now'; btn.disabled = false; }
+  }
 }
 
 async function openProgram(programId) {
@@ -7361,7 +7374,7 @@ async function openLessonContent(programId, lessonId, colName) {
   const contentDiv = document.createElement('div');
   contentDiv.id = 'lesson-content-' + lessonId;
   contentDiv.style.cssText = 'padding:0.75rem 1rem;';
-  contentDiv.innerHTML = '<div class="loading">Loading lesson...</div>';
+  contentDiv.innerHTML = '<div style="padding:1rem;text-align:center;"><div style="display:inline-block;width:28px;height:28px;border:3px solid var(--light);border-top-color:var(--navy);border-radius:50%;animation:spin 0.7s linear infinite;"></div><p style="color:var(--gray);font-size:0.82rem;margin-top:0.5rem;">Loading lesson...</p></div>';
   if (moduleCard && moduleCard.parentNode) {
     moduleCard.parentNode.insertBefore(contentDiv, moduleCard.nextSibling);
   } else if (btn && btn.parentNode) {
