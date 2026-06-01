@@ -316,11 +316,11 @@ async function approveRecLetter(recId, memberName, scholarship) {
           + 'Building the Future, Together.\n\n'
           + 'Warm regards,\nYAN Administration Office\nYoung Africans Network\n'
           + 'youngafricansnetwork.org | info@youngafricansnetwork.org';
-        await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
+        await fetch('https://yan-email-worker.youngafricansn.workers.dev', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
           to_email: userEmail, name: memberNameDecoded,
           subject: 'Your YAN Recommendation Letter Has Been Approved — ' + scholarshipDecoded,
           message: msg
-        });
+        }));
       }
     }
     showToast('Approved! Member notified by email.');
@@ -439,12 +439,12 @@ async function replyToContact(email, name) {
   const message = prompt('Type your reply to ' + name + ':');
   if (!message) return;
   try {
-    await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
+    await fetch('https://yan-email-worker.youngafricansn.workers.dev', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       to_email: email,
       name: name || 'Visitor',
       subject: 'Reply from Young Africans Network',
       message: message + '\n\nWarm regards,\nYAN Administration Office\nyoungafricansnetwork.org'
-    });
+    }));
     showToast('Reply sent to ' + name + '!');
   } catch(e) {
     showToast('Failed to send reply: ' + e.message, 'error');
@@ -455,11 +455,11 @@ window.replyToContact = replyToContact;
 async function approveJoinRequest(id, email, name) {
   await updateDoc(doc(db, 'joinRequests', id), {status: 'approved', approvedAt: serverTimestamp()});
   try {
-    await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
+    await fetch('https://yan-email-worker.youngafricansn.workers.dev', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       to_email: email, name: name,
       subject: 'Application Approved — Young Africans Network',
       message: 'Congratulations ' + name + '! Your application to join Young Africans Network has been approved. Please register at: https://youngafricansnetwork.org/register.html\n\nWelcome to the YAN family!\n\nWarm regards,\nYAN Administration Office'
-    });
+    }));
   } catch(e) { console.log('Email error:', e); }
   showToast(name + ' approved!');
 }
@@ -467,11 +467,11 @@ async function approveJoinRequest(id, email, name) {
 async function rejectJoinRequest(id, email, name) {
   await updateDoc(doc(db, 'joinRequests', id), {status: 'rejected', rejectedAt: serverTimestamp()});
   try {
-    await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
+    await fetch('https://yan-email-worker.youngafricansn.workers.dev', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       to_email: email, name: name,
       subject: 'Application Update — Young Africans Network',
       message: 'Dear ' + name + ', thank you for your interest in joining Young Africans Network. After careful review, we are unable to approve your application at this time. We encourage you to reapply in the future.\n\nWarm regards,\nYAN Administration Office'
-    });
+    }));
   } catch(e) { console.log('Email error:', e); }
   showToast('Request rejected');
 }
@@ -1271,12 +1271,12 @@ window.adminApproveCert = async function(certId) {
         + 'YAN Administration Office\n'
         + 'Young Africans Network\n'
         + 'youngafricansnetwork.org | info@youngafricansnetwork.org';
-      await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
+      await fetch('https://yan-email-worker.youngafricansn.workers.dev', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
         to_email: userEmail,
         name: certData.userName || 'Member',
         subject: 'Your YAN Certificate of Achievement Has Been Approved!',
         message: certMsg
-      });
+      }));
     }
   } catch(e) { console.log('Certificate email error:', e); }
   if (certData?.userId) {
@@ -2969,11 +2969,11 @@ window.approveApplication = async function(appId, userIdEnc, programIdEnc, progr
         + 'Warm regards,\nYAN Administration Office\n'
         + 'Young Africans Network\n'
         + 'youngafricansnetwork.org | info@youngafricansnetwork.org';
-      await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
+      await fetch('https://yan-email-worker.youngafricansn.workers.dev', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
         to_email: email, name,
         subject: 'Congratulations! Your YAN Program Application is Approved — ' + programTitle,
         message: msg
-      });
+      }));
     }
     showToast('Application approved! Member enrolled and notified.');
     loadSection('applications');
@@ -3016,11 +3016,11 @@ window.rejectApplication = async function(appId, emailEnc, nameEnc, programTitle
         + 'Warm regards,\nYAN Administration Office\n'
         + 'Young Africans Network\n'
         + 'youngafricansnetwork.org | info@youngafricansnetwork.org';
-      await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
+      await fetch('https://yan-email-worker.youngafricansn.workers.dev', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
         to_email: email, name,
         subject: 'YAN Program Application Update — ' + programTitle,
         message: msg
-      });
+      }));
     }
     showToast('Application rejected. Member notified with feedback.');
     loadSection('applications');
@@ -3316,8 +3316,8 @@ document.addEventListener('click', function(e) {
 
 
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script>emailjs.init('NyhRgF1xCbrxy7XEG');
+<!-- emailjs replaced with resend worker -->
+<script>// emailjs replaced
 function toggleNavGroup(group) {
   const items = document.getElementById('group-' + group);
   const arrow = document.getElementById('arrow-' + group);
