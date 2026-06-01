@@ -168,10 +168,17 @@ window.restoreProgramState = function() {
   if (lastProgram) {
     setTimeout(function() {
       if (lastType === 'career') {
-        const btn = document.querySelector('[onclick*="openCareerProgram('' + lastProgram + '')"]');
+        // Find program button by searching all onclick attributes
+        let btn = null;
+        document.querySelectorAll('[onclick]').forEach(function(el) {
+          if (el.getAttribute('onclick') && el.getAttribute('onclick').includes('openCareerProgram') && el.getAttribute('onclick').includes(lastProgram)) btn = el;
+        });
         if (btn) btn.click();
       } else {
-        const btn = document.querySelector('[onclick*="openProgram('' + lastProgram + '')"]');
+        let btn = null;
+        document.querySelectorAll('[onclick]').forEach(function(el) {
+          if (el.getAttribute('onclick') && el.getAttribute('onclick').includes('openProgram') && el.getAttribute('onclick').includes(lastProgram)) btn = el;
+        });
         if (btn) btn.click();
       }
       setTimeout(function() {
