@@ -10445,21 +10445,30 @@ window.copyMeetingLink = function(url) {
 window.toggleLiveMeeting=toggleLiveMeeting; window.markAttendance=markAttendance; window.viewAttendance=viewAttendance; window.addRecording=addRecording; window.deleteMeeting=deleteMeeting;
 window.saveCertFromPopup = function(certEl, btn) {
   if (!certEl) { alert('Certificate not found'); return; }
-  // Get exact cert dimensions to avoid white space
-  const rect = certEl.getBoundingClientRect();
-  html2canvas(certEl, {
+  // Always target the .cert element specifically
+  var target = certEl.querySelector ? (certEl.querySelector('.cert') || certEl) : certEl;
+  const w = target.scrollWidth;
+  const h = target.scrollHeight;
+  html2canvas(target, {
     scale: 2,
     useCORS: true,
     allowTaint: true,
     backgroundColor: '#fff',
-    width: certEl.scrollWidth,
-    height: certEl.scrollHeight,
-    windowWidth: certEl.scrollWidth,
-    windowHeight: certEl.scrollHeight
+    width: w,
+    height: h,
+    windowWidth: w,
+    windowHeight: h,
+    x: 0,
+    y: 0
   }).then(function(canvas) {
+    // Crop to exact dimensions - removes any extra whitespace
+    const out = document.createElement('canvas');
+    out.width = w * 2;
+    out.height = h * 2;
+    out.getContext('2d').drawImage(canvas, 0, 0, w*2, h*2, 0, 0, w*2, h*2);
     const link = document.createElement('a');
     link.download = 'YAN-Certificate.png';
-    link.href = canvas.toDataURL('image/png');
+    link.href = out.toDataURL('image/png');
     link.click();
     if (btn) { btn.textContent = '📸 Save as Image'; btn.disabled = false; }
   }).catch(function(e) {
