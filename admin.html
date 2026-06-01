@@ -181,7 +181,7 @@ async function loadLabListings(c) {
         html += '<p style="font-size:0.82rem;color:var(--navy);margin-bottom:0.4rem;">' + sanitize(l.description||'').substring(0,150) + '...</p>';
         if (l.price) html += '<p style="font-size:0.82rem;font-weight:600;color:var(--green);">' + sanitize(l.price) + '</p>';
         if (l.phone) html += '<p style="font-size:0.78rem;color:var(--gray);">📱 ' + sanitize(l.phone) + '</p>';
-        if (l.imageUrl) html += '<img src="' + sanitize(l.imageUrl) + '" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;margin-top:0.5rem;" onerror="this.style.display='none'">';
+        if (l.imageUrl) html += '<img src="' + sanitize(l.imageUrl) + '" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;margin-top:0.5rem;" onerror="this.style.display=\'none\'">';
         html += '</div>';
       });
       html += '</div>';
@@ -348,7 +348,7 @@ async function loadLabListings(c) {
         html += '<p style="font-size:0.82rem;color:var(--navy);margin-bottom:0.4rem;">' + sanitize(l.description||'').substring(0,150) + '...</p>';
         if (l.price) html += '<p style="font-size:0.82rem;font-weight:600;color:var(--green);">' + sanitize(l.price) + '</p>';
         if (l.phone) html += '<p style="font-size:0.78rem;color:var(--gray);">📱 ' + sanitize(l.phone) + '</p>';
-        if (l.imageUrl) html += '<img src="' + sanitize(l.imageUrl) + '" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;margin-top:0.5rem;" onerror="this.style.display='none'">';
+        if (l.imageUrl) html += '<img src="' + sanitize(l.imageUrl) + '" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;margin-top:0.5rem;" onerror="this.style.display=\'none\'">';
         html += '</div>';
       });
       html += '</div>';
@@ -1957,7 +1957,7 @@ async function loadLabListings(c) {
         html += '<p style="font-size:0.82rem;color:var(--navy);margin-bottom:0.4rem;">' + sanitize(l.description||'').substring(0,150) + '...</p>';
         if (l.price) html += '<p style="font-size:0.82rem;font-weight:600;color:var(--green);">' + sanitize(l.price) + '</p>';
         if (l.phone) html += '<p style="font-size:0.78rem;color:var(--gray);">📱 ' + sanitize(l.phone) + '</p>';
-        if (l.imageUrl) html += '<img src="' + sanitize(l.imageUrl) + '" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;margin-top:0.5rem;" onerror="this.style.display='none'">';
+        if (l.imageUrl) html += '<img src="' + sanitize(l.imageUrl) + '" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;margin-top:0.5rem;" onerror="this.style.display=\'none\'">';
         html += '</div>';
       });
       html += '</div>';
