@@ -535,7 +535,7 @@ window.sortListings = function(val) {
 window.contactWhatsApp = function(phone, title) {
   if (!phone) { showToast('No WhatsApp number available'); return; }
   const clean = phone.replace(/\D/g, '');
-  const msg = encodeURIComponent(`Hi! I found your listing "${title}" on the YAN Entrepreneurs Lab. I'm interested!`);
+  const msg = encodeURIComponent(`Hello! 👋\n\nI discovered your listing *"${title}"* on the *YAN Entrepreneurs Lab* at youngafricansnetwork.org 🌍\n\nI'm interested in learning more. Could you share more details?\n\n— Via Young Africans Network | Building the Future, Together`);
   window.open(`https://wa.me/${clean}?text=${msg}`, '_blank');
 };
 
