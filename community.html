@@ -7733,7 +7733,7 @@ async function submitLessonQuiz(programId, lessonId, colName) {
   const alreadyPassed = attSnap.exists() && attSnap.data().passed === true;
 
   // If already passed this lesson before, allow retake without restrictions
-  if (!alreadyPassed && attempts >= 3 && !passed) {
+  if (!alreadyPassed && attempts >= 5 && !passed) {
     showQuizFailureForm(programId, lessonId, score, attempts + 1, colName);
     return;
   }
@@ -7753,7 +7753,7 @@ async function submitLessonQuiz(programId, lessonId, colName) {
     resultsHtml += '</div>';
   });
   if (!passed) {
-    const attLeft = Math.max(0, 3 - (attempts + 1));
+    const attLeft = Math.max(0, 5 - (attempts + 1));
     resultsHtml += '<p style="font-size:0.78rem;color:var(--gray);margin-top:0.5rem;">' + (attLeft > 0 ? attLeft + ' attempt(s) remaining.' : 'No attempts left.') + '</p>';
   }
   resultsHtml += '</div>';
@@ -7823,7 +7823,7 @@ async function submitLessonQuiz(programId, lessonId, colName) {
     }
   } else {
     showToast('Score: ' + score + '%. Need 70%.', 'error');
-    const attLeft = Math.max(0, 3 - (attempts + 1));
+    const attLeft = Math.max(0, 5 - (attempts + 1));
     if (attLeft === 0) showQuizFailureForm(programId, lessonId, score, attempts + 1, colName);
   }
 }
