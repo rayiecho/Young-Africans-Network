@@ -419,8 +419,8 @@ footer a { color: var(--gold); text-decoration: none; }
       <input type="url" id="sub-image" placeholder="https://... (link to your product/work image)">
     </div>
     <div class="form-group">
-      <label>YAN Member ID (optional)</label>
-      <input type="text" id="sub-memberid" placeholder="Your YAN member ID or email">
+      <label>YAN Member Email * <span style="font-size:0.72rem;color:var(--gray);">(must match your YAN account)</span></label>
+      <input type="email" id="sub-memberid" placeholder="Your YAN registered email" required>
     </div>
     <button class="btn-submit" onclick="submitListing()">Submit for Review</button>
     <p class="form-note">📋 Your listing will be reviewed by the YAN team within 24-48 hours before going live.</p>
@@ -688,8 +688,8 @@ window.submitListing = async function() {
   const imageUrl = document.getElementById('sub-image').value.trim();
   const memberId = document.getElementById('sub-memberid').value.trim();
 
-  if (!name || !phone || !title || !category || !desc || !country) {
-    showToast('Please fill all required fields'); return;
+  if (!name || !phone || !title || !category || !desc || !country || !memberId) {
+    showToast('Please fill all required fields including your YAN email'); return;
   }
 
   // Check if member exists and has completed a program
