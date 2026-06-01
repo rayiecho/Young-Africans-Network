@@ -132,7 +132,14 @@ function showScreen(id) {
 }
 function showTab(tab) {
   activeTab = tab;
-  if (currentUser) localStorage.setItem('yan_last_tab', tab);
+  if (currentUser) {
+    localStorage.setItem('yan_last_tab', tab);
+    // Clear program state when switching away from hub tabs
+    if (tab !== 'tech' && tab !== 'career') {
+      localStorage.removeItem('yan_last_program');
+      localStorage.removeItem('yan_last_program_type');
+    }
+  }
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   const btn = document.querySelector(`[data-tab="${tab}"]`);
@@ -148,8 +155,31 @@ window.addEventListener('beforeunload', function() {
   if (currentUser && activeTab) {
     localStorage.setItem('yan_last_tab', activeTab);
     localStorage.setItem('yan_last_uid', currentUser.uid);
+    // Save scroll position
+    localStorage.setItem('yan_last_scroll', window.scrollY);
   }
 });
+
+// Restore program state after hub tab loads
+window.restoreProgramState = function() {
+  const lastProgram = localStorage.getItem('yan_last_program');
+  const lastType = localStorage.getItem('yan_last_program_type');
+  const lastScroll = parseInt(localStorage.getItem('yan_last_scroll') || '0');
+  if (lastProgram) {
+    setTimeout(function() {
+      if (lastType === 'career') {
+        const btn = document.querySelector('[onclick*="openCareerProgram('' + lastProgram + '')"]');
+        if (btn) btn.click();
+      } else {
+        const btn = document.querySelector('[onclick*="openProgram('' + lastProgram + '')"]');
+        if (btn) btn.click();
+      }
+      setTimeout(function() {
+        if (lastScroll > 0) window.scrollTo({top: lastScroll, behavior: 'instant'});
+      }, 500);
+    }, 400);
+  }
+};
 
 // Show loading screen immediately on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -7410,7 +7440,10 @@ async function enrollInProgram(programId) {
 async function openProgram(programId) {
   const box = document.getElementById('program-modules-' + programId);
   if (!box) return;
-  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
+  if (box.style.display !== 'none') { box.style.display = 'none'; localStorage.removeItem('yan_last_program'); return; }
+  // Save state
+  if (currentUser) localStorage.setItem('yan_last_program', programId);
+  localStorage.setItem('yan_last_program_type', 'tech');
   box.innerHTML = '<div class="loading">Loading program...</div>';
   box.style.display = 'block';
   let modulesSnap, lessonsSnap;
@@ -10134,7 +10167,10 @@ async function enrollCareerProgram(programId) {
 async function openCareerProgram(programId) {
   const box = document.getElementById('career-program-modules-' + programId);
   if (!box) return;
-  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
+  if (box.style.display !== 'none') { box.style.display = 'none'; localStorage.removeItem('yan_last_program'); return; }
+  // Save state
+  if (currentUser) localStorage.setItem('yan_last_program', programId);
+  localStorage.setItem('yan_last_program_type', 'career');
   box.innerHTML = '<div class="loading">Loading program...</div>';
   box.style.display = 'block';
 
