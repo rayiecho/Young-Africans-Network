@@ -210,6 +210,13 @@ async function loadLabListings(c) {
   }
 }
 
+window.deleteLabListing = async function(id) {
+  if (!confirm('Permanently delete this listing? This cannot be undone.')) return;
+  await deleteDoc(doc(db, 'labListings', id));
+  showToast('Listing deleted permanently');
+  loadSection('lab');
+};
+
 window.approveLabListing = async function(id) {
   await updateDoc(doc(db, 'labListings', id), { status: 'approved', approvedAt: serverTimestamp(), approvedBy: 'Admin' });
   showToast('Listing approved! Now live on the Lab 🎉');
@@ -377,6 +384,13 @@ async function loadLabListings(c) {
     c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
   }
 }
+
+window.deleteLabListing = async function(id) {
+  if (!confirm('Permanently delete this listing? This cannot be undone.')) return;
+  await deleteDoc(doc(db, 'labListings', id));
+  showToast('Listing deleted permanently');
+  loadSection('lab');
+};
 
 window.approveLabListing = async function(id) {
   await updateDoc(doc(db, 'labListings', id), { status: 'approved', approvedAt: serverTimestamp(), approvedBy: 'Admin' });
@@ -1987,6 +2001,13 @@ async function loadLabListings(c) {
     c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
   }
 }
+
+window.deleteLabListing = async function(id) {
+  if (!confirm('Permanently delete this listing? This cannot be undone.')) return;
+  await deleteDoc(doc(db, 'labListings', id));
+  showToast('Listing deleted permanently');
+  loadSection('lab');
+};
 
 window.approveLabListing = async function(id) {
   await updateDoc(doc(db, 'labListings', id), { status: 'approved', approvedAt: serverTimestamp(), approvedBy: 'Admin' });
