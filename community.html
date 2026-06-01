@@ -2160,19 +2160,23 @@ async function downloadCertificate(certId, deptOverride, programId) {
     + '</div>'
     + body
     + '<scr' + 'ipt>'
-    + 'setTimeout(function(){'
-    + '  var style = document.createElement("style");'
-    + '  style.textContent = "@page{size:297mm 210mm landscape!important;margin:0!important;}";'
-    + '  document.head.appendChild(style);'
+    + 'function saveCertAsImage(){'
     + '  var cert = document.querySelector(".cert");'
-    + '  if(cert){'
-    + '    var scale = Math.min(window.innerWidth/1122, window.innerHeight/794);'
-    + '    if(scale < 1) cert.style.transform = "scale("+scale+")";'
-    + '    cert.style.transformOrigin = "top left";'
-    + '  }'
-    + '  window.print();'
-    + '},1500);'
-    + '<\/script><\/bo' + 'dy><\/html>');
+    + '  if(!cert) return alert("Certificate not found");'
+    + '  var btn = document.querySelector("[onclick=saveCertAsImage()]") || event.target;'
+    + '  btn.textContent = "Generating..."; btn.disabled = true;'
+    + '  html2canvas(cert,{scale:2,useCORS:true,allowTaint:true,backgroundColor:"#fff"}).then(function(canvas){'
+    + '    var link = document.createElement("a");'
+    + '    link.download = "YAN-Certificate.png";'
+    + '    link.href = canvas.toDataURL("image/png");'
+    + '    link.click();'
+    + '    btn.textContent = "📸 Save as Image"; btn.disabled = false;'
+    + '  }).catch(function(e){ alert("Error: "+e.message); btn.textContent = "📸 Save as Image"; btn.disabled = false; });'
+    + '}'
+    + 'setTimeout(function(){ window.print(); },1500);'
+    + '<\/script>'
+    + '<scr'+'ipt src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/scr'+'ipt>'
+    + '<\/bo' + 'dy><\/html>');
   printWin.document.close();
 }
 
