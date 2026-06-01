@@ -1072,7 +1072,9 @@ async function deletePost(postId) {
 async function toggleLike(postId) {
   const ref = doc(db, 'posts', postId);
   const snap = await getDoc(ref);
-  const likes = snap.data().likes || [];
+  const rawLikes = snap.data().likes;
+  // Handle both array and object/map formats
+  const likes = Array.isArray(rawLikes) ? rawLikes : Object.keys(rawLikes || {});
   if (likes.includes(currentUser.uid)) {
     await updateDoc(ref, { likes: arrayRemove(currentUser.uid) });
   } else {
