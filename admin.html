@@ -87,7 +87,7 @@ window.doAdminLogin = function() {
     // Actions
     html += '<div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">';
     html += '<button onclick="resolveAllErrors()" style="background:#27AE60;color:#fff;border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">✅ Mark All Resolved</button>';
-    html += '<button onclick="loadSection('errors')" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">🔄 Refresh</button>';
+    html += '<button onclick="loadSection(\'errors\')" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">🔄 Refresh</button>';
     html += '</div>';
 
     if (unresolved.length === 0) {
@@ -181,7 +181,7 @@ window.doAdminLogout = function() {
     // Actions
     html += '<div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">';
     html += '<button onclick="resolveAllErrors()" style="background:#27AE60;color:#fff;border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">✅ Mark All Resolved</button>';
-    html += '<button onclick="loadSection('errors')" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">🔄 Refresh</button>';
+    html += '<button onclick="loadSection(\'errors\')" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">🔄 Refresh</button>';
     html += '</div>';
 
     if (unresolved.length === 0) {
@@ -1717,7 +1717,7 @@ async function loadSystemErrors(c) {
     // Actions
     html += '<div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">';
     html += '<button onclick="resolveAllErrors()" style="background:#27AE60;color:#fff;border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">✅ Mark All Resolved</button>';
-    html += '<button onclick="loadSection('errors')" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">🔄 Refresh</button>';
+    html += '<button onclick="loadSection(\'errors\')" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">🔄 Refresh</button>';
     html += '</div>';
 
     if (unresolved.length === 0) {
