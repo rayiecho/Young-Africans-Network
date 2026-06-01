@@ -7743,10 +7743,10 @@ async function submitLessonQuiz(programId, lessonId, colName) {
       }), {merge: true});
     }
 
-    if (colName === 'careerPrograms') {
-      openCareerProgram(programId);
-    } else {
-      openProgram(programId);
+    // Stay on current lesson - just scroll to result instead of reloading hub
+    const lessonEl = document.getElementById('lesson-' + lessonId) || document.getElementById('quiz-result-' + lessonId);
+    if (lessonEl) {
+      lessonEl.scrollIntoView({behavior: 'smooth', block: 'center'});
     }
   } else {
     showToast('Score: ' + score + '%. Need 70%.', 'error');
