@@ -4113,11 +4113,13 @@ async function sendBulkEmail() {
       const name = d.data().name;
       if (!email) continue;
       try {
+        const unsubLink2 = 'https://youngafricansnetwork.org/community.html?unsubscribe=' + d.id;
+        const fullMsg = message + '\n\n---\n🌍 Young Africans Network | youngafricansnetwork.org\ninfo@youngafricansnetwork.org\n\nTo unsubscribe, click: ' + unsubLink2;
         await fetch('https://yan-email-worker.youngafricansn.workers.dev', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
           to_email: email,
           name: name,
           subject: subject,
-          message: message
+          message: fullMsg
         })});
         sent++;
       } catch(e) { failed++; }
