@@ -572,11 +572,42 @@ function showTabError(tab) {
     + '</div>';
 }
 
+// ===== ERROR MONITORING SYSTEM =====
+window.yanErrorLog = async function(context, error, severity) {
+  try {
+    const errorData = {
+      context: context,
+      message: error.message || String(error),
+      stack: error.stack ? error.stack.substring(0, 500) : '',
+      severity: severity || 'error',
+      url: window.location.href,
+      userId: (typeof currentUser !== 'undefined' && currentUser) ? currentUser.uid : 'anonymous',
+      userName: (typeof currentUserData !== 'undefined' && currentUserData) ? (currentUserData.name || '') : '',
+      userAgent: navigator.userAgent.substring(0, 100),
+      timestamp: Date.now(),
+      createdAt: serverTimestamp(),
+      resolved: false
+    };
+    await addDoc(collection(db, 'systemErrors'), errorData);
+  } catch(e) {
+    // Silent fail - error logging should never crash the app
+  }
+};
+
+// Global error catcher
+window.addEventListener('error', function(event) {
+  window.yanErrorLog('global', event.error || {message: event.message}, 'error');
+});
+window.addEventListener('unhandledrejection', function(event) {
+  window.yanErrorLog('promise', {message: String(event.reason), stack: ''}, 'warning');
+});
+
 async function safeLoad(tab, fn) {
   try {
     await fn();
   } catch(e) {
     console.error('Tab error [' + tab + ']:', e);
+    window.yanErrorLog('tab:' + tab, e, 'error');
     showTabError(tab);
   }
 }

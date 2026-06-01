@@ -63,7 +63,93 @@ window.doAdminLogin = function() {
   const pass = document.getElementById('admin-pass').value;
   if (pass === ADMIN_PASSWORD) {
     sessionStorage.setItem('yan_admin', 'true');
-    checkAuth();
+    async function loadSystemErrors(c) {
+  c.innerHTML = '<div class="loading">Loading errors...</div>';
+  try {
+    const [unresolvedSnap, allSnap] = await Promise.all([
+      getDocs(query(collection(db, 'systemErrors'), where('resolved', '==', false), orderBy('createdAt', 'desc'), limit(50))),
+      getDocs(query(collection(db, 'systemErrors'), orderBy('createdAt', 'desc'), limit(100)))
+    ]);
+
+    const unresolved = unresolvedSnap.docs;
+    const all = allSnap.docs;
+
+    // Stats
+    const critical = unresolved.filter(d => d.data().severity === 'error').length;
+    const warnings = unresolved.filter(d => d.data().severity === 'warning').length;
+
+    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
+    html += '<div class="stat-card red"><div class="stat-num">' + critical + '</div><div class="stat-label">Unresolved Errors</div></div>';
+    html += '<div class="stat-card gold"><div class="stat-num">' + warnings + '</div><div class="stat-label">Warnings</div></div>';
+    html += '<div class="stat-card navy"><div class="stat-num">' + all.length + '</div><div class="stat-label">Total Logged</div></div>';
+    html += '</div>';
+
+    // Actions
+    html += '<div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">';
+    html += '<button onclick="resolveAllErrors()" style="background:#27AE60;color:#fff;border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">✅ Mark All Resolved</button>';
+    html += '<button onclick="loadSection('errors')" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">🔄 Refresh</button>';
+    html += '</div>';
+
+    if (unresolved.length === 0) {
+      html += '<div class="section-card" style="text-align:center;padding:3rem;"><p style="font-size:2rem;">✅</p><p style="color:var(--gray);">No unresolved errors. System is healthy!</p></div>';
+    } else {
+      html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--red);margin-bottom:1rem;">🚨 Unresolved Errors (' + unresolved.length + ')</h3>';
+      unresolved.forEach(d => {
+        const e = d.data();
+        const time = e.timestamp ? new Date(e.timestamp).toLocaleString() : '';
+        const severityColor = e.severity === 'error' ? '#E63329' : '#F5A623';
+        html += '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;border-left:4px solid ' + severityColor + ';">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.5rem;">';
+        html += '<div><p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(e.context || '') + '</p>';
+        html += '<p style="font-size:0.75rem;color:var(--gray);">' + sanitize(e.userName || 'Anonymous') + ' · ' + time + '</p></div>';
+        html += '<div style="display:flex;gap:0.5rem;align-items:center;">';
+        html += '<span style="background:' + severityColor + '18;color:' + severityColor + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (e.severity || 'error').toUpperCase() + '</span>';
+        html += '<button onclick="resolveError('' + d.id + '')" style="background:#27AE60;color:#fff;border:none;padding:0.3rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;cursor:pointer;">Resolve</button>';
+        html += '</div></div>';
+        html += '<p style="font-size:0.82rem;color:var(--navy);background:white;padding:0.5rem 0.75rem;border-radius:8px;margin-bottom:0.35rem;font-family:monospace;">' + sanitize(e.message || '') + '</p>';
+        if (e.stack) html += '<p style="font-size:0.72rem;color:var(--gray);font-family:monospace;white-space:pre-wrap;">' + sanitize(e.stack) + '</p>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    // Recent resolved
+    const resolved = all.filter(d => d.data().resolved);
+    if (resolved.length > 0) {
+      html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:#27AE60;margin-bottom:1rem;">✅ Recently Resolved (' + resolved.length + ')</h3>';
+      resolved.slice(0, 10).forEach(d => {
+        const e = d.data();
+        html += '<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--light);">';
+        html += '<p style="font-size:0.82rem;color:var(--gray);">' + sanitize(e.context || '') + ' — ' + sanitize(e.message || '').substring(0, 60) + '</p>';
+        html += '<span style="font-size:0.72rem;color:#27AE60;">Resolved</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    c.innerHTML = html;
+  } catch(e) {
+    c.innerHTML = '<p style="color:red;">Error loading system errors: ' + e.message + '</p>';
+  }
+}
+
+window.resolveError = async function(errorId) {
+  await updateDoc(doc(db, 'systemErrors', errorId), { resolved: true, resolvedAt: serverTimestamp(), resolvedBy: 'Admin' });
+  showToast('Error marked as resolved');
+  loadSection('errors');
+};
+
+window.resolveAllErrors = async function() {
+  if (!confirm('Mark all errors as resolved?')) return;
+  const snap = await getDocs(query(collection(db, 'systemErrors'), where('resolved', '==', false)));
+  const batch = [];
+  snap.docs.forEach(d => batch.push(updateDoc(doc(db, 'systemErrors', d.id), { resolved: true, resolvedAt: serverTimestamp() })));
+  await Promise.all(batch);
+  showToast('All errors resolved!');
+  loadSection('errors');
+};
+
+checkAuth();
   } else {
     showToast('Incorrect password', 'error');
   }
@@ -71,7 +157,93 @@ window.doAdminLogin = function() {
 
 window.doAdminLogout = function() {
   sessionStorage.removeItem('yan_admin');
-  checkAuth();
+  async function loadSystemErrors(c) {
+  c.innerHTML = '<div class="loading">Loading errors...</div>';
+  try {
+    const [unresolvedSnap, allSnap] = await Promise.all([
+      getDocs(query(collection(db, 'systemErrors'), where('resolved', '==', false), orderBy('createdAt', 'desc'), limit(50))),
+      getDocs(query(collection(db, 'systemErrors'), orderBy('createdAt', 'desc'), limit(100)))
+    ]);
+
+    const unresolved = unresolvedSnap.docs;
+    const all = allSnap.docs;
+
+    // Stats
+    const critical = unresolved.filter(d => d.data().severity === 'error').length;
+    const warnings = unresolved.filter(d => d.data().severity === 'warning').length;
+
+    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
+    html += '<div class="stat-card red"><div class="stat-num">' + critical + '</div><div class="stat-label">Unresolved Errors</div></div>';
+    html += '<div class="stat-card gold"><div class="stat-num">' + warnings + '</div><div class="stat-label">Warnings</div></div>';
+    html += '<div class="stat-card navy"><div class="stat-num">' + all.length + '</div><div class="stat-label">Total Logged</div></div>';
+    html += '</div>';
+
+    // Actions
+    html += '<div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">';
+    html += '<button onclick="resolveAllErrors()" style="background:#27AE60;color:#fff;border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">✅ Mark All Resolved</button>';
+    html += '<button onclick="loadSection('errors')" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">🔄 Refresh</button>';
+    html += '</div>';
+
+    if (unresolved.length === 0) {
+      html += '<div class="section-card" style="text-align:center;padding:3rem;"><p style="font-size:2rem;">✅</p><p style="color:var(--gray);">No unresolved errors. System is healthy!</p></div>';
+    } else {
+      html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--red);margin-bottom:1rem;">🚨 Unresolved Errors (' + unresolved.length + ')</h3>';
+      unresolved.forEach(d => {
+        const e = d.data();
+        const time = e.timestamp ? new Date(e.timestamp).toLocaleString() : '';
+        const severityColor = e.severity === 'error' ? '#E63329' : '#F5A623';
+        html += '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;border-left:4px solid ' + severityColor + ';">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.5rem;">';
+        html += '<div><p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(e.context || '') + '</p>';
+        html += '<p style="font-size:0.75rem;color:var(--gray);">' + sanitize(e.userName || 'Anonymous') + ' · ' + time + '</p></div>';
+        html += '<div style="display:flex;gap:0.5rem;align-items:center;">';
+        html += '<span style="background:' + severityColor + '18;color:' + severityColor + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (e.severity || 'error').toUpperCase() + '</span>';
+        html += '<button onclick="resolveError('' + d.id + '')" style="background:#27AE60;color:#fff;border:none;padding:0.3rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;cursor:pointer;">Resolve</button>';
+        html += '</div></div>';
+        html += '<p style="font-size:0.82rem;color:var(--navy);background:white;padding:0.5rem 0.75rem;border-radius:8px;margin-bottom:0.35rem;font-family:monospace;">' + sanitize(e.message || '') + '</p>';
+        if (e.stack) html += '<p style="font-size:0.72rem;color:var(--gray);font-family:monospace;white-space:pre-wrap;">' + sanitize(e.stack) + '</p>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    // Recent resolved
+    const resolved = all.filter(d => d.data().resolved);
+    if (resolved.length > 0) {
+      html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:#27AE60;margin-bottom:1rem;">✅ Recently Resolved (' + resolved.length + ')</h3>';
+      resolved.slice(0, 10).forEach(d => {
+        const e = d.data();
+        html += '<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--light);">';
+        html += '<p style="font-size:0.82rem;color:var(--gray);">' + sanitize(e.context || '') + ' — ' + sanitize(e.message || '').substring(0, 60) + '</p>';
+        html += '<span style="font-size:0.72rem;color:#27AE60;">Resolved</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    c.innerHTML = html;
+  } catch(e) {
+    c.innerHTML = '<p style="color:red;">Error loading system errors: ' + e.message + '</p>';
+  }
+}
+
+window.resolveError = async function(errorId) {
+  await updateDoc(doc(db, 'systemErrors', errorId), { resolved: true, resolvedAt: serverTimestamp(), resolvedBy: 'Admin' });
+  showToast('Error marked as resolved');
+  loadSection('errors');
+};
+
+window.resolveAllErrors = async function() {
+  if (!confirm('Mark all errors as resolved?')) return;
+  const snap = await getDocs(query(collection(db, 'systemErrors'), where('resolved', '==', false)));
+  const batch = [];
+  snap.docs.forEach(d => batch.push(updateDoc(doc(db, 'systemErrors', d.id), { resolved: true, resolvedAt: serverTimestamp() })));
+  await Promise.all(batch);
+  showToast('All errors resolved!');
+  loadSection('errors');
+};
+
+checkAuth();
 };
 
 // ===== UTILS =====
@@ -614,11 +786,11 @@ window.loadSection = async function(section) {
     newsletters: ' Newsletter Manager',
     analytics: ' Analytics Dashboard',
     assignments: ' Assignment Reviews',
-    programs: ' Programs Manager', notifications: ' Notification Center', finance: ' Finance Manager', recommendations: ' Recommendation Letters' 
+    programs: ' Programs Manager', notifications: ' Notification Center', finance: ' Finance Manager', recommendations: ' Recommendation Letters', errors: '🚨 System Errors' 
   }[section] || section;
   const container = document.getElementById('content-area');
   container.innerHTML = '<div class="loading">Loading...</div>';
-  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: loadAnalytics, assignments: loadAssignments, programs: loadProgramsAdmin, applications: (...args) => window.loadProgramApplications(...args), notifications: loadNotificationCenter, finance: loadFinance, recommendations: (...args) => window.loadRecommendations(...args), mentors: loadMentorApplications, opportunities: loadOpportunitiesManager };
+  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: loadAnalytics, assignments: loadAssignments, programs: loadProgramsAdmin, applications: (...args) => window.loadProgramApplications(...args), notifications: loadNotificationCenter, finance: loadFinance, recommendations: (...args) => window.loadRecommendations(...args), errors: loadSystemErrors, mentors: loadMentorApplications, opportunities: loadOpportunitiesManager };
   if (fns[section]) {
     try {
       await fns[section](container);
@@ -1519,6 +1691,92 @@ window.deleteItem = async function(collectionName, docId, reloadFn) {
   } catch(e) {
     showToast(e.message, 'error');
   }
+};
+
+async function loadSystemErrors(c) {
+  c.innerHTML = '<div class="loading">Loading errors...</div>';
+  try {
+    const [unresolvedSnap, allSnap] = await Promise.all([
+      getDocs(query(collection(db, 'systemErrors'), where('resolved', '==', false), orderBy('createdAt', 'desc'), limit(50))),
+      getDocs(query(collection(db, 'systemErrors'), orderBy('createdAt', 'desc'), limit(100)))
+    ]);
+
+    const unresolved = unresolvedSnap.docs;
+    const all = allSnap.docs;
+
+    // Stats
+    const critical = unresolved.filter(d => d.data().severity === 'error').length;
+    const warnings = unresolved.filter(d => d.data().severity === 'warning').length;
+
+    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
+    html += '<div class="stat-card red"><div class="stat-num">' + critical + '</div><div class="stat-label">Unresolved Errors</div></div>';
+    html += '<div class="stat-card gold"><div class="stat-num">' + warnings + '</div><div class="stat-label">Warnings</div></div>';
+    html += '<div class="stat-card navy"><div class="stat-num">' + all.length + '</div><div class="stat-label">Total Logged</div></div>';
+    html += '</div>';
+
+    // Actions
+    html += '<div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">';
+    html += '<button onclick="resolveAllErrors()" style="background:#27AE60;color:#fff;border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">✅ Mark All Resolved</button>';
+    html += '<button onclick="loadSection('errors')" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">🔄 Refresh</button>';
+    html += '</div>';
+
+    if (unresolved.length === 0) {
+      html += '<div class="section-card" style="text-align:center;padding:3rem;"><p style="font-size:2rem;">✅</p><p style="color:var(--gray);">No unresolved errors. System is healthy!</p></div>';
+    } else {
+      html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--red);margin-bottom:1rem;">🚨 Unresolved Errors (' + unresolved.length + ')</h3>';
+      unresolved.forEach(d => {
+        const e = d.data();
+        const time = e.timestamp ? new Date(e.timestamp).toLocaleString() : '';
+        const severityColor = e.severity === 'error' ? '#E63329' : '#F5A623';
+        html += '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;border-left:4px solid ' + severityColor + ';">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.5rem;">';
+        html += '<div><p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(e.context || '') + '</p>';
+        html += '<p style="font-size:0.75rem;color:var(--gray);">' + sanitize(e.userName || 'Anonymous') + ' · ' + time + '</p></div>';
+        html += '<div style="display:flex;gap:0.5rem;align-items:center;">';
+        html += '<span style="background:' + severityColor + '18;color:' + severityColor + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (e.severity || 'error').toUpperCase() + '</span>';
+        html += '<button onclick="resolveError('' + d.id + '')" style="background:#27AE60;color:#fff;border:none;padding:0.3rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;cursor:pointer;">Resolve</button>';
+        html += '</div></div>';
+        html += '<p style="font-size:0.82rem;color:var(--navy);background:white;padding:0.5rem 0.75rem;border-radius:8px;margin-bottom:0.35rem;font-family:monospace;">' + sanitize(e.message || '') + '</p>';
+        if (e.stack) html += '<p style="font-size:0.72rem;color:var(--gray);font-family:monospace;white-space:pre-wrap;">' + sanitize(e.stack) + '</p>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    // Recent resolved
+    const resolved = all.filter(d => d.data().resolved);
+    if (resolved.length > 0) {
+      html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:#27AE60;margin-bottom:1rem;">✅ Recently Resolved (' + resolved.length + ')</h3>';
+      resolved.slice(0, 10).forEach(d => {
+        const e = d.data();
+        html += '<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--light);">';
+        html += '<p style="font-size:0.82rem;color:var(--gray);">' + sanitize(e.context || '') + ' — ' + sanitize(e.message || '').substring(0, 60) + '</p>';
+        html += '<span style="font-size:0.72rem;color:#27AE60;">Resolved</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    c.innerHTML = html;
+  } catch(e) {
+    c.innerHTML = '<p style="color:red;">Error loading system errors: ' + e.message + '</p>';
+  }
+}
+
+window.resolveError = async function(errorId) {
+  await updateDoc(doc(db, 'systemErrors', errorId), { resolved: true, resolvedAt: serverTimestamp(), resolvedBy: 'Admin' });
+  showToast('Error marked as resolved');
+  loadSection('errors');
+};
+
+window.resolveAllErrors = async function() {
+  if (!confirm('Mark all errors as resolved?')) return;
+  const snap = await getDocs(query(collection(db, 'systemErrors'), where('resolved', '==', false)));
+  const batch = [];
+  snap.docs.forEach(d => batch.push(updateDoc(doc(db, 'systemErrors', d.id), { resolved: true, resolvedAt: serverTimestamp() })));
+  await Promise.all(batch);
+  showToast('All errors resolved!');
+  loadSection('errors');
 };
 
 checkAuth();
@@ -3217,6 +3475,7 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       <!-- Dashboard -->
       <button class="nav-item" data-section="overview" onclick="loadSection('overview')"><span class="nav-icon">📊</span> Overview</button>
       <button class="nav-item" data-section="analytics" onclick="loadSection('analytics')"><span class="nav-icon">📈</span> Analytics</button>
+      <button class="nav-item" data-section="errors" onclick="loadSection('errors')"><span class="nav-icon">🚨</span> System Errors</button>
       <button class="nav-item" data-section="finance" onclick="loadSection('finance')"><span class="nav-icon">💰</span> Finance</button>
 
       <!-- Community -->
