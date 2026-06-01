@@ -2183,7 +2183,9 @@ async function downloadCertificate(certId, deptOverride, programId) {
     + '<scr' + 'ipt>'
     + 'function saveCertAsImage(btn){'
     + '  btn.textContent = "Generating..."; btn.disabled = true;'
-    + '  window.opener.saveCertFromPopup(document.querySelector(".cert"), btn);'
+    + '  var cert = document.querySelector(".cert");'
+    + '  var wrap = document.querySelector(".cert").parentElement;'
+    + '  window.opener.saveCertFromPopup(wrap, btn);'
     + '}'
     + 'setTimeout(function(){ window.print(); },1500);'
     + '<\/script><\/bo' + 'dy><\/html>');
