@@ -4080,11 +4080,13 @@ async function sendNewsletter() {
       if (dept && u.department !== dept) continue;
       if (!u.email) continue;
       try {
+        const unsubLink = 'https://youngafricansnetwork.org/community.html?unsubscribe=' + d.id;
+        const fullMessage = message + '\n\n---\n🌍 Young Africans Network | youngafricansnetwork.org\ninfo@youngafricansnetwork.org\n\nTo unsubscribe from YAN newsletters, click here: ' + unsubLink;
         await fetch('https://yan-email-worker.youngafricansn.workers.dev', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
           to_email: u.email,
           name: u.name,
           subject: subject,
-          message: message
+          message: fullMessage
         })});
         sent++;
       } catch(e) { failed++; }
