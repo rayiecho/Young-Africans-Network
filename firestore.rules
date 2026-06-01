@@ -13,10 +13,12 @@ service cloud.firestore {
     }
     function isAdmin() {
       return isSystemAdmin() || (isLoggedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true);
     }
     function isDeptHead() {
       return isLoggedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isDeptHead == true;
     }
     function isAdminOrHead() {
