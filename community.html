@@ -10443,7 +10443,18 @@ window.copyMeetingLink = function(url) {
 window.toggleLiveMeeting=toggleLiveMeeting; window.markAttendance=markAttendance; window.viewAttendance=viewAttendance; window.addRecording=addRecording; window.deleteMeeting=deleteMeeting;
 window.saveCertFromPopup = function(certEl, btn) {
   if (!certEl) { alert('Certificate not found'); return; }
-  html2canvas(certEl, {scale:2, useCORS:true, allowTaint:true, backgroundColor:'#fff'}).then(function(canvas) {
+  // Get exact cert dimensions to avoid white space
+  const rect = certEl.getBoundingClientRect();
+  html2canvas(certEl, {
+    scale: 2,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: '#fff',
+    width: certEl.scrollWidth,
+    height: certEl.scrollHeight,
+    windowWidth: certEl.scrollWidth,
+    windowHeight: certEl.scrollHeight
+  }).then(function(canvas) {
     const link = document.createElement('a');
     link.download = 'YAN-Certificate.png';
     link.href = canvas.toDataURL('image/png');
