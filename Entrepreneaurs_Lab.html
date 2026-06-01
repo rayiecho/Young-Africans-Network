@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entrepreneurs Lab | Young Africans Network</title>
+<meta name="description" content="YAN Entrepreneurs Lab — where young African entrepreneurs showcase their skills, products, and services. Discover, connect, and support African talent.">
+<link rel="icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1B2A6B;
+  --gold: #F5A623;
+  --red: #E63329;
+  --light: #F4F6FF;
+  --gray: #6B7280;
+  --white: #fff;
+  --green: #27AE60;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Poppins', sans-serif; color: var(--navy); background: #fff; }
+
+/* NAV */
+nav { position: sticky; top: 0; z-index: 1000; background: #fff; box-shadow: 0 2px 20px rgba(27,42,107,0.08); padding: 0 2rem; }
+.nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 70px; }
+.nav-logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+.nav-logo img { width: 42px; height: 42px; border-radius: 50%; }
+.nav-logo-text { line-height: 1.2; }
+.nav-logo-text strong { display: block; font-size: 0.92rem; font-weight: 700; color: var(--navy); }
+.nav-logo-text span { font-size: 0.72rem; color: var(--gold); font-weight: 500; }
+.nav-links { display: flex; gap: 0.25rem; list-style: none; align-items: center; }
+.nav-links a { font-size: 0.82rem; font-weight: 500; color: var(--navy); text-decoration: none; padding: 0.5rem 0.75rem; border-radius: 8px; transition: color 0.2s; }
+.nav-links a:hover, .nav-links a.active { color: var(--red); }
+.nav-btn { background: var(--red); color: #fff; padding: 0.6rem 1.5rem; border-radius: 50px; font-size: 0.85rem; font-weight: 700; text-decoration: none; transition: background 0.2s; }
+.nav-btn:hover { background: #c0271e; }
+.lab-nav { color: var(--red) !important; font-weight: 700 !important; }
+
+/* HERO */
+.lab-hero { background: linear-gradient(135deg, var(--navy) 0%, #2d3f8f 60%, #1a1f4e 100%); padding: 5rem 2rem 4rem; text-align: center; position: relative; overflow: hidden; }
+.lab-hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at center, rgba(245,166,35,0.08) 0%, transparent 60%); }
+.lab-hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(245,166,35,0.15); border: 1px solid rgba(245,166,35,0.3); color: var(--gold); padding: 0.4rem 1rem; border-radius: 50px; font-size: 0.78rem; font-weight: 600; margin-bottom: 1.5rem; }
+.lab-hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: #fff; margin-bottom: 1rem; line-height: 1.2; }
+.lab-hero h1 span { color: var(--gold); }
+.lab-hero p { font-size: 1.05rem; color: rgba(255,255,255,0.8); max-width: 600px; margin: 0 auto 2.5rem; line-height: 1.7; }
+.hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.btn-primary { background: var(--gold); color: var(--navy); padding: 0.85rem 2rem; border-radius: 50px; font-weight: 700; text-decoration: none; font-size: 0.92rem; transition: transform 0.2s, box-shadow 0.2s; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(245,166,35,0.4); }
+.btn-outline { background: transparent; color: #fff; padding: 0.85rem 2rem; border-radius: 50px; font-weight: 600; text-decoration: none; font-size: 0.92rem; border: 2px solid rgba(255,255,255,0.4); transition: all 0.2s; }
+.btn-outline:hover { border-color: #fff; background: rgba(255,255,255,0.1); }
+.hero-stats { display: flex; gap: 3rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap; }
+.hero-stat { text-align: center; }
+.hero-stat strong { display: block; font-size: 1.8rem; font-weight: 800; color: var(--gold); }
+.hero-stat span { font-size: 0.78rem; color: rgba(255,255,255,0.7); }
+
+/* CATEGORIES */
+.categories { padding: 3rem 2rem; background: var(--light); }
+.categories-inner { max-width: 1200px; margin: 0 auto; }
+.section-label { font-size: 0.75rem; font-weight: 700; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+.section-title { font-size: 1.8rem; font-weight: 800; color: var(--navy); margin-bottom: 2rem; }
+.cats-grid { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.cat-btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem; border-radius: 50px; border: 2px solid transparent; background: #fff; color: var(--navy); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif; }
+.cat-btn:hover, .cat-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+.cat-btn.all.active { background: var(--gold); color: var(--navy); border-color: var(--gold); }
+
+/* LISTINGS */
+.listings { padding: 3rem 2rem; }
+.listings-inner { max-width: 1200px; margin: 0 auto; }
+.listings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: gap; gap: 1rem; }
+.listings-count { font-size: 0.85rem; color: var(--gray); }
+.sort-select { padding: 0.5rem 1rem; border: 1.5px solid #e5e7eb; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 0.82rem; color: var(--navy); outline: none; cursor: pointer; }
+.listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+.listing-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 15px rgba(27,42,107,0.07); border: 1.5px solid #f0f2ff; transition: transform 0.2s, box-shadow 0.2s; }
+.listing-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(27,42,107,0.12); }
+.listing-img { width: 100%; height: 180px; object-fit: cover; background: var(--light); display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+.listing-img img { width: 100%; height: 100%; object-fit: cover; }
+.listing-body { padding: 1.25rem; }
+.listing-cat { display: inline-block; background: rgba(27,42,107,0.07); color: var(--navy); padding: 0.2rem 0.75rem; border-radius: 50px; font-size: 0.72rem; font-weight: 600; margin-bottom: 0.75rem; }
+.listing-title { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 0.4rem; }
+.listing-desc { font-size: 0.82rem; color: var(--gray); line-height: 1.6; margin-bottom: 0.75rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.listing-price { font-size: 1rem; font-weight: 700; color: var(--green); margin-bottom: 0.75rem; }
+.listing-seller { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+.seller-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--navy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; }
+.seller-info { font-size: 0.78rem; }
+.seller-name { font-weight: 600; color: var(--navy); }
+.seller-badge { color: var(--green); font-size: 0.7rem; }
+.listing-stars { display: flex; align-items: center; gap: 0.3rem; font-size: 0.78rem; color: var(--gray); margin-bottom: 1rem; }
+.stars { color: var(--gold); }
+.listing-actions { display: flex; gap: 0.5rem; }
+.btn-whatsapp { flex: 1; background: #25D366; color: #fff; border: none; padding: 0.6rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: background 0.2s; }
+.btn-whatsapp:hover { background: #1da851; }
+.btn-view { flex: 1; background: var(--light); color: var(--navy); border: none; padding: 0.6rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: background 0.2s; }
+.btn-view:hover { background: #e8ecff; }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 4rem 2rem; color: var(--gray); }
+.empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+.empty-state h3 { font-size: 1.1rem; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem; }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; padding: 1rem; }
+.modal-overlay.active { display: flex; }
+.modal { background: #fff; border-radius: 20px; padding: 2rem; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; position: relative; }
+.modal-title { font-size: 1.2rem; font-weight: 700; color: var(--navy); margin-bottom: 1.5rem; }
+.modal-close { position: absolute; top: 1.25rem; right: 1.25rem; background: var(--light); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+.form-group { margin-bottom: 1.25rem; }
+.form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--navy); margin-bottom: 0.4rem; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.7rem 1rem; border: 1.5px solid #e5e7eb; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.85rem; color: var(--navy); outline: none; transition: border-color 0.2s; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--navy); }
+.form-group textarea { resize: vertical; min-height: 80px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.btn-submit { width: 100%; background: var(--navy); color: #fff; border: none; padding: 0.85rem; border-radius: 50px; font-family: 'Poppins', sans-serif; font-size: 0.92rem; font-weight: 700; cursor: pointer; transition: background 0.2s; margin-top: 0.5rem; }
+.btn-submit:hover { background: #2d3f8f; }
+.form-note { font-size: 0.75rem; color: var(--gray); margin-top: 0.75rem; text-align: center; }
+
+/* DETAIL MODAL */
+.detail-img { width: 100%; height: 220px; object-fit: cover; border-radius: 12px; margin-bottom: 1.25rem; background: var(--light); display: flex; align-items: center; justify-content: center; font-size: 4rem; }
+.detail-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+.reviews-section { margin-top: 1.5rem; border-top: 1px solid #f0f2ff; padding-top: 1.25rem; }
+.review-item { background: var(--light); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 0.75rem; }
+.review-header { display: flex; justify-content: space-between; margin-bottom: 0.3rem; }
+.review-name { font-size: 0.82rem; font-weight: 600; color: var(--navy); }
+.review-stars { color: var(--gold); font-size: 0.82rem; }
+.review-text { font-size: 0.78rem; color: var(--gray); }
+.add-review { background: #fff; border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 1rem; margin-top: 1rem; }
+.add-review h4 { font-size: 0.85rem; font-weight: 700; color: var(--navy); margin-bottom: 0.75rem; }
+.star-select { display: flex; gap: 0.25rem; margin-bottom: 0.75rem; }
+.star-select span { font-size: 1.5rem; cursor: pointer; opacity: 0.3; transition: opacity 0.2s; }
+.star-select span.active { opacity: 1; }
+
+/* HOW IT WORKS */
+.how-it-works { padding: 4rem 2rem; background: var(--light); }
+.how-inner { max-width: 1200px; margin: 0 auto; text-align: center; }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2rem; margin-top: 2.5rem; }
+.step { background: #fff; border-radius: 16px; padding: 2rem 1.5rem; box-shadow: 0 2px 15px rgba(27,42,107,0.06); }
+.step-num { width: 48px; height: 48px; background: var(--navy); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; margin: 0 auto 1rem; }
+.step h3 { font-size: 0.95rem; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem; }
+.step p { font-size: 0.82rem; color: var(--gray); line-height: 1.6; }
+
+/* RULES BANNER */
+.rules-banner { background: linear-gradient(135deg, var(--navy), #2d3f8f); padding: 3rem 2rem; }
+.rules-inner { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center; }
+.rules-text h2 { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 1rem; }
+.rules-text p { font-size: 0.88rem; color: rgba(255,255,255,0.8); line-height: 1.7; }
+.rules-list { list-style: none; }
+.rules-list li { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.85); margin-bottom: 0.6rem; }
+.rules-list li::before { content: '✓'; color: var(--gold); font-weight: 700; flex-shrink: 0; }
+
+/* CTA */
+.cta { padding: 4rem 2rem; text-align: center; }
+.cta h2 { font-size: 2rem; font-weight: 800; color: var(--navy); margin-bottom: 1rem; }
+.cta p { font-size: 0.95rem; color: var(--gray); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+
+/* LOADING */
+.loading-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+.skeleton { background: linear-gradient(90deg, #f0f2ff 25%, #e8ecff 50%, #f0f2ff 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 16px; height: 320px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* TOAST */
+.toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: var(--navy); color: #fff; padding: 0.75rem 1.5rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600; z-index: 99999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+
+/* FOOTER */
+footer { background: var(--navy); color: rgba(255,255,255,0.7); padding: 2rem; text-align: center; font-size: 0.82rem; }
+footer a { color: var(--gold); text-decoration: none; }
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .rules-inner { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .hero-stats { gap: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <img src="images/logo.png" alt="YAN Logo" onerror="this.style.display='none'">
+      <div class="nav-logo-text">
+        <strong>Young Africans Network</strong>
+        <span>Building the Future, Together</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="programs.html">Programs</a></li>
+      <li><a href="team.html">Team</a></li>
+      <li><a href="community.html">Community</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="lab.html" class="lab-nav">🧪 Entrepreneurs Lab</a></li>
+    </ul>
+    <a href="join.html" class="nav-btn">Join YAN</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="lab-hero">
+  <div class="lab-hero-badge">🧪 YAN Entrepreneurs Lab</div>
+  <h1>Africa's Young<br><span>Entrepreneurs</span> Showcase</h1>
+  <p>Discover skills, products, and services from verified young African entrepreneurs. Support African talent. Grow together.</p>
+  <div class="hero-btns">
+    <a href="#listings" class="btn-primary">Browse Listings</a>
+    <a href="#" class="btn-outline" onclick="openSubmitModal(); return false;">+ Submit Your Listing</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <strong id="stat-listings">0</strong>
+      <span>Active Listings</span>
+    </div>
+    <div class="hero-stat">
+      <strong id="stat-members">0</strong>
+      <span>Entrepreneurs</span>
+    </div>
+    <div class="hero-stat">
+      <strong id="stat-countries">25+</strong>
+      <span>African Countries</span>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="categories">
+  <div class="categories-inner">
+    <div class="section-label">Browse By</div>
+    <div class="section-title">Categories</div>
+    <div class="cats-grid">
+      <button class="cat-btn all active" onclick="filterCategory('all', this)">🌍 All</button>
+      <button class="cat-btn" onclick="filterCategory('Creative Skills', this)">🎨 Creative Skills</button>
+      <button class="cat-btn" onclick="filterCategory('Tech Skills', this)">💻 Tech Skills</button>
+      <button class="cat-btn" onclick="filterCategory('Marketing', this)">📢 Marketing</button>
+      <button class="cat-btn" onclick="filterCategory('Products', this)">🛍️ Products</button>
+      <button class="cat-btn" onclick="filterCategory('Agriculture & Food', this)">🌱 Agriculture & Food</button>
+      <button class="cat-btn" onclick="filterCategory('Business Services', this)">💼 Business Services</button>
+      <button class="cat-btn" onclick="filterCategory('Pitches', this)">🎤 Pitches</button>
+    </div>
+  </div>
+</section>
+
+<!-- LISTINGS -->
+<section class="listings" id="listings">
+  <div class="listings-inner">
+    <div class="listings-header">
+      <div class="listings-count" id="listings-count">Loading listings...</div>
+      <select class="sort-select" onchange="sortListings(this.value)">
+        <option value="reviews">Most Reviewed</option>
+        <option value="rating">Highest Rated</option>
+        <option value="newest">Newest First</option>
+      </select>
+    </div>
+    <div id="listings-container">
+      <div class="loading-grid">
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works">
+  <div class="how-inner">
+    <div class="section-label">Simple Process</div>
+    <div class="section-title">How the Entrepreneurs Lab Works</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Join YAN & Complete a Program</h3>
+        <p>Become a verified YAN member and complete at least one program to unlock listing access.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Submit Your Listing</h3>
+        <p>Showcase your skill, product, service, or business pitch. Our team reviews all submissions.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Get Discovered</h3>
+        <p>Your listing goes live and is visible to thousands of visitors, buyers, and investors.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h3>Grow Through Reviews</h3>
+        <p>Collect reviews from clients. Top-rated listings get featured and ranked higher automatically.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RULES BANNER -->
+<section class="rules-banner">
+  <div class="rules-inner">
+    <div class="rules-text">
+      <h2>Lab Rules &amp; Standards</h2>
+      <p>The Entrepreneurs Lab is a trusted space. We maintain high standards to protect both buyers and sellers across Africa.</p>
+    </div>
+    <ul class="rules-list">
+      <li>Must be a verified YAN member to list</li>
+      <li>Must have completed at least one YAN program</li>
+      <li>All listings reviewed by YAN team before going live</li>
+      <li>No misleading descriptions or false claims</li>
+      <li>Buyers contact sellers directly — no platform fees</li>
+      <li>Reviews must be genuine from real interactions</li>
+      <li>YAN reserves the right to remove any listing</li>
+    </ul>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2>Ready to Showcase Your Work?</h2>
+  <p>Join thousands of young African entrepreneurs already building their future on YAN.</p>
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+    <a href="#" class="btn-primary" onclick="openSubmitModal(); return false;" style="text-decoration:none;display:inline-block;">+ Submit Your Listing</a>
+    <a href="join.html" style="display:inline-block;background:var(--light);color:var(--navy);padding:0.85rem 2rem;border-radius:50px;font-weight:700;text-decoration:none;font-size:0.92rem;">Join YAN Free</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>&copy; 2026 Young Africans Network · <a href="privacy.html">Privacy Policy</a> · <a href="contact.html">Contact Us</a></p>
+</footer>
+
+<!-- SUBMIT MODAL -->
+<div class="modal-overlay" id="submit-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeSubmitModal()">✕</button>
+    <div class="modal-title">🧪 Submit Your Listing</div>
+    <div class="form-group">
+      <label>Your Name *</label>
+      <input type="text" id="sub-name" placeholder="Full name">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>WhatsApp Number *</label>
+        <input type="tel" id="sub-phone" placeholder="+254 700 000000">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="sub-email" placeholder="your@email.com">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Listing Title *</label>
+      <input type="text" id="sub-title" placeholder="e.g. Professional Logo Design Services">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Category *</label>
+        <select id="sub-category">
+          <option value="">Select category</option>
+          <option>Creative Skills</option>
+          <option>Tech Skills</option>
+          <option>Marketing</option>
+          <option>Products</option>
+          <option>Agriculture & Food</option>
+          <option>Business Services</option>
+          <option>Pitches</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Price / Rate</label>
+        <input type="text" id="sub-price" placeholder="e.g. KES 2,000 per logo">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Description *</label>
+      <textarea id="sub-desc" placeholder="Describe your skill, product, or service in detail..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Country *</label>
+      <input type="text" id="sub-country" placeholder="e.g. Kenya">
+    </div>
+    <div class="form-group">
+      <label>Image URL (optional)</label>
+      <input type="url" id="sub-image" placeholder="https://... (link to your product/work image)">
+    </div>
+    <div class="form-group">
+      <label>YAN Member ID (optional)</label>
+      <input type="text" id="sub-memberid" placeholder="Your YAN member ID or email">
+    </div>
+    <button class="btn-submit" onclick="submitListing()">Submit for Review</button>
+    <p class="form-note">📋 Your listing will be reviewed by the YAN team within 24-48 hours before going live.</p>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeDetailModal()">✕</button>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, getDocs, addDoc, query, orderBy, where, serverTimestamp, doc, updateDoc, arrayUnion, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBmCZFJHpHMsN9UuMYr5Lbxc5HJFi_m_4Q",
+  authDomain: "young-africans-network.firebaseapp.com",
+  projectId: "young-africans-network",
+  storageBucket: "young-africans-network.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abcdef"
+};
+
+// NOTE: Replace firebaseConfig with actual config from your Firebase project
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let allListings = [];
+let currentCategory = 'all';
+let currentSort = 'reviews';
+let selectedRating = 0;
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function sanitize(str) {
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+function getCategoryEmoji(cat) {
+  const map = {
+    'Creative Skills': '🎨',
+    'Tech Skills': '💻',
+    'Marketing': '📢',
+    'Products': '🛍️',
+    'Agriculture & Food': '🌱',
+    'Business Services': '💼',
+    'Pitches': '🎤'
+  };
+  return map[cat] || '🌍';
+}
+
+function renderStars(rating) {
+  let s = '';
+  for (let i = 1; i <= 5; i++) s += i <= rating ? '★' : '☆';
+  return s;
+}
+
+function renderCards(listings) {
+  const container = document.getElementById('listings-container');
+  document.getElementById('listings-count').textContent = listings.length + ' listing' + (listings.length !== 1 ? 's' : '') + ' found';
+
+  if (listings.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">🧪</div><h3>No listings yet in this category</h3><p>Be the first to showcase your work!</p></div>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="listings-grid">${listings.map(l => `
+    <div class="listing-card" onclick="openDetail('${l.id}')">
+      <div class="listing-img" style="background:var(--light);">
+        ${l.imageUrl ? `<img src="${sanitize(l.imageUrl)}" alt="${sanitize(l.title)}" onerror="this.parentElement.innerHTML='${getCategoryEmoji(l.category)}'">` : getCategoryEmoji(l.category)}
+      </div>
+      <div class="listing-body">
+        <span class="listing-cat">${getCategoryEmoji(l.category)} ${sanitize(l.category)}</span>
+        <div class="listing-title">${sanitize(l.title)}</div>
+        <div class="listing-desc">${sanitize(l.description)}</div>
+        ${l.price ? `<div class="listing-price">${sanitize(l.price)}</div>` : ''}
+        <div class="listing-seller">
+          <div class="seller-avatar">${(l.sellerName||'?')[0].toUpperCase()}</div>
+          <div class="seller-info">
+            <div class="seller-name">${sanitize(l.sellerName)} · ${sanitize(l.country||'')}</div>
+            <div class="seller-badge">✅ YAN Verified</div>
+          </div>
+        </div>
+        <div class="listing-stars">
+          <span class="stars">${renderStars(Math.round(l.avgRating||0))}</span>
+          ${l.avgRating ? l.avgRating.toFixed(1) : 'No reviews yet'} (${(l.reviews||[]).length})
+        </div>
+        <div class="listing-actions" onclick="event.stopPropagation()">
+          <button class="btn-whatsapp" onclick="contactWhatsApp('${sanitize(l.phone||'')}','${sanitize(l.title)}')">💬 WhatsApp</button>
+          <button class="btn-view" onclick="openDetail('${l.id}')">View Details</button>
+        </div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+async function loadListings() {
+  try {
+    const snap = await getDocs(query(collection(db, 'labListings'), where('status', '==', 'approved')));
+    allListings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // Update stats
+    const uniqueSellers = new Set(allListings.map(l => l.sellerEmail || l.sellerName)).size;
+    document.getElementById('stat-listings').textContent = allListings.length;
+    document.getElementById('stat-members').textContent = uniqueSellers;
+
+    applyFilters();
+  } catch(e) {
+    console.error(e);
+    document.getElementById('listings-container').innerHTML = `<div class="empty-state"><div class="icon">🧪</div><h3>No listings yet</h3><p>Be the first entrepreneur to showcase your work in the Lab!</p></div>`;
+    document.getElementById('listings-count').textContent = '0 listings';
+  }
+}
+
+function applyFilters() {
+  let filtered = currentCategory === 'all' ? [...allListings] : allListings.filter(l => l.category === currentCategory);
+
+  if (currentSort === 'reviews') filtered.sort((a, b) => (b.reviews||[]).length - (a.reviews||[]).length);
+  else if (currentSort === 'rating') filtered.sort((a, b) => (b.avgRating||0) - (a.avgRating||0));
+  else if (currentSort === 'newest') filtered.sort((a, b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+
+  renderCards(filtered);
+}
+
+window.filterCategory = function(cat, btn) {
+  currentCategory = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+};
+
+window.sortListings = function(val) {
+  currentSort = val;
+  applyFilters();
+};
+
+window.contactWhatsApp = function(phone, title) {
+  if (!phone) { showToast('No WhatsApp number available'); return; }
+  const clean = phone.replace(/\D/g, '');
+  const msg = encodeURIComponent(`Hi! I found your listing "${title}" on the YAN Entrepreneurs Lab. I'm interested!`);
+  window.open(`https://wa.me/${clean}?text=${msg}`, '_blank');
+};
+
+window.openDetail = function(id) {
+  const l = allListings.find(x => x.id === id);
+  if (!l) return;
+
+  const reviews = l.reviews || [];
+  const avgRating = reviews.length ? (reviews.reduce((s, r) => s + (r.rating||0), 0) / reviews.length).toFixed(1) : null;
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-img" style="background:var(--light);">
+      ${l.imageUrl ? `<img src="${sanitize(l.imageUrl)}" alt="${sanitize(l.title)}" onerror="this.parentElement.innerHTML='${getCategoryEmoji(l.category)}'">` : getCategoryEmoji(l.category)}
+    </div>
+    <span class="listing-cat">${getCategoryEmoji(l.category)} ${sanitize(l.category)}</span>
+    <div class="modal-title" style="margin-top:0.5rem;">${sanitize(l.title)}</div>
+    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
+      <div class="seller-avatar">${(l.sellerName||'?')[0].toUpperCase()}</div>
+      <div><div class="seller-name" style="font-size:0.85rem;font-weight:600;">${sanitize(l.sellerName)}</div>
+      <div style="font-size:0.75rem;color:var(--gray);">${sanitize(l.country||'')} · ✅ YAN Verified</div></div>
+    </div>
+    ${l.price ? `<div class="listing-price">${sanitize(l.price)}</div>` : ''}
+    <p style="font-size:0.85rem;color:var(--gray);line-height:1.7;margin-bottom:1.25rem;">${sanitize(l.description)}</p>
+    <div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;">
+      ${l.phone ? `<button class="btn-whatsapp" style="flex:1;padding:0.75rem;" onclick="contactWhatsApp('${sanitize(l.phone)}','${sanitize(l.title)}')">💬 WhatsApp</button>` : ''}
+      ${l.email ? `<a href="mailto:${sanitize(l.email)}" style="flex:1;background:var(--light);color:var(--navy);border:none;padding:0.75rem;border-radius:8px;font-size:0.85rem;font-weight:600;text-align:center;text-decoration:none;display:block;">📧 Email</a>` : ''}
+    </div>
+    <div class="reviews-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <strong style="font-size:0.92rem;">Reviews (${reviews.length})</strong>
+        ${avgRating ? `<span style="font-size:0.85rem;"><span style="color:var(--gold);">${renderStars(Math.round(avgRating))}</span> ${avgRating}</span>` : ''}
+      </div>
+      ${reviews.length === 0 ? '<p style="font-size:0.82rem;color:var(--gray);">No reviews yet. Be the first!</p>' : reviews.slice(0,5).map(r => `
+        <div class="review-item">
+          <div class="review-header">
+            <span class="review-name">${sanitize(r.reviewerName||'Anonymous')}</span>
+            <span class="review-stars">${renderStars(r.rating||5)}</span>
+          </div>
+          <div class="review-text">${sanitize(r.comment||'')}</div>
+        </div>`).join('')}
+      <div class="add-review">
+        <h4>Leave a Review</h4>
+        <div class="star-select" id="star-select-${id}">
+          ${[1,2,3,4,5].map(n => `<span onclick="selectStar(${n},'${id}')" data-star="${n}">⭐</span>`).join('')}
+        </div>
+        <input type="text" id="rev-name-${id}" placeholder="Your name" style="width:100%;padding:0.6rem;border:1.5px solid #e5e7eb;border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;margin-bottom:0.5rem;outline:none;">
+        <textarea id="rev-comment-${id}" placeholder="Share your experience..." style="width:100%;padding:0.6rem;border:1.5px solid #e5e7eb;border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;resize:vertical;min-height:60px;outline:none;margin-bottom:0.5rem;"></textarea>
+        <button onclick="submitReview('${id}')" style="background:var(--navy);color:#fff;border:none;padding:0.6rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">Submit Review</button>
+      </div>
+    </div>`;
+
+  document.getElementById('detail-modal').classList.add('active');
+};
+
+window.selectStar = function(n, id) {
+  selectedRating = n;
+  document.querySelectorAll(`#star-select-${id} span`).forEach((s, i) => {
+    s.classList.toggle('active', i < n);
+  });
+};
+
+window.submitReview = async function(listingId) {
+  const name = document.getElementById(`rev-name-${listingId}`).value.trim();
+  const comment = document.getElementById(`rev-comment-${listingId}`).value.trim();
+  if (!name || !comment || !selectedRating) { showToast('Please fill all fields and select a rating'); return; }
+
+  try {
+    const listingRef = doc(db, 'labListings', listingId);
+    const snap = await getDoc(listingRef);
+    const data = snap.data();
+    const reviews = data.reviews || [];
+    const newReview = { reviewerName: name, comment, rating: selectedRating, createdAt: Date.now() };
+    reviews.push(newReview);
+    const avgRating = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
+
+    await updateDoc(listingRef, { reviews, avgRating, reviewCount: reviews.length });
+
+    // Update local data
+    const listing = allListings.find(l => l.id === listingId);
+    if (listing) { listing.reviews = reviews; listing.avgRating = avgRating; }
+
+    showToast('Review submitted! Thank you 🎉');
+    closeDetailModal();
+    applyFilters();
+  } catch(e) {
+    showToast('Failed to submit review. Try again.');
+  }
+};
+
+window.openSubmitModal = function() {
+  document.getElementById('submit-modal').classList.add('active');
+};
+window.closeSubmitModal = function() {
+  document.getElementById('submit-modal').classList.remove('active');
+};
+window.closeDetailModal = function() {
+  document.getElementById('detail-modal').classList.remove('active');
+  selectedRating = 0;
+};
+
+window.submitListing = async function() {
+  const name = document.getElementById('sub-name').value.trim();
+  const phone = document.getElementById('sub-phone').value.trim();
+  const email = document.getElementById('sub-email').value.trim();
+  const title = document.getElementById('sub-title').value.trim();
+  const category = document.getElementById('sub-category').value;
+  const price = document.getElementById('sub-price').value.trim();
+  const desc = document.getElementById('sub-desc').value.trim();
+  const country = document.getElementById('sub-country').value.trim();
+  const imageUrl = document.getElementById('sub-image').value.trim();
+  const memberId = document.getElementById('sub-memberid').value.trim();
+
+  if (!name || !phone || !title || !category || !desc || !country) {
+    showToast('Please fill all required fields'); return;
+  }
+
+  try {
+    await addDoc(collection(db, 'labListings'), {
+      sellerName: name, phone, email, title, category, price, description: desc,
+      country, imageUrl, memberId, status: 'pending',
+      reviews: [], avgRating: 0, reviewCount: 0,
+      createdAt: serverTimestamp()
+    });
+    showToast('Listing submitted! We\'ll review it within 24-48 hours 🎉');
+    closeSubmitModal();
+    // Clear form
+    ['sub-name','sub-phone','sub-email','sub-title','sub-price','sub-desc','sub-country','sub-image','sub-memberid'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('sub-category').value = '';
+  } catch(e) {
+    showToast('Failed to submit. Please try again.');
+  }
+};
+
+// Close modals on overlay click
+document.getElementById('submit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeSubmitModal();
+});
+document.getElementById('detail-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeDetailModal();
+});
+
+loadListings();
+</script>
+</body>
+</html>
