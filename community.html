@@ -2163,16 +2163,8 @@ async function downloadCertificate(certId, deptOverride, programId) {
     + body
     + '<scr' + 'ipt>'
     + 'function saveCertAsImage(btn){'
-    + '  var cert = document.querySelector(".cert");'
-    + '  if(!cert) return alert("Certificate not found");'
     + '  btn.textContent = "Generating..."; btn.disabled = true;'
-    + '  html2canvas(cert,{scale:2,useCORS:true,allowTaint:true,backgroundColor:"#fff"}).then(function(canvas){'
-    + '    var link = document.createElement("a");'
-    + '    link.download = "YAN-Certificate.png";'
-    + '    link.href = canvas.toDataURL("image/png");'
-    + '    link.click();'
-    + '    btn.textContent = "📸 Save as Image"; btn.disabled = false;'
-    + '  }).catch(function(e){ alert("Error: "+e.message); btn.textContent = "📸 Save as Image"; btn.disabled = false; });'
+    + '  window.opener.saveCertFromPopup(document.querySelector(".cert"), btn);'
     + '}'
     + 'setTimeout(function(){ window.print(); },1500);'
     + '<\/script><\/bo' + 'dy><\/html>');
@@ -10430,6 +10422,19 @@ window.copyMeetingLink = function(url) {
   navigator.clipboard.writeText(url).then(() => showToast('Meeting link copied! ')).catch(() => { prompt('Copy this link:', url); });
 };
 window.toggleLiveMeeting=toggleLiveMeeting; window.markAttendance=markAttendance; window.viewAttendance=viewAttendance; window.addRecording=addRecording; window.deleteMeeting=deleteMeeting;
+window.saveCertFromPopup = function(certEl, btn) {
+  if (!certEl) { alert('Certificate not found'); return; }
+  html2canvas(certEl, {scale:2, useCORS:true, allowTaint:true, backgroundColor:'#fff'}).then(function(canvas) {
+    const link = document.createElement('a');
+    link.download = 'YAN-Certificate.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    if (btn) { btn.textContent = '📸 Save as Image'; btn.disabled = false; }
+  }).catch(function(e) {
+    alert('Error: ' + e.message);
+    if (btn) { btn.textContent = '📸 Save as Image'; btn.disabled = false; }
+  });
+};
 window.saveProfile=saveProfile; window.downloadIDCard=downloadIDCard; window.changeProfilePhoto=changeProfilePhoto; window.downloadCertificate=downloadCertificate;
 window.postMaterial=postMaterial; window.toggleMaterialFields=toggleMaterialFields; window.addQuizQuestion=addQuizQuestion;
 window.renderQuizBuilder=renderQuizBuilder; window.saveQuiz=saveQuiz; window.deleteMaterial=deleteMaterial;
