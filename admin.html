@@ -175,8 +175,8 @@ async function loadLabListings(c) {
         html += '<div><p style="font-size:0.92rem;font-weight:700;color:var(--navy);">' + sanitize(l.title||'') + '</p>';
         html += '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize(l.sellerName||'') + ' · ' + sanitize(l.country||'') + ' · ' + sanitize(l.category||'') + ' · ' + time + '</p></div>';
         html += '<div style="display:flex;gap:0.5rem;">';
-        html += '<button onclick="approveLabListing('' + d.id + '')" style="background:var(--green);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">✅ Approve</button>';
-        html += '<button onclick="rejectLabListing('' + d.id + '')" style="background:var(--red);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">❌ Reject</button>';
+        html += '<button onclick="approveLabListing(\'' + d.id + '\')" style="background:var(--green);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">✅ Approve</button>';
+        html += '<button onclick="rejectLabListing(\'' + d.id + '\')" style="background:var(--red);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">❌ Reject</button>';
         html += '</div></div>';
         html += '<p style="font-size:0.82rem;color:var(--navy);margin-bottom:0.4rem;">' + sanitize(l.description||'').substring(0,150) + '...</p>';
         if (l.price) html += '<p style="font-size:0.82rem;font-weight:600;color:var(--green);">' + sanitize(l.price) + '</p>';
@@ -342,8 +342,8 @@ async function loadLabListings(c) {
         html += '<div><p style="font-size:0.92rem;font-weight:700;color:var(--navy);">' + sanitize(l.title||'') + '</p>';
         html += '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize(l.sellerName||'') + ' · ' + sanitize(l.country||'') + ' · ' + sanitize(l.category||'') + ' · ' + time + '</p></div>';
         html += '<div style="display:flex;gap:0.5rem;">';
-        html += '<button onclick="approveLabListing('' + d.id + '')" style="background:var(--green);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">✅ Approve</button>';
-        html += '<button onclick="rejectLabListing('' + d.id + '')" style="background:var(--red);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">❌ Reject</button>';
+        html += '<button onclick="approveLabListing(\'' + d.id + '\')" style="background:var(--green);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">✅ Approve</button>';
+        html += '<button onclick="rejectLabListing(\'' + d.id + '\')" style="background:var(--red);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">❌ Reject</button>';
         html += '</div></div>';
         html += '<p style="font-size:0.82rem;color:var(--navy);margin-bottom:0.4rem;">' + sanitize(l.description||'').substring(0,150) + '...</p>';
         if (l.price) html += '<p style="font-size:0.82rem;font-weight:600;color:var(--green);">' + sanitize(l.price) + '</p>';
@@ -1951,8 +1951,8 @@ async function loadLabListings(c) {
         html += '<div><p style="font-size:0.92rem;font-weight:700;color:var(--navy);">' + sanitize(l.title||'') + '</p>';
         html += '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize(l.sellerName||'') + ' · ' + sanitize(l.country||'') + ' · ' + sanitize(l.category||'') + ' · ' + time + '</p></div>';
         html += '<div style="display:flex;gap:0.5rem;">';
-        html += '<button onclick="approveLabListing('' + d.id + '')" style="background:var(--green);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">✅ Approve</button>';
-        html += '<button onclick="rejectLabListing('' + d.id + '')" style="background:var(--red);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">❌ Reject</button>';
+        html += '<button onclick="approveLabListing(\'' + d.id + '\')" style="background:var(--green);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">✅ Approve</button>';
+        html += '<button onclick="rejectLabListing(\'' + d.id + '\')" style="background:var(--red);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">❌ Reject</button>';
         html += '</div></div>';
         html += '<p style="font-size:0.82rem;color:var(--navy);margin-bottom:0.4rem;">' + sanitize(l.description||'').substring(0,150) + '...</p>';
         if (l.price) html += '<p style="font-size:0.82rem;font-weight:600;color:var(--green);">' + sanitize(l.price) + '</p>';
