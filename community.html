@@ -596,10 +596,10 @@ function loadTabContent(tab) {
   if (tab === 'directory') safeLoad(tab, loadDirectory);
   if (tab === 'ai') safeLoad(tab, loadAI);
   if (tab === 'scholarships') safeLoad(tab, loadScholarships);
-  if (tab === 'career') safeLoad(tab, loadCareerHub);
+  if (tab === 'career') safeLoad(tab, function() { loadCareerHub(); setTimeout(function(){ if(window.restoreProgramState) window.restoreProgramState(); }, 800); });
   if (tab === 'community-impact') safeLoad(tab, loadCommunityHub);
   if (tab === 'mental-health') safeLoad(tab, loadMentalHealthHub);
-  if (tab === 'programs-hub') safeLoad(tab, loadProgramsHub);
+  if (tab === 'programs-hub') safeLoad(tab, function() { loadProgramsHub(); setTimeout(function(){ if(window.restoreProgramState) window.restoreProgramState(); }, 800); });
   if (tab === 'comms-hub') safeLoad(tab, loadCommsHub);
   if (tab === 'partnerships-hub') safeLoad(tab, loadPartnershipsHub);
   if (tab === 'magazine') safeLoad(tab, loadMagazine);
