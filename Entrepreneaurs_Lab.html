@@ -37,8 +37,13 @@ nav { position: sticky; top: 0; z-index: 1000; background: #fff; box-shadow: 0 2
 .lab-nav { color: var(--red) !important; font-weight: 700 !important; }
 
 /* HERO */
-.lab-hero { background: linear-gradient(135deg, var(--navy) 0%, #2d3f8f 60%, #1a1f4e 100%); padding: 5rem 2rem 4rem; text-align: center; position: relative; overflow: hidden; }
-.lab-hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at center, rgba(245,166,35,0.08) 0%, transparent 60%); }
+.lab-hero { background: linear-gradient(135deg, #0d1b4b 0%, #1B2A6B 40%, #2d1b69 100%); padding: 5rem 2rem 4rem; text-align: center; position: relative; overflow: hidden; }
+.lab-hero::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23F5A623' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+.lab-hero::after { content: ''; position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(245,166,35,0.15) 0%, transparent 70%); border-radius: 50%; }
+.lab-hero-left-glow { position: absolute; bottom: -100px; left: -100px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(230,51,41,0.1) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+@keyframes pulse-gold { 0%,100%{opacity:0.6} 50%{opacity:1} }
+.floating-emoji { position: absolute; font-size: 2rem; animation: float 3s ease-in-out infinite; opacity: 0.4; pointer-events: none; }
 .lab-hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(245,166,35,0.15); border: 1px solid rgba(245,166,35,0.3); color: var(--gold); padding: 0.4rem 1rem; border-radius: 50px; font-size: 0.78rem; font-weight: 600; margin-bottom: 1.5rem; }
 .lab-hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: #fff; margin-bottom: 1rem; line-height: 1.2; }
 .lab-hero h1 span { color: var(--gold); }
@@ -199,14 +204,23 @@ footer a { color: var(--gold); text-decoration: none; }
 
 <!-- HERO -->
 <section class="lab-hero">
-  <div class="lab-hero-badge">🧪 YAN Entrepreneurs Lab</div>
+  <div class="lab-hero-left-glow"></div>
+  <span class="floating-emoji" style="top:15%;left:5%;animation-delay:0s;">🚀</span>
+  <span class="floating-emoji" style="top:20%;right:8%;animation-delay:0.5s;">💡</span>
+  <span class="floating-emoji" style="bottom:25%;left:8%;animation-delay:1s;">🌍</span>
+  <span class="floating-emoji" style="bottom:20%;right:5%;animation-delay:1.5s;">💼</span>
+  <span class="floating-emoji" style="top:50%;left:2%;animation-delay:2s;">🎨</span>
+  <span class="floating-emoji" style="top:45%;right:3%;animation-delay:2.5s;">💻</span>
+  <div style="position:relative;z-index:1;">
+  <div class="lab-hero-badge">🧪 YAN Entrepreneurs Lab — Africa's Showcase</div>
   <h1>Africa's Young<br><span>Entrepreneurs</span> Showcase</h1>
   <p>Discover skills, products, and services from verified young African entrepreneurs. Support African talent. Grow together.</p>
   <div class="hero-btns">
     <a href="#listings" class="btn-primary">Browse Listings</a>
     <a href="#" class="btn-outline" onclick="openSubmitModal(); return false;">+ Submit Your Listing</a>
   </div>
-  <div class="hero-stats">
+  </div>
+  <div class="hero-stats" style="position:relative;z-index:1;">
     <div class="hero-stat">
       <strong id="stat-listings">0</strong>
       <span>Active Listings</span>
