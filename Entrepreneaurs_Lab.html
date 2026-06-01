@@ -652,10 +652,34 @@ window.submitListing = async function() {
     showToast('Please fill all required fields'); return;
   }
 
+  // Check if member exists and has completed a program
+  let isVerifiedMember = false;
+  let completedPrograms = 0;
+  let memberData = null;
+
+  if (email || memberId) {
+    try {
+      const usersSnap = await getDocs(query(collection(db, 'users'),
+        email ? where('email', '==', email) : where('email', '==', memberId)
+      ));
+      if (!usersSnap.empty) {
+        isVerifiedMember = true;
+        memberData = usersSnap.docs[0].data();
+        const uid = usersSnap.docs[0].id;
+        // Check completed programs
+        const progressSnap = await getDocs(query(collection(db, 'learningProgress'), where('userId', '==', uid)));
+        completedPrograms = progressSnap.docs.filter(d => d.data().completed === true || (d.data().lessonsCompleted||[]).length > 0).length;
+      }
+    } catch(e) { console.log('Member check failed:', e); }
+  }
+
   try {
     await addDoc(collection(db, 'labListings'), {
       sellerName: name, phone, email, title, category, price, description: desc,
       country, imageUrl, memberId, status: 'pending',
+      isVerifiedMember, completedPrograms,
+      memberName: memberData ? memberData.name : name,
+      memberDepartment: memberData ? (memberData.department || '') : '',
       reviews: [], avgRating: 0, reviewCount: 0,
       createdAt: serverTimestamp()
     });
