@@ -7730,8 +7730,10 @@ async function submitLessonQuiz(programId, lessonId, colName) {
   const attRef = doc(db, 'quizAttempts', currentUser.uid + '_' + lessonId);
   const attSnap = await getDoc(attRef);
   const attempts = attSnap.exists() ? (attSnap.data().attempts || 0) : 0;
+  const alreadyPassed = attSnap.exists() && attSnap.data().passed === true;
 
-  if (attempts >= 3 && !passed) {
+  // If already passed this lesson before, allow retake without restrictions
+  if (!alreadyPassed && attempts >= 3 && !passed) {
     showQuizFailureForm(programId, lessonId, score, attempts + 1, colName);
     return;
   }
