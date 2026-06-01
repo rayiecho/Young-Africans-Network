@@ -422,6 +422,10 @@ footer a { color: var(--gold); text-decoration: none; }
       <label>YAN Member Email * <span style="font-size:0.72rem;color:var(--gray);">(must match your YAN account)</span></label>
       <input type="email" id="sub-memberid" placeholder="Your YAN registered email" required>
     </div>
+    <div class="form-group">
+      <label>YAN Member ID * <span style="font-size:0.72rem;color:var(--gray);">(found in your YAN profile)</span></label>
+      <input type="text" id="sub-yanid" placeholder="e.g. YAN-2026-XXXX" required>
+    </div>
     <button class="btn-submit" onclick="submitListing()">Submit for Review</button>
     <p class="form-note">📋 Your listing will be reviewed by the YAN team within 24-48 hours before going live.</p>
     <p class="form-note" style="margin-top:0.5rem;color:var(--red);">⚠️ By submitting, you confirm your listing is legal, accurate and you are responsible for all transactions. YAN is not liable for any disputes.</p>
@@ -688,8 +692,9 @@ window.submitListing = async function() {
   const imageUrl = document.getElementById('sub-image').value.trim();
   const memberId = document.getElementById('sub-memberid').value.trim();
 
-  if (!name || !phone || !title || !category || !desc || !country || !memberId) {
-    showToast('Please fill all required fields including your YAN email'); return;
+  const yanId = document.getElementById('sub-yanid').value.trim();
+  if (!name || !phone || !title || !category || !desc || !country || !memberId || !yanId) {
+    showToast('Please fill all required fields including your YAN email and Member ID'); return;
   }
 
   // Check if member exists and has completed a program
@@ -716,7 +721,7 @@ window.submitListing = async function() {
   try {
     await addDoc(collection(db, 'labListings'), {
       sellerName: name, phone, email, title, category, price, description: desc,
-      country, imageUrl, memberId, status: 'pending',
+      country, imageUrl, memberId, yanId, status: 'pending',
       isVerifiedMember, completedPrograms,
       memberName: memberData ? memberData.name : name,
       memberDepartment: memberData ? (memberData.department || '') : '',
