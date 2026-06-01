@@ -2158,14 +2158,13 @@ async function downloadCertificate(certId, deptOverride, programId) {
     + '<div class="no-print" style="background:#f0ece4;padding:10px;font-family:Montserrat,sans-serif;font-size:11px;color:#666;text-align:center;margin-bottom:8px;">'
     + '&#9432; <strong style="color:#E63329;">PDF:</strong> Set <strong>Orientation = Landscape</strong>, Paper = A4, Margins = None'
     + ' &nbsp;|&nbsp; <button onclick="window.print()" style="background:#1B2A6B;color:#fff;border:none;padding:4px 16px;border-radius:4px;cursor:pointer;font-weight:700;font-family:Montserrat,sans-serif;">🖨️ Save as PDF</button>'
-    + ' &nbsp;|&nbsp; <button onclick="saveCertAsImage()" style="background:#27AE60;color:#fff;border:none;padding:4px 16px;border-radius:4px;cursor:pointer;font-weight:700;font-family:Montserrat,sans-serif;">📸 Save as Image</button>'
+    + ' &nbsp;|&nbsp; <button onclick="saveCertAsImage(this)" style="background:#27AE60;color:#fff;border:none;padding:4px 16px;border-radius:4px;cursor:pointer;font-weight:700;font-family:Montserrat,sans-serif;">📸 Save as Image</button>'
     + '</div>'
     + body
     + '<scr' + 'ipt>'
-    + 'function saveCertAsImage(){'
+    + 'function saveCertAsImage(btn){'
     + '  var cert = document.querySelector(".cert");'
     + '  if(!cert) return alert("Certificate not found");'
-    + '  var btn = document.querySelector("[onclick=saveCertAsImage()]") || event.target;'
     + '  btn.textContent = "Generating..."; btn.disabled = true;'
     + '  html2canvas(cert,{scale:2,useCORS:true,allowTaint:true,backgroundColor:"#fff"}).then(function(canvas){'
     + '    var link = document.createElement("a");'
@@ -2176,9 +2175,7 @@ async function downloadCertificate(certId, deptOverride, programId) {
     + '  }).catch(function(e){ alert("Error: "+e.message); btn.textContent = "📸 Save as Image"; btn.disabled = false; });'
     + '}'
     + 'setTimeout(function(){ window.print(); },1500);'
-    + '<\/script>'
-    + '<scr'+'ipt src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/scr'+'ipt>'
-    + '<\/bo' + 'dy><\/html>');
+    + '<\/script><\/bo' + 'dy><\/html>');
   printWin.document.close();
 }
 
