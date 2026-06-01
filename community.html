@@ -8006,14 +8006,14 @@ async function submitQuizFailure(programId, lessonId, score, attempts, colName) 
   const message = document.getElementById('failure-message').value.trim();
   if (!message) return showToast('Please describe the difficulty', 'error');
   try {
-    // Check if already submitted and pending
+    // Check if already submitted and pending - simple query
     const existing = await getDocs(query(
       collection(db, 'quizFailures'),
       where('userId', '==', currentUser.uid),
-      where('lessonId', '==', lessonId),
-      where('reviewed', '==', false)
+      where('lessonId', '==', lessonId)
     ));
-    if (!existing.empty) {
+    const hasPending = existing.docs.some(d => d.data().reviewed === false);
+    if (hasPending) {
       showToast('You already submitted a request for this quiz. Please wait for admin to reset your attempts.', 'error');
       document.getElementById('quiz-failure-modal').remove();
       return;
