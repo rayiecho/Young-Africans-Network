@@ -4017,7 +4017,7 @@ async function sendNewsletter() {
           name: u.name,
           subject: subject,
           message: message
-        }));
+        })});
         sent++;
       } catch(e) { failed++; }
     }
@@ -4048,7 +4048,7 @@ async function sendBulkEmail() {
           name: name,
           subject: subject,
           message: message
-        }));
+        })});
         sent++;
       } catch(e) { failed++; }
     }
@@ -9008,7 +9008,7 @@ async function sendNewsletter2(newsletterId) {
       try {
         await fetch('https://yan-email-worker.youngafricansn.workers.dev', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
           to_email: u.email, name: u.name, subject: nl.subject, message: nl.content
-        }));
+        })});
         sent++;
       } catch(e) {}
     }
@@ -9703,7 +9703,7 @@ async function submitAssignment(programId, moduleId) {
           to_email: currentUserData.email,
           subject: '🎓 Your YAN Certificate is Ready!',
           message: 'Congratulations ' + currentUserData.name + '! You have successfully completed the ' + title + ' program on Young Africans Network. Your certificate has been issued and is available in your My Grades section. Log in to download it: https://youngafricansnetwork.org/community.html\n\nKeep learning and growing!\n\nYAN Team'
-        }));
+        })});
       } catch(emailErr) { console.log('Email error:', emailErr); }
     }
   } catch(e) { console.log('Completion error:', e); }

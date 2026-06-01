@@ -320,7 +320,7 @@ async function approveRecLetter(recId, memberName, scholarship) {
           to_email: userEmail, name: memberNameDecoded,
           subject: 'Your YAN Recommendation Letter Has Been Approved — ' + scholarshipDecoded,
           message: msg
-        }));
+        })});
       }
     }
     showToast('Approved! Member notified by email.');
@@ -444,7 +444,7 @@ async function replyToContact(email, name) {
       name: name || 'Visitor',
       subject: 'Reply from Young Africans Network',
       message: message + '\n\nWarm regards,\nYAN Administration Office\nyoungafricansnetwork.org'
-    }));
+    })});
     showToast('Reply sent to ' + name + '!');
   } catch(e) {
     showToast('Failed to send reply: ' + e.message, 'error');
@@ -459,7 +459,7 @@ async function approveJoinRequest(id, email, name) {
       to_email: email, name: name,
       subject: 'Application Approved — Young Africans Network',
       message: 'Congratulations ' + name + '! Your application to join Young Africans Network has been approved. Please register at: https://youngafricansnetwork.org/register.html\n\nWelcome to the YAN family!\n\nWarm regards,\nYAN Administration Office'
-    }));
+    })});
   } catch(e) { console.log('Email error:', e); }
   showToast(name + ' approved!');
 }
@@ -471,7 +471,7 @@ async function rejectJoinRequest(id, email, name) {
       to_email: email, name: name,
       subject: 'Application Update — Young Africans Network',
       message: 'Dear ' + name + ', thank you for your interest in joining Young Africans Network. After careful review, we are unable to approve your application at this time. We encourage you to reapply in the future.\n\nWarm regards,\nYAN Administration Office'
-    }));
+    })});
   } catch(e) { console.log('Email error:', e); }
   showToast('Request rejected');
 }
@@ -1276,7 +1276,7 @@ window.adminApproveCert = async function(certId) {
         name: certData.userName || 'Member',
         subject: 'Your YAN Certificate of Achievement Has Been Approved!',
         message: certMsg
-      }));
+      })});
     }
   } catch(e) { console.log('Certificate email error:', e); }
   if (certData?.userId) {
@@ -2973,7 +2973,7 @@ window.approveApplication = async function(appId, userIdEnc, programIdEnc, progr
         to_email: email, name,
         subject: 'Congratulations! Your YAN Program Application is Approved — ' + programTitle,
         message: msg
-      }));
+      })});
     }
     showToast('Application approved! Member enrolled and notified.');
     loadSection('applications');
@@ -3020,7 +3020,7 @@ window.rejectApplication = async function(appId, emailEnc, nameEnc, programTitle
         to_email: email, name,
         subject: 'YAN Program Application Update — ' + programTitle,
         message: msg
-      }));
+      })});
     }
     showToast('Application rejected. Member notified with feedback.');
     loadSection('applications');
