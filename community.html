@@ -737,7 +737,7 @@ function loadNotifications() {
         </select>
       </div>
       <button class="btn-primary" onclick="postNotification()">Send Notification</button>
-      <button class="btn-outline" style="margin-top:0.5rem;" onclick="document.getElementById('notif-form').style.display='none'">Cancel</button>
+      <button class="btn-outline" style="margin-top:0.5rem;" onclick="(document.getElementById('notif-form')||{}).style.display='none'">Cancel</button>
     </div>` : ''}
     <div id="notif-list"><div class="loading">Loading notifications...</div></div>`;
   loadNotifList();
@@ -1583,7 +1583,7 @@ async function loadMeetings() {
         <option value="https://youngafricansnetwork.daily.co/YAN_MENTAL_DISCUSSION">Mental Health</option>
       </select>
       <button class="btn-primary" onclick="createMeeting()">Schedule</button>
-      <button class="btn-outline" onclick="document.getElementById('create-meeting-form').style.display='none'">Cancel</button>
+      <button class="btn-outline" onclick="(document.getElementById('create-meeting-form')||{}).style.display='none'">Cancel</button>
     </div>
     <div id="meetings-list" style="margin-top:1rem;"></div>
     <div id="meeting-room-container" style="display:none;" class="meeting-room-wrapper">
@@ -2767,7 +2767,7 @@ async function loadScholarships() {
         <div style="display:flex;gap:0.75rem;margin-top:1rem;">
           <button class="btn-primary" onclick="postScholarship()">Post Opportunity</button>
           <button class="btn-outline" onclick="previewScholarship()"> Preview</button>
-          <button class="btn-outline" onclick="document.getElementById('scholarship-form').style.display='none'">Cancel</button>
+          <button class="btn-outline" onclick="(document.getElementById('scholarship-form')||{}).style.display='none'">Cancel</button>
         </div>
         <div id="scholarship-preview" style="display:none;margin-top:1.5rem;">
           <p style="font-size:0.78rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.75rem;">Preview:</p>
@@ -12195,8 +12195,8 @@ h2,h3{position:relative;}
         <input type="text" id="global-search-input" placeholder=" YAN GOOGLE"
           style="width:100%;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.55rem 1rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.82rem;outline:none;"
           oninput="handleGlobalSearch(this.value)"
-          onfocus="document.getElementById('search-results-dropdown').style.display='block'"
-          onblur="setTimeout(()=>document.getElementById('search-results-dropdown').style.display='none',200)">
+          onfocus="(document.getElementById('search-results-dropdown')||{}).style.display='block'"
+          onblur="setTimeout(()=>(document.getElementById('search-results-dropdown')||{}).style.display='none',200)">
         <div id="search-results-dropdown"
           style="display:none;position:absolute;top:110%;left:0;right:0;background:var(--white);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.15);z-index:999;max-height:400px;overflow-y:auto;border:1px solid rgba(27,42,107,0.1);">
         </div>
