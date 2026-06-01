@@ -7992,6 +7992,7 @@ async function submitQuizFailure(programId, lessonId, score, attempts, colName) 
       attempts: attempts,
       message: message,
       status: 'pending',
+      reviewed: false,
       createdAt: serverTimestamp()
     });
     showToast('Submitted to YAN! We will help you soon. ');
