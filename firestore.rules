@@ -309,5 +309,19 @@ service cloud.firestore {
       allow create: if isLoggedIn();
       allow update, delete: if isAdminOrHead();
     }
+
+    match /labListings/{listingId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reviews','avgRating','reviewCount']);
+      allow delete: if isAdmin();
+    }
+
+    match /systemErrors/{errorId} {
+      allow read: if isAdmin();
+      allow create: if isLoggedIn();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
   }
 }
