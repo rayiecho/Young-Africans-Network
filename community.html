@@ -4220,14 +4220,45 @@ async function issueCertificate(userId, userName) {
   showToast(`Certificate issued to ${userName} `);
 }
 async function viewMemberProgress(userId, userName) {
-  const matsSnap = await getDocs(collection(db, 'results', userId, 'materials'));
-  let watched = 0, quizPassed = 0, totalScore = 0;
-  matsSnap.forEach(d => {
-    if (d.data().watched) watched++;
-    if (d.data().quizPassed) { quizPassed++; totalScore += d.data().quizScore || 0; }
-  });
-  const avgScore = quizPassed > 0 ? Math.round(totalScore / quizPassed) : 0;
-  alert(` Progress for ${userName}\n\n Materials Completed: ${watched}\n Quizzes Passed: ${quizPassed}\n Average Score: ${avgScore}%\n Certificate: ${quizPassed >= 1 ? 'Eligible to request' : 'Not yet eligible'}`);
+  // Show modal with full progress
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  modal.innerHTML = '<div style="background:#fff;border-radius:20px;padding:2rem;max-width:500px;width:100%;max-height:85vh;overflow-y:auto;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);">📊 ' + sanitize(userName) + ' — Progress</h3><button onclick="this.closest('[style*=fixed]').remove()" style="background:var(--light);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;">✕</button></div><div id="progress-modal-content"><div class="loading">Loading...</div></div></div>';
+  document.body.appendChild(modal);
+
+  try {
+    const [lpSnap, clpSnap, gradesSnap] = await Promise.all([
+      getDocs(query(collection(db, 'learningProgress'), where('userId', '==', userId))),
+      getDocs(query(collection(db, 'careerLearningProgress'), where('userId', '==', userId))),
+      getDocs(query(collection(db, 'memberGrades'), where('userId', '==', userId)))
+    ]);
+
+    const content = document.getElementById('progress-modal-content');
+    let html = '';
+
+    const allProgress = [...lpSnap.docs, ...clpSnap.docs];
+    if (allProgress.length === 0) {
+      html = '<p style="color:var(--gray);text-align:center;padding:2rem;">No program progress yet.</p>';
+    } else {
+      html += '<p style="font-size:0.78rem;color:var(--gray);margin-bottom:1rem;">' + allProgress.length + ' program(s) enrolled</p>';
+      allProgress.forEach(d => {
+        const p = d.data();
+        const lessons = (p.lessonsCompleted || []).length;
+        const grade = gradesSnap.docs.find(g => g.data().programId === p.programId);
+        const avg = grade ? (grade.data().overallAverage || grade.data().quizAverage || 0) : 0;
+        html += '<div style="background:var(--light);border-radius:12px;padding:0.85rem;margin-bottom:0.75rem;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+        html += '<p style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + sanitize(p.programId||'') + '</p>';
+        html += '<span style="font-size:0.72rem;background:' + (p.certificateIssued ? 'var(--green)' : 'var(--navy)') + ';color:#fff;padding:0.2rem 0.5rem;border-radius:50px;">' + (p.certificateIssued ? '🏆 Certified' : '📚 In Progress') + '</span>';
+        html += '</div>';
+        html += '<p style="font-size:0.75rem;color:var(--gray);margin-top:0.3rem;">Lessons: ' + lessons + ' completed' + (avg ? ' · Avg Score: ' + avg + '%' : '') + '</p>';
+        html += '</div>';
+      });
+    }
+    content.innerHTML = html;
+  } catch(e) {
+    document.getElementById('progress-modal-content').innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
+  }
 }
 async function toggleRole(userId, role, value) { await updateDoc(doc(db,'users',userId),{[role]:value}); showToast('Updated!'); loadAdminMembers(); }
 async function changeRole(userId, newRole) {
