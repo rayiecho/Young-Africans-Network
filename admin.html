@@ -2270,9 +2270,9 @@ async function loadRedemptions(c) {
         html += '</div>';
       });
       html += '</div>';
-    c.innerHTML = html;
     }
 
+    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
   }
