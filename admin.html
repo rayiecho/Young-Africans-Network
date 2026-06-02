@@ -1086,49 +1086,7 @@ window.approveProposalAdmin = approveProposalAdmin;
 window.rejectProposalAdmin = rejectProposalAdmin;
 window.loadNewslettersAdmin = loadNewslettersAdmin;
 
-window.loadGroupSection = function loadGroupSection(c, groupId, tabs) {
-  const savedTab = localStorage.getItem('yan_admin_subtab_' + groupId) || tabs[0].id;
-  const activeTab = tabs.find(t => t.id === savedTab) || tabs[0];
 
-  let tabsHtml = '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;border-bottom:2px solid var(--light);padding-bottom:1rem;">';
-  tabs.forEach(t => {
-    tabsHtml += '<button onclick="switchGroupTab(\'' + groupId + '\',\'' + t.id + '\')" id="gtab-' + groupId + '-' + t.id + '" style="padding:0.5rem 1rem;border-radius:50px;border:none;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;background:' + (t.id===activeTab.id?'var(--navy)':'var(--light)') + ';color:' + (t.id===activeTab.id?'#fff':'var(--navy)') + ';">' + t.label + '</button>';
-  });
-  tabsHtml += '</div>';
-  tabsHtml += '<div id="group-content-' + groupId + '"></div>';
-  c.innerHTML = tabsHtml;
-
-  // Store tabs for switching
-  window['_group_tabs_' + groupId] = tabs;
-  switchGroupTab(groupId, activeTab.id);
-}
-
-window.switchGroupTab = async function(groupId, tabId) {
-  const tabs = window['_group_tabs_' + groupId];
-  if (!tabs) return;
-  const tab = tabs.find(t => t.id === tabId);
-  if (!tab) return;
-
-  localStorage.setItem('yan_admin_subtab_' + groupId, tabId);
-
-  // Update tab styles
-  tabs.forEach(t => {
-    const btn = document.getElementById('gtab-' + groupId + '-' + t.id);
-    if (btn) {
-      btn.style.background = t.id === tabId ? 'var(--navy)' : 'var(--light)';
-      btn.style.color = t.id === tabId ? '#fff' : 'var(--navy)';
-    }
-  });
-
-  const content = document.getElementById('group-content-' + groupId);
-  if (!content) return;
-  content.innerHTML = '<div class="loading">Loading...</div>';
-  try {
-    await tab.fn(content);
-  } catch(e) {
-    content.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
-  }
-};
 
 window.loadSection = async function(section) {
   localStorage.setItem('yan_admin_section', section);
@@ -4287,7 +4245,37 @@ document.addEventListener('click', function(e) {
 
 </script>
 <!-- emailjs replaced with resend worker -->
-<script>// emailjs replaced
+<script>
+window.loadGroupSection = function(c, groupId, tabs) {
+  const savedTab = localStorage.getItem('yan_admin_subtab_' + groupId) || tabs[0].id;
+  const activeTab = tabs.find(t => t.id === savedTab) || tabs[0];
+  let tabsHtml = '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;border-bottom:2px solid var(--light);padding-bottom:1rem;">';
+  tabs.forEach(t => {
+    tabsHtml += '<button onclick="window.switchGroupTab(\'' + groupId + '\',\'' + t.id + '\')" id="gtab-' + groupId + '-' + t.id + '" style="padding:0.5rem 1rem;border-radius:50px;border:none;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;background:' + (t.id===activeTab.id?'var(--navy)':'var(--light)') + ';color:' + (t.id===activeTab.id?'#fff':'var(--navy)') + ';">' + t.label + '</button>';
+  });
+  tabsHtml += '</div><div id="group-content-' + groupId + '"></div>';
+  c.innerHTML = tabsHtml;
+  window['_group_tabs_' + groupId] = tabs;
+  window.switchGroupTab(groupId, activeTab.id);
+};
+
+window.switchGroupTab = async function(groupId, tabId) {
+  const tabs = window['_group_tabs_' + groupId];
+  if (!tabs) return;
+  const tab = tabs.find(t => t.id === tabId);
+  if (!tab) return;
+  localStorage.setItem('yan_admin_subtab_' + groupId, tabId);
+  tabs.forEach(t => {
+    const btn = document.getElementById('gtab-' + groupId + '-' + t.id);
+    if (btn) { btn.style.background = t.id===tabId?'var(--navy)':'var(--light)'; btn.style.color = t.id===tabId?'#fff':'var(--navy)'; }
+  });
+  const content = document.getElementById('group-content-' + groupId);
+  if (!content) return;
+  content.innerHTML = '<div class="loading">Loading...</div>';
+  try { await tab.fn(content); }
+  catch(e) { content.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+};
+// emailjs replaced
 function toggleNavGroup(group) {
   const items = document.getElementById('group-' + group);
   const arrow = document.getElementById('arrow-' + group);
