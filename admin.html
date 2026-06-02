@@ -2957,6 +2957,7 @@ async function loadAssignments(c) {
     html += '</div>';
     html += '</div>'; // end tab-content-failures
 
+    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
   }
