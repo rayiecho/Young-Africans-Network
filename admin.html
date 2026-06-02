@@ -56,7 +56,7 @@ function checkAuth() {
     document.getElementById('screen-login').style.display = 'none';
     document.getElementById('screen-dashboard').style.display = 'flex';
     const lastSection = localStorage.getItem('yan_admin_section') || 'overview';
-    loadSection(lastSection);
+    window.loadSection(lastSection);
   }
 }
 
@@ -1095,6 +1095,50 @@ window.approveProposalAdmin = approveProposalAdmin;
 window.rejectProposalAdmin = rejectProposalAdmin;
 window.loadNewslettersAdmin = loadNewslettersAdmin;
 
+function loadGroupSection(c, groupId, tabs) {
+  const savedTab = localStorage.getItem('yan_admin_subtab_' + groupId) || tabs[0].id;
+  const activeTab = tabs.find(t => t.id === savedTab) || tabs[0];
+
+  let tabsHtml = '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;border-bottom:2px solid var(--light);padding-bottom:1rem;">';
+  tabs.forEach(t => {
+    tabsHtml += '<button onclick="switchGroupTab('' + groupId + '','' + t.id + '')" id="gtab-' + groupId + '-' + t.id + '" style="padding:0.5rem 1rem;border-radius:50px;border:none;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;background:' + (t.id===activeTab.id?'var(--navy)':'var(--light)') + ';color:' + (t.id===activeTab.id?'#fff':'var(--navy)') + ';">' + t.label + '</button>';
+  });
+  tabsHtml += '</div>';
+  tabsHtml += '<div id="group-content-' + groupId + '"></div>';
+  c.innerHTML = tabsHtml;
+
+  // Store tabs for switching
+  window['_group_tabs_' + groupId] = tabs;
+  switchGroupTab(groupId, activeTab.id);
+}
+
+window.switchGroupTab = async function(groupId, tabId) {
+  const tabs = window['_group_tabs_' + groupId];
+  if (!tabs) return;
+  const tab = tabs.find(t => t.id === tabId);
+  if (!tab) return;
+
+  localStorage.setItem('yan_admin_subtab_' + groupId, tabId);
+
+  // Update tab styles
+  tabs.forEach(t => {
+    const btn = document.getElementById('gtab-' + groupId + '-' + t.id);
+    if (btn) {
+      btn.style.background = t.id === tabId ? 'var(--navy)' : 'var(--light)';
+      btn.style.color = t.id === tabId ? '#fff' : 'var(--navy)';
+    }
+  });
+
+  const content = document.getElementById('group-content-' + groupId);
+  if (!content) return;
+  content.innerHTML = '<div class="loading">Loading...</div>';
+  try {
+    await tab.fn(content);
+  } catch(e) {
+    content.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
+  }
+};
+
 window.loadSection = async function(section) {
   localStorage.setItem('yan_admin_section', section);
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1120,7 +1164,51 @@ window.loadSection = async function(section) {
   }[section] || section;
   const container = document.getElementById('content-area');
   container.innerHTML = '<div class="loading">Loading...</div>';
-  const fns = { overview: loadOverview, gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents, materials: loadMaterials, certificates: loadCertificates, members: loadMembers, moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin, newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, analytics: loadAnalytics, assignments: loadAssignments, programs: loadProgramsAdmin, applications: (...args) => window.loadProgramApplications(...args), notifications: loadNotificationCenter, finance: loadFinance, recommendations: (...args) => window.loadRecommendations(...args), errors: loadSystemErrors, mentors: loadMentorApplications, opportunities: loadOpportunitiesManager, lab: loadLabListings, redemptions: loadRedemptions };
+  const fns = {
+    overview: loadOverview,
+    analytics: loadAnalytics,
+    programs_group: (c) => loadGroupSection(c, 'programs_group', [
+      {id:'programs', label:'Programs Manager', fn: loadProgramsAdmin},
+      {id:'applications', label:'Applications', fn: (...args) => window.loadProgramApplications(...args)},
+      {id:'mentors', label:'Mentors', fn: loadMentorApplications},
+      {id:'assignments', label:'Assignments', fn: loadAssignments},
+      {id:'certificates', label:'Certificates', fn: loadCertificates},
+      {id:'materials', label:'Training Materials', fn: loadMaterials},
+    ]),
+    community_group: (c) => loadGroupSection(c, 'community_group', [
+      {id:'members', label:'Members', fn: loadMembers},
+      {id:'moderation', label:'Moderation', fn: loadModeration},
+      {id:'forms', label:'Form Submissions', fn: loadFormsAdmin},
+      {id:'notifications', label:'Notifications', fn: loadNotificationCenter},
+      {id:'hubs', label:'YAN Hubs', fn: loadHubsAdmin},
+      {id:'errors', label:'System Errors', fn: loadSystemErrors},
+    ]),
+    content_group: (c) => loadGroupSection(c, 'content_group', [
+      {id:'gallery', label:'Gallery', fn: loadGallery},
+      {id:'events', label:'Events', fn: loadEvents},
+      {id:'stories', label:'Journey Stories', fn: loadStories},
+      {id:'newsletters', label:'Newsletters', fn: loadNewslettersAdmin},
+      {id:'opportunities', label:'Opportunities', fn: loadOpportunitiesManager},
+    ]),
+    business_group: (c) => loadGroupSection(c, 'business_group', [
+      {id:'finance', label:'Finance', fn: loadFinance},
+      {id:'partnerships', label:'Partnerships', fn: loadPartnershipsAdmin},
+      {id:'recommendations', label:'Recommendations', fn: (...args) => window.loadRecommendations(...args)},
+      {id:'team', label:'Team', fn: loadTeam},
+      {id:'lab', label:'Entrepreneurs Lab', fn: loadLabListings},
+      {id:'redemptions', label:'Reward Redemptions', fn: loadRedemptions},
+    ]),
+    // Keep individual sections accessible
+    gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents,
+    materials: loadMaterials, certificates: loadCertificates, members: loadMembers,
+    moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin,
+    newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, assignments: loadAssignments,
+    programs: loadProgramsAdmin, applications: (...args) => window.loadProgramApplications(...args),
+    notifications: loadNotificationCenter, finance: loadFinance,
+    recommendations: (...args) => window.loadRecommendations(...args),
+    errors: loadSystemErrors, mentors: loadMentorApplications,
+    opportunities: loadOpportunitiesManager, lab: loadLabListings, redemptions: loadRedemptions
+  };
   if (fns[section]) {
     try {
       await fns[section](container);
@@ -3968,94 +4056,23 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     </div>
     <nav class="admin-nav">
       <!-- Dashboard -->
-      <!-- SYSTEM -->
-      <div class="nav-group-label">SYSTEM</div>
       <button class="nav-item" data-section="overview" onclick="loadSection('overview')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Overview
       </button>
       <button class="nav-item" data-section="analytics" onclick="loadSection('analytics')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Analytics
       </button>
-      <button class="nav-item" data-section="errors" onclick="loadSection('errors')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> System Errors
+      <button class="nav-item" data-section="programs_group" onclick="loadSection('programs_group')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Programs & Learning
       </button>
-
-      <!-- PROGRAMS & LEARNING -->
-      <div class="nav-group-label">PROGRAMS & LEARNING</div>
-      <button class="nav-item" data-section="programs" onclick="loadSection('programs')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Programs Manager
+      <button class="nav-item" data-section="community_group" onclick="loadSection('community_group')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Community
       </button>
-      <button class="nav-item" data-section="applications" onclick="loadSection('applications')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Applications
+      <button class="nav-item" data-section="content_group" onclick="loadSection('content_group')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> Content & Media
       </button>
-      <button class="nav-item" data-section="mentors" onclick="loadSection('mentors')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Mentors
-      </button>
-      <button class="nav-item" data-section="assignments" onclick="loadSection('assignments')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Assignments
-      </button>
-      <button class="nav-item" data-section="certificates" onclick="loadSection('certificates')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg> Certificates
-      </button>
-      <button class="nav-item" data-section="materials" onclick="loadSection('materials')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg> Training Materials
-      </button>
-
-      <!-- COMMUNITY -->
-      <div class="nav-group-label">COMMUNITY</div>
-      <button class="nav-item" data-section="members" onclick="loadSection('members')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Members
-      </button>
-      <button class="nav-item" data-section="moderation" onclick="loadSection('moderation')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Moderation
-      </button>
-      <button class="nav-item" data-section="forms" onclick="loadSection('forms')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg> Form Submissions
-      </button>
-      <button class="nav-item" data-section="notifications" onclick="loadSection('notifications')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Notifications
-      </button>
-      <button class="nav-item" data-section="hubs" onclick="loadSection('hubs')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> YAN Hubs
-      </button>
-
-      <!-- CONTENT & MEDIA -->
-      <div class="nav-group-label">CONTENT & MEDIA</div>
-      <button class="nav-item" data-section="gallery" onclick="loadSection('gallery')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Gallery
-      </button>
-      <button class="nav-item" data-section="events" onclick="loadSection('events')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Events
-      </button>
-      <button class="nav-item" data-section="stories" onclick="loadSection('stories')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> Journey Stories
-      </button>
-      <button class="nav-item" data-section="newsletters" onclick="loadSection('newsletters')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Newsletters
-      </button>
-      <button class="nav-item" data-section="opportunities" onclick="loadSection('opportunities')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Opportunities
-      </button>
-
-      <!-- BUSINESS -->
-      <div class="nav-group-label">BUSINESS</div>
-      <button class="nav-item" data-section="finance" onclick="loadSection('finance')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Finance
-      </button>
-      <button class="nav-item" data-section="partnerships" onclick="loadSection('partnerships')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg> Partnerships
-      </button>
-      <button class="nav-item" data-section="recommendations" onclick="loadSection('recommendations')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Recommendations
-      </button>
-      <button class="nav-item" data-section="team" onclick="loadSection('team')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Team
-      </button>
-      <button class="nav-item" data-section="lab" onclick="loadSection('lab')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v11l-4 7h14l-4-7V3"/></svg> Entrepreneurs Lab
-      </button>
-      <button class="nav-item" data-section="redemptions" onclick="loadSection('redemptions')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg> Reward Redemptions
+      <button class="nav-item" data-section="business_group" onclick="loadSection('business_group')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Business
       </button>
       </div>
     </nav>
