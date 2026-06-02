@@ -12183,13 +12183,11 @@ h2,h3{position:relative;}
       <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;">ADMIN PANEL</button>
     </nav>
     <div class="sidebar-logout">
-      <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem;background:rgba(255,255,255,0.05);border-radius:12px;cursor:pointer;" onclick="showTab('profile')">
-        <div id="bottom-avatar" style="width:38px;height:38px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,var(--gold),var(--red));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.9rem;flex-shrink:0;">?</div>
-        <div style="flex:1;min-width:0;">
-          <div id="bottom-name" style="font-size:0.82rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Loading...</div>
-          <div id="bottom-role" style="font-size:0.7rem;color:rgba(255,255,255,0.5);">Member</div>
-        </div>
-        <button class="btn-logout" onclick="event.stopPropagation();doLogout()" style="padding:0.4rem 0.75rem;font-size:0.75rem;background:rgba(230,51,41,0.2);color:rgba(255,255,255,0.7);border-radius:8px;white-space:nowrap;">🚪 Out</button>
+      <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;">
+        <div id="bottom-avatar" style="width:36px;height:36px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,var(--gold),var(--red));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.9rem;flex-shrink:0;">?</div>
+        <button onclick="showTab('profile')" style="background:none;border:none;color:rgba(255,255,255,0.85);font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;padding:0;white-space:nowrap;">My Profile</button>
+        <div style="flex:1;"></div>
+        <button onclick="doLogout()" style="background:none;border:none;color:rgba(255,255,255,0.6);font-family:Poppins,sans-serif;font-size:0.82rem;cursor:pointer;padding:0;white-space:nowrap;">Sign Out</button>
       </div>
     </div>
   </aside>
