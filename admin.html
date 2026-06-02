@@ -41,6 +41,7 @@ const DEPARTMENTS = [
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+window._db = db;
 const auth = getAuth(app);
 signInWithEmailAndPassword(auth, 'yan.admin.cms@youngafricansnetwork.org', 'YAN@Admin2026@CMS')
   .then(() => console.log('Admin auth ready '))
