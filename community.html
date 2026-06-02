@@ -353,7 +353,7 @@ async function doRegister() {
     await setDoc(doc(db, 'users', cred.user.uid), {
       ...sanitizeInputs({name, email, country, whatsapp, dob, role}), department: dept,
       referredBy: localStorage.getItem('yan_referral') || '',
-      photoUrl, bio: '', joinedAt: serverTimestamp(),
+      photoUrl, bio: '', joinedAt: serverTimestamp(), createdAt: serverTimestamp(),
       isAdmin: false, isDeptHead: false, isExec: false,
       profileComplete: true
     });
