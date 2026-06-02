@@ -48,6 +48,7 @@ const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
+window._db = db;
 
 const DEPARTMENTS = [
   { id: 'programs', name: 'Programs & Training', icon: '', certification: true },
@@ -4296,7 +4297,14 @@ async function loadAdminCertificates() {
   if (snap.empty) { c.innerHTML = '<div class="empty-state">No requests yet.</div>'; return; }
   c.innerHTML = snap.docs.map(d=>{const cert=d.data();const dept=DEPARTMENTS.find(x=>x.id===cert.department);return `<div class="cert-admin-row"><div><strong>${sanitize(cert.userName)}</strong><p>${dept?.name||cert.department} · <span class="cert-status ${cert.status}">${cert.status}</span></p></div>${cert.status==='pending'?`<div><button class="btn-sm btn-navy" onclick="approveCert('${d.id}')"> Approve</button><button class="btn-sm btn-red" onclick="rejectCert('${d.id}')"> Reject</button></div>`:''}</div>`;}).join('');
 }
-async function approveCert(id) { await updateDoc(doc(db,'certificates',id),{status:'approved',approvedBy:currentUserData.name,approvedAt:serverTimestamp()}); showToast('Approved! '); loadAdminCertificates(); }
+async function approveCert(id) {
+  const certSnap = await getDoc(doc(db,'certificates',id));
+  const certData = certSnap.data();
+  await updateDoc(doc(db,'certificates',id),{status:'approved',approvedBy:currentUserData.name,approvedAt:serverTimestamp()});
+  if (certData?.userId) await awardPoints(certData.userId, 'certificate_earned', 'Certificate earned!', 50);
+  showToast('Approved! +50 Legacy Points awarded to member');
+  loadAdminCertificates();
+}
 async function rejectCert(id) { await updateDoc(doc(db,'certificates',id),{status:'rejected'}); showToast('Rejected'); loadAdminCertificates(); }
 async function loadAdminTeam() {
   const c = document.getElementById('admin-section-team');
@@ -8014,7 +8022,8 @@ async function submitLessonAssignment(programId, lessonId, colName) {
 
   if (resultDiv) resultDiv.innerHTML = feedbackHtml;
   textarea.disabled = true;
-  showToast('Assignment submitted! AI grade: ' + aiScore + '%');
+  await awardPoints(currentUserData.uid, 'assignment_submitted', 'Assignment submitted', 3);
+    showToast('Assignment submitted! AI grade: ' + aiScore + '%');
 
   // Mark lesson complete in progress
   const progressRef = doc(db, progressCol, currentUser.uid + '_' + programId);
@@ -11506,11 +11515,16 @@ window.saveSessionNotes = async function() {
       points: 30, description: 'Mentoring session completed',
       createdAt: serverTimestamp()
     });
-    await setDoc(doc(db,'memberPoints',currentUser.uid), {
-      points: increment(30)
-    }, {merge: true});
+    // Award mentor 20 points, mentee 5 points (only if session > 10 mins)
+    const sessionDuration = sessionData.duration || 0;
+    if (sessionDuration >= 10) {
+      await awardPoints(currentUser.uid, 'mentoring_session', 'Mentoring session completed (mentor)', 20);
+      if (sessionData.menteeId) {
+        await awardPoints(sessionData.menteeId, 'mentoring_session', 'Mentoring session completed (mentee)', 5);
+      }
+    }
     document.getElementById('session-notes-modal').remove();
-    showToast('Session notes saved! +30 points earned 🎉');
+    showToast('Session notes saved!' + (sessionDuration >= 10 ? ' +20 Legacy Points earned!' : ''));
   } catch(e) {
     showToast('Error saving notes: ' + e.message, 'error');
   }
@@ -12485,6 +12499,23 @@ function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   sidebar.classList.toggle('collapsed');
 }
+
+async function awardPoints(userId, action, description, points) {
+  try {
+    const db = window._db;
+    if (!db || !userId) return;
+    await Promise.all([
+      addDoc(collection(db, 'pointsHistory'), {
+        userId, action, description, points, createdAt: serverTimestamp()
+      }),
+      setDoc(doc(db, 'memberPoints', userId), {
+        points: increment(points)
+      }, { merge: true })
+    ]);
+    showToast('+' + points + ' Legacy Points earned!');
+  } catch(e) { console.log('Points error:', e); }
+}
+window.awardPoints = awardPoints;
 </script>
 </body>
 </html>
