@@ -1116,7 +1116,7 @@ window.loadSection = async function(section) {
   const fns = {
     overview: loadOverview,
     analytics: loadAnalytics,
-    programs_group: (c) => loadGroupSection(c, 'programs_group', [
+    programs_group: (c) => window.loadGroupSection(c, 'programs_group', [
       {id:'programs', label:'Programs Manager', fn: loadProgramsAdmin},
       {id:'applications', label:'Applications', fn: (...args) => window.loadProgramApplications(...args)},
       {id:'mentors', label:'Mentors', fn: loadMentorApplications},
@@ -1124,7 +1124,7 @@ window.loadSection = async function(section) {
       {id:'certificates', label:'Certificates', fn: loadCertificates},
       {id:'materials', label:'Training Materials', fn: loadMaterials},
     ]),
-    community_group: (c) => loadGroupSection(c, 'community_group', [
+    community_group: (c) => window.loadGroupSection(c, 'community_group', [
       {id:'members', label:'Members', fn: loadMembers},
       {id:'moderation', label:'Moderation', fn: loadModeration},
       {id:'forms', label:'Form Submissions', fn: loadFormsAdmin},
@@ -1132,14 +1132,14 @@ window.loadSection = async function(section) {
       {id:'hubs', label:'YAN Hubs', fn: loadHubsAdmin},
       {id:'errors', label:'System Errors', fn: loadSystemErrors},
     ]),
-    content_group: (c) => loadGroupSection(c, 'content_group', [
+    content_group: (c) => window.loadGroupSection(c, 'content_group', [
       {id:'gallery', label:'Gallery', fn: loadGallery},
       {id:'events', label:'Events', fn: loadEvents},
       {id:'stories', label:'Journey Stories', fn: loadStories},
       {id:'newsletters', label:'Newsletters', fn: loadNewslettersAdmin},
       {id:'opportunities', label:'Opportunities', fn: loadOpportunitiesManager},
     ]),
-    business_group: (c) => loadGroupSection(c, 'business_group', [
+    business_group: (c) => window.loadGroupSection(c, 'business_group', [
       {id:'finance', label:'Finance', fn: loadFinance},
       {id:'partnerships', label:'Partnerships', fn: loadPartnershipsAdmin},
       {id:'recommendations', label:'Recommendations', fn: (...args) => window.loadRecommendations(...args)},
