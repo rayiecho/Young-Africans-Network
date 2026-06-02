@@ -3199,6 +3199,7 @@ async function loadProgramsAdmin(c) {
       html += '</div></div>';
     });
     html += '</div>';
+    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
   }
