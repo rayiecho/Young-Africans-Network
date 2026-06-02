@@ -1086,7 +1086,7 @@ window.approveProposalAdmin = approveProposalAdmin;
 window.rejectProposalAdmin = rejectProposalAdmin;
 window.loadNewslettersAdmin = loadNewslettersAdmin;
 
-function loadGroupSection(c, groupId, tabs) {
+window.loadGroupSection = function loadGroupSection(c, groupId, tabs) {
   const savedTab = localStorage.getItem('yan_admin_subtab_' + groupId) || tabs[0].id;
   const activeTab = tabs.find(t => t.id === savedTab) || tabs[0];
 
