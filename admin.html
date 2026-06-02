@@ -2690,8 +2690,8 @@ async function loadAssignments(c) {
   try {
     const [techAssign, careerAssign, quizFails, gradesDocs] = await Promise.all([
       getDocs(query(collection(db, 'programAssignments'), orderBy('submittedAt', 'desc'))),
-      getDocs(query(collection(db, 'careerAssignments'), orderBy('submittedAt', 'desc'))),
-      getDocs(query(collection(db, 'quizFailures'), orderBy('createdAt', 'desc'))),
+      getDocs(query(collection(db, 'careerAssignments'), orderBy('submittedAt', 'desc'))).catch(()=>getDocs(collection(db,'careerAssignments'))),
+      getDocs(query(collection(db, 'quizFailures'), orderBy('createdAt', 'desc'))).catch(()=>getDocs(collection(db,'quizFailures'))),
       getDocs(query(collection(db, 'memberGrades'), orderBy('updatedAt', 'desc'))).catch(()=>getDocs(collection(db,'memberGrades')))
     ]);
 
