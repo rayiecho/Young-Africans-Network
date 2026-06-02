@@ -12184,7 +12184,10 @@ h2,h3{position:relative;}
       <button class="tab-btn" id="tab-btn-admin" data-tab="admin" onclick="showTab('admin')" style="display:none;">ADMIN PANEL</button>
     </nav>
     <div class="sidebar-logout">
-      <button class="btn-logout" onclick="doLogout()"><span></span> Sign Out</button>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn-logout" onclick="showTab('profile')" style="flex:1;justify-content:center;color:rgba(255,255,255,0.8);">👤 My Profile</button>
+        <button class="btn-logout" onclick="doLogout()" style="flex:1;justify-content:center;">🚪 Sign Out</button>
+      </div>
     </div>
   </aside>
 
