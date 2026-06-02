@@ -1913,6 +1913,7 @@ async function loadMentorApplications(c) {
         html += '</div>';
       });
     }
+    c.innerHTML = html;
     html += '</div>';
   } catch(e) { c.innerHTML = '<p style="color:red;">Error: '+e.message+'</p>'; }
 }
@@ -2730,6 +2731,7 @@ async function loadAssignments(c) {
           html += '<p style="font-size:0.72rem;font-weight:700;color:var(--gray);margin-bottom:0.35rem;">TEXT SUBMISSION</p>';
           html += '<p style="font-size:0.82rem;color:var(--navy);white-space:pre-wrap;line-height:1.6;">' + sanitize(a.submission || a.answer) + '</p>';
           html += '</div>';
+    c.innerHTML = html;
         }
 
         // File attachment
