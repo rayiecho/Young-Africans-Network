@@ -420,11 +420,17 @@ footer a { color: var(--gold); text-decoration: none; }
     </div>
     <div class="form-group">
       <label>YAN Member Email * <span style="font-size:0.72rem;color:var(--gray);">(must match your YAN account)</span></label>
-      <input type="email" id="sub-memberid" placeholder="Your YAN registered email" required>
+      <input type="email" id="sub-memberid" placeholder="Your YAN registered email" required oninput="verifyYANEmail(this.value)">
+      <div id="email-verify-status" style="font-size:0.75rem;margin-top:0.4rem;"></div>
     </div>
     <div class="form-group">
       <label>YAN Member ID * <span style="font-size:0.72rem;color:var(--gray);">(found in your YAN profile)</span></label>
       <input type="text" id="sub-yanid" placeholder="e.g. YAN-2026-XXXX" required>
+    </div>
+    <div class="form-group">
+      <label>Upload YAN ID / Certificate * <span style="font-size:0.72rem;color:var(--gray);">(screenshot or photo)</span></label>
+      <input type="url" id="sub-idurl" placeholder="Paste image link (upload to imgbb.com first)" required>
+      <p style="font-size:0.72rem;color:var(--gray);margin-top:0.3rem;">📎 Upload your image to <a href="https://imgbb.com" target="_blank" style="color:var(--navy);font-weight:600;">imgbb.com</a> (free) then paste the link here</p>
     </div>
     <button class="btn-submit" onclick="submitListing()">Submit for Review</button>
     <p class="form-note">📋 Your listing will be reviewed by the YAN team within 24-48 hours before going live.</p>
@@ -680,6 +686,28 @@ window.closeDetailModal = function() {
   selectedRating = 0;
 };
 
+let emailVerified = false;
+
+window.verifyYANEmail = async function(email) {
+  const status = document.getElementById('email-verify-status');
+  if (!email || !email.includes('@')) { status.innerHTML = ''; emailVerified = false; return; }
+  status.innerHTML = '<span style="color:var(--gray);">🔍 Checking...</span>';
+  try {
+    const snap = await getDocs(query(collection(db, 'users'), where('email', '==', email)));
+    if (!snap.empty) {
+      const member = snap.docs[0].data();
+      emailVerified = true;
+      status.innerHTML = '<span style="color:var(--green);font-weight:600;">✅ Verified YAN Member — ' + (member.name||'') + ' · ' + (member.department||'') + '</span>';
+    } else {
+      emailVerified = false;
+      status.innerHTML = '<span style="color:var(--red);font-weight:600;">❌ Email not found in YAN database. Please use your registered YAN email.</span>';
+    }
+  } catch(e) {
+    status.innerHTML = '<span style="color:var(--gray);">Unable to verify. Continue anyway.</span>';
+    emailVerified = true; // Allow submission if verification fails
+  }
+};
+
 window.submitListing = async function() {
   const name = document.getElementById('sub-name').value.trim();
   const phone = document.getElementById('sub-phone').value.trim();
@@ -693,8 +721,12 @@ window.submitListing = async function() {
   const memberId = document.getElementById('sub-memberid').value.trim();
 
   const yanId = document.getElementById('sub-yanid').value.trim();
-  if (!name || !phone || !title || !category || !desc || !country || !memberId || !yanId) {
-    showToast('Please fill all required fields including your YAN email and Member ID'); return;
+  const idUrl = document.getElementById('sub-idurl').value.trim();
+  if (!name || !phone || !title || !category || !desc || !country || !memberId || !yanId || !idUrl) {
+    showToast('Please fill all required fields'); return;
+  }
+  if (!emailVerified) {
+    showToast('❌ Please use your registered YAN email address'); return;
   }
 
   // Check if member exists and has completed a program
@@ -721,7 +753,7 @@ window.submitListing = async function() {
   try {
     await addDoc(collection(db, 'labListings'), {
       sellerName: name, phone, email, title, category, price, description: desc,
-      country, imageUrl, memberId, yanId, status: 'pending',
+      country, imageUrl, memberId, yanId, idUrl, status: 'pending',
       isVerifiedMember, completedPrograms,
       memberName: memberData ? memberData.name : name,
       memberDepartment: memberData ? (memberData.department || '') : '',
