@@ -1101,7 +1101,7 @@ function loadGroupSection(c, groupId, tabs) {
 
   let tabsHtml = '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;border-bottom:2px solid var(--light);padding-bottom:1rem;">';
   tabs.forEach(t => {
-    tabsHtml += '<button onclick="switchGroupTab('' + groupId + '','' + t.id + '')" id="gtab-' + groupId + '-' + t.id + '" style="padding:0.5rem 1rem;border-radius:50px;border:none;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;background:' + (t.id===activeTab.id?'var(--navy)':'var(--light)') + ';color:' + (t.id===activeTab.id?'#fff':'var(--navy)') + ';">' + t.label + '</button>';
+    tabsHtml += '<button onclick="switchGroupTab(\'' + groupId + '\',\'' + t.id + '\')" id="gtab-' + groupId + '-' + t.id + '" style="padding:0.5rem 1rem;border-radius:50px;border:none;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;background:' + (t.id===activeTab.id?'var(--navy)':'var(--light)') + ';color:' + (t.id===activeTab.id?'#fff':'var(--navy)') + ';">' + t.label + '</button>';
   });
   tabsHtml += '</div>';
   tabsHtml += '<div id="group-content-' + groupId + '"></div>';
