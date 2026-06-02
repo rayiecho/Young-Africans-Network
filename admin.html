@@ -3708,6 +3708,7 @@ window.loadProgramApplications = async function(c) {
       html += '</div>';
     }
     html += '</div>';
+    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:var(--red);padding:1rem;">Error: ' + e.message + '</p>';
   }
