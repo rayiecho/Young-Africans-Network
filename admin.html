@@ -128,7 +128,6 @@ window.doAdminLogin = function() {
       html += '</div>';
     }
 
-    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error loading system errors: ' + e.message + '</p>';
   }
@@ -205,7 +204,6 @@ async function loadLabListings(c) {
       html += '</div>';
     }
 
-    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
   }
@@ -260,7 +258,6 @@ async function loadRedemptions(c) {
       html += '</div>';
     }
 
-    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
   }
@@ -386,7 +383,6 @@ window.doAdminLogout = function() {
       html += '</div>';
     }
 
-    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error loading system errors: ' + e.message + '</p>';
   }
@@ -463,7 +459,6 @@ async function loadLabListings(c) {
       html += '</div>';
     }
 
-    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
   }
@@ -518,7 +513,6 @@ async function loadRedemptions(c) {
       html += '</div>';
     }
 
-    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
   }
@@ -920,7 +914,6 @@ async function loadFormsAdmin(c) {
       });
     }
     html += '</div>';
-    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:var(--gray);">Error: ' + e.message + '</p>';
   }
@@ -1049,7 +1042,6 @@ async function loadPartnershipsAdmin(c) {
       });
     }
     html += '</div>';
-    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:var(--gray);">Error loading partnerships: ' + e.message + '</p>';
   }
@@ -1072,7 +1064,6 @@ async function loadNewslettersAdmin(c) {
           + '</div></div>';
       });
     }
-    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:var(--gray);">Error loading newsletters.</p>';
   }
@@ -1955,7 +1946,6 @@ async function loadMentorApplications(c) {
       });
     }
     html += '</div>';
-    c.innerHTML = html;
   } catch(e) { c.innerHTML = '<p style="color:red;">Error: '+e.message+'</p>'; }
 }
 
@@ -2175,7 +2165,6 @@ async function loadSystemErrors(c) {
       html += '</div>';
     }
 
-    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error loading system errors: ' + e.message + '</p>';
   }
@@ -2252,7 +2241,6 @@ async function loadLabListings(c) {
       html += '</div>';
     }
 
-    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
   }
@@ -2307,7 +2295,6 @@ async function loadRedemptions(c) {
       html += '</div>';
     }
 
-    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
   }
@@ -2458,15 +2445,76 @@ window.viewMemberProgress = async function(userId, userName) {
 async function loadAnalytics(c) {
   c.innerHTML = '<div class="loading">Loading analytics...</div>';
   try {
-    const [techProgs, careerProgs, users, certs, techProgress, careerProgress, pushSubs] = await Promise.all([
+    const [techProgs, careerProgs, users, certs, techProgress, careerProgress, pushSubs, posts, points] = await Promise.all([
       getDocs(collection(db, 'trainingPrograms')),
       getDocs(collection(db, 'careerPrograms')),
       getDocs(collection(db, 'users')),
       getDocs(collection(db, 'certificates')),
       getDocs(collection(db, 'learningProgress')),
       getDocs(collection(db, 'careerLearningProgress')),
-      getDocs(collection(db, 'pushSubscriptions'))
+      getDocs(collection(db, 'pushSubscriptions')),
+      getDocs(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(200))),
+      getDocs(collection(db, 'memberPoints'))
     ]);
+
+    // --- DATA PROCESSING ---
+
+    // 1. Members growth over time (by month)
+    const membersByMonth = {};
+    users.docs.forEach(d => {
+      const data = d.data();
+      if (data.createdAt) {
+        const date = new Date(data.createdAt.seconds * 1000);
+        const key = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0');
+        membersByMonth[key] = (membersByMonth[key] || 0) + 1;
+      }
+    });
+    const memberMonths = Object.keys(membersByMonth).sort().slice(-8);
+    const memberCounts = memberMonths.map(m => membersByMonth[m]);
+
+    // 2. Enrollments per program (top 10)
+    const allProgs = [...techProgs.docs, ...careerProgs.docs];
+    const progEnrollments = allProgs.map(d => ({
+      name: (d.data().title || d.id).substring(0, 25),
+      count: (d.data().enrolledBy || []).length
+    })).sort((a,b) => b.count - a.count).slice(0, 10);
+
+    // 3. Members by country (top 10)
+    const countryCount = {};
+    users.docs.forEach(d => {
+      const country = d.data().country || 'Unknown';
+      countryCount[country] = (countryCount[country] || 0) + 1;
+    });
+    const topCountries = Object.entries(countryCount).sort((a,b) => b[1]-a[1]).slice(0,10);
+
+    // 4. Posts per day (last 14 days)
+    const postsByDay = {};
+    const now = new Date();
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().substring(0,10);
+      postsByDay[key] = 0;
+    }
+    posts.docs.forEach(d => {
+      const data = d.data();
+      if (data.createdAt) {
+        const key = new Date(data.createdAt.seconds * 1000).toISOString().substring(0,10);
+        if (postsByDay[key] !== undefined) postsByDay[key]++;
+      }
+    });
+
+    // 5. Points tier distribution
+    const tierCounts = {Starter:0, Bronze:0, Silver:0, Gold:0, Diamond:0, Legend:0};
+    points.docs.forEach(d => {
+      const pts = d.data().points || d.data().total || 0;
+      if (pts >= 5000) tierCounts.Legend++;
+      else if (pts >= 3500) tierCounts.Diamond++;
+      else if (pts >= 2000) tierCounts.Gold++;
+      else if (pts >= 1000) tierCounts.Silver++;
+      else if (pts >= 500) tierCounts.Bronze++;
+      else tierCounts.Starter++;
+    });
 
     const totalEnrollments = techProgress.size + careerProgress.size;
     const completions = [...techProgress.docs, ...careerProgress.docs].filter(d => {
@@ -2474,14 +2522,138 @@ async function loadAnalytics(c) {
       return (p.lessonsCompleted || []).length >= 20;
     }).length;
 
-    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem;">';
-    html += '<div class="stat-card"><div class="stat-num">' + users.size + '</div><div class="stat-label">Total Members</div></div>';
-    html += '<div class="stat-card"><div class="stat-num">' + (techProgs.size + careerProgs.size) + '</div><div class="stat-label">Total Programs</div></div>';
-    html += '<div class="stat-card"><div class="stat-num">' + totalEnrollments + '</div><div class="stat-label">Total Enrollments</div></div>';
-    html += '<div class="stat-card green"><div class="stat-num">' + completions + '</div><div class="stat-label">Completions</div></div>';
+    const totalEnrollments2 = techProgress.size + careerProgress.size;
+    const completions2 = [...techProgress.docs, ...careerProgress.docs].filter(d => {
+      return (d.data().lessonsCompleted || []).length >= 20;
+    }).length;
+
+    let html = '<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"><\/script>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem;">';
+    html += '<div class="stat-card navy"><div class="stat-num">' + users.size + '</div><div class="stat-label">Total Members</div></div>';
+    html += '<div class="stat-card gold"><div class="stat-num">' + (techProgs.size + careerProgs.size) + '</div><div class="stat-label">Total Programs</div></div>';
+    html += '<div class="stat-card navy"><div class="stat-num">' + totalEnrollments2 + '</div><div class="stat-label">Total Enrollments</div></div>';
+    html += '<div class="stat-card green"><div class="stat-num">' + completions2 + '</div><div class="stat-label">Completions</div></div>';
     html += '<div class="stat-card red"><div class="stat-num">' + certs.size + '</div><div class="stat-label">Certificates</div></div>';
-    html += '<div class="stat-card"><div class="stat-num">' + pushSubs.size + '</div><div class="stat-label">Push Subscribers</div></div>';
+    html += '<div class="stat-card navy"><div class="stat-num">' + pushSubs.size + '</div><div class="stat-label">Push Subscribers</div></div>';
     html += '</div>';
+
+    // CHARTS ROW 1
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">';
+
+    // Chart 1: Members Growth
+    html += '<div class="section-card"><h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Members Growth Over Time</h3>';
+    html += '<canvas id="chart-members" height="200"></canvas></div>';
+
+    // Chart 2: Posts per Day
+    html += '<div class="section-card"><h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Community Activity (Posts per Day)</h3>';
+    html += '<canvas id="chart-posts" height="200"></canvas></div>';
+    html += '</div>';
+
+    // CHARTS ROW 2
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">';
+
+    // Chart 3: Members by Country
+    html += '<div class="section-card"><h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Members by Country (Top 10)</h3>';
+    html += '<canvas id="chart-countries" height="200"></canvas></div>';
+
+    // Chart 4: Points Tier Distribution
+    html += '<div class="section-card"><h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Legacy Points Tier Distribution</h3>';
+    html += '<canvas id="chart-tiers" height="200"></canvas></div>';
+    html += '</div>';
+
+    // Chart 5: Enrollments per Program (full width)
+    html += '<div class="section-card" style="margin-bottom:1.5rem;"><h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Enrollments per Program</h3>';
+    html += '<canvas id="chart-programs" height="120"></canvas></div>';
+
+    c.innerHTML = html;
+
+    // Initialize Charts
+    setTimeout(() => {
+      // Chart 1: Members Growth
+      const ctx1 = document.getElementById('chart-members');
+      if (ctx1) new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: memberMonths.map(m => { const [y,mo] = m.split('-'); return new Date(y,mo-1).toLocaleString('default',{month:'short',year:'2-digit'}); }),
+          datasets: [{
+            label: 'New Members',
+            data: memberCounts,
+            borderColor: '#1B2A6B',
+            backgroundColor: 'rgba(27,42,107,0.1)',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#1B2A6B'
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+      });
+
+      // Chart 2: Posts per Day
+      const ctx2 = document.getElementById('chart-posts');
+      if (ctx2) new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(postsByDay).map(d => d.substring(5)),
+          datasets: [{
+            label: 'Posts',
+            data: Object.values(postsByDay),
+            backgroundColor: 'rgba(245,166,35,0.7)',
+            borderColor: '#F5A623',
+            borderWidth: 1,
+            borderRadius: 4
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+      });
+
+      // Chart 3: Members by Country
+      const ctx3 = document.getElementById('chart-countries');
+      if (ctx3) new Chart(ctx3, {
+        type: 'bar',
+        data: {
+          labels: topCountries.map(c => c[0]),
+          datasets: [{
+            label: 'Members',
+            data: topCountries.map(c => c[1]),
+            backgroundColor: ['#1B2A6B','#E63329','#F5A623','#27AE60','#1ABC9C','#9B59B6','#3498DB','#E74C3C','#2ECC71','#F39C12'],
+            borderRadius: 4
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, indexAxis: 'y' }
+      });
+
+      // Chart 4: Tier Distribution
+      const ctx4 = document.getElementById('chart-tiers');
+      if (ctx4) new Chart(ctx4, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(tierCounts),
+          datasets: [{
+            data: Object.values(tierCounts),
+            backgroundColor: ['#BDC3C7','#CD7F32','#95A5A6','#F5A623','#1ABC9C','#9B59B6'],
+            borderWidth: 2,
+            borderColor: '#fff'
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'right', labels: { font: { size: 11 } } } } }
+      });
+
+      // Chart 5: Enrollments per Program
+      const ctx5 = document.getElementById('chart-programs');
+      if (ctx5) new Chart(ctx5, {
+        type: 'bar',
+        data: {
+          labels: progEnrollments.map(p => p.name),
+          datasets: [{
+            label: 'Enrollments',
+            data: progEnrollments.map(p => p.count),
+            backgroundColor: 'rgba(27,42,107,0.75)',
+            borderRadius: 4
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+      });
+    }, 300);
 
     // Tech Programs breakdown
     html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;"> Tech Hub Programs</h3>';
@@ -2521,7 +2693,6 @@ async function loadAnalytics(c) {
     }
     html += '</div>';
 
-    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
   }
@@ -2811,7 +2982,6 @@ async function loadAssignments(c) {
     html += '</div>';
     html += '</div>'; // end tab-content-failures
 
-    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
   }
@@ -3061,7 +3231,6 @@ async function loadProgramsAdmin(c) {
       html += '</div></div>';
     });
     html += '</div>';
-    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
   }
@@ -3257,7 +3426,6 @@ async function loadFinance(c) {
       html += '</table>';
     }
     html += '</div>';
-    c.innerHTML = html;
   } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
 }
 
@@ -3544,7 +3712,6 @@ window.loadProgramApplications = async function(c) {
       html += '</div>';
     }
     html += '</div>';
-    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:var(--red);padding:1rem;">Error: ' + e.message + '</p>';
   }
