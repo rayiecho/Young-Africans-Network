@@ -1048,7 +1048,7 @@ function renderPost(post) {
     <div class="post-content">${sanitize(post.content).replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:var(--red);word-break:break-all;">$1</a>')}</div>
     ${post.link ? `<a href="${sanitize(post.link)}" target="_blank" class="post-link"> ${sanitize(post.link)}</a>` : ''}
     <div class="post-actions">
-      <button class="post-action ${liked?'liked':''}" onclick="toggleLike('${post.id}')"> ${Array.isArray(post.likes) ? post.likes.length : Object.keys(post.likes||{}).length}</button>
+      <button class="post-action ${liked?'liked':''}" onclick="toggleLike('${post.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="${liked?'currentColor':'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> ${Array.isArray(post.likes) ? post.likes.length : Object.keys(post.likes||{}).length}</button>
       <button class="post-action" onclick="toggleReplies('${post.id}')"> Reply</button>
     </div>
     <div class="reply-box" id="reply-box-${post.id}" style="display:none;">
@@ -1363,7 +1363,7 @@ async function submitQuiz(materialId, dept, questions) {
   const passed = score >= 70;
   await setDoc(doc(db, 'results', currentUser.uid, 'materials', materialId), { quizScore: score, quizPassed: passed, quizAttemptedAt: serverTimestamp(), department: dept }, { merge: true });
   document.getElementById(`quiz-${materialId}`).innerHTML = passed
-    ? `<div class="quiz-passed"> Passed with ${score}%!</div>`
+    ? (awardPoints(currentUser?.uid, 'quiz_passed', 'Quiz passed', 5), `<div class="quiz-passed"> Passed with ${score}%! +5 Legacy Points!</div>`)
     : `<div class="quiz-failed"> Score: ${score}%. Need 70%. <button onclick="document.getElementById('quiz-${materialId}').dataset.loaded='';openQuiz('${materialId}','${dept}')">Retry</button></div>`;
   showToast(passed ? ` Passed with ${score}%!` : `Score: ${score}%. Keep trying!`, passed ? 'success' : 'error');
 }
