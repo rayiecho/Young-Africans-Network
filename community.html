@@ -4449,8 +4449,8 @@ async function loadAchievements() {
   container.innerHTML = `
     <div style="max-width:900px;margin:0 auto;">
       <div style="text-align:center;margin-bottom:2rem;">
-        <h2 style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;"> Achievements Board</h2>
-        <p style="color:var(--gray);font-size:0.88rem;">Celebrating the wins of our pan-African community</p>
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;"> My Achievements</h2>
+        <p style="color:var(--gray);font-size:0.88rem;">Your personal wins and milestones on YAN</p>
       </div>
       <div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;justify-content:center;">
         <button class="achieve-filter-btn active" onclick="filterAchievements('all')"> All</button>
@@ -4463,11 +4463,11 @@ async function loadAchievements() {
 
   window._allAchievements = [];
 
-  // Load approved certificates
+  // Load current user's approved certificates only
   const certSnap = await getDocs(query(
     collection(db, 'certificates'),
     where('status', '==', 'approved'),
-    orderBy('approvedAt', 'desc')
+    where('userId', '==', currentUserData.uid)
   ));
 
   for (const d of certSnap.docs) {
