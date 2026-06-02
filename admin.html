@@ -1079,7 +1079,7 @@ async function loadNewslettersAdmin(c) {
     }
     c.innerHTML = html;
   } catch(e) {
-    c.innerHTML = '<p style="color:var(--gray);">Error loading newsletters.</p>';
+    c.innerHTML = '<p style="color:var(--gray);">Error: ' + e.message + '</p>';
   }
 }
 
