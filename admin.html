@@ -1231,7 +1231,7 @@ async function loadOverview(c) {
     getDocs(collection(db, 'team')),
     getDocs(collection(db, 'events')),
     getDocs(collection(db, 'stories')),
-    getDocs(collection(db, 'departments', 'programs', 'materials')),
+    getDocs(collection(db, 'trainingPrograms')),
     getDocs(query(collection(db, 'certificates'), where('status', '==', 'pending')))
   ]);
   c.innerHTML = `
