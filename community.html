@@ -1006,10 +1006,13 @@ function loadFeed() {
   loadFeedMembers();
   const container = document.getElementById('feed-posts');
   container.innerHTML = '<div class="loading">Loading posts...</div>';
-  // Add quote of the day at top
-  const quoteEl = document.createElement('div');
-  quoteEl.innerHTML = renderQuoteOfDay();
-  container.parentElement.insertBefore(quoteEl, container);
+  // Add quote of the day at top (only once)
+  if (!document.getElementById('quote-of-day')) {
+    const quoteEl = document.createElement('div');
+    quoteEl.id = 'quote-of-day';
+    quoteEl.innerHTML = renderQuoteOfDay();
+    container.parentElement.insertBefore(quoteEl, container);
+  }
   const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(30));
   const unsub = onSnapshot(q, snap => {
     if (snap.empty) { container.innerHTML = '<div class="empty-state">No posts yet. Be the first to post! </div>'; return; }
