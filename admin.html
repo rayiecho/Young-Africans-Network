@@ -1088,11 +1088,13 @@ window.loadNewslettersAdmin = loadNewslettersAdmin;
 
 
 
-window.loadSection = async function(section) {
-  localStorage.setItem('yan_admin_section', section);
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const btn = document.querySelector(`[data-section="${section}"]`);
-  if (btn) btn.classList.add('active');
+window.loadSection = async function(section, customContainer) {
+  if (!customContainer) {
+    localStorage.setItem('yan_admin_section', section);
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const btn = document.querySelector(`[data-section="${section}"]`);
+    if (btn) btn.classList.add('active');
+  }
   document.getElementById('section-title').textContent = {
     overview: ' Dashboard Overview',
     gallery: ' Gallery Manager',
@@ -1111,7 +1113,7 @@ window.loadSection = async function(section) {
     assignments: ' Assignment Reviews',
     programs: ' Programs Manager', notifications: ' Notification Center', finance: ' Finance Manager', recommendations: ' Recommendation Letters', errors: '🚨 System Errors' 
   }[section] || section;
-  const container = document.getElementById('content-area');
+  const container = customContainer || document.getElementById('content-area');
   container.innerHTML = '<div class="loading">Loading...</div>';
   const fns = {
     overview: loadOverview,
