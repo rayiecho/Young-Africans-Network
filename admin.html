@@ -1103,6 +1103,7 @@ window.loadNewslettersAdmin = loadNewslettersAdmin;
 
 
 
+window.loadSystemErrors = loadSystemErrors;
 window.loadSection = async function(section, customContainer) {
   if (!customContainer) {
     localStorage.setItem('yan_admin_section', section);
@@ -2081,8 +2082,8 @@ async function loadSystemErrors(c) {
   c.innerHTML = '<div class="loading">Loading errors...</div>';
   try {
     const [unresolvedSnap, allSnap] = await Promise.all([
-      getDocs(query(collection(db, 'systemErrors'), where('resolved', '==', false), orderBy('createdAt', 'desc'), limit(50))),
-      getDocs(query(collection(db, 'systemErrors'), orderBy('createdAt', 'desc'), limit(100)))
+      getDocs(query(collection(db, 'systemErrors'), where('resolved', '==', false), orderBy('createdAt', 'desc'), limit(50))).catch(()=>getDocs(collection(db,'systemErrors'))),
+      getDocs(query(collection(db, 'systemErrors'), orderBy('createdAt', 'desc'), limit(100))).catch(()=>getDocs(collection(db,'systemErrors')))
     ]);
 
     const unresolved = unresolvedSnap.docs;
@@ -3651,7 +3652,6 @@ window.loadModeration = loadModeration;
 window.loadFormsAdmin = loadFormsAdmin;
 window.loadNotificationCenter = loadNotificationCenter;
 window.loadHubsAdmin = loadHubsAdmin;
-window.loadSystemErrors = loadSystemErrors;
 window.loadGallery = loadGallery;
 window.loadEvents = loadEvents;
 window.loadStories = loadStories;
