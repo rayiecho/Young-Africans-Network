@@ -992,6 +992,49 @@ function renderQuoteOfDay() {
   </div>`;
 }
 
+function getYouTubeId(url) {
+  if (!url) return null;
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+  return match ? match[1] : null;
+}
+
+function previewYouTube(url) {
+  const id = getYouTubeId(url);
+  const preview = document.getElementById('post-youtube-preview');
+  if (!preview) return;
+  if (id) {
+    preview.style.display = 'block';
+    preview.innerHTML = '<div style="position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" src="https://www.youtube.com/embed/' + id + '" allowfullscreen></iframe></div>';
+  } else {
+    preview.style.display = 'none';
+    preview.innerHTML = '';
+  }
+}
+
+function handlePostImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) return showToast('Image too large (max 5MB)', 'error');
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    window._postImageUrl = e.target.result;
+    document.getElementById('post-image-preview').style.display = 'block';
+    document.getElementById('post-image-preview-img').src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearPostImage() {
+  window._postImageUrl = '';
+  const preview = document.getElementById('post-image-preview');
+  const ytPreview = document.getElementById('post-youtube-preview');
+  if (preview) { preview.style.display = 'none'; }
+  if (ytPreview) { ytPreview.style.display = 'none'; ytPreview.innerHTML = ''; }
+}
+window.clearPostImage = clearPostImage;
+window.previewYouTube = previewYouTube;
+window.handlePostImage = handlePostImage;
+
 window.shareQuote = function(quote) {
   const text = '"' + quote + '" — YAN Quote of the Day';
   if (navigator.share) {
@@ -1049,7 +1092,8 @@ function renderPost(post) {
       ${canDelete ? `<button class="post-delete" onclick="deletePost('${post.id}')"></button>` : ''}
     </div>
     <div class="post-content">${sanitize(post.content).replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:var(--red);word-break:break-all;">$1</a>')}</div>
-    ${post.link ? `<a href="${sanitize(post.link)}" target="_blank" class="post-link"> ${sanitize(post.link)}</a>` : ''}
+    ${post.youtubeId ? `<div style="position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;margin-bottom:0.75rem;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" src="https://www.youtube.com/embed/${sanitize(post.youtubeId)}" allowfullscreen></iframe></div>` : post.link ? `<a href="${sanitize(post.link)}" target="_blank" class="post-link"> ${sanitize(post.link)}</a>` : ''}
+    ${post.imageUrl ? `<img src="${sanitize(post.imageUrl)}" style="width:100%;max-height:400px;object-fit:cover;border-radius:12px;margin-bottom:0.75rem;cursor:pointer;" onclick="window.open('${sanitize(post.imageUrl)}','_blank')">` : ''}
     <div class="post-actions">
       <button class="post-action ${liked?'liked':''}" onclick="toggleLike('${post.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="${liked?'currentColor':'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> ${Array.isArray(post.likes) ? post.likes.length : Object.keys(post.likes||{}).length}</button>
       <button class="post-action" onclick="toggleReplies('${post.id}')"> Reply</button>
@@ -1121,14 +1165,18 @@ async function submitPost() {
 
   const cleanContent = stripHTML(content).substring(0, 2000);
   const cleanLink = link && isValidUrl(link) ? link : '';
+  const youtubeId = getYouTubeId(cleanLink);
+  const imageUrl = window._postImageUrl || '';
   await addDoc(collection(db, 'posts'), {
     content: cleanContent, category, link: cleanLink,
+    youtubeId: youtubeId || '', imageUrl: imageUrl,
     authorId: currentUser.uid, authorName: currentUserData.name,
     authorPhoto: currentUserData.photoUrl || '',
     likes: [], createdAt: serverTimestamp()
   });
   document.getElementById('post-input').value = '';
   document.getElementById('post-link').value = '';
+  clearPostImage();
   if (btn) { btn.disabled = false; btn.textContent = 'Post '; }
   showToast('Post shared! ');
   await awardPoints(currentUserData.uid, 'post_created', 'Posted in feed', 1);
@@ -12326,6 +12374,11 @@ h2,h3{position:relative;}
       <div style="flex:1;min-width:0;">
       <div class="post-composer">
         <textarea id="post-input" placeholder="Share something with the community... use @name to tag members " rows="3"></textarea>
+        <div id="post-image-preview" style="display:none;margin-bottom:0.5rem;position:relative;">
+          <img id="post-image-preview-img" style="max-width:100%;border-radius:12px;max-height:200px;object-fit:cover;">
+          <button onclick="clearPostImage()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:0.8rem;">✕</button>
+        </div>
+        <div id="post-youtube-preview" style="display:none;margin-bottom:0.5rem;"></div>
         <div class="post-composer-row">
           <select id="post-category">
             <option value="General"> General</option>
@@ -12334,7 +12387,12 @@ h2,h3{position:relative;}
             <option value="Question"> Question</option>
             <option value="Motivation"> Motivation</option>
           </select>
-          <input type="text" id="post-link" placeholder=" Add a link (optional)">
+          <input type="text" id="post-link" placeholder=" YouTube or link (optional)" oninput="previewYouTube(this.value)">
+          <label style="cursor:pointer;display:flex;align-items:center;gap:0.3rem;padding:0.4rem 0.75rem;border-radius:50px;border:1.5px solid rgba(27,42,107,0.15);font-size:0.78rem;color:var(--navy);font-weight:600;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Photo
+            <input type="file" accept="image/*" onchange="handlePostImage(this)" style="display:none;">
+          </label>
           <button class="btn-post" onclick="submitPost()">Post</button>
         </div>
       </div>
