@@ -254,6 +254,13 @@ onAuthStateChanged(auth, async user => {
           if (snap.exists()) {
             currentUserData = snap.data();
             localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
+            // Update bottom profile
+            const bAvatar = document.getElementById('bottom-avatar');
+            const bName = document.getElementById('bottom-name');
+            const bRole = document.getElementById('bottom-role');
+            if (bName) bName.textContent = currentUserData.name || 'Member';
+            if (bRole) bRole.textContent = (currentUserData.role || 'Member') + ' · ' + (currentUserData.department || '');
+            if (bAvatar) { if (currentUserData.photoUrl) { bAvatar.innerHTML = '<img src="' + currentUserData.photoUrl + '" style="width:100%;height:100%;object-fit:cover;">'; } else { bAvatar.textContent = (currentUserData.name || '?')[0].toUpperCase(); } }
             // Update sidebar silently
             const sn = document.getElementById('sidebar-name');
             const sr = document.getElementById('sidebar-role');
