@@ -1158,15 +1158,15 @@ window.loadSection = async function(section, customContainer) {
       {id:'redemptions', label:'Reward Redemptions'},
     ]),
     // Keep individual sections accessible
-    gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents,
-    materials: loadMaterials, certificates: loadCertificates, members: loadMembers,
-    moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin,
-    newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, assignments: loadAssignments,
-    programs: loadProgramsAdmin, applications: (c) => { const fn = window.loadProgramApplications; if(fn) return fn(c); c.innerHTML='<p>Loading...</p>'; },
-    notifications: loadNotificationCenter, finance: loadFinance,
-    recommendations: (...args) => window.loadRecommendations(...args),
-    errors: loadSystemErrors, mentors: loadMentorApplications,
-    opportunities: loadOpportunitiesManager, lab: loadLabListings, redemptions: loadRedemptions
+    gallery:(c)=>window.loadGallery(c),team:(c)=>window.loadTeam(c),stories:(c)=>window.loadStories(c),events:(c)=>window.loadEvents(c),
+    materials:(c)=>window.loadMaterials(c),certificates:(c)=>window.loadCertificates(c),members:(c)=>window.loadMembers(c),
+    moderation:(c)=>window.loadModeration(c),hubs:(c)=>window.loadHubsAdmin(c),partnerships:(c)=>window.loadPartnershipsAdmin(c),
+    newsletters:(c)=>window.loadNewslettersAdmin(c),forms:(c)=>window.loadFormsAdmin(c),assignments:(c)=>window.loadAssignments(c),
+    programs:(c)=>window.loadProgramsAdmin(c),applications:(c)=>window.loadProgramApplications(c),
+    notifications:(c)=>window.loadNotificationCenter(c),finance:(c)=>window.loadFinance(c),
+    recommendations:(c)=>window.loadRecommendations(c),
+    errors:(c)=>window.loadSystemErrors(c),mentors:(c)=>window.loadMentorApplications(c),
+    opportunities:(c)=>window.loadOpportunitiesManager(c),lab:(c)=>window.loadLabListings(c),redemptions:(c)=>window.loadRedemptions(c)
   };
   if (fns[section]) {
     try {
