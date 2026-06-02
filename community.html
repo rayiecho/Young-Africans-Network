@@ -262,7 +262,7 @@ onAuthStateChanged(auth, async user => {
             if (bName) bName.textContent = currentUserData.name || 'Member';
             // Load legacy points in topbar — real-time listener
             onSnapshot(doc(db, 'memberPoints', user.uid), ps => {
-              const pts = ps.exists() ? (ps.data().points || 0) : 0;
+              const pts = ps.exists() ? (ps.data().points || ps.data().total || 0) : 0;
               const el = document.getElementById('topbar-points');
               if (el) el.textContent = pts.toLocaleString();
             });
@@ -1982,7 +1982,9 @@ async function saveProfile() {
   await updateDoc(doc(db, 'users', currentUser.uid), { name, country, whatsapp, bio });
   currentUserData = { ...currentUserData, name, country, whatsapp, bio };
   document.getElementById('sidebar-name').textContent = name;
-  showToast('Profile updated ');
+  const profileComplete = name && country && whatsapp && bio;
+  if (profileComplete) await awardPoints(currentUser.uid, 'profile_completed', 'Profile completed', 10);
+  showToast('Profile updated!' + (profileComplete ? ' +10 Legacy Points!' : ''));
 }
 
 async function changeProfilePhoto(input) {
@@ -11542,11 +11544,18 @@ const POINTS_MAP = {
 };
 
 const TIERS = [
-  {name:'Legend', min:2000, reward:'Full YAN Recognition Package + Special Role', icon:'', color:'#9B59B6'},
-  {name:'Diamond', min:1000, reward:'YAN T-Shirt + Website Feature', icon:'', color:'#1ABC9C'},
-  {name:'Gold', min:500, reward:'YAN Book + Recognition Post', icon:'', color:'#F5A623'},
-  {name:'Silver', min:200, reward:'YAN Certificate of Excellence', icon:'', color:'#95A5A6'},
-  {name:'Bronze', min:0, reward:'Recognition Badge', icon:'', color:'#CD7F32'},
+  {name:'Legend', min:5000, reward:'Full YAN Recognition Package + Special Role', color:'#9B59B6',
+   svg:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'},
+  {name:'Diamond', min:3500, reward:'YAN T-Shirt + Website Feature', color:'#1ABC9C',
+   svg:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3L8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>'},
+  {name:'Gold', min:2000, reward:'YAN Book + Recognition Post', color:'#F5A623',
+   svg:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>'},
+  {name:'Silver', min:1000, reward:'YAN Certificate of Excellence', color:'#95A5A6',
+   svg:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>'},
+  {name:'Bronze', min:500, reward:'Recognition Badge', color:'#CD7F32',
+   svg:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>'},
+  {name:'Starter', min:0, reward:'YAN Community Member', color:'#BDC3C7',
+   svg:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>'},
 ];
 
 function getTier(points) {

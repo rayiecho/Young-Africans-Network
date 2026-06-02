@@ -703,6 +703,16 @@ window.submitReview = async function(listingId) {
     if (listing) { listing.reviews = reviews; listing.avgRating = avgRating; }
 
     showToast('Review submitted! Thank you 🎉');
+    // Award 5 points to listing owner if 5 stars
+    if (selectedRating === 5 && listing) {
+      const uSnap = await getDocs(query(collection(db, 'users'), where('email', '==', listing.email||'')));
+      if (!uSnap.empty) {
+        await Promise.all([
+          addDoc(collection(db, 'pointsHistory'), { userId: uSnap.docs[0].id, action: 'five_star_review', description: '5-star review received', points: 5, createdAt: serverTimestamp() }),
+          setDoc(doc(db, 'memberPoints', uSnap.docs[0].id), { points: increment(5) }, { merge: true })
+        ]);
+      }
+    }
     closeDetailModal();
     applyFilters();
   } catch(e) {
