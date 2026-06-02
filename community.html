@@ -5317,7 +5317,7 @@ async function handleGlobalSearch(searchQuery) {
         if (t.name.toLowerCase().includes(q) || t.keywords.some(function(k){ return k.includes(q); })) {
           results.push({
             type: 'tab',
-            icon: '<div style="width:32px;height:32px;border-radius:50%;background:rgba(27,42,107,0.1);display:flex;align-items:center;justify-content:center;font-size:1rem;">' + t.icon + '</div>',
+            icon: '<div style="width:32px;height:32px;border-radius:50%;background:rgba(27,42,107,0.1);display:flex;align-items:center;justify-content:center;color:' + t.color + '">' + (t.svg||'') + '</div>',
             title: t.name,
             subtitle: 'Go to ' + t.name,
             action: "showTab('" + t.tab + "')"
@@ -11637,7 +11637,7 @@ async function loadLeaderboard() {
     [...TIERS].reverse().forEach(t => {
       const active = myTier.name === t.name;
       html += '<div style="background:var(--white);border-radius:12px;padding:1rem;text-align:center;border:2px solid ' + (active ? t.color : 'transparent') + ';box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
-      html += '<div style="width:40px;height:40px;border-radius:50%;background:' + t.color + ';display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;margin:0 auto 0.5rem;">' + t.icon + '</div>';
+      html += '<div style="width:48px;height:48px;border-radius:50%;background:' + t.color + ';display:flex;align-items:center;justify-content:center;color:#fff;margin:0 auto 0.5rem;">' + (t.svg||'') + '</div>';
       html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);">' + t.name + '</p>';
       html += '<p style="font-size:0.7rem;color:var(--gray);">' + t.min + '+ pts</p>';
       html += '<p style="font-size:0.68rem;color:var(--gray);margin-top:4px;">' + t.reward + '</p>';
