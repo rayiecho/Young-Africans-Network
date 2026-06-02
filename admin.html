@@ -2141,6 +2141,7 @@ async function loadSystemErrors(c) {
       html += '</div>';
     }
 
+    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error loading system errors: ' + e.message + '</p>';
   }
