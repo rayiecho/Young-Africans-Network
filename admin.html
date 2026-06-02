@@ -2199,7 +2199,6 @@ async function loadLabListings(c) {
         html += '</div>';
       });
       html += '</div>';
-    c.innerHTML = html;
     } else {
       html += '<div class="section-card" style="text-align:center;padding:2rem;"><p style="font-size:2rem;">✅</p><p style="color:var(--gray);">No pending listings!</p></div>';
     }
@@ -2218,6 +2217,7 @@ async function loadLabListings(c) {
       html += '</div>';
     }
 
+    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
   }
