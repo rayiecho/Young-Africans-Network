@@ -1552,7 +1552,7 @@ async function loadHelpline() {
 async function loadMeetings() {
   const container = document.getElementById('meetings-container');
   container.innerHTML = `
-    <div class="meetings-header"><h2> YAN Meetings</h2></div>
+    <div class="meetings-header"><h2> CONFERENCE ROOMS</h2></div>
     <p style="color:var(--gray);font-size:0.88rem;margin-bottom:1.5rem;">Click any room to join instantly — available 24/7.</p>
     <div class="rooms-grid">
       <div class="room-card"><div class="room-icon">GF</div><div class="room-info"><h4>General Forum</h4><p>Open to all members</p></div><button class="btn-sm btn-navy" onclick="joinMeeting('https://youngafricansnetwork.daily.co/YAN_GENERAL_FORUM','General Forum')">Join</button></div>
@@ -12190,7 +12190,7 @@ h2,h3{position:relative;}
         <div class="dd-items" id="support-dd">
           <button class="dd-item" onclick="showTab('directory');closeDropdowns()">Directory</button>
           <button class="dd-item" onclick="showTab('polls');closeDropdowns()">Polls</button>
-          <button class="dd-item" onclick="showTab('meetings');closeDropdowns()">Meetings</button>
+          <button class="dd-item" onclick="showTab('meetings');closeDropdowns()">Conference Rooms</button>
           <button class="dd-item" onclick="showTab('helpline');closeDropdowns()">Helpline</button>
         </div>
       </div>
