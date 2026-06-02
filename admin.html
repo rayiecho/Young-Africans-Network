@@ -2568,6 +2568,7 @@ async function loadAnalytics(c) {
 
     // Initialize Charts
     setTimeout(() => {
+      if (typeof Chart === 'undefined') { console.log('Chart.js not loaded yet'); return; }
       // Chart 1: Members Growth
       const ctx1 = document.getElementById('chart-members');
       if (ctx1) new Chart(ctx1, {
@@ -2652,7 +2653,7 @@ async function loadAnalytics(c) {
         },
         options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
       });
-    }, 300);
+    }, 1000);
 
     // Tech Programs breakdown
     html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;"> Tech Hub Programs</h3>';
