@@ -56,7 +56,8 @@ function checkAuth() {
     document.getElementById('screen-login').style.display = 'none';
     document.getElementById('screen-dashboard').style.display = 'flex';
     const lastSection = localStorage.getItem('yan_admin_section') || 'overview';
-    window.loadSection(lastSection);
+    // Wait for module to finish loading
+    setTimeout(() => window.loadSection(lastSection), 800);
   }
 }
 
