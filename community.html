@@ -367,6 +367,7 @@ async function doRegister() {
       memberId: 'YAN-' + cred.user.uid.substring(0,8).toUpperCase()
     });
     showToast('Account created! Welcome to YAN!');
+    await awardPoints(user.uid, 'account_created', 'Welcome to YAN! Account created', 10);
     // Request push notification permission - non-blocking
     setTimeout(async () => {
       try {
@@ -1127,6 +1128,7 @@ async function submitPost() {
   document.getElementById('post-link').value = '';
   if (btn) { btn.disabled = false; btn.textContent = 'Post '; }
   showToast('Post shared! ');
+  await awardPoints(currentUserData.uid, 'post_created', 'Posted in feed', 1);
 }
 
 async function moderateContent(text) {
@@ -7527,7 +7529,8 @@ async function enrollInProgram(programId) {
         progress:0, modulesCompleted:[], enrolledAt:serverTimestamp()
       },{merge:true})
     ]);
-    showToast('Enrolled! Click the program to start.');
+    await awardPoints(currentUser.uid, 'program_enrolled', 'Enrolled in a program', 5);
+    showToast('Enrolled! +5 Legacy Points earned!');
     loadAllPrograms();
   } catch(e) {
     showToast('Error enrolling: '+e.message,'error');
@@ -11297,13 +11300,14 @@ window.confirmMentoringSlot = async function(mentorshipId, slotIndex) {
 };
 
 window.logMentoringSession = async function(mentorshipId, menteeId) {
-  if (!confirm('Log a completed mentoring session? You will earn 30 points.')) return;
+  if (!confirm('Log a completed mentoring session? You will earn 20 Legacy Points (if 10+ mins).')) return;
   await addDoc(collection(db,'mentoringSessions'), {
     mentorshipId, mentorId: currentUser.uid, menteeId,
     loggedAt: serverTimestamp()
   });
   await awardPoints('mentoring_session');
-  showToast('Session logged! +30 points earned.');
+  await awardPoints(currentUser.uid, 'mentoring_session', 'Mentoring session logged (mentor)', 20);
+  showToast('Session logged! +20 Legacy Points earned!');
 };
 
 window.aiMatchMentor = async function() {
