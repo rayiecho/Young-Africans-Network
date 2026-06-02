@@ -1070,7 +1070,6 @@ async function loadNewslettersAdmin(c) {
       snap.docs.forEach(d => {
         const n = d.data();
         html += '<div class="section-card" style="margin-bottom:1rem;">'
-    c.innerHTML = html;
           + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">'
           + '<div><strong style="font-size:0.92rem;color:var(--navy);">' + (n.subject||'') + '</strong>'
           + '<p style="font-size:0.78rem;color:var(--gray);margin-top:0.25rem;">' + (n.sent ? 'Sent to ' + (n.sentTo||0) + ' members' : 'Draft') + ' · ' + (n.createdBy||'') + '</p></div>'
@@ -1078,6 +1077,7 @@ async function loadNewslettersAdmin(c) {
           + '</div></div>';
       });
     }
+    c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<p style="color:var(--gray);">Error loading newsletters.</p>';
   }
