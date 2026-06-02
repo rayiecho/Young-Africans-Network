@@ -3626,6 +3626,31 @@ window.filterRecs = function(status) {
   });
 }
 
+// Expose all load functions globally
+window.loadProgramsAdmin = loadProgramsAdmin;
+window.loadMentorApplications = loadMentorApplications;
+window.loadAssignments = loadAssignments;
+window.loadCertificates = loadCertificates;
+window.loadMaterials = loadMaterials;
+window.loadMembers = loadMembers;
+window.loadModeration = loadModeration;
+window.loadFormsAdmin = loadFormsAdmin;
+window.loadNotificationCenter = loadNotificationCenter;
+window.loadHubsAdmin = loadHubsAdmin;
+window.loadSystemErrors = loadSystemErrors;
+window.loadGallery = loadGallery;
+window.loadEvents = loadEvents;
+window.loadStories = loadStories;
+window.loadNewslettersAdmin = loadNewslettersAdmin;
+window.loadOpportunitiesManager = loadOpportunitiesManager;
+window.loadFinance = loadFinance;
+window.loadPartnershipsAdmin = loadPartnershipsAdmin;
+window.loadTeam = loadTeam;
+window.loadLabListings = loadLabListings;
+window.loadRedemptions = loadRedemptions;
+window.loadOverview = loadOverview;
+window.loadAnalytics = loadAnalytics;
+
 window.loadProgramApplications = async function(c) {
   try {
     const [pendingSnap, allSnap] = await Promise.all([
