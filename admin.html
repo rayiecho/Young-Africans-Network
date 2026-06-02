@@ -218,8 +218,21 @@ window.deleteLabListing = async function(id) {
 };
 
 window.approveLabListing = async function(id) {
+  const labSnap = await getDoc(doc(db, 'labListings', id));
+  const labData = labSnap.data();
   await updateDoc(doc(db, 'labListings', id), { status: 'approved', approvedAt: serverTimestamp(), approvedBy: 'Admin' });
-  showToast('Listing approved! Now live on the Lab 🎉');
+  // Award 10 points to the member
+  if (labData?.email) {
+    const uSnap = await getDocs(query(collection(db, 'users'), where('email', '==', labData.email)));
+    if (!uSnap.empty) {
+      const uid = uSnap.docs[0].id;
+      await Promise.all([
+        addDoc(collection(db, 'pointsHistory'), { userId: uid, action: 'lab_listing_approved', description: 'Lab listing approved', points: 10, createdAt: serverTimestamp() }),
+        setDoc(doc(db, 'memberPoints', uid), { points: increment(10) }, { merge: true })
+      ]);
+    }
+  }
+  showToast('Listing approved! +10 Legacy Points awarded 🎉');
   loadSection('lab');
 };
 
@@ -393,8 +406,21 @@ window.deleteLabListing = async function(id) {
 };
 
 window.approveLabListing = async function(id) {
+  const labSnap = await getDoc(doc(db, 'labListings', id));
+  const labData = labSnap.data();
   await updateDoc(doc(db, 'labListings', id), { status: 'approved', approvedAt: serverTimestamp(), approvedBy: 'Admin' });
-  showToast('Listing approved! Now live on the Lab 🎉');
+  // Award 10 points to the member
+  if (labData?.email) {
+    const uSnap = await getDocs(query(collection(db, 'users'), where('email', '==', labData.email)));
+    if (!uSnap.empty) {
+      const uid = uSnap.docs[0].id;
+      await Promise.all([
+        addDoc(collection(db, 'pointsHistory'), { userId: uid, action: 'lab_listing_approved', description: 'Lab listing approved', points: 10, createdAt: serverTimestamp() }),
+        setDoc(doc(db, 'memberPoints', uid), { points: increment(10) }, { merge: true })
+      ]);
+    }
+  }
+  showToast('Listing approved! +10 Legacy Points awarded 🎉');
   loadSection('lab');
 };
 
@@ -2010,8 +2036,21 @@ window.deleteLabListing = async function(id) {
 };
 
 window.approveLabListing = async function(id) {
+  const labSnap = await getDoc(doc(db, 'labListings', id));
+  const labData = labSnap.data();
   await updateDoc(doc(db, 'labListings', id), { status: 'approved', approvedAt: serverTimestamp(), approvedBy: 'Admin' });
-  showToast('Listing approved! Now live on the Lab 🎉');
+  // Award 10 points to the member
+  if (labData?.email) {
+    const uSnap = await getDocs(query(collection(db, 'users'), where('email', '==', labData.email)));
+    if (!uSnap.empty) {
+      const uid = uSnap.docs[0].id;
+      await Promise.all([
+        addDoc(collection(db, 'pointsHistory'), { userId: uid, action: 'lab_listing_approved', description: 'Lab listing approved', points: 10, createdAt: serverTimestamp() }),
+        setDoc(doc(db, 'memberPoints', uid), { points: increment(10) }, { merge: true })
+      ]);
+    }
+  }
+  showToast('Listing approved! +10 Legacy Points awarded 🎉');
   loadSection('lab');
 };
 
