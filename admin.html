@@ -1122,7 +1122,7 @@ window.loadSection = async function(section, customContainer) {
     programs: ' Programs Manager', notifications: ' Notification Center', finance: ' Finance Manager', recommendations: ' Recommendation Letters', errors: '🚨 System Errors' 
   }[section] || section;
   const container = customContainer || document.getElementById('content-area');
-  container.innerHTML = '<div class="loading">Loading...</div>';
+  if (!customContainer) container.innerHTML = '<div class="loading">Loading...</div>';
   const fns = {
     overview: loadOverview,
     analytics: loadAnalytics,
