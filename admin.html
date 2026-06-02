@@ -2527,8 +2527,7 @@ async function loadAnalytics(c) {
       return (d.data().lessonsCompleted || []).length >= 20;
     }).length;
 
-    let html = '<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"><\/script>';
-    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem;">';
+    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem;">';
     html += '<div class="stat-card navy"><div class="stat-num">' + users.size + '</div><div class="stat-label">Total Members</div></div>';
     html += '<div class="stat-card gold"><div class="stat-num">' + (techProgs.size + careerProgs.size) + '</div><div class="stat-label">Total Programs</div></div>';
     html += '<div class="stat-card navy"><div class="stat-num">' + totalEnrollments2 + '</div><div class="stat-label">Total Enrollments</div></div>';
@@ -3490,7 +3489,8 @@ window.generateReceipt = function(colName, id) {
     const d = snap.data();
     const rNo = 'YAN-' + id.substring(0,8).toUpperCase();
     const w = window.open('','_blank','width=600,height=800');
-    w.document.write('<html><head><title>YAN Receipt</title><style>body{font-family:Arial,sans-serif;padding:40px;color:#1B2A6B;}.box{border:2px solid #1B2A6B;border-radius:12px;padding:30px;margin-top:20px;}.row{display:flex;justify-content:space-between;margin-bottom:12px;font-size:14px;}.amt{font-size:28px;font-weight:900;color:#27AE60;margin:20px 0;}@media print{button{display:none;}}</style></head><body>');
+    w.document.write('<html><head><title>YAN Receipt</title><style>body{font-family:Arial,sans-serif;padding:40px;color:#1B2A6B;}.box{border:2px solid #1B2A6B;border-radius:12px;padding:30px;margin-top:20px;}.row{display:flex;justify-content:space-between;margin-bottom:12px;font-size:14px;}.amt{font-size:28px;font-weight:900;color:#27AE60;margin:20px 0;}@media print{button{display:none;}}</style><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head><body>');
     w.document.write('<h2> Young Africans Network</h2><p style="color:#6B7280;">youngafricansnetwork.org</p>');
     w.document.write('<div class="box"><h3>Official Receipt — '+rNo+'</h3>');
     w.document.write('<div class="row"><span>Date:</span><strong>'+( d.date||''  )+'</strong></div>');
