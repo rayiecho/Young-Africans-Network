@@ -11610,7 +11610,7 @@ async function loadLeaderboard() {
   try {
     const snap = await getDocs(query(collection(db, 'memberPoints'), orderBy('total', 'desc'), limit(50)));
     const mySnap = await getDoc(doc(db, 'memberPoints', currentUser.uid));
-    const myPoints = mySnap.exists() ? mySnap.data().total || 0 : 0;
+    const myPoints = mySnap.exists() ? (mySnap.data().points || mySnap.data().total || 0) : 0;
     const myTier = getTier(myPoints);
     const nextTier = getNextTier(myPoints);
 
@@ -11629,7 +11629,9 @@ async function loadLeaderboard() {
       html += '<div style="width:' + Math.min(100, ((myPoints - (TIERS[TIERS.findIndex(t=>t.name===myTier.name)+1]?.min||0)) / (nextTier.min - (TIERS[TIERS.findIndex(t=>t.name===myTier.name)+1]?.min||0))) * 100) + '%;height:4px;background:var(--gold);border-radius:50px;"></div></div>';
     }
     html += '</div></div>';
-    html += '<div style="text-align:right;"><p style="font-size:0.78rem;color:rgba(255,255,255,0.6);">Reward</p><p style="font-size:0.85rem;font-weight:700;">' + myTier.reward + '</p></div>';
+    html += '<div style="text-align:right;"><p style="font-size:0.78rem;color:rgba(255,255,255,0.6);">Reward</p><p style="font-size:0.85rem;font-weight:700;">' + myTier.reward + '</p>' +
+      (myPoints >= 500 ? '<button onclick="redeemReward(\'' + myTier.name + '\',\'' + myTier.reward + '\',' + myPoints + ')" style="margin-top:0.5rem;background:var(--gold);color:var(--navy);border:none;padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">Redeem Reward</button>' : '<p style="font-size:0.72rem;color:rgba(255,255,255,0.5);margin-top:0.3rem;">Reach Bronze (500pts) to redeem</p>') +
+      '</div>';
     html += '</div>';
 
     // Tiers overview
@@ -11650,14 +11652,14 @@ async function loadLeaderboard() {
     html += '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Top Members</h3>';
     snap.docs.forEach((d, idx) => {
       const data = d.data();
-      const tier = getTier(data.total || 0);
+      const tier = getTier(data.points || data.total || 0);
       const isMe = d.id === currentUser.uid;
       html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;border-radius:12px;background:' + (isMe ? 'rgba(27,42,107,0.05)' : '') + ';margin-bottom:0.5rem;">';
       html += '<span style="font-size:0.9rem;font-weight:800;color:' + (idx < 3 ? ['#F5A623','#95A5A6','#CD7F32'][idx] : 'var(--gray)') + ';width:28px;">' + (idx+1) + '</span>';
       html += '<div style="width:36px;height:36px;border-radius:50%;background:' + tier.color + ';display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.85rem;">' + (data.userName||'?').charAt(0) + '</div>';
       html += '<div style="flex:1;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(data.userName||'Member') + (isMe ? ' (You)' : '') + '</p>';
       html += '<p style="font-size:0.72rem;color:var(--gray);">' + tier.name + ' Tier</p></div>';
-      html += '<span style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + (data.total||0) + ' pts</span>';
+      html += '<span style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + (data.points||data.total||0) + ' pts</span>';
       html += '</div>';
     });
     html += '</div>';
@@ -11683,6 +11685,22 @@ async function loadLeaderboard() {
     document.getElementById('tab-achievements').innerHTML = '<p style="color:var(--red);padding:1rem;">Error loading leaderboard: ' + e.message + '</p>';
   }
 }
+window.redeemReward = async function(tierName, reward, points) {
+  if (!confirm('Redeem your ' + tierName + ' reward: ' + reward + '?\n\nYAN team will contact you within 48 hours.')) return;
+  try {
+    await addDoc(collection(db, 'rewardRedemptions'), {
+      userId: currentUser.uid,
+      userName: currentUserData.name,
+      userEmail: currentUserData.email,
+      tierName, reward, points,
+      status: 'pending',
+      createdAt: serverTimestamp()
+    });
+    showToast('Reward redemption submitted! We will contact you within 48 hours 🎉');
+  } catch(e) {
+    showToast('Error: ' + e.message, 'error');
+  }
+};
 window.loadLeaderboard = loadLeaderboard;
 
 
