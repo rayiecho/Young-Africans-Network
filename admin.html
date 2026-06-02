@@ -3921,14 +3921,14 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .btn-logout-admin:hover{color:var(--red);}
 
 /* MAIN */
-.admin-main{margin-left:var(--sidebar);display:flex;flex-direction:column;min-height:100vh;}
-.admin-topbar{background:var(--white);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(27,42,107,0.08);position:sticky;top:0;z-index:40;}
+.admin-main{margin-left:var(--sidebar);display:flex;flex-direction:column;min-height:100vh;padding-top:0;}
+.admin-topbar{background:var(--white);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(27,42,107,0.08);position:sticky;top:0;z-index:40;flex-shrink:0;}
 .admin-topbar-left{display:flex;align-items:center;gap:1rem;}
 .admin-topbar-left h1{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:900;color:var(--navy);}
 #section-title{font-size:0.88rem;color:var(--gray);}
 .admin-topbar-right a{font-size:0.82rem;color:var(--navy);text-decoration:none;padding:0.5rem 1rem;border-radius:8px;border:1px solid rgba(27,42,107,0.15);}
 .admin-topbar-right a:hover{background:var(--light);}
-#content-area{padding:2rem;max-width:1100px;}
+#content-area{padding:2rem;max-width:1100px;flex:1;}
 
 /* SECTION CARDS */
 .section-card{background:var(--white);border-radius:16px;padding:1.75rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
