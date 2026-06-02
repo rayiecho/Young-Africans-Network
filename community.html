@@ -4464,6 +4464,8 @@ async function loadAdminModeration() {
 // ACHIEVEMENTS BOARD
 async function loadAchievements() {
   const container = document.getElementById('achievements-container');
+  if (!container) return;
+  if (!currentUser || !currentUser.uid) { container.innerHTML = '<div class="empty-state">Please log in to view achievements.</div>'; return; }
   container.innerHTML = `
     <div style="max-width:900px;margin:0 auto;">
       <div style="text-align:center;margin-bottom:2rem;">
@@ -4482,10 +4484,12 @@ async function loadAchievements() {
   window._allAchievements = [];
 
   // Load current user's approved certificates only
+  const uid = currentUser?.uid || currentUserData?.uid;
+  if (!uid) return;
   const certSnap = await getDocs(query(
     collection(db, 'certificates'),
     where('status', '==', 'approved'),
-    where('userId', '==', currentUserData.uid)
+    where('userId', '==', uid)
   ));
 
   for (const d of certSnap.docs) {
