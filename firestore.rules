@@ -325,8 +325,10 @@ service cloud.firestore {
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
-  }
-}    match /rewardRedemptions/{redemptionId} {
+
+    match /rewardRedemptions/{redemptionId} {
       allow create: if isLoggedIn();
       allow read, update: if isAdmin();
     }
+  }
+}
