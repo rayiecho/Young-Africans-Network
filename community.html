@@ -532,13 +532,15 @@ async function doForgotPassword() {
 // PLATFORM ENTRY
 function enterPlatform() {
   showScreen('screen-platform');
-  document.getElementById('sidebar-name').textContent = currentUserData.name || '';
-  document.getElementById('sidebar-role').textContent = currentUserData.role || 'Member';
-  document.getElementById('sidebar-dept').textContent = DEPARTMENTS.find(d=>d.id===currentUserData.department)?.name || '';
   const photo = currentUserData.photoUrl;
-  document.getElementById('sidebar-avatar').innerHTML = photo
+  const avatarHtml = photo
     ? `<img src="${photo}" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
     : `<span>${(currentUserData.name||'?')[0].toUpperCase()}</span>`;
+  if (document.getElementById('sidebar-name')) document.getElementById('sidebar-name').textContent = currentUserData.name || '';
+  if (document.getElementById('sidebar-role')) document.getElementById('sidebar-role').textContent = currentUserData.role || 'Member';
+  if (document.getElementById('sidebar-dept')) document.getElementById('sidebar-dept').textContent = DEPARTMENTS.find(d=>d.id===currentUserData.department)?.name || '';
+  if (document.getElementById('sidebar-avatar')) document.getElementById('sidebar-avatar').innerHTML = avatarHtml;
+  if (document.getElementById('bottom-avatar')) document.getElementById('bottom-avatar').innerHTML = avatarHtml;
   const headTab = document.getElementById('tab-btn-head');
   const adminTab = document.getElementById('tab-btn-admin');
   if (headTab) headTab.style.display = (currentUserData.isDeptHead||currentUserData.isAdmin) ? 'flex' : 'none';
