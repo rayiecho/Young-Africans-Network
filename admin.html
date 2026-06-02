@@ -3721,8 +3721,8 @@ window.loadProgramApplications = async function(c) {
   }
 };
 // ============ OPPORTUNITIES MANAGER ============
-async function loadOpportunitiesManager() {
-  const main = document.getElementById('content-area');
+async function loadOpportunitiesManager(c) {
+  const main = c || document.getElementById('content-area');
   main.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--gray);">Loading opportunities...</div>';
 
   const [schSnap, jobsSnap] = await Promise.all([
