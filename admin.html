@@ -1154,7 +1154,7 @@ window.loadSection = async function(section, customContainer) {
     materials: loadMaterials, certificates: loadCertificates, members: loadMembers,
     moderation: loadModeration, hubs: loadHubsAdmin, partnerships: loadPartnershipsAdmin,
     newsletters: loadNewslettersAdmin, forms: loadFormsAdmin, assignments: loadAssignments,
-    programs: loadProgramsAdmin, applications: (...args) => window.loadProgramApplications(...args),
+    programs: loadProgramsAdmin, applications: (c) => { const fn = window.loadProgramApplications; if(fn) return fn(c); c.innerHTML='<p>Loading...</p>'; },
     notifications: loadNotificationCenter, finance: loadFinance,
     recommendations: (...args) => window.loadRecommendations(...args),
     errors: loadSystemErrors, mentors: loadMentorApplications,
