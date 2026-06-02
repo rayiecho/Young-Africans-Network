@@ -3357,8 +3357,7 @@ window.generateBalanceSheet = async function() {
   lns.filter(l=>l.status!=='repaid').forEach(l=>w.document.write('<tr><td>'+(l.lender||'')+'</td><td>'+(l.purpose||'')+'</td><td>'+(l.dueDate||'')+'</td><td style="text-align:right;">'+parseFloat(l.amount||0).toLocaleString()+'</td></tr>'));
   w.document.write('<tr class="tot"><td colspan="3">TOTAL OUTSTANDING</td><td style="text-align:right;" class="neg">KES '+tL.toLocaleString()+'</td></tr></table>');
   w.document.write('<h3> Net Position</h3><table><tr><td>Total Income</td><td style="text-align:right;" class="pos">KES '+tI.toLocaleString()+'</td></tr><tr><td>Less: Expenses</td><td style="text-align:right;" class="neg">KES '+tE.toLocaleString()+'</td></tr><tr><td>Less: Outstanding Loans</td><td style="text-align:right;" class="neg">KES '+tL.toLocaleString()+'</td></tr><tr class="tot"><td>NET POSITION</td><td style="text-align:right;" class="'+(net>=0?'pos':'neg')+'">KES '+net.toLocaleString()+'</td></tr></table>');
-  w.document.write('<br><button onclick="window.print()" style="background:#1B2A6B;color:#fff;padding:10px 30px;border:none;border-radius:50px;cursor:pointer;"> Print / Save PDF</button></div>
-</body></html>');
+  w.document.write('<br><button onclick="window.print()" style="background:#1B2A6B;color:#fff;padding:10px 30px;border:none;border-radius:50px;cursor:pointer;"> Print / Save PDF</button></body></html>');
   w.document.close();
 };
 
