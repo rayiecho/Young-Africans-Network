@@ -1117,35 +1117,35 @@ window.loadSection = async function(section) {
     overview: loadOverview,
     analytics: loadAnalytics,
     programs_group: (c) => window.loadGroupSection(c, 'programs_group', [
-      {id:'programs', label:'Programs Manager', fn: loadProgramsAdmin},
-      {id:'applications', label:'Applications', fn: (...args) => window.loadProgramApplications(...args)},
-      {id:'mentors', label:'Mentors', fn: loadMentorApplications},
-      {id:'assignments', label:'Assignments', fn: loadAssignments},
-      {id:'certificates', label:'Certificates', fn: loadCertificates},
-      {id:'materials', label:'Training Materials', fn: loadMaterials},
+      {id:'programs', label:'Programs Manager'},
+      {id:'applications', label:'Applications'},
+      {id:'mentors', label:'Mentors'},
+      {id:'assignments', label:'Assignments'},
+      {id:'certificates', label:'Certificates'},
+      {id:'materials', label:'Training Materials'},
     ]),
     community_group: (c) => window.loadGroupSection(c, 'community_group', [
-      {id:'members', label:'Members', fn: loadMembers},
-      {id:'moderation', label:'Moderation', fn: loadModeration},
-      {id:'forms', label:'Form Submissions', fn: loadFormsAdmin},
-      {id:'notifications', label:'Notifications', fn: loadNotificationCenter},
-      {id:'hubs', label:'YAN Hubs', fn: loadHubsAdmin},
-      {id:'errors', label:'System Errors', fn: loadSystemErrors},
+      {id:'members', label:'Members'},
+      {id:'moderation', label:'Moderation'},
+      {id:'forms', label:'Form Submissions'},
+      {id:'notifications', label:'Notifications'},
+      {id:'hubs', label:'YAN Hubs'},
+      {id:'errors', label:'System Errors'},
     ]),
     content_group: (c) => window.loadGroupSection(c, 'content_group', [
-      {id:'gallery', label:'Gallery', fn: loadGallery},
-      {id:'events', label:'Events', fn: loadEvents},
-      {id:'stories', label:'Journey Stories', fn: loadStories},
-      {id:'newsletters', label:'Newsletters', fn: loadNewslettersAdmin},
-      {id:'opportunities', label:'Opportunities', fn: loadOpportunitiesManager},
+      {id:'gallery', label:'Gallery'},
+      {id:'events', label:'Events'},
+      {id:'stories', label:'Journey Stories'},
+      {id:'newsletters', label:'Newsletters'},
+      {id:'opportunities', label:'Opportunities'},
     ]),
     business_group: (c) => window.loadGroupSection(c, 'business_group', [
-      {id:'finance', label:'Finance', fn: loadFinance},
-      {id:'partnerships', label:'Partnerships', fn: loadPartnershipsAdmin},
-      {id:'recommendations', label:'Recommendations', fn: (...args) => window.loadRecommendations(...args)},
-      {id:'team', label:'Team', fn: loadTeam},
-      {id:'lab', label:'Entrepreneurs Lab', fn: loadLabListings},
-      {id:'redemptions', label:'Reward Redemptions', fn: loadRedemptions},
+      {id:'finance', label:'Finance'},
+      {id:'partnerships', label:'Partnerships'},
+      {id:'recommendations', label:'Recommendations'},
+      {id:'team', label:'Team'},
+      {id:'lab', label:'Entrepreneurs Lab'},
+      {id:'redemptions', label:'Reward Redemptions'},
     ]),
     // Keep individual sections accessible
     gallery: loadGallery, team: loadTeam, stories: loadStories, events: loadEvents,
@@ -4272,7 +4272,7 @@ window.switchGroupTab = async function(groupId, tabId) {
   const content = document.getElementById('group-content-' + groupId);
   if (!content) return;
   content.innerHTML = '<div class="loading">Loading...</div>';
-  try { await tab.fn(content); }
+  try { await window.loadSection(tabId, content); }
   catch(e) { content.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
 };
 // emailjs replaced
