@@ -402,11 +402,41 @@ footer{background:var(--navy);padding:4rem 2rem 2rem;}
       <span class="hero-tag">🌍 Pan-African Youth Network</span>
       <h1>Building the<br><span>Future, Together</span></h1>
       <p class="hero-sub">Empowering African youth through education, leadership, mentorship and access to global opportunities. Join a network of changemakers across Africa and beyond.</p>
-      <!-- LAUNCH COUNTDOWN -->
-      <div style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.3);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:inline-block;">
-        <p style="color:var(--gold);font-size:0.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:0.75rem;">🚀 Official Continental Launch</p>
-        <div style="display:flex;gap:1rem;" id="countdown">
-          <div style="text-align:center;"><div id="cd-days" style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.65rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1px;">Days</div></div>
+      <!-- DAILY PROVERB BANNER -->
+      <div style="position:relative;margin-bottom:1.5rem;display:inline-block;max-width:500px;">
+        <div id="proverb-banner" style="border-radius:16px;padding:1.25rem 1.5rem;background:rgba(0,0,0,0.3);position:relative;overflow:hidden;">
+          <div style="position:absolute;inset:0;border-radius:16px;padding:2px;background:linear-gradient(90deg,#E63329,#F5A623,#27AE60,#1B2A6B,#E63329);background-size:300% 100%;animation:glowBorder 3s linear infinite;-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;"></div>
+          <p id="proverb-text" style="color:#fff;font-family:'Playfair Display',serif;font-size:0.95rem;font-style:italic;line-height:1.7;margin-bottom:0.5rem;position:relative;z-index:1;"></p>
+          <p id="proverb-author" style="color:var(--gold);font-size:0.75rem;font-weight:700;position:relative;z-index:1;"></p>
+        </div>
+      </div>
+      <style>
+        @keyframes glowBorder {
+          0% { background-position: 0% 50%; }
+          100% { background-position: 300% 50%; }
+        }
+      </style>
+      <script>
+        const PROVERBS = [
+          {text: "When spider webs unite, they can tie up a lion.", author: "— Ethiopian Proverb"},
+          {text: "Until the lion learns to write, every story will glorify the hunter.", author: "— African Proverb"},
+          {text: "A child who is not embraced by the village will burn it down to feel its warmth.", author: "— African Proverb"},
+          {text: "If you want to go fast, go alone. If you want to go far, go together.", author: "— African Proverb"},
+          {text: "The earth is a beehive; we all enter by the same door.", author: "— Ugandan Proverb"},
+          {text: "Rain does not fall on one roof alone.", author: "— Cameroonian Proverb"},
+          {text: "A tree is straightened while it is young.", author: "— Kenyan Proverb"},
+          {text: "Knowledge is like a garden: if it is not cultivated, it cannot be harvested.", author: "— Guinean Proverb"},
+          {text: "He who learns, teaches.", author: "— Ethiopian Proverb"},
+          {text: "A person is a person because of other people.", author: "— Ubuntu Philosophy"},
+          {text: "The youth of today are the leaders of tomorrow.", author: "— Nelson Mandela"},
+          {text: "Education is the most powerful weapon you can use to change the world.", author: "— Nelson Mandela"},
+        ];
+        const day = Math.floor(Date.now() / (1000*60*60*24));
+        const p = PROVERBS[day % PROVERBS.length];
+        document.getElementById('proverb-text').textContent = '"' + p.text + '"';
+        document.getElementById('proverb-author').textContent = p.author;
+      </script>
+      <!-- END PROVERB BANNER -->
           <div style="color:rgba(255,255,255,0.3);font-size:2rem;font-weight:300;">:</div>
           <div style="text-align:center;"><div id="cd-hours" style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.65rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1px;">Hours</div></div>
           <div style="color:rgba(255,255,255,0.3);font-size:2rem;font-weight:300;">:</div>
