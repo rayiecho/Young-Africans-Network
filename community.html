@@ -3979,6 +3979,12 @@ async function loadHeadPanel() {
   const hasAccess = accessSnap.exists() && accessSnap.data().granted === true;
 
   if (!hasAccess) {
+    // Show pending state if already requested
+    const hasPending = accessSnap.exists() && accessSnap.data().granted === false;
+    if (hasPending) {
+      container.innerHTML = '<div style="max-width:500px;margin:4rem auto;text-align:center;"><div style="width:72px;height:72px;border-radius:50%;background:rgba(245,166,35,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;"><svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"var(--gold)\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"12\" y1=\"8\" x2=\"12\" y2=\"12\"/><line x1=\"12\" y1=\"16\" x2=\"12.01\" y2=\"16\"/></svg></div><h2 style=\"font-family:Playfair Display,serif;font-size:1.4rem;color:var(--navy);margin-bottom:0.75rem;\">Request Pending</h2><p style=\"color:var(--gray);font-size:0.85rem;line-height:1.7;\">Your access request is awaiting approval from YAN Admin. You will be notified once approved.</p></div>';
+      return;
+    }
     // Show agreement + password form
     container.innerHTML = `
       <div style="max-width:500px;margin:2rem auto;">
