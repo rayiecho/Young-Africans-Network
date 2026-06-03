@@ -12538,9 +12538,7 @@ window.sendYANGuide = async function() {
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 500,
-        messages: [{role: 'user', content: systemPrompt + '
-
-Question: ' + message}]
+        messages: [{role: 'user', content: systemPrompt + '\n\nQuestion: ' + message}]
       })
     });
     const data = await response.json();
