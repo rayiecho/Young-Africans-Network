@@ -1164,7 +1164,7 @@ window.loadApplications = async function(c) {
       html += '</div>';
       html += '<div style="display:flex;gap:0.5rem;">';
       html += '<button data-id="' + d.id + '" data-uid="' + (a.userId||'') + '" data-prog="' + (a.programId||'') + '" onclick="approveApplication(this.dataset.id,this.dataset.uid,this.dataset.prog)" style="background:var(--green);color:#fff;border:none;padding:0.35rem 0.85rem;border-radius:50px;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">Approve</button>';
-      html += '<button onclick="rejectApplication('' + d.id + '')" style="background:var(--red);color:#fff;border:none;padding:0.35rem 0.85rem;border-radius:50px;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">Reject</button>';
+      html += '<button data-id="' + d.id + '" onclick="rejectApplication(this.dataset.id)" style="background:var(--red);color:#fff;border:none;padding:0.35rem 0.85rem;border-radius:50px;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">Reject</button>';
       html += '</div></div></div>';
     });
     html += '</div>';
