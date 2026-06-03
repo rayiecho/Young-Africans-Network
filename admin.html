@@ -1216,6 +1216,12 @@ window.rejectApplication = async function(id) {
 };
 
 // Aliases for group tab functions
+window.loadNewsletters = function(c) { return window.loadNewslettersAdmin(c); };
+window.loadForms = function(c) { return window.loadFormsAdmin(c); };
+window.loadHubs = function(c) { return window.loadHubsAdmin(c); };
+window.loadPartnerships = function(c) { return window.loadPartnershipsAdmin(c); };
+window.loadLab = function(c) { return window.loadLabListings(c); };
+window.loadOpportunities = function(c) { return window.loadOpportunitiesManager(c); };
 window.loadProgramsadmin = function(c) { return window.loadProgramsAdmin(c); };
 window.loadErrors = async function(c) {
   c.innerHTML = '<div class="loading">Loading errors...</div>';
