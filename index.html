@@ -768,25 +768,6 @@ mobileMenu.querySelectorAll('.mobile-submenu a, .mobile-join').forEach(link => {
 });
 </script>
 <script>
-function updateCountdown() {
-  const launch = new Date('2026-06-01T00:00:00');
-  const now = new Date();
-  const diff = launch - now;
-  if (diff <= 0) {
-    document.getElementById('countdown').innerHTML = '<p style="color:var(--gold);font-weight:700;font-size:1rem;">🎉 YAN is LIVE!</p>';
-    return;
-  }
-  const days = Math.floor(diff / (1000*60*60*24));
-  const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-  const mins = Math.floor((diff % (1000*60*60)) / (1000*60));
-  const secs = Math.floor((diff % (1000*60)) / 1000);
-  document.getElementById('cd-days').textContent = String(days).padStart(2,'0');
-  document.getElementById('cd-hours').textContent = String(hours).padStart(2,'0');
-  document.getElementById('cd-mins').textContent = String(mins).padStart(2,'0');
-  document.getElementById('cd-secs').textContent = String(secs).padStart(2,'0');
-}
-updateCountdown();
-setInterval(updateCountdown, 1000);
 </script>
 
 <!-- YAN GUIDE FLOATING BUTTON -->
