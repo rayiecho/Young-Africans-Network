@@ -10716,9 +10716,9 @@ async function openCareerProgram(programId) {
     html += '<div style="background:var(--light);border-radius:12px;padding:1rem;opacity:0.6;display:flex;align-items:center;gap:0.75rem;"><div style="width:32px;height:32px;border-radius:50%;background:#ccc;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;">&#x1F512;</div><div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Capstone Module</p><p style="font-size:0.72rem;color:var(--gray);">Complete all modules to unlock</p></div></div>';
   }
   html += '</div>';
-}
   box.innerHTML = html;
   if (allCareerModulesDone) { setTimeout(function(){ loadCapstone(programId); }, 100); }
+}
 
 function toggleCareerModuleLessons(programId, week) {
   const box = document.getElementById('career-module-lessons-' + programId + '-' + week);
