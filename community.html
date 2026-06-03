@@ -7782,14 +7782,14 @@ async function loadCapstone(programId) {
       if (subData.adminFeedback) html += '<p style="font-size:0.78rem;color:#fff;margin-top:0.5rem;">Feedback: ' + sanitize(subData.adminFeedback) + '</p>';
       html += '</div>';
       // Show peer review if not done
-      html += '<button onclick="openPeerReview('' + programId + '')" style="width:100%;background:var(--gold);color:var(--navy);border:none;padding:0.75rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;margin-bottom:0.5rem;">👥 Review Peers' Projects</button>';
+      html += '<button onclick="openPeerReview(\\' + programId + \\')" style="width:100%;background:var(--gold);color:var(--navy);border:none;padding:0.75rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;margin-bottom:0.5rem;">👥 Review Peers Projects</button>';
     } else {
       // Submission form
       html += '<div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:1rem;">';
       html += '<p style="font-size:0.82rem;font-weight:700;color:#fff;margin-bottom:0.75rem;">📤 Submit Your Project</p>';
       html += '<input type="url" id="capstone-link-' + programId + '" placeholder="Link to your project (Google Drive, GitHub, etc.)" style="width:100%;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.65rem 0.85rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
       html += '<textarea id="capstone-notes-' + programId + '" placeholder="Brief description of your project (what you built, tools used, impact)..." rows="3" style="width:100%;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.65rem 0.85rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;resize:none;box-sizing:border-box;margin-bottom:0.75rem;"></textarea>';
-      html += '<button onclick="submitCapstone('' + programId + '')" style="width:100%;background:var(--gold);color:var(--navy);border:none;padding:0.75rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;">Submit Project →</button>';
+      html += '<button onclick="submitCapstone(\\' + programId + \\')" style="width:100%;background:var(--gold);color:var(--navy);border:none;padding:0.75rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;">Submit Project →</button>';
       html += '<p style="font-size:0.7rem;color:rgba(255,255,255,0.5);text-align:center;margin-top:0.5rem;">You can only submit once. Make it count!</p>';
       html += '</div>';
     }
