@@ -2468,7 +2468,7 @@ async function loadAnalytics(c) {
   const cached = localStorage.getItem(cacheKey);
   const lastTime = parseInt(localStorage.getItem(cacheTime)||'0');
   if (cached && Date.now() - lastTime < 10 * 60 * 1000) {
-    c.innerHTML = cached + '<p style="font-size:0.72rem;color:var(--gray);text-align:right;margin-top:0.5rem;">Cached · <button onclick="localStorage.removeItem('yan_analytics_cache');loadSection('analytics')" style="background:none;border:none;color:var(--navy);cursor:pointer;font-size:0.72rem;text-decoration:underline;">Refresh</button></p>';
+    c.innerHTML = cached + '<p style="font-size:0.72rem;color:var(--gray);text-align:right;margin-top:0.5rem;">Cached · <button onclick="localStorage.removeItem(&quot;yan_analytics_cache&quot;);loadSection(&quot;analytics&quot;)" style="background:none;border:none;color:var(--navy);cursor:pointer;font-size:0.72rem;text-decoration:underline;">Refresh</button></p>';
     setTimeout(() => {
       if (typeof Chart !== 'undefined') loadAnalyticsCharts(c._chartData);
     }, 300);
