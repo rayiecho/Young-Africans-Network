@@ -7790,6 +7790,16 @@ async function loadCapstone(programId) {
       html += '<input type="url" id="capstone-link-' + programId + '" placeholder="Link to your project (Google Drive, GitHub, etc.)" style="width:100%;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.65rem 0.85rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
       html += '<textarea id="capstone-notes-' + programId + '" placeholder="Brief description of your project (what you built, tools used, impact)..." rows="3" style="width:100%;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.65rem 0.85rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;resize:none;box-sizing:border-box;margin-bottom:0.75rem;"></textarea>';
       html += '<button data-prog="' + programId + '" onclick="submitCapstone(this.dataset.prog)" style="width:100%;background:var(--gold);color:var(--navy);border:none;padding:0.75rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;">Submit Project</button>';
+      // Program feedback form
+      html += '<div style="margin-top:1rem;background:rgba(255,255,255,0.1);border-radius:12px;padding:1rem;">';
+      html += '<p style="font-size:0.82rem;font-weight:700;color:var(--gold);margin-bottom:0.75rem;">📋 Program Feedback</p>';
+      html += '<p style="font-size:0.75rem;color:rgba(255,255,255,0.7);margin-bottom:0.5rem;">How would you rate this program?</p>';
+      html += '<div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">';
+      html += [1,2,3,4,5].map(n => '<button onclick="selectFeedbackRating(' + n + ',\'' + programId + '\')" id="fb-star-' + programId + '-' + n + '" style="width:36px;height:36px;border-radius:50%;border:2px solid var(--gold);background:rgba(255,255,255,0.1);font-size:1rem;cursor:pointer;color:#fff;">☆</button>').join('');
+      html += '</div>';
+      html += '<textarea id="fb-text-' + programId + '" placeholder="What did you learn? What could be improved? (Optional)" rows="3" style="width:100%;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.2);color:#fff;padding:0.65rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;resize:none;box-sizing:border-box;margin-bottom:0.5rem;"></textarea>';
+      html += '<button data-prog="' + programId + '" onclick="submitProgramFeedback(this.dataset.prog)" style="width:100%;background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:0.6rem;border-radius:10px;font-family:Poppins,sans-serif;font-weight:600;font-size:0.82rem;cursor:pointer;">Submit Feedback</button>';
+      html += '</div>';
       html += '<p style="font-size:0.7rem;color:rgba(255,255,255,0.5);text-align:center;margin-top:0.5rem;">You can only submit once. Make it count!</p>';
       html += '</div>';
     }
@@ -7817,10 +7827,124 @@ window.submitCapstone = async function(programId) {
 };
 
 window.openPeerReview = async function(programId) {
-  showToast('Peer review coming soon!');
+  // Check if member has submitted their own capstone first
+  const mySubSnap = await getDoc(doc(db, 'capstoneSubmissions', currentUser.uid + '_' + programId));
+  if (!mySubSnap.exists()) {
+    showToast('Submit your own project first before reviewing others!', 'error');
+    return;
+  }
+
+  // Get all submissions for this program (excluding own)
+  const allSubs = await getDocs(query(
+    collection(db, 'capstoneSubmissions'),
+    where('programId', '==', programId),
+    where('status', '==', 'pending')
+  ));
+
+  // Check how many reviews member has already done
+  const myReviews = await getDocs(query(
+    collection(db, 'capstoneReviews'),
+    where('reviewerId', '==', currentUser.uid),
+    where('programId', '==', programId)
+  ));
+  const reviewedIds = myReviews.docs.map(d => d.data().submissionId);
+
+  // Filter out own submission and already reviewed
+  const toReview = allSubs.docs.filter(d =>
+    d.data().userId !== currentUser.uid &&
+    !reviewedIds.includes(d.id)
+  );
+
+  if (toReview.length === 0) {
+    showToast(reviewedIds.length >= 2 ? 'You have completed your peer reviews!' : 'No projects to review yet. Check back later!');
+    return;
+  }
+
+  // Show peer review modal
+  const sub = toReview[0];
+  const subData = sub.data();
+  const remaining = 2 - reviewedIds.length;
+
+  const modal = document.createElement('div');
+  modal.id = 'peer-review-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:20px;padding:1.5rem;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:900;color:var(--navy);">Peer Review (${remaining} remaining)</h3>
+        <button onclick="document.getElementById('peer-review-modal').remove()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;">✕</button>
+      </div>
+      <div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+        <p style="font-size:0.78rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Project by: ${sanitize(subData.userName)}</p>
+        <p style="font-size:0.78rem;color:var(--gray);margin-bottom:0.5rem;">${sanitize(subData.description)}</p>
+        <a href="${sanitize(subData.projectLink)}" target="_blank" style="display:inline-block;background:var(--navy);color:#fff;padding:0.4rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:700;text-decoration:none;">View Project →</a>
+      </div>
+      <div style="margin-bottom:1rem;">
+        <p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Your Rating (1-5 stars):</p>
+        <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">
+          ${[1,2,3,4,5].map(n => `<button onclick="selectPeerRating(${n})" id="peer-star-${n}" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--gold);background:white;font-size:1.2rem;cursor:pointer;">☆</button>`).join('')}
+        </div>
+        <textarea id="peer-review-feedback" placeholder="Give constructive feedback on this project (minimum 50 words)..." rows="4" style="width:100%;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;resize:none;box-sizing:border-box;"></textarea>
+      </div>
+      <button onclick="submitPeerReview('${sub.id}','${programId}')" style="width:100%;background:var(--navy);color:#fff;border:none;padding:0.85rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;">Submit Review</button>
+    </div>`;
+  document.body.appendChild(modal);
+};
+
+window._peerRating = 0;
+window.selectPeerRating = function(n) {
+  window._peerRating = n;
+  for (let i = 1; i <= 5; i++) {
+    const btn = document.getElementById('peer-star-' + i);
+    if (btn) btn.textContent = i <= n ? '★' : '☆';
+  }
+};
+
+window.submitPeerReview = async function(submissionId, programId) {
+  const feedback = document.getElementById('peer-review-feedback')?.value.trim();
+  const rating = window._peerRating;
+  if (!rating) return showToast('Please give a star rating', 'error');
+  if (!feedback || feedback.split(' ').length < 10) return showToast('Please write more feedback (minimum 50 words)', 'error');
+  try {
+    await addDoc(collection(db, 'capstoneReviews'), {
+      submissionId, programId,
+      reviewerId: currentUser.uid, reviewerName: currentUserData.name,
+      rating, feedback, createdAt: serverTimestamp()
+    });
+    document.getElementById('peer-review-modal')?.remove();
+    showToast('Review submitted! Thank you for helping your peers. +5 Legacy Points!');
+    await awardPoints(currentUserData.uid, 'peer_review', 'Peer review submitted', 5);
+    // Check if 2 reviews done — notify
+    const myReviews = await getDocs(query(collection(db, 'capstoneReviews'), where('reviewerId','==',currentUser.uid), where('programId','==',programId)));
+    if (myReviews.size >= 2) {
+      showToast('🎉 You have completed both peer reviews! Your certificate is now under review.');
+    }
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
 };
 
 window.loadCapstone = loadCapstone;
+
+window._feedbackRatings = {};
+window.selectFeedbackRating = function(n, programId) {
+  window._feedbackRatings[programId] = n;
+  for (let i = 1; i <= 5; i++) {
+    const btn = document.getElementById('fb-star-' + programId + '-' + i);
+    if (btn) btn.textContent = i <= n ? '★' : '☆';
+  }
+};
+
+window.submitProgramFeedback = async function(programId) {
+  const rating = window._feedbackRatings[programId] || 0;
+  const text = document.getElementById('fb-text-' + programId)?.value.trim() || '';
+  if (!rating) return showToast('Please give a star rating', 'error');
+  try {
+    await setDoc(doc(db, 'programFeedback', currentUser.uid + '_' + programId), {
+      userId: currentUser.uid, userName: currentUserData.name,
+      programId, rating, feedback: text, createdAt: serverTimestamp()
+    });
+    showToast('Thank you for your feedback! 🙏');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
 
 
 async function loadDiscussion(programId, week) {

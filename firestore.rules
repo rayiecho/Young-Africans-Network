@@ -331,6 +331,16 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /capstoneReviews/{reviewId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+    }
+
+    match /programFeedback/{feedbackId} {
+      allow read: if isAdmin();
+      allow create: if isLoggedIn();
+    }
+
     match /capstoneSubmissions/{submissionId} {
       allow read: if isLoggedIn();
       allow create: if isLoggedIn();
