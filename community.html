@@ -4307,37 +4307,6 @@ window.sendHeadNewsletter = async function(dept) {
       <button class="btn-primary" onclick="saveQuiz('${dept}')">Save Quiz</button>
       <button class="btn-sm btn-red" style="margin-top:0.5rem;width:100%;" onclick="deleteQuiz('${dept}')">Delete Quiz</button>
     </div>
-    <div class="head-section"><h3> Engagement</h3><div id="head-engagement"></div></div>
-    <div class="head-section" style="margin-top:1.5rem;">
-      <h3> Notify Your Department</h3>
-      <div class="form-group"><label>Title *</label><input type="text" id="head-notif-title" placeholder="e.g. New assignment posted"></div>
-      <div class="form-group"><label>Message *</label><textarea id="head-notif-message" rows="3" placeholder="Write your announcement to department members..."></textarea></div>
-      <button class="btn-primary" onclick="sendDeptNotification('${dept}')">Send Notification</button>
-    </div>
-    <div class="head-section" style="margin-top:1.5rem;">
-      <h3>Schedule Department Meeting</h3>
-      <div class="form-group"><label>Session Title *</label><input type="text" id="head-mtg-title" placeholder="e.g. Weekly Training Session"></div>
-      <div class="form-group"><label>Topic</label><input type="text" id="head-mtg-topic" placeholder="e.g. CV Writing Workshop"></div>
-      <div class="form-group"><label>Date & Time *</label><input type="datetime-local" id="head-mtg-date"></div>
-      <div class="form-group"><label>Room</label>
-        <select id="head-mtg-room">
-          <option value="https://youngafricansnetwork.daily.co/YAN_GENERAL_FORUM">General Forum</option>
-          <option value="https://youngafricansnetwork.daily.co/YAN_TRAINING_FORUM">Training Forum</option>
-          <option value="https://youngafricansnetwork.daily.co/YAN_SCHOLARSHIP_REVISION">Scholarship Revision</option>
-          <option value="https://youngafricansnetwork.daily.co/YAN_CAREER_ROOM">Career Room</option>
-          <option value="https://youngafricansnetwork.daily.co/YAN_ANY_BUSINESS">Any Business</option>
-          <option value="https://youngafricansnetwork.daily.co/YAN_MENTAL_DISCUSSION">Mental Health</option>
-        </select>
-      </div>
-      <button class="btn-primary" onclick="scheduleHeadMeeting('${dept}')">Schedule & Notify Members</button>
-      <div id="head-meetings-list" style="margin-top:1rem;"></div>
-    </div>
-    <div class="head-section" style="margin-top:1.5rem;">
-      <h3> Department Members</h3>
-      <div id="head-members-list"><div class="loading">Loading...</div></div>
-    </div>`;
-  loadHeadHubPostForm(dept); loadHeadMaterials(dept); loadHeadEngagement(dept); loadHeadMembers(dept); loadHeadMeetings(dept);
-}
 
 function toggleMaterialFields() {
   const type = document.getElementById('head-mat-type').value;
