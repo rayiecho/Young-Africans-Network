@@ -4010,20 +4010,20 @@ async function loadHeadPanel() {
           <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;">${deptName}</h2>
         </div>
         <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
-          <button onclick="showHeadSection('overview')" class="head-nav-btn active" id="hn-overview">Overview</button>
-          <button onclick="showHeadSection('members')" class="head-nav-btn" id="hn-members">Members</button>
-          <button onclick="showHeadSection('posts')" class="head-nav-btn" id="hn-posts">Post & Moderate</button>
-          <button onclick="showHeadSection('newsletter')" class="head-nav-btn" id="hn-newsletter">Newsletter</button>
-          <button onclick="showHeadSection('meetings')" class="head-nav-btn" id="hn-meetings">Meetings</button>
-          <button onclick="showHeadSection('assignments')" class="head-nav-btn" id="hn-assignments">Assignments</button>
-          <button onclick="showHeadSection('notify')" class="head-nav-btn" id="hn-notify">Notify</button>
+          <button onclick="showHeadSection(\'overview\')" class="head-nav-btn active" id="hn-overview">Overview</button>
+          <button onclick="showHeadSection(\'members\')" class="head-nav-btn" id="hn-members">Members</button>
+          <button onclick="showHeadSection(\'posts\')" class="head-nav-btn" id="hn-posts">Post & Moderate</button>
+          <button onclick="showHeadSection(\'newsletter\')" class="head-nav-btn" id="hn-newsletter">Newsletter</button>
+          <button onclick="showHeadSection(\'meetings\')" class="head-nav-btn" id="hn-meetings">Meetings</button>
+          <button onclick="showHeadSection(\'assignments\')" class="head-nav-btn" id="hn-assignments">Assignments</button>
+          <button onclick="showHeadSection(\'notify\')" class="head-nav-btn" id="hn-notify">Notify</button>
         </div>
       </div>
       <div id="head-section-content"></div>
     </div>`;
 
   // Load overview by default
-  showHeadSection('overview');
+  showHeadSection(\'overview\');
 }
 
 window.submitHeadAgreement = async function() {
@@ -4075,9 +4075,9 @@ async function loadHeadOverview(c, dept) {
     html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
     html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Quick Actions</h3>';
     html += '<div style="display:flex;gap:0.75rem;flex-wrap:wrap;">';
-    html += '<button onclick="showHeadSection('posts')" style="background:var(--navy);color:#fff;border:none;padding:0.6rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">Post to Feed</button>';
-    html += '<button onclick="showHeadSection('notify')" style="background:var(--gold);color:var(--navy);border:none;padding:0.6rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">Notify Members</button>';
-    html += '<button onclick="showHeadSection('members')" style="background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);padding:0.6rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">View Members</button>';
+    html += '<button onclick="showHeadSection(\'posts\')" style="background:var(--navy);color:#fff;border:none;padding:0.6rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">Post to Feed</button>';
+    html += '<button onclick="showHeadSection(\'notify\')" style="background:var(--gold);color:var(--navy);border:none;padding:0.6rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">Notify Members</button>';
+    html += '<button onclick="showHeadSection(\'members\')" style="background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);padding:0.6rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">View Members</button>';
     html += '</div></div>';
     c.innerHTML = html;
   } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
@@ -4221,7 +4221,7 @@ window.headDeletePost = async function(postId) {
   if (!confirm('Delete this post?')) return;
   await deleteDoc(doc(db,'posts',postId));
   showToast('Post deleted');
-  showHeadSection('posts');
+  showHeadSection(\'posts\');
 };
 
 window.gradeAssignment = async function(assignId, userId) {
