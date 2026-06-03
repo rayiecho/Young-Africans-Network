@@ -1991,6 +1991,13 @@ async function loadMembers(c) {
             <span style="display:flex;gap:0.35rem;flex-wrap:wrap;">
               <button class="btn-sm-action" onclick="adminToggleRole('${d.id}','isDeptHead',${!u.isDeptHead})">${u.isDeptHead?'Remove Head':'Make Head'}</button>
               <button class="btn-sm-action" onclick="adminToggleRole('${d.id}','isAdmin',${!u.isAdmin})">${u.isAdmin?'Remove Admin':'Make Admin'}</button>
+              <select onchange="adminChangeRole('${d.id}',this.value)" class="btn-sm-action" style="cursor:pointer;">
+                <option value="">Set Role...</option>
+                <option value="Member" ${u.role==='Member'?'selected':''}>Member</option>
+                <option value="Volunteer" ${u.role==='Volunteer'?'selected':''}>Volunteer</option>
+                <option value="Associate" ${u.role==='Associate'?'selected':''}>Associate</option>
+                <option value="Executive" ${u.role==='Executive'?'selected':''}>Executive</option>
+              </select>
               <select onchange="adminChangeDept('${d.id}',this.value)" class="btn-sm-action" style="cursor:pointer;">
                 <option value="">Move Dept...</option>
                 <option value="programs" ${u.department==='programs'?'selected':''}> Programs</option>
@@ -1998,6 +2005,9 @@ async function loadMembers(c) {
                 <option value="career" ${u.department==='career'?'selected':''}> Career</option>
                 <option value="community" ${u.department==='community'?'selected':''}> Community</option>
                 <option value="mental" ${u.department==='mental'?'selected':''}> Mental Health</option>
+                <option value="communications" ${u.department==='communications'?'selected':''}> Communications</option>
+                <option value="finance" ${u.department==='finance'?'selected':''}> Finance</option>
+                <option value="partnerships" ${u.department==='partnerships'?'selected':''}> Partnerships</option>
               </select>
               ${u.status === 'deleted' ? `<button class="btn-success" onclick="adminRestoreMember('${d.id}')">Restore</button><button class="btn-delete" onclick="adminPermanentDelete('${d.id}')">Permanent Delete</button>` : `<button class="btn-delete" onclick="adminRemoveMember('${d.id}')">Remove</button>`}
             </span>
@@ -2006,6 +2016,13 @@ async function loadMembers(c) {
       </div>
     </div>`;
 }
+
+window.adminChangeRole = async function(userId, role) {
+  if (!role) return;
+  await updateDoc(doc(db, 'users', userId), {role});
+  showToast('Role updated to ' + role);
+  window.loadSection('members', document.getElementById('content-area'));
+};
 
 window.adminChangeDept = async function(userId, dept) {
   if (!dept) return;
