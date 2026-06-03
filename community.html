@@ -686,7 +686,7 @@ function loadTabContent(tab) {
   if (tab === 'polls') safeLoad(tab, loadPolls);
   if (tab === 'messages') safeLoad(tab, loadMessagesTab);
   if (tab === 'calendar') safeLoad(tab, loadCalendar);
-  if (tab === 'mentorship') safeLoad(tab, loadMentorshipTab);
+  if (tab === 'mentorship') safeLoad(tab, function(){ return (window.loadMentorshipTab||function(){})(); });
 }
 
 // MEMBER DIRECTORY
@@ -10963,7 +10963,7 @@ window.saveCertFromPopup = function(certEl, btn) {
   });
 };
 window.saveProfile=saveProfile; window.downloadIDCard=downloadIDCard; window.changeProfilePhoto=changeProfilePhoto; window.downloadCertificate=downloadCertificate;
-window.postMaterial=postMaterial; window.toggleMaterialFields=toggleMaterialFields; window.addQuizQuestion=addQuizQuestion;
+// old material functions removed
 window.renderQuizBuilder=renderQuizBuilder; window.saveQuiz=saveQuiz; window.deleteMaterial=deleteMaterial;
 
 window.approveCert=approveCert; window.rejectCert=rejectCert; window.deleteTeamMember=deleteTeamMember; window.addTeamMember=addTeamMember; window.toggleDeptField=toggleDeptField; window.previewTeamPhoto=previewTeamPhoto; window.deleteQuiz=deleteQuiz; window.viewMemberProgress=viewMemberProgress; window.issueCertificate=issueCertificate; window.sendBulkEmail=sendBulkEmail; window.sendNewsletter=sendNewsletter; window.deleteTeamMember=deleteTeamMember; 
