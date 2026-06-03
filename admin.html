@@ -1215,6 +1215,45 @@ window.rejectApplication = async function(id) {
   window.loadApplications(document.getElementById('group-content-programs_group'));
 };
 
+// Aliases for group tab functions
+window.loadProgramsadmin = function(c) { return window.loadProgramsAdmin(c); };
+window.loadErrors = async function(c) {
+  c.innerHTML = '<div class="loading">Loading errors...</div>';
+  try {
+    const snap = await getDocs(query(collection(db,'systemErrors'), orderBy('createdAt','desc'), limit(50))).catch(()=>({docs:[],size:0}));
+    if (!snap.docs.length) { c.innerHTML = '<div class="section-card" style="text-align:center;padding:2rem;"><p style="color:var(--green);">No system errors! 🎉</p></div>'; return; }
+    let html = '<div class="section-card"><h3 style="margin-bottom:1rem;">System Errors (' + snap.docs.length + ')</h3>';
+    snap.docs.forEach(d => {
+      const e = d.data();
+      html += '<div style="background:rgba(230,51,41,0.05);border-radius:10px;padding:0.75rem;margin-bottom:0.5rem;border-left:3px solid var(--red);">';
+      html += '<p style="font-size:0.82rem;font-weight:700;color:var(--red);">' + sanitize(e.type||e.message||'Error') + '</p>';
+      html += '<p style="font-size:0.75rem;color:var(--gray);">' + sanitize(e.userId||'') + ' · ' + (e.createdAt?new Date(e.createdAt.seconds*1000).toLocaleString():'') + '</p>';
+      if (e.details) html += '<p style="font-size:0.75rem;color:var(--navy);margin-top:0.25rem;">' + sanitize(String(e.details).substring(0,150)) + '</p>';
+      html += '</div>';
+    });
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+};
+window.loadNotifications = async function(c) {
+  c.innerHTML = '<div class="loading">Loading notifications...</div>';
+  try {
+    const snap = await getDocs(query(collection(db,'notifications'), orderBy('createdAt','desc'), limit(50)));
+    if (snap.empty) { c.innerHTML = '<div class="section-card" style="text-align:center;padding:2rem;"><p style="color:var(--gray);">No notifications sent yet.</p></div>'; return; }
+    let html = '<div class="section-card"><h3 style="margin-bottom:1rem;">Recent Notifications (' + snap.size + ')</h3>';
+    snap.docs.forEach(d => {
+      const n = d.data();
+      html += '<div style="padding:0.65rem 0;border-bottom:1px solid var(--light);">';
+      html += '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(n.title||'') + '</p>';
+      html += '<p style="font-size:0.75rem;color:var(--gray);">' + sanitize(n.postedBy||'') + ' · ' + (n.createdAt?new Date(n.createdAt.seconds*1000).toLocaleString():'') + '</p>';
+      html += '<p style="font-size:0.78rem;color:var(--navy);">' + sanitize((n.message||'').substring(0,100)) + '</p>';
+      html += '</div>';
+    });
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+};
+
 window.loadGroupSection = function(c, groupId, tabs) {
   const savedTab = localStorage.getItem('yan_admin_subtab_' + groupId) || tabs[0].id;
   const activeTab = tabs.find(t => t.id === savedTab) || tabs[0];
