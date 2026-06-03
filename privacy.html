@@ -3,50 +3,409 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Privacy Policy | Young Africans Network</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>Terms, Rules & Privacy Policy | Young Africans Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <style>
-body { font-family: Poppins, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; color: #1B2A6B; }
-h1 { color: #1B2A6B; } h2 { color: #1B2A6B; margin-top: 2rem; }
-p, li { line-height: 1.8; color: #444; }
-.header { text-align: center; padding: 2rem 0; border-bottom: 2px solid #f0f0f0; margin-bottom: 2rem; }
-a { color: #1B2A6B; }
+  :root { --navy:#1B2A6B; --red:#E63329; --gold:#F5A623; --green:#27AE60; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Poppins, sans-serif; background: #F8F9FF; color: #333; }
+  .hero { background: linear-gradient(135deg, var(--navy), #2D3F7B); color: #fff; padding: 4rem 2rem; text-align: center; }
+  .hero img { width: 80px; border-radius: 50%; margin-bottom: 1rem; border: 3px solid var(--gold); }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 900; margin-bottom: 0.5rem; }
+  .hero p { color: rgba(255,255,255,0.7); font-size: 0.9rem; }
+  .nav-tabs { display: flex; gap: 0; background: #fff; border-bottom: 2px solid #eee; position: sticky; top: 0; z-index: 100; overflow-x: auto; }
+  .nav-tab { padding: 1rem 1.5rem; font-size: 0.82rem; font-weight: 600; color: #666; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; text-decoration: none; }
+  .nav-tab.active, .nav-tab:hover { color: var(--navy); border-bottom-color: var(--navy); }
+  .container { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .section { display: none; }
+  .section.active { display: block; }
+  h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--navy); margin-bottom: 0.5rem; }
+  h3 { font-size: 1rem; font-weight: 700; color: var(--navy); margin: 1.5rem 0 0.5rem; }
+  p { line-height: 1.8; color: #444; margin-bottom: 0.75rem; font-size: 0.92rem; }
+  ul, ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+  li { line-height: 1.9; color: #444; font-size: 0.9rem; }
+  .card { background: #fff; border-radius: 16px; padding: 1.75rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 1.5rem; }
+  .badge { display: inline-block; padding: 0.2rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700; margin-right: 0.5rem; }
+  .badge-red { background: rgba(230,51,41,0.1); color: var(--red); }
+  .badge-green { background: rgba(39,174,96,0.1); color: var(--green); }
+  .badge-navy { background: rgba(27,42,107,0.1); color: var(--navy); }
+  .highlight { background: linear-gradient(135deg, var(--navy), #2D3F7B); color: #fff; border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+  .highlight h3 { color: var(--gold); }
+  .highlight p, .highlight li { color: rgba(255,255,255,0.85); }
+  .updated { font-size: 0.78rem; color: #999; margin-bottom: 2rem; }
+  .contact-box { background: rgba(27,42,107,0.05); border-radius: 12px; padding: 1.25rem; margin-top: 1.5rem; }
+  @media(max-width:600px) { .hero h1 { font-size: 1.5rem; } .nav-tab { padding: 0.75rem 1rem; font-size: 0.78rem; } }
 </style>
 </head>
 <body>
-<div class="header">
-<img src="images/logo.jpeg" alt="YAN Logo" style="width:80px;border-radius:50%;">
-<h1>Privacy Policy</h1>
-<p>Young Africans Network | Last updated: May 27, 2026</p>
+
+<div class="hero">
+  <img src="images/logo.jpeg" alt="YAN Logo" onerror="this.style.display='none'">
+  <h1>YAN Legal & Community Standards</h1>
+  <p>Terms of Use · Community Rules · Privacy Policy · Member Rights</p>
+  <p style="margin-top:0.5rem;font-size:0.8rem;">Young Africans Network | Est. April 2026, Kenya | Last updated: June 2026</p>
 </div>
-<h2>1. Introduction</h2>
-<p>Young Africans Network ("YAN", "we", "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and protect your personal information when you use our platform at youngafricansnetwork.org.</p>
-<h2>2. Information We Collect</h2>
-<ul>
-<li>Name, email address, and profile photo</li>
-<li>Country, department, and role within YAN</li>
-<li>Learning progress, quiz scores, and assignment submissions</li>
-<li>Community posts, comments, and interactions</li>
-</ul>
-<h2>3. How We Use Your Information</h2>
-<ul>
-<li>To provide and improve our community platform</li>
-<li>To track your learning progress and issue certificates</li>
-<li>To send important YAN announcements and newsletters</li>
-<li>To connect you with scholarship and career opportunities</li>
-</ul>
-<h2>4. Data Storage</h2>
-<p>Your data is stored securely using Google Firebase, located in the africa-south1 region. We do not sell your personal data to third parties.</p>
-<h2>5. Google Sign-In</h2>
-<p>We use Google Sign-In for authentication. When you sign in with Google, we receive your name, email, and profile photo. We do not receive your Google password.</p>
-<h2>6. Your Rights</h2>
-<ul>
-<li>Access your personal data at any time via your profile</li>
-<li>Request deletion of your account by contacting us</li>
-<li>Opt out of newsletters at any time</li>
-</ul>
-<h2>7. Contact Us</h2>
-<p>For privacy concerns, contact us at: <a href="mailto:info@youngafricansnetwork.org">info@youngafricansnetwork.org</a></p>
-<p style="text-align:center;margin-top:3rem;"><a href="index.html">← Back to Young Africans Network</a></p>
+
+<div class="nav-tabs">
+  <a class="nav-tab active" onclick="showSection('terms')">Terms of Use</a>
+  <a class="nav-tab" onclick="showSection('rules')">Community Rules</a>
+  <a class="nav-tab" onclick="showSection('privacy')">Privacy Policy</a>
+  <a class="nav-tab" onclick="showSection('rights')">Member Rights</a>
+  <a class="nav-tab" onclick="showSection('repercussions')">Repercussions</a>
+  <a class="nav-tab" onclick="showSection('contact')">Contact</a>
+</div>
+
+<div class="container">
+
+  <!-- TERMS OF USE -->
+  <div class="section active" id="section-terms">
+    <div class="card">
+      <h2>Terms of Use</h2>
+      <p class="updated">Effective date: June 1, 2026 | Applies to: youngafricansnetwork.org and all YAN platforms</p>
+
+      <div class="highlight">
+        <h3>Welcome to Young Africans Network</h3>
+        <p>By creating an account or using any YAN platform, you agree to these Terms of Use. Please read them carefully. These terms protect both you and YAN, and ensure our community remains safe, respectful and empowering for all African youth.</p>
+      </div>
+
+      <h3>1. About Young Africans Network</h3>
+      <p>Young Africans Network (YAN) is a pan-African, youth-led volunteer organization founded in Kenya in April 2026. YAN's mission is to empower African youth through education, leadership, mentorship and access to global opportunities. YAN operates as a volunteer-driven community platform available at youngafricansnetwork.org.</p>
+
+      <h3>2. Eligibility</h3>
+      <ul>
+        <li>You must be at least 16 years of age to create a YAN account.</li>
+        <li>You must provide accurate, truthful information during registration.</li>
+        <li>One account per person. Creating multiple accounts is prohibited.</li>
+        <li>You must be a genuine supporter of YAN's pan-African mission.</li>
+      </ul>
+
+      <h3>3. Account Responsibilities</h3>
+      <ul>
+        <li>You are responsible for all activity on your account.</li>
+        <li>Keep your login credentials secure and do not share them.</li>
+        <li>Notify YAN immediately if you suspect unauthorized access to your account.</li>
+        <li>You must not impersonate any YAN official, admin, department head or other member.</li>
+        <li>Profile photos must be real photos of yourself — no logos, cartoons or misleading images.</li>
+      </ul>
+
+      <h3>4. Platform Usage</h3>
+      <ul>
+        <li>YAN's platform is for educational, professional development and community purposes only.</li>
+        <li>Commercial use, advertising or solicitation without YAN approval is prohibited.</li>
+        <li>You may not use the platform to distribute malware, spam or harmful content.</li>
+        <li>Automated access, scraping or bots are strictly prohibited.</li>
+        <li>YAN reserves the right to modify, suspend or discontinue any feature at any time.</li>
+      </ul>
+
+      <h3>5. Programs and Certificates</h3>
+      <ul>
+        <li>YAN programs are provided free of charge to all registered members.</li>
+        <li>Certificates are issued based on genuine completion — academic dishonesty results in revocation.</li>
+        <li>Quiz and assignment submissions must represent your own original work.</li>
+        <li>Capstone projects must be your own work; plagiarism will result in permanent removal.</li>
+        <li>YAN certificates are community-issued and do not replace formal academic qualifications.</li>
+      </ul>
+
+      <h3>6. Intellectual Property</h3>
+      <ul>
+        <li>All YAN content, logos, program materials and platform design are owned by Young Africans Network.</li>
+        <li>You may not reproduce, distribute or commercialize YAN content without written permission.</li>
+        <li>Content you post on YAN remains yours, but you grant YAN a non-exclusive license to display it on the platform.</li>
+      </ul>
+
+      <h3>7. Termination</h3>
+      <p>YAN reserves the right to suspend or permanently remove any account that violates these terms, without prior notice. Removed members may appeal by emailing info@youngafricansnetwork.org within 14 days.</p>
+
+      <h3>8. Disclaimer</h3>
+      <p>YAN is a volunteer-run platform provided "as is." We make no guarantees regarding uptime, job placement, scholarship outcomes or certificate recognition by third parties. YAN is not liable for any losses arising from use of the platform.</p>
+
+      <h3>9. Changes to Terms</h3>
+      <p>YAN may update these terms at any time. Continued use of the platform after changes constitutes acceptance of the new terms. Major changes will be communicated via platform notifications.</p>
+    </div>
+  </div>
+
+  <!-- COMMUNITY RULES -->
+  <div class="section" id="section-rules">
+    <div class="card">
+      <h2>Community Rules</h2>
+      <p class="updated">These rules apply to all interactions on YAN — posts, messages, comments, meetings and any YAN-related spaces.</p>
+
+      <div class="highlight">
+        <h3>Our Community Values</h3>
+        <p>YAN is built on <strong>Pan-Africanism, Excellence, Collaboration, Integrity and Empowerment</strong>. Every member is expected to uphold these values in all interactions on and off the platform.</p>
+      </div>
+
+      <h3>✅ What We Encourage</h3>
+      <ul>
+        <li>Sharing knowledge, resources and opportunities generously with fellow members.</li>
+        <li>Constructive feedback that helps others grow.</li>
+        <li>Celebrating African achievements, cultures and languages.</li>
+        <li>Supporting members from all African nations equally.</li>
+        <li>Reporting content that violates community standards.</li>
+        <li>Participating actively in programs, discussions and community events.</li>
+        <li>Mentoring and being mentored with professionalism and commitment.</li>
+      </ul>
+
+      <h3>❌ What Is Prohibited</h3>
+      <ul>
+        <li><span class="badge badge-red">ZERO TOLERANCE</span> Hate speech, racism, tribalism, xenophobia or discrimination of any kind.</li>
+        <li><span class="badge badge-red">ZERO TOLERANCE</span> Sexual harassment, inappropriate messages or unsolicited explicit content.</li>
+        <li><span class="badge badge-red">ZERO TOLERANCE</span> Bullying, intimidation, threats or personal attacks against any member.</li>
+        <li><span class="badge badge-red">ZERO TOLERANCE</span> Sharing, promoting or facilitating scams, fraud or financial exploitation.</li>
+        <li><span class="badge badge-red">ZERO TOLERANCE</span> Sharing violent, graphic or disturbing content.</li>
+        <li>Spam — repeated identical posts, unsolicited promotions or irrelevant content.</li>
+        <li>Sharing false, misleading or unverified information as fact.</li>
+        <li>Political campaigning or partisan political content.</li>
+        <li>Sharing other members' personal information without consent (doxxing).</li>
+        <li>Impersonating YAN officials, admins or other members.</li>
+        <li>Excessive self-promotion unrelated to YAN's mission.</li>
+      </ul>
+
+      <h3>Content Standards</h3>
+      <ul>
+        <li>Posts must be in English or include an English translation.</li>
+        <li>Constructive criticism is welcome; personal attacks are not.</li>
+        <li>Business promotions must be approved by YAN Communications department.</li>
+        <li>News and information shared must include a credible source.</li>
+      </ul>
+
+      <h3>Mentorship Standards</h3>
+      <ul>
+        <li>Mentors must honor scheduled sessions — cancellations require 24 hours notice.</li>
+        <li>Mentorship relationships must remain professional at all times.</li>
+        <li>Mentors must not solicit payment from mentees for any YAN-related service.</li>
+        <li>Any inappropriate behavior during mentoring must be reported immediately.</li>
+      </ul>
+
+      <h3>Department Head Standards</h3>
+      <ul>
+        <li>Department heads must post at least twice per month in their hub.</li>
+        <li>Heads must respond to member queries within 48 hours.</li>
+        <li>Heads must schedule at least one department meeting per month.</li>
+        <li>Heads must never use their position for personal benefit or to discriminate against members.</li>
+        <li>Head access can be revoked by YAN administration for inactivity or misconduct.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PRIVACY POLICY -->
+  <div class="section" id="section-privacy">
+    <div class="card">
+      <h2>Privacy Policy</h2>
+      <p class="updated">Effective: June 1, 2026 | YAN takes your privacy seriously.</p>
+
+      <h3>1. Information We Collect</h3>
+      <p>When you register and use YAN, we collect:</p>
+      <ul>
+        <li><strong>Registration data:</strong> Name, email address, country, department, profile photo.</li>
+        <li><strong>Activity data:</strong> Posts, comments, quiz scores, assignment submissions, program progress.</li>
+        <li><strong>Points and achievements:</strong> Legacy Points earned, certificates issued, capstone submissions.</li>
+        <li><strong>Communication data:</strong> Messages sent through YAN's messaging system.</li>
+        <li><strong>Technical data:</strong> Browser type, device type, approximate location (country level).</li>
+      </ul>
+
+      <h3>2. How We Use Your Information</h3>
+      <ul>
+        <li>To provide and improve YAN's platform and services.</li>
+        <li>To track your learning progress and issue certificates.</li>
+        <li>To send you notifications about your account, programs and YAN news.</li>
+        <li>To display your profile and achievements to other YAN members.</li>
+        <li>To ensure platform safety through content moderation.</li>
+        <li>To send newsletters and department updates (you may unsubscribe at any time).</li>
+      </ul>
+
+      <h3>3. Information We Do NOT Collect</h3>
+      <ul>
+        <li>We do not collect payment card information (YAN is free).</li>
+        <li>We do not sell your data to third parties.</li>
+        <li>We do not collect precise GPS location data.</li>
+        <li>We do not access your device camera, microphone or contacts.</li>
+      </ul>
+
+      <h3>4. Data Storage and Security</h3>
+      <ul>
+        <li>Your data is stored securely on Google Firebase (Firestore), which is GDPR-compliant.</li>
+        <li>Data is stored on servers located in the United States (Google Cloud).</li>
+        <li>We use industry-standard encryption for data in transit and at rest.</li>
+        <li>Only YAN administrators have access to member data — and only for platform management purposes.</li>
+        <li>YAN uses Cloudflare for security and performance — Cloudflare may log anonymized traffic data.</li>
+      </ul>
+
+      <h3>5. Data Sharing</h3>
+      <p>YAN does not sell or rent your personal data. We may share data only in these limited circumstances:</p>
+      <ul>
+        <li>With Google Firebase/Firestore as our database provider.</li>
+        <li>With Cloudflare as our CDN and security provider.</li>
+        <li>With Anthropic's Claude AI for content moderation (post text only — no personal identifiers).</li>
+        <li>With law enforcement if required by applicable law.</li>
+      </ul>
+
+      <h3>6. Your Rights</h3>
+      <ul>
+        <li>You may request a copy of your personal data at any time.</li>
+        <li>You may request deletion of your account and data.</li>
+        <li>You may update your profile information at any time.</li>
+        <li>You may unsubscribe from YAN emails by contacting info@youngafricansnetwork.org.</li>
+      </ul>
+
+      <h3>7. Cookies</h3>
+      <p>YAN uses minimal cookies for authentication (keeping you logged in) and performance. We do not use advertising cookies or third-party tracking cookies.</p>
+
+      <h3>8. Children's Privacy</h3>
+      <p>YAN is not intended for children under 16. If we become aware that a child under 16 has registered, we will delete their account promptly.</p>
+
+      <h3>9. Contact for Privacy Issues</h3>
+      <p>For any privacy concerns, email: <a href="mailto:info@youngafricansnetwork.org">info@youngafricansnetwork.org</a></p>
+    </div>
+  </div>
+
+  <!-- MEMBER RIGHTS -->
+  <div class="section" id="section-rights">
+    <div class="card">
+      <h2>Member Rights</h2>
+      <p class="updated">YAN is committed to upholding the rights of every member.</p>
+
+      <div class="highlight">
+        <h3>Your Rights as a YAN Member</h3>
+        <p>Every YAN member, regardless of nationality, gender, religion, tribe or background, is entitled to the following rights.</p>
+      </div>
+
+      <h3>1. Right to Equal Access</h3>
+      <p>Every member has equal access to all YAN programs, resources, mentorship and opportunities regardless of their country, tribe, religion, gender or socioeconomic background. YAN does not discriminate.</p>
+
+      <h3>2. Right to Safe Community</h3>
+      <p>Every member has the right to participate in YAN without experiencing harassment, bullying, discrimination or any form of abuse. YAN takes all reports of misconduct seriously and acts promptly.</p>
+
+      <h3>3. Right to Quality Education</h3>
+      <p>Every member has the right to access YAN's full program library free of charge, receive fair grading of assignments, and earn certificates that genuinely reflect their achievement.</p>
+
+      <h3>4. Right to Privacy</h3>
+      <p>Every member has the right to privacy of their personal information. YAN will never share your personal data without your consent except as required by law.</p>
+
+      <h3>5. Right to Appeal</h3>
+      <p>Any member whose account is suspended or removed has the right to appeal the decision within 14 days by emailing info@youngafricansnetwork.org. Appeals are reviewed by YAN leadership within 7 days.</p>
+
+      <h3>6. Right to Feedback</h3>
+      <p>Every member has the right to provide feedback on programs, platform features and YAN leadership through the platform's feedback system or by emailing info@youngafricansnetwork.org.</p>
+
+      <h3>7. Right to Leave</h3>
+      <p>Any member may request deletion of their account and all associated data at any time by emailing info@youngafricansnetwork.org. Deletion is processed within 30 days.</p>
+
+      <h3>8. Right to Recognition</h3>
+      <p>Every member who completes programs, contributes to the community or serves in leadership deserves recognition. YAN's Legacy Points system and certificate program exist to celebrate your achievements.</p>
+    </div>
+  </div>
+
+  <!-- REPERCUSSIONS -->
+  <div class="section" id="section-repercussions">
+    <div class="card">
+      <h2>Repercussions & Enforcement</h2>
+      <p class="updated">YAN enforces community standards fairly and consistently.</p>
+
+      <div class="highlight">
+        <h3>Our Approach to Enforcement</h3>
+        <p>YAN believes in restorative justice — we aim to educate first and punish only when necessary. However, some violations are so serious that immediate action is required to protect our community.</p>
+      </div>
+
+      <h3>Violation Levels</h3>
+
+      <h3><span class="badge badge-navy">LEVEL 1 — Warning</span></h3>
+      <p>First-time minor violations (mild spam, off-topic posts, minor rule breaches):</p>
+      <ul>
+        <li>Private warning from department head or admin.</li>
+        <li>Post removed if applicable.</li>
+        <li>Record kept on file for 90 days.</li>
+      </ul>
+
+      <h3><span class="badge badge-gold" style="background:rgba(245,166,35,0.15);color:#b37800;">LEVEL 2 — Points Deduction + Suspension</span></h3>
+      <p>Repeat minor violations or moderate violations (repeated spam, misinformation, disrespect):</p>
+      <ul>
+        <li>Formal written warning.</li>
+        <li>Legacy Points deduction (50-200 points).</li>
+        <li>Temporary posting suspension (3-14 days).</li>
+        <li>Content removed.</li>
+      </ul>
+
+      <h3><span class="badge badge-red">LEVEL 3 — Temporary Ban</span></h3>
+      <p>Serious violations (harassment, bullying, significant misinformation, fraud attempts):</p>
+      <ul>
+        <li>Account suspended for 30-90 days.</li>
+        <li>All Legacy Points forfeited.</li>
+        <li>Certificates under review.</li>
+        <li>May be reported to relevant authorities.</li>
+      </ul>
+
+      <h3><span class="badge badge-red">LEVEL 4 — Permanent Removal</span></h3>
+      <p>Zero-tolerance violations (hate speech, sexual harassment, violence, fraud, impersonation of YAN officials, plagiarism of capstone projects):</p>
+      <ul>
+        <li>Immediate permanent ban — no appeal for most cases.</li>
+        <li>All certificates revoked.</li>
+        <li>Reported to relevant authorities where applicable.</li>
+        <li>IP address blocked from platform.</li>
+      </ul>
+
+      <h3>Head Panel Violations</h3>
+      <p>Department heads who violate their responsibilities face:</p>
+      <ul>
+        <li>Head access revoked immediately.</li>
+        <li>Returned to general member status.</li>
+        <li>May face additional sanctions depending on severity.</li>
+      </ul>
+
+      <h3>Reporting Violations</h3>
+      <p>To report a violation, use the platform's report feature or email <a href="mailto:info@youngafricansnetwork.org">info@youngafricansnetwork.org</a> with evidence. All reports are confidential. YAN commits to responding within 48 hours.</p>
+
+      <h3>Appeals Process</h3>
+      <ol>
+        <li>Submit appeal to info@youngafricansnetwork.org within 14 days of action.</li>
+        <li>Include your full name, the action taken and your explanation.</li>
+        <li>YAN leadership reviews within 7 days.</li>
+        <li>Decision is final for Level 4 violations unless new evidence is presented.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="section" id="section-contact">
+    <div class="card">
+      <h2>Contact YAN</h2>
+      <p>For any questions about these terms, privacy or community standards, please contact us:</p>
+
+      <div class="contact-box">
+        <h3 style="margin-top:0;">General Inquiries</h3>
+        <p>📧 <a href="mailto:info@youngafricansnetwork.org">info@youngafricansnetwork.org</a></p>
+        <p>🌐 <a href="https://youngafricansnetwork.org">youngafricansnetwork.org</a></p>
+      </div>
+
+      <div class="contact-box" style="margin-top:1rem;">
+        <h3 style="margin-top:0;">Technical Support</h3>
+        <p>📧 <a href="mailto:tech@youngafricansnetwork.org">tech@youngafricansnetwork.org</a></p>
+      </div>
+
+      <div class="contact-box" style="margin-top:1rem;">
+        <h3 style="margin-top:0;">Partnerships & Media</h3>
+        <p>📧 <a href="mailto:marketing@youngafricansnetwork.org">marketing@youngafricansnetwork.org</a></p>
+      </div>
+
+      <div class="contact-box" style="margin-top:1rem;">
+        <h3 style="margin-top:0;">Report Abuse</h3>
+        <p>📧 <a href="mailto:info@youngafricansnetwork.org">info@youngafricansnetwork.org</a></p>
+        <p style="font-size:0.82rem;color:#666;">All reports are confidential. We respond within 48 hours.</p>
+      </div>
+
+      <p style="margin-top:2rem;font-size:0.82rem;color:#999;text-align:center;">Young Africans Network | Est. April 2026, Nairobi, Kenya<br>Building the Future, Together 🌍</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
 </body>
 </html>
