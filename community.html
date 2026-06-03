@@ -4033,6 +4033,7 @@ async function loadHeadPanel() {
           <button onclick="showHeadSection(\'meetings\')" class="head-nav-btn" id="hn-meetings">Meetings</button>
           <button onclick="showHeadSection(\'assignments\')" class="head-nav-btn" id="hn-assignments">Assignments</button>
           <button onclick="showHeadSection(\'notify\')" class="head-nav-btn" id="hn-notify">Notify</button>
+          <button onclick="showHeadSection(\'depttools\')" class="head-nav-btn" id="hn-depttools">Dept Tools</button>
         </div>
       </div>
       <div id="head-section-content"></div>
@@ -4073,7 +4074,305 @@ window.showHeadSection = function(section) {
     case 'meetings': loadHeadMeetings(content, dept); break;
     case 'assignments': loadHeadAssignments(content, dept); break;
     case 'notify': loadHeadNotify(content, dept); break;
+    case 'depttools': loadDeptTools(content, dept); break;
   }
+};
+
+async function loadDeptTools(c, dept) {
+  c.innerHTML = '<div class="loading">Loading department tools...</div>';
+  switch(dept) {
+    case 'programs': loadDeptPrograms(c); break;
+    case 'scholarships': loadDeptScholarships(c); break;
+    case 'career': loadDeptCareer(c); break;
+    case 'community': loadDeptCommunity(c); break;
+    case 'mental': loadDeptMental(c); break;
+    case 'communications': loadDeptCommunications(c); break;
+    case 'finance': loadDeptFinance(c); break;
+    case 'partnerships': loadDeptPartnerships(c); break;
+    default: c.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">No specific tools for this department yet.</div>';
+  }
+}
+
+// PROGRAMS & TRAINING DEPT TOOLS
+async function loadDeptPrograms(c) {
+  try {
+    const [progSnap, assignSnap] = await Promise.all([
+      getDocs(collection(db, 'trainingPrograms')),
+      getDocs(query(collection(db, 'programAssignments'), orderBy('submittedAt', 'desc'), limit(20)))
+    ]);
+    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><div style="font-size:2rem;font-weight:900;color:var(--navy);font-family:Playfair Display,serif;">' + progSnap.size + '</div><div style="font-size:0.75rem;color:var(--gray);">Training Programs</div></div>';
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><div style="font-size:2rem;font-weight:900;color:var(--gold);font-family:Playfair Display,serif;">' + assignSnap.size + '</div><div style="font-size:0.75rem;color:var(--gray);">Assignments Pending</div></div>';
+    html += '</div>';
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:1rem;">';
+    html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Training Programs</h3>';
+    progSnap.docs.forEach(d => {
+      const p = d.data();
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.65rem 0;border-bottom:1px solid var(--light);">';
+      html += '<div><p style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + sanitize(p.title||'') + '</p>';
+      html += '<p style="font-size:0.72rem;color:var(--gray);">' + sanitize(p.category||'') + ' · ' + (p.enrolledBy?.length||0) + ' enrolled</p></div>';
+      html += '<span style="font-size:0.72rem;font-weight:700;color:' + (p.enrollmentOpen?'#27AE60':'var(--red)') + ';">' + (p.enrollmentOpen?'Open':'Closed') + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
+    html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Recent Assignment Submissions</h3>';
+    if (assignSnap.empty) {
+      html += '<p style="color:var(--gray);font-size:0.85rem;">No submissions yet.</p>';
+    } else {
+      assignSnap.docs.forEach(d => {
+        const a = d.data();
+        html += '<div style="padding:0.65rem 0;border-bottom:1px solid var(--light);">';
+        html += '<p style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + sanitize(a.userName||'') + '</p>';
+        html += '<p style="font-size:0.72rem;color:var(--gray);">' + sanitize(a.programId||'') + ' · ' + (a.submittedAt ? new Date(a.submittedAt.seconds*1000).toLocaleDateString() : '') + '</p>';
+        html += '</div>';
+      });
+    }
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+}
+
+// SCHOLARSHIPS DEPT TOOLS
+async function loadDeptScholarships(c) {
+  try {
+    const snap = await getDocs(query(collection(db, 'scholarships'), orderBy('postedAt', 'desc'), limit(20))).catch(()=>({docs:[],size:0}));
+    const appSnap = await getDocs(query(collection(db, 'applications'), limit(20))).catch(()=>({docs:[],size:0}));
+    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><div style="font-size:2rem;font-weight:900;color:var(--navy);font-family:Playfair Display,serif;">' + snap.size + '</div><div style="font-size:0.75rem;color:var(--gray);">Scholarships Posted</div></div>';
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><div style="font-size:2rem;font-weight:900;color:var(--gold);font-family:Playfair Display,serif;">' + appSnap.size + '</div><div style="font-size:0.75rem;color:var(--gray);">Applications</div></div>';
+    html += '</div>';
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:1rem;">';
+    html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Post New Scholarship</h3>';
+    html += '<input type="text" id="sch-title" placeholder="Scholarship name" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<input type="text" id="sch-org" placeholder="Organization" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<input type="text" id="sch-deadline" placeholder="Deadline (e.g. 30 June 2026)" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<input type="url" id="sch-link" placeholder="Application link" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<textarea id="sch-desc" rows="3" placeholder="Description..." style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;resize:none;box-sizing:border-box;margin-bottom:0.75rem;"></textarea>';
+    html += '<button onclick="headPostScholarship()" style="background:var(--navy);color:#fff;border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Post Scholarship</button>';
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+}
+
+// CAREER DEPT TOOLS
+async function loadDeptCareer(c) {
+  try {
+    const [progSnap, oppSnap] = await Promise.all([
+      getDocs(collection(db, 'careerPrograms')),
+      getDocs(query(collection(db, 'opportunities'), limit(10))).catch(()=>({docs:[],size:0}))
+    ]);
+    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><div style="font-size:2rem;font-weight:900;color:var(--navy);font-family:Playfair Display,serif;">' + progSnap.size + '</div><div style="font-size:0.75rem;color:var(--gray);">Career Programs</div></div>';
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><div style="font-size:2rem;font-weight:900;color:var(--gold);font-family:Playfair Display,serif;">' + oppSnap.size + '</div><div style="font-size:0.75rem;color:var(--gray);">Opportunities</div></div>';
+    html += '</div>';
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:1rem;">';
+    html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Post Job/Internship Opportunity</h3>';
+    html += '<input type="text" id="opp-title" placeholder="Job/Internship title" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<input type="text" id="opp-org" placeholder="Organization/Company" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<input type="text" id="opp-location" placeholder="Location (e.g. Nairobi, Kenya or Remote)" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<input type="url" id="opp-link" placeholder="Application link" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<textarea id="opp-desc" rows="3" placeholder="Job description..." style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;resize:none;box-sizing:border-box;margin-bottom:0.75rem;"></textarea>';
+    html += '<button onclick="headPostOpportunity()" style="background:var(--navy);color:#fff;border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Post Opportunity</button>';
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+}
+
+// COMMUNITY IMPACT DEPT TOOLS
+async function loadDeptCommunity(c) {
+  try {
+    const tasksSnap = await getDocs(query(collection(db, 'communityTasks'), limit(10))).catch(()=>({docs:[],size:0}));
+    let html = '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:1rem;">';
+    html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Create Volunteer Task</h3>';
+    html += '<input type="text" id="task-title" placeholder="Task title (e.g. Beach Clean-up)" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<input type="text" id="task-location" placeholder="Location" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<input type="datetime-local" id="task-date" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<input type="number" id="task-volunteers" placeholder="Volunteers needed" min="1" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<textarea id="task-desc" rows="3" placeholder="Task description..." style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;resize:none;box-sizing:border-box;margin-bottom:0.75rem;"></textarea>';
+    html += '<button onclick="headPostTask()" style="background:var(--navy);color:#fff;border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Create Task</button>';
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+}
+
+// MENTAL HEALTH DEPT TOOLS
+async function loadDeptMental(c) {
+  let html = '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:1rem;">';
+  html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Post Mental Health Resource</h3>';
+  html += '<input type="text" id="mh-title" placeholder="Resource title" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+  html += '<select id="mh-type" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;"><option value="article">Article</option><option value="video">Video</option><option value="hotline">Hotline</option><option value="exercise">Exercise</option></select>';
+  html += '<input type="url" id="mh-link" placeholder="Link (optional)" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+  html += '<textarea id="mh-desc" rows="3" placeholder="Description..." style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;resize:none;box-sizing:border-box;margin-bottom:0.75rem;"></textarea>';
+  html += '<button onclick="headPostMentalResource()" style="background:var(--navy);color:#fff;border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Post Resource</button>';
+  html += '</div>';
+  html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
+  html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Schedule Peer Support Session</h3>';
+  html += '<input type="text" id="ps-title" placeholder="Session title (e.g. Stress Management Workshop)" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+  html += '<input type="datetime-local" id="ps-date" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+  html += '<input type="url" id="ps-link" placeholder="Meeting link" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.75rem;">';
+  html += '<button onclick="headSchedulePeerSession()" style="background:var(--navy);color:#fff;border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Schedule Session</button>';
+  html += '</div>';
+  c.innerHTML = html;
+}
+
+// COMMUNICATIONS DEPT TOOLS
+async function loadDeptCommunications(c) {
+  let html = '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:1rem;">';
+  html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Content Calendar</h3>';
+  html += '<input type="text" id="cc-title" placeholder="Content title" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+  html += '<select id="cc-platform" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;"><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="twitter">Twitter/X</option><option value="tiktok">TikTok</option><option value="linkedin">LinkedIn</option><option value="newsletter">Newsletter</option></select>';
+  html += '<input type="date" id="cc-date" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+  html += '<textarea id="cc-content" rows="3" placeholder="Content draft..." style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;resize:none;box-sizing:border-box;margin-bottom:0.75rem;"></textarea>';
+  html += '<button onclick="headAddContentCalendar()" style="background:var(--navy);color:#fff;border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Add to Calendar</button>';
+  html += '</div>';
+  c.innerHTML = html;
+}
+
+// FINANCE DEPT TOOLS
+async function loadDeptFinance(c) {
+  try {
+    const expSnap = await getDocs(query(collection(db, 'expenses'), orderBy('date','desc'), limit(20))).catch(()=>({docs:[],size:0}));
+    let total = 0;
+    expSnap.docs.forEach(d => { total += d.data().amount || 0; });
+    let html = '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:1rem;">';
+    html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:0.5rem;">Budget Tracker</h3>';
+    html += '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:1rem;">Total recorded expenses: <strong>KES ' + total.toLocaleString() + '</strong></p>';
+    html += '<input type="text" id="exp-title" placeholder="Expense description" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<input type="number" id="exp-amount" placeholder="Amount (KES)" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<input type="date" id="exp-date" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<select id="exp-cat" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.75rem;"><option value="operations">Operations</option><option value="events">Events</option><option value="marketing">Marketing</option><option value="training">Training</option><option value="other">Other</option></select>';
+    html += '<button onclick="headRecordExpense()" style="background:var(--navy);color:#fff;border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Record Expense</button>';
+    html += '</div>';
+    if (expSnap.docs.length > 0) {
+      html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
+      html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Recent Expenses</h3>';
+      expSnap.docs.forEach(d => {
+        const e = d.data();
+        html += '<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--light);"><span style="font-size:0.82rem;color:var(--navy);">' + sanitize(e.title||'') + '</span><span style="font-size:0.82rem;font-weight:700;color:var(--red);">KES ' + (e.amount||0).toLocaleString() + '</span></div>';
+      });
+      html += '</div>';
+    }
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+}
+
+// PARTNERSHIPS DEPT TOOLS
+async function loadDeptPartnerships(c) {
+  try {
+    const partSnap = await getDocs(query(collection(db, 'partnerships'), limit(20))).catch(()=>({docs:[],size:0}));
+    let html = '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:1rem;">';
+    html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Add New Partner</h3>';
+    html += '<input type="text" id="part-name" placeholder="Organization name" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<input type="text" id="part-country" placeholder="Country" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+    html += '<select id="part-type" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;"><option value="ngo">NGO</option><option value="corporate">Corporate</option><option value="government">Government</option><option value="university">University</option><option value="media">Media</option></select>';
+    html += '<select id="part-status" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;"><option value="prospect">Prospect</option><option value="active">Active</option><option value="mou_signed">MOU Signed</option></select>';
+    html += '<textarea id="part-notes" rows="2" placeholder="Notes..." style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;resize:none;box-sizing:border-box;margin-bottom:0.75rem;"></textarea>';
+    html += '<button onclick="headAddPartner()" style="background:var(--navy);color:#fff;border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Add Partner</button>';
+    html += '</div>';
+    if (partSnap.docs.length > 0) {
+      html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
+      html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Partners (' + partSnap.docs.length + ')</h3>';
+      partSnap.docs.forEach(d => {
+        const p = d.data();
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid var(--light);">';
+        html += '<div><p style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + sanitize(p.name||'') + '</p><p style="font-size:0.72rem;color:var(--gray);">' + sanitize(p.country||'') + ' · ' + sanitize(p.type||'') + '</p></div>';
+        html += '<span style="font-size:0.72rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:50px;background:rgba(27,42,107,0.08);color:var(--navy);">' + sanitize(p.status||'') + '</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+}
+
+// ACTION FUNCTIONS
+window.headPostScholarship = async function() {
+  const title = document.getElementById('sch-title')?.value.trim();
+  const org = document.getElementById('sch-org')?.value.trim();
+  const deadline = document.getElementById('sch-deadline')?.value.trim();
+  const link = document.getElementById('sch-link')?.value.trim();
+  const desc = document.getElementById('sch-desc')?.value.trim();
+  if (!title || !org) return showToast('Title and organization required', 'error');
+  await addDoc(collection(db, 'scholarships'), {title, organization:org, deadline, applicationLink:link, description:desc, postedBy:currentUserData.name, postedAt:serverTimestamp(), active:true});
+  showToast('Scholarship posted!');
+  loadDeptScholarships(document.getElementById('head-section-content'));
+};
+
+window.headPostOpportunity = async function() {
+  const title = document.getElementById('opp-title')?.value.trim();
+  const org = document.getElementById('opp-org')?.value.trim();
+  const location = document.getElementById('opp-location')?.value.trim();
+  const link = document.getElementById('opp-link')?.value.trim();
+  const desc = document.getElementById('opp-desc')?.value.trim();
+  if (!title || !org) return showToast('Title and organization required', 'error');
+  await addDoc(collection(db, 'opportunities'), {title, organization:org, location, applicationLink:link, description:desc, postedBy:currentUserData.name, postedAt:serverTimestamp(), active:true});
+  showToast('Opportunity posted!');
+  loadDeptCareer(document.getElementById('head-section-content'));
+};
+
+window.headPostTask = async function() {
+  const title = document.getElementById('task-title')?.value.trim();
+  const location = document.getElementById('task-location')?.value.trim();
+  const date = document.getElementById('task-date')?.value;
+  const volunteers = parseInt(document.getElementById('task-volunteers')?.value)||0;
+  const desc = document.getElementById('task-desc')?.value.trim();
+  if (!title) return showToast('Task title required', 'error');
+  await addDoc(collection(db, 'communityTasks'), {title, location, date:date?new Date(date):null, volunteersNeeded:volunteers, description:desc, postedBy:currentUserData.name, createdAt:serverTimestamp(), volunteers:[]});
+  showToast('Volunteer task created!');
+  loadDeptCommunity(document.getElementById('head-section-content'));
+};
+
+window.headPostMentalResource = async function() {
+  const title = document.getElementById('mh-title')?.value.trim();
+  const type = document.getElementById('mh-type')?.value;
+  const link = document.getElementById('mh-link')?.value.trim();
+  const desc = document.getElementById('mh-desc')?.value.trim();
+  if (!title) return showToast('Title required', 'error');
+  await addDoc(collection(db, 'mentalResources'), {title, type, link, description:desc, postedBy:currentUserData.name, createdAt:serverTimestamp()});
+  showToast('Resource posted!');
+};
+
+window.headSchedulePeerSession = async function() {
+  const title = document.getElementById('ps-title')?.value.trim();
+  const date = document.getElementById('ps-date')?.value;
+  const link = document.getElementById('ps-link')?.value.trim();
+  if (!title || !date) return showToast('Title and date required', 'error');
+  await addDoc(collection(db, 'peerSessions'), {title, date:new Date(date), meetingLink:link, department:'mental', createdBy:currentUserData.name, createdAt:serverTimestamp()});
+  showToast('Peer support session scheduled!');
+};
+
+window.headAddContentCalendar = async function() {
+  const title = document.getElementById('cc-title')?.value.trim();
+  const platform = document.getElementById('cc-platform')?.value;
+  const date = document.getElementById('cc-date')?.value;
+  const content = document.getElementById('cc-content')?.value.trim();
+  if (!title) return showToast('Title required', 'error');
+  await addDoc(collection(db, 'contentCalendar'), {title, platform, date:date?new Date(date):null, content, createdBy:currentUserData.name, createdAt:serverTimestamp(), status:'draft'});
+  showToast('Added to content calendar!');
+};
+
+window.headRecordExpense = async function() {
+  const title = document.getElementById('exp-title')?.value.trim();
+  const amount = parseFloat(document.getElementById('exp-amount')?.value)||0;
+  const date = document.getElementById('exp-date')?.value;
+  const category = document.getElementById('exp-cat')?.value;
+  if (!title || !amount) return showToast('Description and amount required', 'error');
+  await addDoc(collection(db, 'expenses'), {title, amount, date:date?new Date(date):new Date(), category, recordedBy:currentUserData.name, createdAt:serverTimestamp()});
+  showToast('Expense recorded!');
+  loadDeptFinance(document.getElementById('head-section-content'));
+};
+
+window.headAddPartner = async function() {
+  const name = document.getElementById('part-name')?.value.trim();
+  const country = document.getElementById('part-country')?.value.trim();
+  const type = document.getElementById('part-type')?.value;
+  const status = document.getElementById('part-status')?.value;
+  const notes = document.getElementById('part-notes')?.value.trim();
+  if (!name) return showToast('Organization name required', 'error');
+  await addDoc(collection(db, 'partnerships'), {name, country, type, status, notes, addedBy:currentUserData.name, createdAt:serverTimestamp()});
+  showToast('Partner added!');
+  loadDeptPartnerships(document.getElementById('head-section-content'));
 };
 
 async function loadHeadOverview(c, dept) {
