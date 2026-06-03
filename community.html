@@ -25,6 +25,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <title>YAN Community Platform | Young Africans Network</title>
 
+<script>
+// WHITE SCREEN PREVENTION
+window.onerror = function(msg, src, line, col, err) {
+  console.error('YAN Error:', msg, src, line);
+  const body = document.body;
+  if (body && body.innerHTML.trim().length < 100) {
+    body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:Poppins,sans-serif;background:#f8f9ff;padding:2rem;text-align:center;">' +
+      '<img src="images/logo.png" style="width:80px;margin-bottom:1.5rem;" onerror="this.style.display='none'">' +
+      '<h2 style="color:#1B2A6B;font-size:1.3rem;margin-bottom:0.5rem;">YAN is loading...</h2>' +
+      '<p style="color:#6B7280;font-size:0.85rem;margin-bottom:1.5rem;">If this takes too long, please refresh the page.</p>' +
+      '<button onclick="location.reload()" style="background:#1B2A6B;color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Refresh Page</button>' +
+      '</div>';
+  }
+  return false;
+};
+</script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut, onAuthStateChanged, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
