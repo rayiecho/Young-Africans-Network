@@ -7974,21 +7974,14 @@ async function submitLessonAssignment(programId, lessonId, colName) {
 
   // Skipping AI grading — admin grades manually
   let aiScore = 0;
-  let aiFeedback = '';
-  let aiStrengths = '';
-  let aiWeaknesses = '';
+  let aiFeedback = "Assignment received. Admin will review and grade it shortly.";
+  let aiStrengths = "";
+  let aiWeaknesses = "";
 
   try {
     const lessonSnap = await getDoc(doc(db, colName, programId, 'lessons', lessonId));
     const lessonData = lessonSnap.exists() ? lessonSnap.data() : {};
-    const assignmentInstructions = lessonData.assignment || '';
-    // Admin grades assignments — no AI needed
-    let aiScore = 0;
-    let aiFeedback = "Assignment received. Admin will review and grade it shortly.";
-    let aiStrengths = "";
-    let aiWeaknesses = "";
-    aiScore = 0;
-    aiFeedback = 'Assignment received. Your facilitator will review it shortly.';
+  } catch(e) { console.warn('lesson fetch', e); }
 
   // Save to programAssignments
   const assignDoc = await addDoc(collection(db, 'programAssignments'), {
