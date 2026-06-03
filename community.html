@@ -3974,6 +3974,23 @@ async function loadHeadPanel() {
   const container = document.getElementById('head-container');
   if (!container) return;
 
+  // ADMIN BYPASS — admins select any department
+  if (currentUserData.isAdmin) {
+    const selectedDept = window._adminHeadDept || null;
+    if (!selectedDept) {
+      container.innerHTML = '<div style="max-width:500px;margin:2rem auto;">' +
+        '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">Admin — Select Department</h2>' +
+        '<p style="color:var(--gray);font-size:0.85rem;margin-bottom:1.5rem;">As an admin you have access to all departments. Select one to manage:</p>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">' +
+        DEPARTMENTS.map(d => '<button onclick="window._adminHeadDept='' + d.id + '';loadHeadPanel()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;padding:1rem;text-align:left;cursor:pointer;font-family:Poppins,sans-serif;"><p style=\"font-size:0.85rem;font-weight:700;color:var(--navy);\">' + d.name + '</p></button>').join('') +
+        '</div></div>';
+      return;
+    }
+    // Admin selected a dept — load head panel for that dept
+    currentUserData._activeDept = selectedDept;
+  }
+
+
   // Check if head access is granted
   const accessSnap = await getDoc(doc(db, 'headAccess', currentUser.uid));
   const hasAccess = accessSnap.exists() && accessSnap.data().granted === true;
