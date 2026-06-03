@@ -4918,6 +4918,9 @@ async function initReferralCode() {
 
 async function loadReferralSection() {
   await initReferralCode();
+  // Fetch fresh user data for accurate referral count
+  const freshSnap = await getDoc(doc(db, 'users', currentUser.uid));
+  if (freshSnap.exists()) { currentUserData = {...currentUserData, ...freshSnap.data()}; }
   const code = currentUserData.referralCode || '';
   const count = currentUserData.referralCount || 0;
   const referralUrl = 'https://youngafricansnetwork.org/community.html?ref=' + code;
