@@ -12432,5 +12432,20 @@ async function awardPoints(userId, action, description, points) {
 }
 window.awardPoints = awardPoints;
 </script>
+<script>
+window.addEventListener('error', function(e) {
+  console.error('YAN Error:', e.message, e.filename, e.lineno);
+  // Log to Firestore if db available
+  if (window._db && window.currentUser) {
+    try {
+      const { addDoc, collection, serverTimestamp } = window._firestoreFns || {};
+    } catch(err) {}
+  }
+});
+
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('YAN Promise Error:', e.reason);
+});
+</script>
 </body>
 </html>
