@@ -1113,6 +1113,33 @@ window.loadNewslettersAdmin = loadNewslettersAdmin;
 
 
 window.loadSystemErrors = loadSystemErrors;
+window.loadGroupSection = function(c, groupId, tabs) {
+  const savedTab = localStorage.getItem('yan_admin_subtab_' + groupId) || tabs[0].id;
+  const activeTab = tabs.find(t => t.id === savedTab) || tabs[0];
+  let tabsHtml = '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;border-bottom:2px solid var(--light);padding-bottom:1rem;">';
+  tabs.forEach(t => {
+    tabsHtml += '<button data-group="' + groupId + '" data-tab="' + t.id + '" onclick="window.switchGroupTab(this.dataset.group,this.dataset.tab)" id="gtab-' + groupId + '-' + t.id + '" style="padding:0.5rem 1rem;border-radius:50px;border:none;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;background:' + (t.id===activeTab.id?'var(--navy)':'var(--light)') + ';color:' + (t.id===activeTab.id?'#fff':'var(--navy)') + ';">' + t.label + '</button>';
+  });
+  tabsHtml += '</div><div id="group-content-' + groupId + '"></div>';
+  c.innerHTML = tabsHtml;
+  window.switchGroupTab(groupId, activeTab.id);
+};
+
+window.switchGroupTab = function(groupId, tabId) {
+  localStorage.setItem('yan_admin_subtab_' + groupId, tabId);
+  document.querySelectorAll('[id^="gtab-' + groupId + '-"]').forEach(b => {
+    b.style.background = b.id === 'gtab-' + groupId + '-' + tabId ? 'var(--navy)' : 'var(--light)';
+    b.style.color = b.id === 'gtab-' + groupId + '-' + tabId ? '#fff' : 'var(--navy)';
+  });
+  const container = document.getElementById('group-content-' + groupId);
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading...</div>';
+  const fnName = 'load' + tabId.charAt(0).toUpperCase() + tabId.slice(1);
+  const fn = window[fnName];
+  if (typeof fn === 'function') fn(container);
+  else container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--gray);">Coming soon!</div>';
+};
+
 window.loadSection = async function(section, customContainer) {
   if (!customContainer) {
     localStorage.setItem('yan_admin_section', section);
@@ -4227,32 +4254,6 @@ window.revokeHeadAccess = async function(docId, userId) {
   window.loadSection('headaccess', document.getElementById('content-area'));
 };
 
-window.loadGroupSection = function(c, groupId, tabs) {
-  const savedTab = localStorage.getItem('yan_admin_subtab_' + groupId) || tabs[0].id;
-  const activeTab = tabs.find(t => t.id === savedTab) || tabs[0];
-  let tabsHtml = '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;border-bottom:2px solid var(--light);padding-bottom:1rem;">';
-  tabs.forEach(t => {
-    tabsHtml += '<button data-group="' + groupId + '" data-tab="' + t.id + '" onclick="window.switchGroupTab(this.dataset.group,this.dataset.tab)" id="gtab-' + groupId + '-' + t.id + '" style="padding:0.5rem 1rem;border-radius:50px;border:none;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;background:' + (t.id===activeTab.id?'var(--navy)':'var(--light)') + ';color:' + (t.id===activeTab.id?'#fff':'var(--navy)') + ';">' + t.label + '</button>';
-  });
-  tabsHtml += '</div><div id="group-content-' + groupId + '"></div>';
-  c.innerHTML = tabsHtml;
-  window.switchGroupTab(groupId, activeTab.id);
-};
-
-window.switchGroupTab = function(groupId, tabId) {
-  localStorage.setItem('yan_admin_subtab_' + groupId, tabId);
-  document.querySelectorAll('[id^="gtab-' + groupId + '-"]').forEach(b => {
-    b.style.background = b.id === 'gtab-' + groupId + '-' + tabId ? 'var(--navy)' : 'var(--light)';
-    b.style.color = b.id === 'gtab-' + groupId + '-' + tabId ? '#fff' : 'var(--navy)';
-  });
-  const container = document.getElementById('group-content-' + groupId);
-  if (!container) return;
-  container.innerHTML = '<div class="loading">Loading...</div>';
-  const fnName = 'load' + tabId.charAt(0).toUpperCase() + tabId.slice(1);
-  const fn = window[fnName];
-  if (typeof fn === 'function') fn(container);
-  else container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--gray);">Coming soon!</div>';
-};
 
 </script>
 
