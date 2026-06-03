@@ -12415,6 +12415,27 @@ function toggleSidebar() {
   sidebar.classList.toggle('collapsed');
 }
 
+function toggleDropdown(id) {
+  const dd = document.getElementById(id);
+  if (!dd) return;
+  const isOpen = dd.style.display === 'block';
+  closeDropdowns();
+  if (!isOpen) dd.style.display = 'block';
+}
+
+function closeDropdowns() {
+  document.querySelectorAll('.dropdown-menu').forEach(d => d.style.display = 'none');
+}
+
+window.toggleDropdown = toggleDropdown;
+window.closeDropdowns = closeDropdowns;
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.dropdown-toggle') && !e.target.closest('.dropdown-menu')) {
+    closeDropdowns();
+  }
+});
+
 async function awardPoints(userId, action, description, points) {
   try {
     const db = window._db;
