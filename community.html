@@ -7970,9 +7970,9 @@ async function submitLessonAssignment(programId, lessonId, colName) {
 
 
   // Show loading
-  if (resultDiv) resultDiv.innerHTML = '<div style="background:var(--light);border-radius:12px;padding:1rem;"><p style="font-size:0.85rem;color:var(--gray);">🤖 AI is grading your assignment...</p></div>';
+  if (resultDiv) resultDiv.innerHTML = '<div style="background:rgba(39,174,96,0.1);border-radius:12px;padding:1rem;"><p style="font-size:0.85rem;color:#27AE60;font-weight:600;">✅ Assignment submitted! Admin will review and grade it shortly.</p></div>';
 
-  // AI grading
+  // Skipping AI grading — admin grades manually
   let aiScore = 0;
   let aiFeedback = '';
   let aiStrengths = '';
@@ -7982,27 +7982,11 @@ async function submitLessonAssignment(programId, lessonId, colName) {
     const lessonSnap = await getDoc(doc(db, colName, programId, 'lessons', lessonId));
     const lessonData = lessonSnap.exists() ? lessonSnap.data() : {};
     const assignmentInstructions = lessonData.assignment || '';
-
-    const aiPrompt = 'You are a YAN (Young Africans Network) assignment grader. Grade this assignment submission. Assignment Instructions: ' + assignmentInstructions + ' Student Submission: ' + (text || '[File submitted — see attachment]') + ' Grade this assignment out of 100. Be fair, encouraging and specific. Return ONLY valid JSON: {"score": 75, "feedback": "Overall feedback here", "strengths": "What they did well", "weaknesses": "What needs improvement", "suggestions": "Specific suggestions to improve"}';
-
-    const aiRes = await fetch('https://yan-ai-worker.youngafricansn.workers.dev', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 800,
-        messages: [{role: 'user', content: aiPrompt}]
-      })
-    });
-    const aiData = await aiRes.json();
-    const aiText = aiData.content[0].text;
-    const aiClean = aiText.replace(/```json|```/g, '').trim();
-    const aiParsed = JSON.parse(aiClean);
-    aiScore = aiParsed.score || 0;
-    aiFeedback = aiParsed.feedback || '';
-    aiStrengths = aiParsed.strengths || '';
-    aiWeaknesses = aiParsed.weaknesses || '';
-  } catch(e) {
+    // Admin grades assignments — no AI needed
+    let aiScore = 0;
+    let aiFeedback = "Assignment received. Admin will review and grade it shortly.";
+    let aiStrengths = "";
+    let aiWeaknesses = "";
     aiScore = 0;
     aiFeedback = 'Assignment received. Your facilitator will review it shortly.';
   }

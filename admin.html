@@ -2423,6 +2423,18 @@ window.viewMemberProgress = async function(userId, userName) {
 
 // ===== ANALYTICS =====
 async function loadAnalytics(c) {
+  // Cache for 10 minutes
+  const cacheKey = 'yan_analytics_cache';
+  const cacheTime = 'yan_analytics_time';
+  const cached = localStorage.getItem(cacheKey);
+  const lastTime = parseInt(localStorage.getItem(cacheTime)||'0');
+  if (cached && Date.now() - lastTime < 10 * 60 * 1000) {
+    c.innerHTML = cached + '<p style="font-size:0.72rem;color:var(--gray);text-align:right;margin-top:0.5rem;">Cached · <button onclick="localStorage.removeItem('yan_analytics_cache');loadSection('analytics')" style="background:none;border:none;color:var(--navy);cursor:pointer;font-size:0.72rem;text-decoration:underline;">Refresh</button></p>';
+    setTimeout(() => {
+      if (typeof Chart !== 'undefined') loadAnalyticsCharts(c._chartData);
+    }, 300);
+    return;
+  }
   c.innerHTML = '<div class="loading">Loading analytics...</div>';
   try {
     const [techProgs, careerProgs, users, certs, techProgress, careerProgress, pushSubs, posts, points] = await Promise.all([
