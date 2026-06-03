@@ -4520,7 +4520,14 @@ async function loadHeadAssignments(c, dept) {
       html += '<p style="font-size:0.72rem;color:var(--gray);">' + sanitize(a.programId||'') + ' · ' + (a.submittedAt ? new Date(a.submittedAt.seconds*1000).toLocaleDateString() : '') + '</p></div>';
       html += graded ? '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">Graded: ' + a.grade + '/100</span>' : '<span style="background:rgba(245,166,35,0.1);color:#b37800;padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">Pending</span>';
       html += '</div>';
-      if (a.submission) html += '<p style="font-size:0.78rem;color:var(--navy);background:white;border-radius:8px;padding:0.5rem;margin-bottom:0.5rem;">' + sanitize(a.submission.substring(0,200)) + '</p>';
+      if (a.submission) {
+        const isLong = a.submission.length > 200;
+        html += '<div style="background:white;border-radius:8px;padding:0.5rem;margin-bottom:0.5rem;">';
+        html += '<p style="font-size:0.78rem;color:var(--navy);" id="sub-text-' + d.id + '">' + sanitize(a.submission.substring(0,200)) + (isLong ? '...' : '') + '</p>';
+        if (isLong) html += '<button data-id="' + d.id + '" data-full="' + sanitize(a.submission).replace(/"/g,"'") + '" onclick="document.getElementById(\'sub-text-\'+this.dataset.id).textContent=this.dataset.full;this.style.display=\'none\';" style="background:none;border:none;color:var(--navy);font-size:0.72rem;cursor:pointer;text-decoration:underline;">Read full submission</button>';
+        html += '</div>';
+      }
+      if (a.fileUrl) html += '<a href="' + sanitize(a.fileUrl) + '" target="_blank" style="display:inline-block;margin-bottom:0.5rem;font-size:0.78rem;color:var(--navy);font-weight:600;">📎 View attached file</a><br>';
       if (!graded) {
         html += '<div style="display:flex;gap:0.5rem;margin-top:0.5rem;">';
         html += '<input type="number" id="grade-' + d.id + '" placeholder="Score /100" min="0" max="100" style="width:100px;padding:0.4rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;">';
