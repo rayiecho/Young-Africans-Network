@@ -11620,40 +11620,6 @@ function getNextTier(points) {
   return idx > 0 ? TIERS[idx-1] : null;
 }
 
-async function awardPoints(action, userId, userName) {
-  const uid = userId || currentUser?.uid;
-  const uname = userName || currentUserData?.name;
-  if (!uid) return;
-  const pts = POINTS_MAP[action] || 0;
-  if (!pts) return;
-  try {
-    const ref = doc(db, 'memberPoints', uid);
-    const snap = await getDoc(ref);
-    const current = snap.exists() ? (snap.data().total || 0) : 0;
-    const newTotal = current + pts;
-    const oldTier = getTier(current);
-    const newTier = getTier(newTotal);
-    await setDoc(ref, {
-      userId: uid, userName: uname,
-      total: newTotal,
-      lastUpdated: serverTimestamp(),
-      [`earned_${action}`]: (snap.data()?.[`earned_${action}`] || 0) + pts
-    }, {merge: true});
-    // Log transaction
-    await addDoc(collection(db, 'pointsHistory'), {
-      userId: uid, action, points: pts,
-      total: newTotal, createdAt: serverTimestamp()
-    });
-    // Notify tier upgrade
-    if (oldTier.name !== newTier.name) {
-      showToast('Tier upgraded to ' + newTier.name + '! Reward: ' + newTier.reward);
-      await addDoc(collection(db, 'notifications'), {
-        title: 'Tier Upgrade - ' + newTier.name + '!',
-        message: 'Congratulations! You have reached ' + newTier.name + ' tier. Your reward: ' + newTier.reward + '. Contact info@youngafricansnetwork.org to claim.',
-        type: 'success', userId: uid, postedBy: 'YAN Points System',
-        createdAt: serverTimestamp(), readBy: []
-      });
-    }
   } catch(e) { console.log('Points error:', e); }
 }
 
