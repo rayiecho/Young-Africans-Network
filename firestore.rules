@@ -326,6 +326,11 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /moduleDiscussions/{discussionId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+    }
+
     match /rewardRedemptions/{redemptionId} {
       allow create: if isLoggedIn();
       allow read, update: if isAdmin();

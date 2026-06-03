@@ -7699,6 +7699,15 @@ async function openProgram(programId) {
     } else if (unlocked) {
       html += '<p style="font-size:0.82rem;color:var(--gray);padding:0.5rem 0;">No lessons yet.</p>';
     }
+    // Discussion after completed module
+    if (unlocked && allDone) {
+      html += '<div style="margin-top:0.75rem;border-top:2px dashed rgba(27,42,107,0.15);padding-top:0.75rem;">';
+      html += '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1B2A6B" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p style="font-size:0.82rem;font-weight:700;color:var(--navy);">Module ' + (mi+1) + ' Discussion</p></div>';
+      html += '<div id="discussion-' + programId + '-' + week + '" style="max-height:200px;overflow-y:auto;margin-bottom:0.5rem;"></div>';
+      html += '<div style="display:flex;gap:0.5rem;"><input type="text" id="disc-input-' + programId + '-' + week + '" placeholder="Share your thoughts..." style="flex:1;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);border-radius:50px;padding:0.5rem 0.85rem;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;"><button onclick="postDiscussion(\''  + programId + '\',\'' + week + '\')" style="background:var(--navy);color:#fff;border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;flex-shrink:0;">&#9658;</button></div>';
+      html += '</div>';
+      setTimeout(function(){ loadDiscussion('' + programId + '', '' + week + ''); }, 100);
+    }
     html += '</div>';
     html += '</div>';
   });
@@ -7707,6 +7716,38 @@ async function openProgram(programId) {
   html += '</div>';
   box.innerHTML = html;
 }
+
+
+async function loadDiscussion(programId, week) {
+  const container = document.getElementById('discussion-' + programId + '-' + week);
+  if (!container) return;
+  try {
+    const snap = await getDocs(query(collection(db, 'moduleDiscussions'), where('programId','==',programId), where('moduleWeek','==',parseInt(week)), orderBy('createdAt','asc'), limit(20)));
+    if (snap.empty) { container.innerHTML = '<p style="font-size:0.75rem;color:var(--gray);text-align:center;padding:0.5rem;">No comments yet. Be the first!</p>'; return; }
+    container.innerHTML = snap.docs.map(d => {
+      const c = d.data();
+      return '<div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;"><div style="width:26px;height:26px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.7rem;font-weight:700;flex-shrink:0;">' + (c.authorName||'?')[0] + '</div><div style="flex:1;background:var(--light);border-radius:10px;padding:0.4rem 0.65rem;"><p style="font-size:0.72rem;font-weight:700;color:var(--navy);">' + sanitize(c.authorName||'') + '</p><p style="font-size:0.78rem;color:var(--navy);line-height:1.5;">' + sanitize(c.comment||'') + '</p></div></div>';
+    }).join('');
+  } catch(e) { console.log('Discussion error:', e); }
+}
+window.loadDiscussion = loadDiscussion;
+
+window.postDiscussion = async function(programId, week) {
+  const input = document.getElementById('disc-input-' + programId + '-' + week);
+  if (!input) return;
+  const comment = input.value.trim();
+  if (!comment) return showToast('Write something first', 'error');
+  input.value = '';
+  try {
+    await addDoc(collection(db, 'moduleDiscussions'), {
+      programId, moduleWeek: parseInt(week), comment,
+      authorId: currentUser.uid, authorName: currentUserData.name,
+      authorPhoto: currentUserData.photoUrl || '', createdAt: serverTimestamp()
+    });
+    loadDiscussion(programId, week);
+    await awardPoints(currentUserData.uid, 'discussion_comment', 'Posted in module discussion', 1);
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
 
 function toggleModuleLessons(programId, week) {
   const box = document.getElementById('module-lessons-' + programId + '-' + week);
