@@ -3982,7 +3982,7 @@ async function loadHeadPanel() {
         '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">Admin — Select Department</h2>' +
         '<p style="color:var(--gray);font-size:0.85rem;margin-bottom:1.5rem;">As an admin you have access to all departments. Select one to manage:</p>' +
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">' +
-        DEPARTMENTS.map(d => '<button onclick="window._adminHeadDept='' + d.id + '';loadHeadPanel()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;padding:1rem;text-align:left;cursor:pointer;font-family:Poppins,sans-serif;"><p style=\"font-size:0.85rem;font-weight:700;color:var(--navy);\">' + d.name + '</p></button>').join('') +
+        DEPARTMENTS.map(d => '<button data-dept="' + d.id + '" onclick="window._adminHeadDept=this.dataset.dept;loadHeadPanel()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;padding:1rem;text-align:left;cursor:pointer;font-family:Poppins,sans-serif;font-size:0.85rem;font-weight:700;color:var(--navy);">' + d.name + '</button>').join('') +
         '</div></div>';
       return;
     }
