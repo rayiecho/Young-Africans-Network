@@ -2038,7 +2038,18 @@ window.adminPermanentDelete = async function(userId) {
 // ===== MODERATION =====
 async function loadModeration(c) {
   const postsSnap = await getDocs(query(collection(db, 'posts'), orderBy('createdAt', 'desc')));
-  c.innerHTML = `
+  // Load AI-flagged posts
+  const flaggedSnap = await getDocs(query(collection(db,'moderation_log'), orderBy('createdAt','desc'), limit(20))).catch(()=>({empty:true,docs:[]}));
+  let flaggedHtml = '';
+  if (!flaggedSnap.empty) {
+    flaggedHtml = '<div class="section-card" style="margin-bottom:1.5rem;"><h3 style="font-size:1rem;font-weight:700;color:var(--red);margin-bottom:1rem;">AI-Flagged & Blocked Posts (' + flaggedSnap.docs.length + ')</h3>';
+    flaggedSnap.docs.forEach(d => {
+      const p = d.data();
+      flaggedHtml += '<div style="background:rgba(230,51,41,0.05);border-radius:12px;padding:1rem;margin-bottom:0.5rem;border-left:4px solid var(--red);"><p style="font-size:0.85rem;font-weight:700;color:var(--red);">BLOCKED · ' + sanitize(p.authorName||'') + '</p><p style="font-size:0.82rem;color:var(--navy);margin:0.25rem 0;">' + sanitize((p.content||'').substring(0,150)) + '...</p><p style="font-size:0.72rem;color:var(--gray);">Reason: ' + sanitize(p.reason||'') + '</p></div>';
+    });
+    flaggedHtml += '</div>';
+  }
+  c.innerHTML = flaggedHtml + `
     <div class="section-card">
       <h3> Recent Community Posts (${postsSnap.size} total)</h3>
       ${postsSnap.empty ? '<p style="color:var(--gray);">No posts yet.</p>' :
