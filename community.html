@@ -4023,7 +4023,7 @@ async function loadHeadPanel() {
     </div>`;
 
   // Load overview by default
-  showHeadSection(\'overview\');
+  showHeadSection('overview');
 }
 
 window.submitHeadAgreement = async function() {
@@ -4096,7 +4096,7 @@ async function loadHeadMembers(c, dept) {
       html += u.photoUrl ? '<img src="' + sanitize(u.photoUrl) + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">' : '<div style="width:36px;height:36px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">' + (u.name||'?')[0] + '</div>';
       html += '<div style="flex:1;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(u.name||'') + '</p>';
       html += '<p style="font-size:0.72rem;color:var(--gray);">' + sanitize(u.country||'') + ' · ' + sanitize(u.role||'Member') + '</p></div>';
-      html += '<button onclick="viewMemberProgress('' + d.id + '','' + sanitize(u.name||'') + '')" style="background:var(--light);color:var(--navy);border:none;padding:0.3rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;cursor:pointer;">Progress</button>';
+      html += '<button onclick="viewMemberProgress("' + d.id + '","'  + sanitize(u.name||'') + '")" style="background:var(--light);color:var(--navy);border:none;padding:0.3rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;cursor:pointer;">Progress</button>';
       html += '</div>';
     });
     html += '</div>';
@@ -4120,7 +4120,7 @@ async function loadHeadPosts(c, dept) {
       html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:0.75rem 0;border-bottom:1px solid var(--light);gap:0.5rem;">';
       html += '<div style="flex:1;"><p style="font-size:0.82rem;font-weight:700;color:var(--navy);">' + sanitize(p.authorName||'') + '</p>';
       html += '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize((p.content||'').substring(0,100)) + '...</p></div>';
-      html += '<button onclick="headDeletePost('' + d.id + '')" style="background:var(--red);color:#fff;border:none;padding:0.3rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;cursor:pointer;flex-shrink:0;">Delete</button>';
+      html += '<button data-id="' + d.id + '" onclick="headDeletePost(this.dataset.id)" style="background:var(--red);color:#fff;border:none;padding:0.3rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;cursor:pointer;flex-shrink:0;">Delete</button>';
       html += '</div>';
     });
     html += '</div>';
@@ -4135,7 +4135,7 @@ async function loadHeadNewsletter(c, dept) {
     '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Send Department Newsletter</h3>' +
     '<div class="form-group"><label style="font-size:0.82rem;font-weight:600;color:var(--navy);">Subject</label><input type="text" id="head-nl-subject" placeholder="e.g. ' + deptName + ' Monthly Update" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;outline:none;box-sizing:border-box;margin-top:0.35rem;"></div>' +
     '<div class="form-group" style="margin-top:0.75rem;"><label style="font-size:0.82rem;font-weight:600;color:var(--navy);">Message</label><textarea id="head-nl-body" rows="6" placeholder="Write your newsletter..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;outline:none;resize:none;box-sizing:border-box;margin-top:0.35rem;"></textarea></div>' +
-    '<button onclick="sendHeadNewsletter('' + dept + '')" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;margin-top:0.75rem;">Send to Department Members</button>' +
+    '<button data-dept="' + dept + '" onclick="sendHeadNewsletter(this.dataset.dept)" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;margin-top:0.75rem;">Send to Department Members</button>' +
     '</div>';
 }
 
@@ -4148,7 +4148,7 @@ async function loadHeadMeetings(c, dept) {
     html += '<div class="form-group"><label style="font-size:0.82rem;font-weight:600;">Title</label><input type="text" id="head-mtg-title2" placeholder="e.g. Weekly Sync" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-top:0.25rem;"></div>';
     html += '<div class="form-group" style="margin-top:0.5rem;"><label style="font-size:0.82rem;font-weight:600;">Date & Time</label><input type="datetime-local" id="head-mtg-date2" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-top:0.25rem;"></div>';
     html += '<div class="form-group" style="margin-top:0.5rem;"><label style="font-size:0.82rem;font-weight:600;">Meeting Link</label><input type="url" id="head-mtg-link2" placeholder="Paste Google Meet, Zoom or Daily.co link" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-top:0.25rem;"></div>';
-    html += '<button onclick="scheduleHeadMeeting('' + dept + '')" style="background:var(--navy);color:#fff;border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;margin-top:0.75rem;">Schedule Meeting</button>';
+    html += '<button data-dept="' + dept + '" onclick="scheduleHeadMeeting(this.dataset.dept)" style="background:var(--navy);color:#fff;border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;margin-top:0.75rem;">Schedule Meeting</button>';
     html += '</div>';
     if (!snap.empty) {
       html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
@@ -4184,7 +4184,7 @@ async function loadHeadAssignments(c, dept) {
         html += '<div style="display:flex;gap:0.5rem;margin-top:0.5rem;">';
         html += '<input type="number" id="grade-' + d.id + '" placeholder="Score /100" min="0" max="100" style="width:100px;padding:0.4rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;">';
         html += '<input type="text" id="feedback-' + d.id + '" placeholder="Feedback..." style="flex:1;padding:0.4rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;">';
-        html += '<button onclick="gradeAssignment('' + d.id + '','' + (a.userId||'') + '')" style="background:var(--green);color:#fff;border:none;padding:0.4rem 0.75rem;border-radius:8px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Grade</button>';
+        html += '<button data-id="' + d.id + '" data-uid="' + (a.userId||"") + '" onclick="gradeAssignment(this.dataset.id,this.dataset.uid)" style="background:var(--green);color:#fff;border:none;padding:0.4rem 0.75rem;border-radius:8px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Grade</button>';
         html += '</div>';
       }
       html += '</div>';
@@ -4200,7 +4200,7 @@ async function loadHeadNotify(c, dept) {
     '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Notify Department Members</h3>' +
     '<div class="form-group"><label style="font-size:0.82rem;font-weight:600;">Title</label><input type="text" id="head-notif-title2" placeholder="e.g. New assignment posted" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-top:0.25rem;"></div>' +
     '<div class="form-group" style="margin-top:0.75rem;"><label style="font-size:0.82rem;font-weight:600;">Message</label><textarea id="head-notif-msg2" rows="4" placeholder="Write your message to ' + deptName + ' members..." style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;resize:none;box-sizing:border-box;margin-top:0.25rem;"></textarea></div>' +
-    '<button onclick="sendHeadNotification('' + dept + '')" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;margin-top:0.75rem;">Send Notification</button>' +
+    '<button data-dept="' + dept + '" onclick="sendHeadNotification(this.dataset.dept)" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;margin-top:0.75rem;">Send Notification</button>' +
     '</div>';
 }
 
@@ -4221,7 +4221,7 @@ window.headDeletePost = async function(postId) {
   if (!confirm('Delete this post?')) return;
   await deleteDoc(doc(db,'posts',postId));
   showToast('Post deleted');
-  showHeadSection(\'posts\');
+  showHeadSection('posts');
 };
 
 window.gradeAssignment = async function(assignId, userId) {
