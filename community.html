@@ -404,7 +404,9 @@ async function doRegister() {
     if (refCode) {
       const refSnap = await getDocs(query(collection(db,'users'), where('referralCode','==',refCode)));
       if (!refSnap.empty) {
-        await updateDoc(doc(db,'users',refSnap.docs[0].id), { referralCount: (refSnap.docs[0].data().referralCount||0)+1 });
+        const referrerId = refSnap.docs[0].id;
+        await updateDoc(doc(db,'users',referrerId), { referralCount: (refSnap.docs[0].data().referralCount||0)+1 });
+        await awardPoints(referrerId, 'referral', 'Member joined via your referral link', 20);
       }
       localStorage.removeItem('yan_referral');
     }
@@ -7426,7 +7428,7 @@ async function loadAllPrograms() {
         '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(p.title) + '</h3>',
         '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;margin-bottom:0.35rem;">' + sanitize(p.description) + '</p>',
         isPartner && p.partnerName ? '<p style="font-size:0.78rem;color:var(--navy);"><strong>Partner:</strong> ' + sanitize(p.partnerName) + '</p>' : '',
-        p.modules ? '<p style="font-size:0.75rem;color:var(--gray);margin-top:0.25rem;">' + p.modules + ' modules · ' + (p.enrolledBy ? p.enrolledBy.length : 0) + ' enrolled</p>' : '',
+        p.modules ? '<p style="font-size:0.75rem;color:var(--gray);margin-top:0.25rem;">' + p.modules + ' modules</p>' : '',
         '</div>',
         '<div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">',
         p.isOpen === false
@@ -10288,7 +10290,7 @@ async function loadCareerPrograms() {
           + '</div>'
           + '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">' + sanitize(p.title||'') + '</h3>'
           + '<p style="font-size:0.85rem;color:var(--gray);line-height:1.7;">' + sanitize(p.description||'') + '</p>'
-          + '<p style="font-size:0.75rem;color:var(--gray);margin-top:0.35rem;"> Opens: ' + openDate.toLocaleDateString() + ' · ' + (p.enrolledBy ? p.enrolledBy.length : 0) + ' enrolled</p>'
+          + '<p style="font-size:0.75rem;color:var(--gray);margin-top:0.35rem;"> Opens: ' + openDate.toLocaleDateString() + '</p>'
           + '</div>'
           + '<div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">'
           + (isOpen && enrolled ? '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;">Enrolled</span>' : '')
