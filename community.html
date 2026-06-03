@@ -4776,7 +4776,7 @@ async function loadHeadMembers(c, dept) {
       html += u.photoUrl ? '<img src="' + sanitize(u.photoUrl) + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">' : '<div style="width:36px;height:36px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">' + (u.name||'?')[0] + '</div>';
       html += '<div style="flex:1;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(u.name||'') + '</p>';
       html += '<p style="font-size:0.72rem;color:var(--gray);">' + sanitize(u.country||'') + ' · ' + sanitize(u.role||'Member') + '</p></div>';
-      html += '<button onclick="viewMemberProgress("' + d.id + '","'  + sanitize(u.name||'') + '")" style="background:var(--light);color:var(--navy);border:none;padding:0.3rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;cursor:pointer;">Progress</button>';
+      html += '<button data-id="' + d.id + '" data-name="' + sanitize(u.name||'') + '" onclick="viewMemberProgress(this.dataset.id,this.dataset.name)" style="background:var(--light);color:var(--navy);border:none;padding:0.3rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;cursor:pointer;">Progress</button>';
       html += '</div>';
     });
     html += '</div>';
