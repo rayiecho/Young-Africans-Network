@@ -12468,5 +12468,12 @@ window.addEventListener('unhandledrejection', function(e) {
   console.error('YAN Promise Error:', e.reason);
 });
 </script>
+<!-- Floating YAN Guide Button -->
+<div id="yan-guide-float-btn" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:9998;cursor:pointer;" onclick="showTab('yan-guide');document.getElementById('sidebar').classList.remove('collapsed');" title="Ask YAN Guide">
+  <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(27,42,107,0.4);border:3px solid var(--gold);">
+    <img src="images/AI.jpg" style="width:46px;height:46px;border-radius:50%;object-fit:cover;">
+  </div>
+  <div style="position:absolute;top:-8px;right:-4px;background:var(--gold);color:var(--navy);border-radius:50px;padding:0.15rem 0.4rem;font-size:0.6rem;font-weight:800;font-family:Poppins,sans-serif;white-space:nowrap;">Ask YAN</div>
+</div>
 </body>
 </html>
