@@ -4397,12 +4397,8 @@ window.filterApps = function(status) {
   });
 };
 
-</script>
-</div>
-</body>
-</html>
 
-<script>
+
 window.loadCapstone = async function(c) {
   c.innerHTML = '<div class="loading">Loading capstone submissions...</div>';
   try {
@@ -4475,8 +4471,8 @@ window.rejectCapstone = async function(id) {
   showToast('Capstone rejected with feedback.');
   window.loadSection('capstone', document.getElementById('content-area'));
 };
-</script>
-<script>
+
+
 window.loadHeadaccess = async function(c) {
   c.innerHTML = '<div class="loading">Loading head access requests...</div>';
   try {
@@ -4537,4 +4533,11 @@ window.revokeHeadAccess = async function(docId, userId) {
   showToast('Access revoked.');
   window.loadSection('headaccess', document.getElementById('content-area'));
 };
+
 </script>
+</div>
+</body>
+</html>
+
+</body>
+</html>
