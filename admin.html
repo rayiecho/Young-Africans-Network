@@ -71,6 +71,15 @@ function checkAuth() {
 
 window.doAdminLogin = function() {
   const pass = document.getElementById('admin-pass').value;
+  const nameInput = document.getElementById('admin-name').value.trim().toLowerCase();
+  const ADMIN_NAMES = [
+    'emmanuel ikumilu mwori',
+    'regan odhiambo ayiecho',
+    'highness lomayani mollel',
+    'innosent onesmo nko'
+  ];
+  const nameValid = ADMIN_NAMES.some(n => n === nameInput);
+  if (!nameValid) return showToast('Name not recognized. Access denied.', 'error');
   if (pass === ADMIN_PASSWORD) {
     sessionStorage.setItem('yan_admin', 'true');
     async function loadSystemErrors(c) {
@@ -4239,6 +4248,9 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <img src="images/logo.jpeg" alt="YAN Logo">
     <h2>Admin Dashboard</h2>
     <p>Young Africans Network — Content Management System</p>
+    <div class="form-group" style="margin-bottom:1rem;">
+      <input type="text" id="admin-name" placeholder="Enter your full name" style="width:100%;padding:0.85rem 1rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.88rem;outline:none;box-sizing:border-box;">
+    </div>
     <input type="password" id="admin-pass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doAdminLogin()">
     <button class="btn-login" onclick="doAdminLogin()">Access Dashboard </button>
     <a href="index.html" class="login-back">← Back to website</a>
