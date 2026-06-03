@@ -326,6 +326,17 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /capstoneProjects/{projectId} {
+      allow read: if isLoggedIn();
+      allow write: if isAdmin();
+    }
+
+    match /capstoneSubmissions/{submissionId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isAdmin();
+    }
+
     match /moduleDiscussions/{discussionId} {
       allow read: if isLoggedIn();
       allow create: if isLoggedIn();

@@ -7713,9 +7713,114 @@ async function openProgram(programId) {
   });
   html += '</div>';
 
+  // CAPSTONE MODULE — shown when all 4 modules completed
+  const allModulesDone = moduleDocs.every(function(m, mi) {
+    const week = m.week || (mi+1);
+    const lessons = lessonsByModule[week] || [];
+    return lessons.length > 0 && lessons.every(function(l){ return lessonsCompleted.includes(l.id); });
+  });
+
+  html += '<div id="capstone-module-' + programId + '" style="margin-top:0.75rem;">';
+  if (allModulesDone) {
+    html += '<div style="background:linear-gradient(135deg,var(--navy),#2D3F7B);border-radius:16px;padding:1.25rem;color:#fff;">';
+    html += '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">';
+    html += '<div style="width:40px;height:40px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>';
+    html += '<div><p style="font-weight:800;font-size:1rem;">Capstone Module</p><p style="font-size:0.75rem;color:rgba(255,255,255,0.7);">Final Project — Required for Certificate</p></div></div>';
+    html += '<div id="capstone-content-' + programId + '"><div style="text-align:center;padding:1rem;color:rgba(255,255,255,0.6);font-size:0.82rem;">Loading capstone...</div></div>';
+    html += '</div>';
+  } else {
+    html += '<div style="background:var(--light);border-radius:12px;padding:1rem;opacity:0.6;display:flex;align-items:center;gap:0.75rem;">';
+    html += '<div style="width:32px;height:32px;border-radius:50%;background:#ccc;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;">🔒</div>';
+    html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Capstone Module</p>';
+    html += '<p style="font-size:0.72rem;color:var(--gray);">Complete all 4 modules to unlock the Capstone Project</p></div>';
+    html += '</div>';
+  }
+  html += '</div>';
+
   html += '</div>';
   box.innerHTML = html;
+
+  // Load capstone if unlocked
+  if (allModulesDone) {
+    loadCapstone(programId);
+  }
 }
+
+async function loadCapstone(programId) {
+  const container = document.getElementById('capstone-content-' + programId);
+  if (!container) return;
+  try {
+    // Get capstone brief
+    const capSnap = await getDoc(doc(db, 'capstoneProjects', programId));
+    if (!capSnap.exists()) { container.innerHTML = '<p style="color:rgba(255,255,255,0.6);font-size:0.82rem;">Capstone project coming soon!</p>'; return; }
+    const cap = capSnap.data();
+
+    // Check if member already submitted
+    const subSnap = await getDoc(doc(db, 'capstoneSubmissions', currentUser.uid + '_' + programId));
+    const submitted = subSnap.exists();
+
+    let html = '';
+    // Project brief
+    html += '<div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">';
+    html += '<p style="font-size:0.82rem;font-weight:700;color:var(--gold);margin-bottom:0.5rem;">📋 ' + sanitize(cap.title) + '</p>';
+    html += '<p style="font-size:0.78rem;color:rgba(255,255,255,0.85);line-height:1.7;margin-bottom:0.75rem;">' + sanitize(cap.brief) + '</p>';
+    html += '<p style="font-size:0.75rem;font-weight:700;color:var(--gold);margin-bottom:0.35rem;">Deliverables:</p>';
+    cap.deliverables.forEach(function(d) {
+      html += '<p style="font-size:0.75rem;color:rgba(255,255,255,0.8);padding-left:0.75rem;">• ' + sanitize(d) + '</p>';
+    });
+    html += '<p style="font-size:0.75rem;font-weight:700;color:var(--gold);margin-top:0.5rem;margin-bottom:0.35rem;">Grading Criteria:</p>';
+    cap.criteria.forEach(function(c) {
+      html += '<p style="font-size:0.75rem;color:rgba(255,255,255,0.8);padding-left:0.75rem;">• ' + sanitize(c) + '</p>';
+    });
+    html += '</div>';
+
+    if (submitted) {
+      const subData = subSnap.data();
+      html += '<div style="background:rgba(39,174,96,0.2);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">';
+      html += '<p style="font-size:0.82rem;font-weight:700;color:#2ECC71;">✅ Submitted!</p>';
+      html += '<p style="font-size:0.75rem;color:rgba(255,255,255,0.7);">Status: ' + (subData.status || 'Under Review') + '</p>';
+      if (subData.adminFeedback) html += '<p style="font-size:0.78rem;color:#fff;margin-top:0.5rem;">Feedback: ' + sanitize(subData.adminFeedback) + '</p>';
+      html += '</div>';
+      // Show peer review if not done
+      html += '<button onclick="openPeerReview('' + programId + '')" style="width:100%;background:var(--gold);color:var(--navy);border:none;padding:0.75rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;margin-bottom:0.5rem;">👥 Review Peers' Projects</button>';
+    } else {
+      // Submission form
+      html += '<div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:1rem;">';
+      html += '<p style="font-size:0.82rem;font-weight:700;color:#fff;margin-bottom:0.75rem;">📤 Submit Your Project</p>';
+      html += '<input type="url" id="capstone-link-' + programId + '" placeholder="Link to your project (Google Drive, GitHub, etc.)" style="width:100%;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.65rem 0.85rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
+      html += '<textarea id="capstone-notes-' + programId + '" placeholder="Brief description of your project (what you built, tools used, impact)..." rows="3" style="width:100%;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.65rem 0.85rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;resize:none;box-sizing:border-box;margin-bottom:0.75rem;"></textarea>';
+      html += '<button onclick="submitCapstone('' + programId + '')" style="width:100%;background:var(--gold);color:var(--navy);border:none;padding:0.75rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;">Submit Project →</button>';
+      html += '<p style="font-size:0.7rem;color:rgba(255,255,255,0.5);text-align:center;margin-top:0.5rem;">You can only submit once. Make it count!</p>';
+      html += '</div>';
+    }
+    container.innerHTML = html;
+  } catch(e) { console.log('Capstone error:', e); container.innerHTML = '<p style="color:rgba(255,255,255,0.6);">Error loading capstone.</p>'; }
+}
+
+window.submitCapstone = async function(programId) {
+  const link = document.getElementById('capstone-link-' + programId)?.value.trim();
+  const notes = document.getElementById('capstone-notes-' + programId)?.value.trim();
+  if (!link) return showToast('Please add a project link', 'error');
+  if (!notes) return showToast('Please describe your project', 'error');
+  if (!confirm('Submit your capstone project? You can only submit once.')) return;
+  try {
+    await setDoc(doc(db, 'capstoneSubmissions', currentUser.uid + '_' + programId), {
+      userId: currentUser.uid, userName: currentUserData.name,
+      userEmail: currentUserData.email, programId,
+      projectLink: link, description: notes,
+      status: 'pending', submittedAt: serverTimestamp()
+    });
+    showToast('Capstone submitted! Admin will review shortly. 🎉');
+    await awardPoints(currentUserData.uid, 'capstone_submitted', 'Capstone project submitted', 20);
+    loadCapstone(programId);
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+window.openPeerReview = async function(programId) {
+  showToast('Peer review coming soon!');
+};
+
+window.loadCapstone = loadCapstone;
 
 
 async function loadDiscussion(programId, week) {
