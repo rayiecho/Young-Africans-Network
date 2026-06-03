@@ -10688,8 +10688,34 @@ async function openCareerProgram(programId) {
     html += '</div>';
   });
 
+    // Discussion after completed module (career)
+    if (unlocked && allDone) {
+      html += '<div style="margin-top:0.75rem;border-top:2px dashed rgba(27,42,107,0.15);padding-top:0.75rem;">';
+      html += '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1B2A6B" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p style="font-size:0.82rem;font-weight:700;color:var(--navy);">Module ' + (mi+1) + ' Discussion</p></div>';
+      html += '<div id="discussion-' + programId + '-' + week + '" style="max-height:200px;overflow-y:auto;margin-bottom:0.5rem;"></div>';
+      html += '<div style="display:flex;gap:0.5rem;"><input type="text" id="disc-input-' + programId + '-' + week + '" placeholder="Share your thoughts..." style="flex:1;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);border-radius:50px;padding:0.5rem 0.85rem;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;"><button data-prog="' + programId + '" data-week="' + week + '" onclick="postDiscussion(this.dataset.prog,this.dataset.week)" style="background:var(--navy);color:#fff;border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;flex-shrink:0;">&#9658;</button></div>';
+      html += '</div>';
+      setTimeout(function(){ loadDiscussion(programId, week); }, 100);
+    }
   html += '</div>';
   box.innerHTML = html;
+
+  // CAPSTONE MODULE for career programs
+  const allCareerModulesDone = moduleDocs.every(function(m, mi) {
+    const week = m.week || (mi+1);
+    const lessons = lessonsByModule[week] || [];
+    return lessons.length > 0 && lessons.every(function(l){ return lessonsCompleted.includes(l.id); });
+  });
+  html += '<div style="margin-top:0.75rem;">';
+  if (allCareerModulesDone) {
+    html += '<div style="background:linear-gradient(135deg,var(--navy),#2D3F7B);border-radius:16px;padding:1.25rem;color:#fff;">';
+    html += '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;"><div style="width:40px;height:40px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div><p style="font-weight:800;font-size:1rem;">Capstone Module</p><p style="font-size:0.75rem;color:rgba(255,255,255,0.7);">Final Project — Required for Certificate</p></div></div>';
+    html += '<div id="capstone-content-' + programId + '"><div style="text-align:center;padding:1rem;color:rgba(255,255,255,0.6);font-size:0.82rem;">Loading capstone...</div></div>';
+    html += '</div>';
+  } else {
+    html += '<div style="background:var(--light);border-radius:12px;padding:1rem;opacity:0.6;display:flex;align-items:center;gap:0.75rem;"><div style="width:32px;height:32px;border-radius:50%;background:#ccc;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;">&#x1F512;</div><div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Capstone Module</p><p style="font-size:0.72rem;color:var(--gray);">Complete all modules to unlock</p></div></div>';
+  }
+  html += '</div>';
 }
 
 function toggleCareerModuleLessons(programId, week) {
