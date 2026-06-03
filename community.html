@@ -3970,6 +3970,7 @@ function downloadIDCard() {
 const HEAD_PASSWORD = 'YAN@HEAD2026';
 
 async function loadHeadPanel() {
+  // exposed as window.loadHeadPanel below
   const dept = currentUserData.department;
   const container = document.getElementById('head-container');
   if (!container) return;
@@ -3982,7 +3983,7 @@ async function loadHeadPanel() {
         '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">Admin — Select Department</h2>' +
         '<p style="color:var(--gray);font-size:0.85rem;margin-bottom:1.5rem;">As an admin you have access to all departments. Select one to manage:</p>' +
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">' +
-        DEPARTMENTS.map(d => '<button data-dept="' + d.id + '" onclick="window._adminHeadDept=this.dataset.dept;loadHeadPanel()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;padding:1rem;text-align:left;cursor:pointer;font-family:Poppins,sans-serif;font-size:0.85rem;font-weight:700;color:var(--navy);">' + d.name + '</button>').join('') +
+        DEPARTMENTS.map(d => '<button data-dept="' + d.id + '" onclick="window._adminHeadDept=this.dataset.dept;window.loadHeadPanel()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;padding:1rem;text-align:left;cursor:pointer;font-family:Poppins,sans-serif;font-size:0.85rem;font-weight:700;color:var(--navy);">' + d.name + '</button>').join('') +
         '</div></div>';
       return;
     }
@@ -4066,6 +4067,7 @@ async function loadHeadPanel() {
   showHeadSection('overview');
 }
 
+window.loadHeadPanel = loadHeadPanel;
 window.submitHeadAgreement = async function() {
   const pwd = document.getElementById('head-pwd')?.value;
   const agreed = document.getElementById('head-agree-chk')?.checked;
@@ -10694,8 +10696,6 @@ async function openCareerProgram(programId) {
     }
     html += '</div>';
     html += '</div>';
-  });
-
     // Discussion after completed module (career)
     if (unlocked && allDone) {
       html += '<div style="margin-top:0.75rem;border-top:2px dashed rgba(27,42,107,0.15);padding-top:0.75rem;">';
@@ -10706,6 +10706,8 @@ async function openCareerProgram(programId) {
       setTimeout(function(){ loadDiscussion(programId, week); }, 100);
     }
   html += '</div>';
+  });
+
   box.innerHTML = html;
 
   // CAPSTONE MODULE for career programs
