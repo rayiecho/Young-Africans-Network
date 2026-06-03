@@ -1113,6 +1113,108 @@ window.loadNewslettersAdmin = loadNewslettersAdmin;
 
 
 window.loadSystemErrors = loadSystemErrors;
+window.loadPrograms = async function(c) {
+  c.innerHTML = '<div class="loading">Loading programs...</div>';
+  try {
+    const [trainSnap, careerSnap] = await Promise.all([
+      getDocs(collection(db,'trainingPrograms')),
+      getDocs(collection(db,'careerPrograms'))
+    ]);
+    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
+    html += '<div class="stat-card navy"><div class="stat-num">' + trainSnap.size + '</div><div class="stat-label">Training Programs</div></div>';
+    html += '<div class="stat-card gold"><div class="stat-num">' + careerSnap.size + '</div><div class="stat-label">Career Programs</div></div>';
+    html += '</div>';
+    html += '<div class="section-card"><h3 style="margin-bottom:1rem;">Training Programs</h3>';
+    trainSnap.docs.forEach(d => {
+      const p = d.data();
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.65rem 0;border-bottom:1px solid var(--light);">';
+      html += '<div><p style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + sanitize(p.title||'') + '</p>';
+      html += '<p style="font-size:0.72rem;color:var(--gray);">' + sanitize(p.category||'') + ' · ' + (p.enrolledBy?.length||0) + ' enrolled</p></div>';
+      html += '<span style="font-size:0.72rem;font-weight:700;color:' + (p.enrollmentOpen?'var(--green)':'var(--red)') + ';">' + (p.enrollmentOpen?'Open':'Closed') + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<div class="section-card" style="margin-top:1rem;"><h3 style="margin-bottom:1rem;">Career Programs</h3>';
+    careerSnap.docs.forEach(d => {
+      const p = d.data();
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.65rem 0;border-bottom:1px solid var(--light);">';
+      html += '<div><p style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + sanitize(p.title||'') + '</p>';
+      html += '<p style="font-size:0.72rem;color:var(--gray);">' + sanitize(p.category||'') + '</p></div>';
+      html += '<span style="font-size:0.72rem;font-weight:700;color:' + (p.enrollmentOpen?'var(--green)':'var(--red)') + ';">' + (p.enrollmentOpen?'Open':'Closed') + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+};
+
+window.loadApplications = async function(c) {
+  c.innerHTML = '<div class="loading">Loading applications...</div>';
+  try {
+    const snap = await getDocs(query(collection(db,'applications'), orderBy('submittedAt','desc'))).catch(()=>getDocs(collection(db,'applications')));
+    if (snap.empty) { c.innerHTML = '<div class="section-card" style="text-align:center;padding:2rem;"><p style="color:var(--gray);">No applications yet.</p></div>'; return; }
+    let html = '<div class="section-card"><h3 style="margin-bottom:1rem;">Program Applications (' + snap.size + ')</h3>';
+    snap.docs.forEach(d => {
+      const a = d.data();
+      html += '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">';
+      html += '<div><p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(a.userName||a.name||'') + '</p>';
+      html += '<p style="font-size:0.75rem;color:var(--gray);">' + sanitize(a.programId||a.program||'') + ' · ' + sanitize(a.country||'') + '</p>';
+      if (a.motivation) html += '<p style="font-size:0.78rem;color:var(--navy);margin-top:0.3rem;">' + sanitize(a.motivation.substring(0,150)) + '...</p>';
+      html += '</div>';
+      html += '<div style="display:flex;gap:0.5rem;">';
+      html += '<button onclick="approveApplication('' + d.id + '','' + sanitize(a.userId||'') + '','' + sanitize(a.programId||'') + '')" style="background:var(--green);color:#fff;border:none;padding:0.35rem 0.85rem;border-radius:50px;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">Approve</button>';
+      html += '<button onclick="rejectApplication('' + d.id + '')" style="background:var(--red);color:#fff;border:none;padding:0.35rem 0.85rem;border-radius:50px;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">Reject</button>';
+      html += '</div></div></div>';
+    });
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+};
+
+window.loadMentors = async function(c) {
+  c.innerHTML = '<div class="loading">Loading mentors...</div>';
+  try {
+    const snap = await getDocs(query(collection(db,'users'), where('isMentor','==',true)));
+    const sessSnap = await getDocs(query(collection(db,'mentorSessions'), orderBy('createdAt','desc'), limit(20))).catch(()=>({docs:[],size:0}));
+    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
+    html += '<div class="stat-card navy"><div class="stat-num">' + snap.size + '</div><div class="stat-label">Active Mentors</div></div>';
+    html += '<div class="stat-card gold"><div class="stat-num">' + sessSnap.size + '</div><div class="stat-label">Sessions</div></div>';
+    html += '</div>';
+    html += '<div class="section-card"><h3 style="margin-bottom:1rem;">Mentors (' + snap.size + ')</h3>';
+    if (snap.empty) {
+      html += '<p style="color:var(--gray);">No mentors registered yet.</p>';
+    } else {
+      snap.docs.forEach(d => {
+        const u = d.data();
+        html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--light);">';
+        html += u.photoUrl ? '<img src="' + sanitize(u.photoUrl) + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">' : '<div style="width:36px;height:36px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">' + (u.name||'?')[0] + '</div>';
+        html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(u.name||'') + '</p>';
+        html += '<p style="font-size:0.72rem;color:var(--gray);">' + sanitize(u.department||'') + ' · ' + sanitize(u.country||'') + '</p></div>';
+        html += '</div>';
+      });
+    }
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+};
+
+window.approveApplication = async function(id, userId, programId) {
+  await updateDoc(doc(db,'applications',id), {status:'approved', approvedAt:serverTimestamp()});
+  if (userId && programId) {
+    await updateDoc(doc(db,'users',userId), {[`enrolled_${programId}`]:true});
+    await addDoc(collection(db,'notifications'), {title:'Application Approved!', message:'Your application for ' + programId + ' has been approved. You can now enroll!', type:'success', userId, postedBy:'YAN Admin', createdAt:serverTimestamp(), readBy:[]});
+  }
+  showToast('Application approved!');
+  window.loadApplications(document.getElementById('group-content-programs_group'));
+};
+
+window.rejectApplication = async function(id) {
+  await updateDoc(doc(db,'applications',id), {status:'rejected', rejectedAt:serverTimestamp()});
+  showToast('Application rejected.');
+  window.loadApplications(document.getElementById('group-content-programs_group'));
+};
+
 window.loadGroupSection = function(c, groupId, tabs) {
   const savedTab = localStorage.getItem('yan_admin_subtab_' + groupId) || tabs[0].id;
   const activeTab = tabs.find(t => t.id === savedTab) || tabs[0];
