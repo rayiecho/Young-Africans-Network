@@ -7706,7 +7706,7 @@ async function openProgram(programId) {
       html += '<div id="discussion-' + programId + '-' + week + '" style="max-height:200px;overflow-y:auto;margin-bottom:0.5rem;"></div>';
       html += '<div style="display:flex;gap:0.5rem;"><input type="text" id="disc-input-' + programId + '-' + week + '" placeholder="Share your thoughts..." style="flex:1;background:var(--light);border:1.5px solid rgba(27,42,107,0.15);border-radius:50px;padding:0.5rem 0.85rem;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;"><button onclick="postDiscussion(\''  + programId + '\',\'' + week + '\')" style="background:var(--navy);color:#fff;border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;flex-shrink:0;">&#9658;</button></div>';
       html += '</div>';
-      setTimeout(function(){ loadDiscussion('' + programId + '', '' + week + ''); }, 100);
+      setTimeout(function(){ loadDiscussion(programId, week); }, 100);
     }
     html += '</div>';
     html += '</div>';
