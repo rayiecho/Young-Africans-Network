@@ -3951,12 +3951,345 @@ function downloadIDCard() {
 }
 
 // HEAD PANEL
+const HEAD_PASSWORD = 'YAN@HEAD2026';
+
 async function loadHeadPanel() {
   const dept = currentUserData.department;
   const container = document.getElementById('head-container');
+  if (!container) return;
+
+  // Check if head access is granted
+  const accessSnap = await getDoc(doc(db, 'headAccess', currentUser.uid));
+  const hasAccess = accessSnap.exists() && accessSnap.data().granted === true;
+
+  if (!hasAccess) {
+    // Show agreement + password form
+    container.innerHTML = `
+      <div style="max-width:500px;margin:2rem auto;">
+        <div style="text-align:center;margin-bottom:2rem;">
+          <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--red));display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--navy);">Department Head Access</h2>
+          <p style="color:var(--gray);font-size:0.85rem;margin-top:0.5rem;">${DEPARTMENTS.find(d=>d.id===dept)?.name||dept}</p>
+        </div>
+        <div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+          <p style="font-size:0.85rem;color:var(--navy);font-weight:700;margin-bottom:1rem;">Department Head Agreement</p>
+          <div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:1.25rem;max-height:200px;overflow-y:auto;font-size:0.78rem;color:var(--gray);line-height:1.8;">
+            <p><strong>As a YAN Department Head, I agree to:</strong></p>
+            <p>1. Lead my department with integrity, transparency and commitment to YAN's mission of empowering African youth.</p>
+            <p>2. Actively manage my department — post updates, respond to members, schedule meetings and drive engagement.</p>
+            <p>3. Never abuse my access to member data or platform tools for personal gain.</p>
+            <p>4. Uphold YAN's values of pan-Africanism, excellence, collaboration and youth empowerment in all my actions.</p>
+            <p>5. Report any issues, concerns or conflicts of interest to YAN leadership immediately.</p>
+            <p>6. Understand that my head access can be revoked at any time by YAN administration for misconduct.</p>
+            <p>7. Represent YAN professionally in all interactions with members, partners and the public.</p>
+          </div>
+          <div class="form-group">
+            <label style="font-size:0.82rem;font-weight:600;color:var(--navy);">Head Panel Password</label>
+            <input type="password" id="head-pwd" placeholder="Enter department head password" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;outline:none;box-sizing:border-box;margin-top:0.35rem;">
+          </div>
+          <div style="display:flex;gap:0.5rem;align-items:flex-start;margin-bottom:1rem;">
+            <input type="checkbox" id="head-agree-chk" style="margin-top:3px;width:16px;height:16px;flex-shrink:0;">
+            <label for="head-agree-chk" style="font-size:0.78rem;color:var(--navy);line-height:1.6;cursor:pointer;">I have read and agree to the Department Head Agreement above and commit to fulfilling my responsibilities to YAN and its members.</label>
+          </div>
+          <button onclick="submitHeadAgreement()" style="width:100%;background:var(--navy);color:#fff;border:none;padding:0.85rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;">Request Access</button>
+          <p style="font-size:0.72rem;color:var(--gray);text-align:center;margin-top:0.75rem;">Your request will be reviewed by YAN Admin. You will be notified once access is granted.</p>
+        </div>
+      </div>`;
+    return;
+  }
+
+  // ACCESS GRANTED — Load full head panel
+  const deptName = DEPARTMENTS.find(d=>d.id===dept)?.name || dept;
   container.innerHTML = `
-    <h2> Department Head Panel</h2>
-    <p style="color:var(--gray);margin-bottom:1.5rem;"><strong>${DEPARTMENTS.find(d=>d.id===dept)?.name||dept}</strong></p>
+    <div style="max-width:900px;margin:0 auto;">
+      <div style="background:linear-gradient(135deg,var(--navy),#2D3F7B);border-radius:20px;padding:1.5rem;margin-bottom:1.5rem;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+        <div>
+          <p style="font-size:0.75rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.25rem;">Department Head Panel</p>
+          <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;">${deptName}</h2>
+        </div>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+          <button onclick="showHeadSection('overview')" class="head-nav-btn active" id="hn-overview">Overview</button>
+          <button onclick="showHeadSection('members')" class="head-nav-btn" id="hn-members">Members</button>
+          <button onclick="showHeadSection('posts')" class="head-nav-btn" id="hn-posts">Post & Moderate</button>
+          <button onclick="showHeadSection('newsletter')" class="head-nav-btn" id="hn-newsletter">Newsletter</button>
+          <button onclick="showHeadSection('meetings')" class="head-nav-btn" id="hn-meetings">Meetings</button>
+          <button onclick="showHeadSection('assignments')" class="head-nav-btn" id="hn-assignments">Assignments</button>
+          <button onclick="showHeadSection('notify')" class="head-nav-btn" id="hn-notify">Notify</button>
+        </div>
+      </div>
+      <div id="head-section-content"></div>
+    </div>`;
+
+  // Load overview by default
+  showHeadSection('overview');
+}
+
+window.submitHeadAgreement = async function() {
+  const pwd = document.getElementById('head-pwd')?.value;
+  const agreed = document.getElementById('head-agree-chk')?.checked;
+  if (!agreed) return showToast('Please read and agree to the agreement', 'error');
+  if (pwd !== HEAD_PASSWORD) return showToast('Incorrect password', 'error');
+  try {
+    await setDoc(doc(db, 'headAccess', currentUser.uid), {
+      userId: currentUser.uid, userName: currentUserData.name,
+      department: currentUserData.department, agreed: true,
+      granted: false, requestedAt: serverTimestamp()
+    });
+    showToast('Access requested! Admin will review and approve shortly.');
+    loadHeadPanel();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+window.showHeadSection = function(section) {
+  document.querySelectorAll('.head-nav-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('hn-' + section);
+  if (btn) btn.classList.add('active');
+  const content = document.getElementById('head-section-content');
+  if (!content) return;
+  const dept = currentUserData.department;
+  switch(section) {
+    case 'overview': loadHeadOverview(content, dept); break;
+    case 'members': loadHeadMembers(content, dept); break;
+    case 'posts': loadHeadPosts(content, dept); break;
+    case 'newsletter': loadHeadNewsletter(content, dept); break;
+    case 'meetings': loadHeadMeetings(content, dept); break;
+    case 'assignments': loadHeadAssignments(content, dept); break;
+    case 'notify': loadHeadNotify(content, dept); break;
+  }
+};
+
+async function loadHeadOverview(c, dept) {
+  c.innerHTML = '<div class="loading">Loading overview...</div>';
+  try {
+    const [membersSnap, postsSnap] = await Promise.all([
+      getDocs(query(collection(db,'users'), where('department','==',dept))),
+      getDocs(query(collection(db,'posts'), where('department','==',dept), orderBy('createdAt','desc'), limit(5)))
+    ]);
+    const deptName = DEPARTMENTS.find(d=>d.id===dept)?.name || dept;
+    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--navy);">' + membersSnap.size + '</div><div style="font-size:0.75rem;color:var(--gray);">Department Members</div></div>';
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + postsSnap.size + '</div><div style="font-size:0.75rem;color:var(--gray);">Recent Posts</div></div>';
+    html += '</div>';
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
+    html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Quick Actions</h3>';
+    html += '<div style="display:flex;gap:0.75rem;flex-wrap:wrap;">';
+    html += '<button onclick="showHeadSection('posts')" style="background:var(--navy);color:#fff;border:none;padding:0.6rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">Post to Feed</button>';
+    html += '<button onclick="showHeadSection('notify')" style="background:var(--gold);color:var(--navy);border:none;padding:0.6rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">Notify Members</button>';
+    html += '<button onclick="showHeadSection('members')" style="background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);padding:0.6rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">View Members</button>';
+    html += '</div></div>';
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+}
+
+async function loadHeadMembers(c, dept) {
+  c.innerHTML = '<div class="loading">Loading members...</div>';
+  try {
+    const snap = await getDocs(query(collection(db,'users'), where('department','==',dept)));
+    if (snap.empty) { c.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">No members in this department yet.</div>'; return; }
+    let html = '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
+    html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Department Members (' + snap.size + ')</h3>';
+    snap.docs.forEach(d => {
+      const u = d.data();
+      html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--light);">';
+      html += u.photoUrl ? '<img src="' + sanitize(u.photoUrl) + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">' : '<div style="width:36px;height:36px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">' + (u.name||'?')[0] + '</div>';
+      html += '<div style="flex:1;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(u.name||'') + '</p>';
+      html += '<p style="font-size:0.72rem;color:var(--gray);">' + sanitize(u.country||'') + ' · ' + sanitize(u.role||'Member') + '</p></div>';
+      html += '<button onclick="viewMemberProgress('' + d.id + '','' + sanitize(u.name||'') + '')" style="background:var(--light);color:var(--navy);border:none;padding:0.3rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;cursor:pointer;">Progress</button>';
+      html += '</div>';
+    });
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+}
+
+async function loadHeadPosts(c, dept) {
+  c.innerHTML = '<div class="loading">Loading...</div>';
+  try {
+    const postsSnap = await getDocs(query(collection(db,'posts'), orderBy('createdAt','desc'), limit(30)));
+    let html = '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:1rem;">';
+    html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Post to Community Feed</h3>';
+    html += '<textarea id="head-post-content" rows="3" placeholder="Share something with the YAN community..." style="width:100%;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.85rem;outline:none;resize:none;box-sizing:border-box;margin-bottom:0.75rem;"></textarea>';
+    html += '<button onclick="headPostToFeed()" style="background:var(--navy);color:#fff;border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Post to Feed</button>';
+    html += '</div>';
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
+    html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Moderate Recent Posts</h3>';
+    postsSnap.docs.forEach(d => {
+      const p = d.data();
+      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:0.75rem 0;border-bottom:1px solid var(--light);gap:0.5rem;">';
+      html += '<div style="flex:1;"><p style="font-size:0.82rem;font-weight:700;color:var(--navy);">' + sanitize(p.authorName||'') + '</p>';
+      html += '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize((p.content||'').substring(0,100)) + '...</p></div>';
+      html += '<button onclick="headDeletePost('' + d.id + '')" style="background:var(--red);color:#fff;border:none;padding:0.3rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;cursor:pointer;flex-shrink:0;">Delete</button>';
+      html += '</div>';
+    });
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+}
+
+async function loadHeadNewsletter(c, dept) {
+  c.innerHTML = '<div class="loading">Loading...</div>';
+  const deptName = DEPARTMENTS.find(d=>d.id===dept)?.name || dept;
+  c.innerHTML = '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">' +
+    '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Send Department Newsletter</h3>' +
+    '<div class="form-group"><label style="font-size:0.82rem;font-weight:600;color:var(--navy);">Subject</label><input type="text" id="head-nl-subject" placeholder="e.g. ' + deptName + ' Monthly Update" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;outline:none;box-sizing:border-box;margin-top:0.35rem;"></div>' +
+    '<div class="form-group" style="margin-top:0.75rem;"><label style="font-size:0.82rem;font-weight:600;color:var(--navy);">Message</label><textarea id="head-nl-body" rows="6" placeholder="Write your newsletter..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;outline:none;resize:none;box-sizing:border-box;margin-top:0.35rem;"></textarea></div>' +
+    '<button onclick="sendHeadNewsletter('' + dept + '')" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;margin-top:0.75rem;">Send to Department Members</button>' +
+    '</div>';
+}
+
+async function loadHeadMeetings(c, dept) {
+  c.innerHTML = '<div class="loading">Loading...</div>';
+  try {
+    const snap = await getDocs(query(collection(db,'meetings'), where('department','==',dept), orderBy('date','desc'), limit(10)));
+    let html = '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:1rem;">';
+    html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Schedule Meeting</h3>';
+    html += '<div class="form-group"><label style="font-size:0.82rem;font-weight:600;">Title</label><input type="text" id="head-mtg-title2" placeholder="e.g. Weekly Sync" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-top:0.25rem;"></div>';
+    html += '<div class="form-group" style="margin-top:0.5rem;"><label style="font-size:0.82rem;font-weight:600;">Date & Time</label><input type="datetime-local" id="head-mtg-date2" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-top:0.25rem;"></div>';
+    html += '<div class="form-group" style="margin-top:0.5rem;"><label style="font-size:0.82rem;font-weight:600;">Meeting Link</label><input type="url" id="head-mtg-link2" placeholder="Paste Google Meet, Zoom or Daily.co link" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-top:0.25rem;"></div>';
+    html += '<button onclick="scheduleHeadMeeting('' + dept + '')" style="background:var(--navy);color:#fff;border:none;padding:0.65rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;margin-top:0.75rem;">Schedule Meeting</button>';
+    html += '</div>';
+    if (!snap.empty) {
+      html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
+      html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Past Meetings</h3>';
+      snap.docs.forEach(d => {
+        const m = d.data();
+        html += '<div style="padding:0.65rem 0;border-bottom:1px solid var(--light);"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(m.title||'') + '</p><p style="font-size:0.72rem;color:var(--gray);">' + (m.date ? new Date(m.date.seconds*1000).toLocaleDateString() : '') + '</p></div>';
+      });
+      html += '</div>';
+    }
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+}
+
+async function loadHeadAssignments(c, dept) {
+  c.innerHTML = '<div class="loading">Loading assignments...</div>';
+  try {
+    const snap = await getDocs(query(collection(db,'programAssignments'), where('department','==',dept), orderBy('submittedAt','desc'), limit(30))).catch(()=>getDocs(collection(db,'programAssignments')));
+    if (snap.empty) { c.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">No assignments yet.</div>'; return; }
+    let html = '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
+    html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Grade Assignments (' + snap.size + ')</h3>';
+    snap.docs.forEach(d => {
+      const a = d.data();
+      const graded = a.grade !== undefined;
+      html += '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">';
+      html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(a.userName||'') + '</p>';
+      html += '<p style="font-size:0.72rem;color:var(--gray);">' + sanitize(a.programId||'') + ' · ' + (a.submittedAt ? new Date(a.submittedAt.seconds*1000).toLocaleDateString() : '') + '</p></div>';
+      html += graded ? '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">Graded: ' + a.grade + '/100</span>' : '<span style="background:rgba(245,166,35,0.1);color:#b37800;padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:700;">Pending</span>';
+      html += '</div>';
+      if (a.submission) html += '<p style="font-size:0.78rem;color:var(--navy);background:white;border-radius:8px;padding:0.5rem;margin-bottom:0.5rem;">' + sanitize(a.submission.substring(0,200)) + '</p>';
+      if (!graded) {
+        html += '<div style="display:flex;gap:0.5rem;margin-top:0.5rem;">';
+        html += '<input type="number" id="grade-' + d.id + '" placeholder="Score /100" min="0" max="100" style="width:100px;padding:0.4rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;">';
+        html += '<input type="text" id="feedback-' + d.id + '" placeholder="Feedback..." style="flex:1;padding:0.4rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;">';
+        html += '<button onclick="gradeAssignment('' + d.id + '','' + (a.userId||'') + '')" style="background:var(--green);color:#fff;border:none;padding:0.4rem 0.75rem;border-radius:8px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Grade</button>';
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
+}
+
+async function loadHeadNotify(c, dept) {
+  const deptName = DEPARTMENTS.find(d=>d.id===dept)?.name || dept;
+  c.innerHTML = '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">' +
+    '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Notify Department Members</h3>' +
+    '<div class="form-group"><label style="font-size:0.82rem;font-weight:600;">Title</label><input type="text" id="head-notif-title2" placeholder="e.g. New assignment posted" style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-top:0.25rem;"></div>' +
+    '<div class="form-group" style="margin-top:0.75rem;"><label style="font-size:0.82rem;font-weight:600;">Message</label><textarea id="head-notif-msg2" rows="4" placeholder="Write your message to ' + deptName + ' members..." style="width:100%;padding:0.65rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;resize:none;box-sizing:border-box;margin-top:0.25rem;"></textarea></div>' +
+    '<button onclick="sendHeadNotification('' + dept + '')" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;margin-top:0.75rem;">Send Notification</button>' +
+    '</div>';
+}
+
+window.headPostToFeed = async function() {
+  const content = document.getElementById('head-post-content')?.value.trim();
+  if (!content) return showToast('Write something first', 'error');
+  await addDoc(collection(db,'posts'), {
+    content, category: 'Announcement', authorId: currentUser.uid,
+    authorName: currentUserData.name, authorPhoto: currentUserData.photoUrl||'',
+    department: currentUserData.department, likes: [], createdAt: serverTimestamp()
+  });
+  document.getElementById('head-post-content').value = '';
+  showToast('Posted to community feed!');
+  await awardPoints(currentUserData.uid, 'post_created', 'Posted to feed', 1);
+};
+
+window.headDeletePost = async function(postId) {
+  if (!confirm('Delete this post?')) return;
+  await deleteDoc(doc(db,'posts',postId));
+  showToast('Post deleted');
+  showHeadSection('posts');
+};
+
+window.gradeAssignment = async function(assignId, userId) {
+  const grade = parseInt(document.getElementById('grade-' + assignId)?.value);
+  const feedback = document.getElementById('feedback-' + assignId)?.value.trim();
+  if (!grade || grade < 0 || grade > 100) return showToast('Enter a valid score (0-100)', 'error');
+  await updateDoc(doc(db,'programAssignments',assignId), {
+    grade, feedback: feedback||'', gradedAt: serverTimestamp(), gradedBy: currentUserData.name
+  });
+  if (userId) await addDoc(collection(db,'notifications'), {
+    title: 'Assignment Graded!', message: 'Your assignment has been graded: ' + grade + '/100. ' + (feedback||''),
+    type: 'success', userId, postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
+  });
+  showToast('Assignment graded!');
+  loadHeadAssignments(document.getElementById('head-section-content'), currentUserData.department);
+};
+
+window.scheduleHeadMeeting = async function(dept) {
+  const title = document.getElementById('head-mtg-title2')?.value.trim();
+  const date = document.getElementById('head-mtg-date2')?.value;
+  const link = document.getElementById('head-mtg-link2')?.value.trim();
+  if (!title || !date) return showToast('Title and date required', 'error');
+  await addDoc(collection(db,'meetings'), {
+    title, date: new Date(date), link: link||'', department: dept,
+    createdBy: currentUserData.name, createdAt: serverTimestamp(), isLive: false
+  });
+  showToast('Meeting scheduled!');
+  await addDoc(collection(db,'notifications'), {
+    title: 'Meeting Scheduled: ' + title,
+    message: 'A new meeting has been scheduled for ' + new Date(date).toLocaleString() + (link ? '. Join: ' + link : ''),
+    type: 'info', department: dept, postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
+  });
+  loadHeadMeetings(document.getElementById('head-section-content'), dept);
+};
+
+window.sendHeadNotification = async function(dept) {
+  const title = document.getElementById('head-notif-title2')?.value.trim();
+  const msg = document.getElementById('head-notif-msg2')?.value.trim();
+  if (!title || !msg) return showToast('Title and message required', 'error');
+  const membersSnap = await getDocs(query(collection(db,'users'), where('department','==',dept)));
+  const batch = membersSnap.docs.map(d => addDoc(collection(db,'notifications'), {
+    title, message: msg, type: 'info', userId: d.id,
+    postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
+  }));
+  await Promise.all(batch);
+  showToast('Notification sent to ' + membersSnap.size + ' members!');
+  document.getElementById('head-notif-title2').value = '';
+  document.getElementById('head-notif-msg2').value = '';
+};
+
+window.sendHeadNewsletter = async function(dept) {
+  const subject = document.getElementById('head-nl-subject')?.value.trim();
+  const body = document.getElementById('head-nl-body')?.value.trim();
+  if (!subject || !body) return showToast('Subject and message required', 'error');
+  const membersSnap = await getDocs(query(collection(db,'users'), where('department','==',dept)));
+  const emails = membersSnap.docs.map(d => d.data().email).filter(Boolean);
+  try {
+    await fetch('https://yan-email-worker.youngafricansn.workers.dev', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({type:'bulk', subject, body, emails})
+    });
+    showToast('Newsletter sent to ' + emails.length + ' members!');
+    document.getElementById('head-nl-subject').value = '';
+    document.getElementById('head-nl-body').value = '';
+  } catch(e) { showToast('Error sending: ' + e.message, 'error'); }
+};
+
+  container.innerHTML = `
     <div class="head-sections">
       <div class="head-section">
         <h3> Post to Your Hub</h3>
@@ -11796,6 +12129,9 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 .quiz-answer{width:100%;background:var(--white);border:1.5px solid rgba(27,42,107,0.1);border-radius:8px;padding:0.5rem 0.75rem;font-family:'Poppins',sans-serif;font-size:0.82rem;outline:none;}
 .btn-submit-quiz{background:var(--red);color:var(--white);padding:0.75rem 2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.88rem;font-weight:700;border:none;cursor:pointer;width:100%;margin-top:1rem;}
 .quiz-passed{background:#d4edda;color:#155724;border-radius:10px;padding:1rem;text-align:center;font-weight:600;}
+.head-nav-btn{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.2);padding:0.4rem 0.85rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.head-nav-btn:hover{background:rgba(255,255,255,0.2);color:#fff;}
+.head-nav-btn.active{background:var(--gold);color:var(--navy);border-color:var(--gold);}
 .quiz-failed{background:#f8d7da;color:#721c24;border-radius:10px;padding:1rem;text-align:center;font-size:0.85rem;}
 .quiz-failed button{background:var(--navy);color:var(--white);border:none;padding:0.4rem 1rem;border-radius:50px;margin-top:0.5rem;cursor:pointer;}
 .progress-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;}
