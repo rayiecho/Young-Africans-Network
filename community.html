@@ -7989,7 +7989,6 @@ async function submitLessonAssignment(programId, lessonId, colName) {
     let aiWeaknesses = "";
     aiScore = 0;
     aiFeedback = 'Assignment received. Your facilitator will review it shortly.';
-  }
 
   // Save to programAssignments
   const assignDoc = await addDoc(collection(db, 'programAssignments'), {
@@ -11604,8 +11603,6 @@ function getNextTier(points) {
   return idx > 0 ? TIERS[idx-1] : null;
 }
 
-  } catch(e) { console.log('Points error:', e); }
-}
 
 async function loadLeaderboard() {
   const container = document.getElementById('points-container');
