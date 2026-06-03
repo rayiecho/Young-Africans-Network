@@ -10717,6 +10717,8 @@ async function openCareerProgram(programId) {
   }
   html += '</div>';
 }
+  box.innerHTML = html;
+  if (allCareerModulesDone) { setTimeout(function(){ loadCapstone(programId); }, 100); }
 
 function toggleCareerModuleLessons(programId, week) {
   const box = document.getElementById('career-module-lessons-' + programId + '-' + week);
