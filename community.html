@@ -4058,6 +4058,7 @@ async function loadHeadPanel() {
           <button onclick="showHeadSection(\'assignments\')" class="head-nav-btn" id="hn-assignments">Assignments</button>
           <button onclick="showHeadSection(\'notify\')" class="head-nav-btn" id="hn-notify">Notify</button>
           <button onclick="showHeadSection(\'depttools\')" class="head-nav-btn" id="hn-depttools">Dept Tools</button>
+          ${currentUserData.isAdmin ? '<button onclick="window._adminHeadDept=null;loadHeadPanel()" class="head-nav-btn" style="background:rgba(230,51,41,0.3);color:#fff;">← Back to Depts</button>' : ''}
         </div>
       </div>
       <div id="head-section-content"></div>
