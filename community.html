@@ -12365,6 +12365,17 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
   .admin-stats-grid{grid-template-columns:repeat(2,1fr);}
   .landing-features{grid-template-columns:1fr;}
   .rooms-grid{grid-template-columns:1fr;}
+  /* MOBILE TOPBAR FIX */
+  .topbar{padding:0 0.75rem;gap:0.4rem;}
+  .topbar-right{gap:0.4rem;}
+  .topbar-points-label{display:none;}
+  .topbar-back-label{display:none;}
+  .topbar-back{padding:0.4rem 0.5rem;font-size:0;}
+  .topbar-back svg{display:block;}
+  #global-search-input{padding:0.45rem 0.6rem;font-size:0.75rem;}
+  .topbar div[style*="max-width:400px"]{max-width:120px !important;margin:0 0.25rem !important;}
+  #members-mobile-btn span{display:none;}
+  #members-mobile-btn{padding:0.4rem 0.5rem;}
 }
 @media(max-width:480px){
   .admin-stats-grid{grid-template-columns:1fr 1fr;}
@@ -12631,12 +12642,12 @@ h2,h3{position:relative;}
         </div>
         <div onclick="showTab('points')" style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.85rem;border-radius:50px;border:1px solid rgba(27,42,107,0.15);cursor:pointer;transition:all 0.2s;background:#fff;" title="Legacy Points">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <span style="font-size:0.78rem;font-weight:700;color:var(--navy);">Legacy Points</span>
+          <span class="topbar-points-label" style="font-size:0.78rem;font-weight:700;color:var(--navy);">Legacy Points</span>
           <span id="topbar-points" style="font-size:0.78rem;font-weight:800;color:var(--gold);min-width:20px;">0</span>
         </div>
         <a href="index.html" class="topbar-back">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
-          Main Site
+          <span class="topbar-back-label">Main Site</span>
         </a>
       </div>
     </div>
