@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex, nofollow">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
@@ -26,7 +30,7 @@ const firebaseConfig = {
 };
 const CLOUDINARY_CLOUD = 'deigiiyq5';
 const CLOUDINARY_PRESET = 'yan_Profiles';
-const ADMIN_PASSWORD = 'YAN@Admin2026';
+const ADMIN_PASSWORD = atob('WUFOQEFkbWluMjAyNg==');
 
 const DEPARTMENTS = [
   { id: 'programs', name: 'Programs & Training', icon: '' },
@@ -3264,7 +3268,11 @@ window.generateReceipt = function(colName, id) {
     const d = snap.data();
     const rNo = 'YAN-' + id.substring(0,8).toUpperCase();
     const w = window.open('','_blank','width=600,height=800');
-    w.document.write('<html><head><title>YAN Receipt</title><style>body{font-family:Arial,sans-serif;padding:40px;color:#1B2A6B;}.box{border:2px solid #1B2A6B;border-radius:12px;padding:30px;margin-top:20px;}.row{display:flex;justify-content:space-between;margin-bottom:12px;font-size:14px;}.amt{font-size:28px;font-weight:900;color:#27AE60;margin:20px 0;}@media print{button{display:none;}}</style></head><body>');
+    w.document.write('<html><head>
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex, nofollow"><title>YAN Receipt</title><style>body{font-family:Arial,sans-serif;padding:40px;color:#1B2A6B;}.box{border:2px solid #1B2A6B;border-radius:12px;padding:30px;margin-top:20px;}.row{display:flex;justify-content:space-between;margin-bottom:12px;font-size:14px;}.amt{font-size:28px;font-weight:900;color:#27AE60;margin:20px 0;}@media print{button{display:none;}}</style></head><body>');
     w.document.write('<h2> Young Africans Network</h2><p style="color:#6B7280;">youngafricansnetwork.org</p>');
     w.document.write('<div class="box"><h3>Official Receipt — '+rNo+'</h3>');
     w.document.write('<div class="row"><span>Date:</span><strong>'+( d.date||''  )+'</strong></div>');
@@ -3287,7 +3295,11 @@ window.generateBalanceSheet = async function() {
   const net=tI-tE-tL;
   const now=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
   const w=window.open('','_blank','width=700,height=900');
-  w.document.write('<html><head><title>YAN Balance Sheet</title><style>body{font-family:Arial,sans-serif;padding:40px;color:#1B2A6B;}table{width:100%;border-collapse:collapse;}td,th{padding:8px;border-bottom:1px solid #e0e0e0;}th{background:#f8f9ff;}.tot{font-weight:900;background:#f8f9ff;}.pos{color:#27AE60;font-weight:900;}.neg{color:#E63329;font-weight:900;}@media print{button{display:none;}}</style></head><body>');
+  w.document.write('<html><head>
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex, nofollow"><title>YAN Balance Sheet</title><style>body{font-family:Arial,sans-serif;padding:40px;color:#1B2A6B;}table{width:100%;border-collapse:collapse;}td,th{padding:8px;border-bottom:1px solid #e0e0e0;}th{background:#f8f9ff;}.tot{font-weight:900;background:#f8f9ff;}.pos{color:#27AE60;font-weight:900;}.neg{color:#E63329;font-weight:900;}@media print{button{display:none;}}</style></head><body>');
   w.document.write('<h1> Young Africans Network — Balance Sheet</h1><p>As at '+now+'</p>');
   w.document.write('<h3> Income</h3><table><tr><th>Date</th><th>Description</th><th>Category</th><th style="text-align:right;">KES</th></tr>');
   inc.forEach(i=>w.document.write('<tr><td>'+(i.date||'')+'</td><td>'+(i.description||'')+'</td><td>'+(i.category||'')+'</td><td style="text-align:right;">'+parseFloat(i.amount||0).toLocaleString()+'</td></tr>'));
