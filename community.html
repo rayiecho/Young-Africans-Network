@@ -10649,20 +10649,7 @@ async function openCareerProgram(programId) {
   const totalLessons = lessonsSnap.size;
   const completedCount = lessonsCompleted.length;
 
-  function isModuleUnlocked(index) {
-    if (index === 0) return true;
-    const prevModule = moduleDocs[index-1];
-    if (!prevModule) return false;
-    const prevWeek = prevModule.week || index;
-    const prevLessons = lessonsByModule[prevWeek] || [];
-    const allPrevDone = prevLessons.every(function(l){ return lessonsCompleted.includes(l.id); });
-    if (!allPrevDone) return false;
-    const lastLesson = prevLessons[prevLessons.length-1];
-    if (!lastLesson) return true;
-    const completedAt = completionDates[lastLesson.id];
-    if (!completedAt) return true;
-    return (now - completedAt) >= SEVEN_DAYS;
-  }
+
 
   let html = '<div style="background:var(--light);border-radius:12px;padding:1rem;">';
   html += '<div style="background:white;border-radius:8px;padding:0.5rem 1rem;margin-bottom:0.75rem;font-size:0.78rem;color:var(--gray);">Progress: <strong style="color:var(--navy);">' + completedCount + ' / ' + totalLessons + ' lessons completed</strong></div>';
@@ -12891,6 +12878,43 @@ window.sendYANGuideFloat = async function() {
 };
 
 
+
+window.submitCareerAssignment = async function(materialId) {
+  const input = document.getElementById('assign-input-' + materialId);
+  if (!input || !input.value.trim()) return showToast('Please write your assignment first.', 'error');
+  try {
+    await addDoc(collection(db, 'careerAssignments'), {
+      userId: currentUser.uid,
+      userName: currentUser.displayName || '',
+      materialId,
+      content: input.value.trim(),
+      status: 'pending',
+      submittedAt: serverTimestamp()
+    });
+    input.value = '';
+    document.getElementById('career-assign-' + materialId).style.display = 'none';
+    showToast('Assignment submitted!');
+  } catch(e) {
+    showToast('Error submitting: ' + e.message, 'error');
+  }
+};
+
+window.viewMemberProgress = async function(userId, userName) {
+  try {
+    const [progSnap, careerSnap] = await Promise.all([
+      getDocs(query(collection(db,'learningProgress'), where('userId','==',userId))),
+      getDocs(query(collection(db,'careerLearningProgress'), where('userId','==',userId)))
+    ]);
+    const progCount = progSnap.size;
+    const careerCount = careerSnap.size;
+    let msg = (userName || 'Member') + ' Progress:\n';
+    msg += '- Program lessons completed: ' + progCount + '\n';
+    msg += '- Career lessons completed: ' + careerCount;
+    alert(msg);
+  } catch(e) {
+    showToast('Error loading progress: ' + e.message, 'error');
+  }
+};
 </script>
 <!-- v1780508636 -->
 </body>
