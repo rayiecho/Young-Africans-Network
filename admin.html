@@ -69,8 +69,25 @@ function checkAuth() {
   }
 }
 
-window.doAdminLogin = function() {
+window.doAdminStep1 = function() {
+  const email = document.getElementById('admin-email').value.trim();
   const pass = document.getElementById('admin-pass').value;
+  if (!email) return showToast('Please enter your email.', 'error');
+  if (pass !== ADMIN_PASSWORD) return showToast('Incorrect password.', 'error');
+  // Verify email is an admin email
+  const ADMIN_EMAILS = [
+    'emmanuelikumilu@gmail.com',
+    'reganayiecho@gmail.com', 
+    'highnessmollel@gmail.com',
+    'innocentnko@gmail.com'
+  ];
+  // Proceed to step 2 regardless of email (name will verify)
+  document.getElementById('login-step1').style.display = 'none';
+  document.getElementById('login-step2').style.display = 'block';
+  document.getElementById('admin-name').focus();
+};
+
+window.doAdminStep2 = function() {
   const nameInput = document.getElementById('admin-name').value.trim().toLowerCase();
   const ADMIN_NAMES = [
     'emmanuel ikumilu mwori',
@@ -80,13 +97,11 @@ window.doAdminLogin = function() {
   ];
   const nameValid = ADMIN_NAMES.some(n => n === nameInput);
   if (!nameValid) return showToast('Name not recognized. Access denied.', 'error');
-  if (pass === ADMIN_PASSWORD) {
-    sessionStorage.setItem('yan_admin', 'true');
-    location.reload();
-  } else {
-    showToast('Incorrect password.', 'error');
-  }
+  sessionStorage.setItem('yan_admin', 'true');
+  location.reload();
 };
+
+window.doAdminLogin = window.doAdminStep1;
 window.approveRedemption = async function(id) {
   const snap = await getDoc(doc(db, 'rewardRedemptions', id));
   const r = snap.data();
@@ -4126,11 +4141,22 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <img src="images/logo.jpeg" alt="YAN Logo">
     <h2>Admin Dashboard</h2>
     <p>Young Africans Network — Content Management System</p>
-    <div class="form-group" style="margin-bottom:1rem;">
-      <input type="text" id="admin-name" placeholder="Enter your full name" style="width:100%;padding:0.85rem 1rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.88rem;outline:none;box-sizing:border-box;">
+    <!-- STEP 1: Email + Password -->
+    <div id="login-step1">
+      <div class="form-group" style="margin-bottom:1rem;">
+        <input type="email" id="admin-email" placeholder="Enter your email address" style="width:100%;padding:0.85rem 1rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.88rem;outline:none;box-sizing:border-box;">
+      </div>
+      <input type="password" id="admin-pass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doAdminStep1()" style="width:100%;padding:0.85rem 1rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.88rem;outline:none;box-sizing:border-box;margin-bottom:1rem;">
+      <button class="btn-login" onclick="doAdminStep1()">Continue →</button>
     </div>
-    <input type="password" id="admin-pass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doAdminLogin()">
-    <button class="btn-login" onclick="doAdminLogin()">Access Dashboard </button>
+    <!-- STEP 2: Name Verification -->
+    <div id="login-step2" style="display:none;">
+      <p style="font-size:0.85rem;color:#27AE60;margin-bottom:1rem;text-align:center;">✅ Password verified. Enter your full name to confirm identity.</p>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <input type="text" id="admin-name" placeholder="Enter your full name" style="width:100%;padding:0.85rem 1rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.88rem;outline:none;box-sizing:border-box;" onkeydown="if(event.key==='Enter')doAdminStep2()">
+      </div>
+      <button class="btn-login" onclick="doAdminStep2()">Access Dashboard </button>
+    </div>
     <a href="index.html" class="login-back">← Back to website</a>
   </div>
 </div>
