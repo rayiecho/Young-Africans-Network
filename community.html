@@ -2329,8 +2329,8 @@ async function downloadCertificate(certId, deptOverride, programId) {
   printWin.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8">'
     + '<div class="no-print" style="background:#f0ece4;padding:10px;font-family:Montserrat,sans-serif;font-size:11px;color:#666;text-align:center;margin-bottom:8px;">'
     + '&#9432; <strong style="color:#E63329;">PDF:</strong> Set <strong>Orientation = Landscape</strong>, Paper = A4, Margins = None'
-    + ' &nbsp;|&nbsp; <button onclick="window.print()" style="background:#1B2A6B;color:#fff;border:none;padding:4px 16px;border-radius:4px;cursor:pointer;font-weight:700;font-family:Montserrat,sans-serif;">🖨️ Save as PDF</button>'
-    + ' &nbsp;|&nbsp; <button onclick="saveCertAsImage(this)" style="background:#27AE60;color:#fff;border:none;padding:4px 16px;border-radius:4px;cursor:pointer;font-weight:700;font-family:Montserrat,sans-serif;">📸 Save as Image</button>'
+    + ' &nbsp;|&nbsp; <button onclick="window.print()" style="background:#1B2A6B;color:#fff;border:none;padding:4px 16px;border-radius:4px;cursor:pointer;font-weight:700;font-family:Montserrat,sans-serif;">&#128424; Save as PDF</button>'
+    + ' &nbsp;|&nbsp; <button onclick="saveCertAsImage(this)" style="background:#27AE60;color:#fff;border:none;padding:4px 16px;border-radius:4px;cursor:pointer;font-weight:700;font-family:Montserrat,sans-serif;">&#128248; Save as Image</button>'
     + '</div>'
     + body
     + '<scr' + 'ipt>'
@@ -10979,10 +10979,10 @@ window.saveCertFromPopup = function(certEl, btn) {
     link.download = 'YAN-Certificate.png';
     link.href = out.toDataURL('image/png');
     link.click();
-    if (btn) { btn.textContent = '📸 Save as Image'; btn.disabled = false; }
+    if (btn) { btn.textContent = '&#128248; Save as Image'; btn.disabled = false; }
   }).catch(function(e) {
     alert('Error: ' + e.message);
-    if (btn) { btn.textContent = '📸 Save as Image'; btn.disabled = false; }
+    if (btn) { btn.textContent = '&#128248; Save as Image'; btn.disabled = false; }
   });
 };
 window.saveProfile=saveProfile; window.downloadIDCard=downloadIDCard; window.changeProfilePhoto=changeProfilePhoto; window.downloadCertificate=downloadCertificate;
