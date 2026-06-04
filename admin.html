@@ -1864,11 +1864,12 @@ async function loadSystemErrors(c) {
     html += '<button onclick="loadSection(\'errors\')" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">🔄 Refresh</button>';
     html += '</div>';
 
-    if (unresolved.length === 0) {
+    if (unresolved.length === 0 && all.length === 0) {
       html += '<div class="section-card" style="text-align:center;padding:3rem;"><p style="font-size:2rem;">✅</p><p style="color:var(--gray);">No unresolved errors. System is healthy!</p></div>';
     } else {
+      const toShow = unresolved.length > 0 ? unresolved : all;
       html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--red);margin-bottom:1rem;">🚨 Unresolved Errors (' + unresolved.length + ')</h3>';
-      unresolved.forEach(d => {
+      toShow.forEach(d => {
         const e = d.data();
         const time = e.timestamp ? new Date(e.timestamp).toLocaleString() : '';
         const severityColor = e.severity === 'error' ? '#E63329' : '#F5A623';
