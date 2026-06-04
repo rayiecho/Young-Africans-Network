@@ -1172,32 +1172,7 @@ window.loadApplications = async function(c) {
   } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
 };
 
-window.loadMentors = async function(c) {
-  c.innerHTML = '<div class="loading">Loading mentors...</div>';
-  try {
-    const snap = await getDocs(query(collection(db,'users'), where('isMentor','==',true)));
-    const sessSnap = await getDocs(query(collection(db,'mentorSessions'), orderBy('createdAt','desc'), limit(20))).catch(()=>({docs:[],size:0}));
-    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
-    html += '<div class="stat-card navy"><div class="stat-num">' + snap.size + '</div><div class="stat-label">Active Mentors</div></div>';
-    html += '<div class="stat-card gold"><div class="stat-num">' + sessSnap.size + '</div><div class="stat-label">Sessions</div></div>';
-    html += '</div>';
-    html += '<div class="section-card"><h3 style="margin-bottom:1rem;">Mentors (' + snap.size + ')</h3>';
-    if (snap.empty) {
-      html += '<p style="color:var(--gray);">No mentors registered yet.</p>';
-    } else {
-      snap.docs.forEach(d => {
-        const u = d.data();
-        html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--light);">';
-        html += u.photoUrl ? '<img src="' + sanitize(u.photoUrl) + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">' : '<div style="width:36px;height:36px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">' + (u.name||'?')[0] + '</div>';
-        html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(u.name||'') + '</p>';
-        html += '<p style="font-size:0.72rem;color:var(--gray);">' + sanitize(u.department||'') + ' · ' + sanitize(u.country||'') + '</p></div>';
-        html += '</div>';
-      });
-    }
-    html += '</div>';
-    c.innerHTML = html;
-  } catch(e) { c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>'; }
-};
+window.loadMentors = async function(c) { loadMentorApplications(c); };
 
 window.approveApplication = async function(id, userId, programId) {
   await updateDoc(doc(db,'applications',id), {status:'approved', approvedAt:serverTimestamp()});
