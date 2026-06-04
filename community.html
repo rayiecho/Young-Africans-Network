@@ -11175,10 +11175,12 @@ window.openConversation = async function(convId, otherId, otherNameEncoded, othe
   const convList = document.getElementById('conversations-list');
   if (isMobile && convList) {
     convList.style.display = 'none';
-    chatArea.style.gridColumn = '1';
+    chatArea.style.display = 'flex';
+    chatArea.style.gridColumn = '1 / -1';
+    chatArea.style.minHeight = '70vh';
   }
 
-  const backBtn = isMobile ? '<button onclick="document.getElementById(\'conv-list\').style.display=\'block\';document.getElementById(\'chat-area\').innerHTML=\'\';activeConversationId=null;" style="background:none;border:none;color:var(--navy);font-size:1.2rem;cursor:pointer;padding:0 0.5rem 0 0;">←</button>' : '';
+  const backBtn = isMobile ? '<button onclick="document.getElementById(\'conversations-list\').style.display=\'block\';document.getElementById(\'chat-area\').style.display=\'none\';activeConversationId=null;" style="background:none;border:none;color:var(--navy);font-size:1.2rem;cursor:pointer;padding:0 0.5rem 0 0;">← Back</button>' : '';
 
   chatArea.innerHTML = '<div style="padding:1rem;border-bottom:1px solid var(--light);display:flex;align-items:center;gap:0.75rem;">'
     + backBtn
