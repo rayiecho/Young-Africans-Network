@@ -82,7 +82,11 @@ window.doAdminLogin = function() {
   if (!nameValid) return showToast('Name not recognized. Access denied.', 'error');
   if (pass === ADMIN_PASSWORD) {
     sessionStorage.setItem('yan_admin', 'true');
-    async function loadSystemErrors(c) {
+    location.reload();
+  } else {
+    showToast('Incorrect password.', 'error');
+  }
+};
   c.innerHTML = '<div class="loading">Loading errors...</div>';
   try {
     const [unresolvedSnap, allSnap] = await Promise.all([
@@ -340,7 +344,8 @@ checkAuth();
 
 window.doAdminLogout = function() {
   sessionStorage.removeItem('yan_admin');
-  async function loadSystemErrors(c) {
+  location.reload();
+};
   c.innerHTML = '<div class="loading">Loading errors...</div>';
   try {
     const [unresolvedSnap, allSnap] = await Promise.all([
