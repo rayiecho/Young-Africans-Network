@@ -2090,6 +2090,11 @@ window.rejectLabListing = async function(id) {
 
 checkAuth();
 
+window.doAdminLogout = function() {
+  sessionStorage.removeItem('yan_admin');
+  location.reload();
+};
+
 // ===== VIEW MEMBER PROGRESS =====
 window.viewMemberProgress = async function(userId, userName) {
   const container = document.getElementById('content-area');
