@@ -2,10 +2,6 @@
 <!-- cache-bust: v17 -->
 <html lang="en">
 <head>
-  <meta http-equiv="X-Frame-Options" content="DENY">
-  <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-  <meta name="robots" content="noindex, nofollow">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="index, follow">
@@ -2330,11 +2326,7 @@ async function downloadCertificate(certId, deptOverride, programId) {
     + '</div>';
 
   const printWin = window.open('', '_blank', 'width=1400,height=850');
-  printWin.document.write('<!DOCTYPE html><html><head>
-  <meta http-equiv="X-Frame-Options" content="DENY">
-  <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-  <meta name="robots" content="noindex, nofollow"><meta charset="UTF-8">'
+  printWin.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8">'
     + '<div class="no-print" style="background:#f0ece4;padding:10px;font-family:Montserrat,sans-serif;font-size:11px;color:#666;text-align:center;margin-bottom:8px;">'
     + '&#9432; <strong style="color:#E63329;">PDF:</strong> Set <strong>Orientation = Landscape</strong>, Paper = A4, Margins = None'
     + ' &nbsp;|&nbsp; <button onclick="window.print()" style="background:#1B2A6B;color:#fff;border:none;padding:4px 16px;border-radius:4px;cursor:pointer;font-weight:700;font-family:Montserrat,sans-serif;">&#128424; Save as PDF</button>'
@@ -2450,10 +2442,6 @@ async function downloadMagazineById(id, data) {
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta http-equiv="X-Frame-Options" content="DENY">
-  <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-  <meta name="robots" content="noindex, nofollow">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>YAN Magazine — ${month}</title>
@@ -3330,10 +3318,6 @@ async function downloadRecommendationLetter(recId) {
   const html = `<!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv="X-Frame-Options" content="DENY">
-  <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-  <meta name="robots" content="noindex, nofollow">
 <meta charset="UTF-8">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;600;700&display=swap');
@@ -3983,7 +3967,7 @@ function downloadIDCard() {
 }
 
 // HEAD PANEL
-const HEAD_PASSWORD = atob('WUFOQEJFQUQYMDI2');
+const HEAD_PASSWORD = 'YAN@HEAD2026';
 
 async function loadHeadPanel() {
   // exposed as window.loadHeadPanel below
