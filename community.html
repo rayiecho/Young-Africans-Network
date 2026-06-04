@@ -12379,6 +12379,49 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
 }
 @media(max-width:480px){
   .admin-stats-grid{grid-template-columns:1fr 1fr;}
+  .topbar div[style*="max-width:400px"]{max-width:90px !important;}
+  .auth-card{padding:1.5rem;}
+}
+@media(max-width:768px){
+  /* CONTENT AREAS */
+  .tab-panel{padding:0.75rem !important;}
+  .section-card{padding:1rem !important;border-radius:12px !important;}
+  .post-card{padding:1rem !important;}
+  .post-composer{padding:1rem !important;}
+  
+  /* GRIDS - stack on mobile */
+  .stat-grid,.stats-grid,.stat-cards{grid-template-columns:1fr 1fr !important;}
+  .two-col,.three-col,.four-col{grid-template-columns:1fr !important;}
+  .dept-tools-grid{grid-template-columns:1fr !important;}
+  .programs-grid{grid-template-columns:1fr !important;}
+  .scholarship-grid{grid-template-columns:1fr !important;}
+  .members-grid{grid-template-columns:1fr 1fr !important;}
+  .cert-grid{grid-template-columns:1fr !important;}
+  
+  /* OVERFLOW FIX */
+  .tab-panel > *{max-width:100% !important;overflow-x:hidden;}
+  table{display:block;overflow-x:auto;width:100%;}
+  
+  /* BUTTONS */
+  .btn-primary{font-size:0.88rem;padding:0.75rem 1.25rem;}
+  .btn-sm{font-size:0.75rem;padding:0.35rem 0.75rem;}
+  
+  /* MODALS */
+  .modal-content{width:95% !important;max-width:95% !important;padding:1.25rem !important;border-radius:16px !important;}
+  
+  /* FONT SIZES */
+  h2{font-size:1.2rem !important;}
+  h3{font-size:1rem !important;}
+  
+  /* FEED LAYOUT */
+  #tab-feed > div > div:first-child{flex-direction:column !important;}
+  #feed-right-panel{display:none !important;}
+  
+  /* CHAT */
+  #messages-container{padding:0 !important;}
+  
+  /* FORMS */
+  .form-group input,.form-group select,.form-group textarea{font-size:16px !important;}
 }
 
 /*  YAN GOLD LINE SIGNATURE - PLATFORM  */
