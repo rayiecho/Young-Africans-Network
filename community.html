@@ -12460,8 +12460,9 @@ h2,h3{position:relative;}
       <h2>Create Account</h2>
       <p>Join the Young Africans Network Community</p>
     </div>
+    <form onsubmit="return false;">
     <div class="form-row-2">
-      <div class="form-group"><label>Full Name *</label><input type="text" id="reg-name" placeholder="Your full name"></div>
+      <div class="form-group"><label>Full Name *</label><input type="text" id="reg-name" placeholder="Your full name" autocomplete="name"></div>
       <div class="form-group"><label>Country *</label><input type="text" id="reg-country" placeholder="e.g. Kenya"></div>
     </div>
     <div class="form-group"><label>Email Address *</label><input type="email" id="reg-email" placeholder="your@email.com"></div>
@@ -12480,6 +12481,7 @@ h2,h3{position:relative;}
     </div>
     <div class="form-group"><label>Profile Photo (optional)</label><input type="file" id="reg-photo" accept="image/*"></div>
     <button class="btn-primary" id="reg-btn" onclick="doRegister()">Create Account </button>
+    </form>
     <p class="auth-switch">Already have an account? <a onclick="safeShowScreen('screen-login')">Sign In</a></p>
     <p style="text-align:center;margin-top:0.75rem;"><a href="index.html" style="color:var(--gray);font-size:0.8rem;text-decoration:none;">← Back to website</a></p>
   </div>
@@ -12493,9 +12495,11 @@ h2,h3{position:relative;}
       <h2>Welcome Back</h2>
       <p>Sign in to your YAN Community account</p>
     </div>
-    <div class="form-group"><label>Email Address</label><input type="email" id="login-email" placeholder="your@email.com"></div>
-    <div class="form-group"><label>Password</label><input type="password" id="login-pass" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()"></div>
-    <button class="btn-primary" id="login-btn" onclick="doLogin()">Sign In</button>
+    <form onsubmit="doLogin();return false;" autocomplete="on">
+    <div class="form-group"><label>Email Address</label><input type="email" id="login-email" placeholder="your@email.com" autocomplete="email"></div>
+    <div class="form-group"><label>Password</label><input type="password" id="login-pass" placeholder="Your password" autocomplete="current-password"></div>
+    <button class="btn-primary" id="login-btn" type="submit">Sign In</button>
+    </form>
     <div style="display:flex;align-items:center;gap:0.75rem;margin:0.75rem 0;">
       <div style="flex:1;height:1px;background:rgba(27,42,107,0.1);"></div>
       <span style="font-size:0.75rem;color:var(--gray);">or</span>
