@@ -87,66 +87,6 @@ window.doAdminLogin = function() {
     showToast('Incorrect password.', 'error');
   }
 };
-async function loadLabListings(c) {
-  c.innerHTML = '<div class="loading">Loading Lab listings...</div>';
-  try {
-    const [pendingSnap, approvedSnap, rejectedSnap] = await Promise.all([
-      getDocs(query(collection(db, 'labListings'), where('status','==','pending'))),
-      getDocs(query(collection(db, 'labListings'), where('status','==','approved'))),
-      getDocs(query(collection(db, 'labListings'), where('status','==','rejected')))
-    ]);
-
-    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
-    html += '<div class="stat-card gold"><div class="stat-num">' + pendingSnap.size + '</div><div class="stat-label">Pending Review</div></div>';
-    html += '<div class="stat-card navy"><div class="stat-num">' + approvedSnap.size + '</div><div class="stat-label">Approved</div></div>';
-    html += '<div class="stat-card red"><div class="stat-num">' + rejectedSnap.size + '</div><div class="stat-label">Rejected</div></div>';
-    html += '</div>';
-
-    // Pending listings
-    if (pendingSnap.size > 0) {
-      html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--gold);margin-bottom:1rem;">⏳ Pending Review (' + pendingSnap.size + ')</h3>';
-      pendingSnap.docs.forEach(d => {
-        const l = d.data();
-        const time = l.createdAt ? new Date(l.createdAt.seconds * 1000).toLocaleDateString() : '';
-        html += '<div style="background:var(--light);border-radius:12px;padding:1rem;margin-bottom:0.75rem;border-left:4px solid var(--gold);">';
-        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">';
-        html += '<div><p style="font-size:0.92rem;font-weight:700;color:var(--navy);">' + sanitize(l.title||'') + '</p>';
-        html += '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize(l.sellerName||'') + ' · ' + sanitize(l.country||'') + ' · ' + sanitize(l.category||'') + ' · ' + time + '</p>';
-        html += '<p style="font-size:0.75rem;margin-top:0.2rem;">' + (l.isVerifiedMember ? '<span style="color:var(--green);font-weight:700;">✅ YAN Member · ' + (l.completedPrograms||0) + ' program(s) completed · ' + sanitize(l.memberDepartment||'') + '</span>' : '<span style="color:#F5A623;font-weight:700;">⚠️ Not a verified YAN member</span>') + '</p></div>';
-        html += '<div style="display:flex;gap:0.5rem;">';
-        html += '<button onclick="approveLabListing(\'' + d.id + '\')" style="background:var(--green);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">✅ Approve</button>';
-        html += '<button onclick="rejectLabListing(\'' + d.id + '\')" style="background:var(--red);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">❌ Reject</button>';
-        html += '</div></div>';
-        html += '<p style="font-size:0.82rem;color:var(--navy);margin-bottom:0.4rem;">' + sanitize(l.description||'').substring(0,150) + '...</p>';
-        if (l.price) html += '<p style="font-size:0.82rem;font-weight:600;color:var(--green);">' + sanitize(l.price) + '</p>';
-        if (l.phone) html += '<p style="font-size:0.78rem;color:var(--gray);">📱 ' + sanitize(l.phone) + '</p>';
-        if (l.imageUrl) html += '<img src="' + sanitize(l.imageUrl) + '" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;margin-top:0.5rem;" onerror="this.style.display=\'none\'">';
-        html += '</div>';
-      });
-      html += '</div>';
-    } else {
-      html += '<div class="section-card" style="text-align:center;padding:2rem;"><p style="font-size:2rem;">✅</p><p style="color:var(--gray);">No pending listings!</p></div>';
-    }
-
-    // Approved listings
-    if (approvedSnap.size > 0) {
-      html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:700;color:var(--green);margin-bottom:1rem;">✅ Approved Listings (' + approvedSnap.size + ')</h3>';
-      approvedSnap.docs.forEach(d => {
-        const l = d.data();
-        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--light);">';
-        html += '<div><p style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + sanitize(l.title||'') + '</p>';
-        html += '<p style="font-size:0.75rem;color:var(--gray);">' + sanitize(l.sellerName||'') + ' · ' + sanitize(l.category||'') + ' · ⭐ ' + (l.reviewCount||0) + ' reviews</p></div>';
-        html += '<button onclick="rejectLabListing(\'' + d.id + '\')" style="background:var(--light);color:var(--red);border:1.5px solid var(--red);padding:0.3rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;cursor:pointer;">Remove</button>' + '<button onclick="deleteLabListing(\'' + d.id + '\')" style="background:var(--red);color:#fff;border:none;padding:0.3rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;cursor:pointer;margin-left:0.3rem;">🗑 Delete</button>';
-        html += '</div>';
-      });
-      html += '</div>';
-    }
-
-  } catch(e) {
-    c.innerHTML = '<p style="color:red;">Error: ' + e.message + '</p>';
-  }
-}
-
 async function loadRedemptions(c) {
   c.innerHTML = '<div class="loading">Loading redemptions...</div>';
   try {
