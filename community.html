@@ -2045,7 +2045,7 @@ async function saveProfile() {
   const bio = document.getElementById('edit-bio').value.trim();
   await updateDoc(doc(db, 'users', currentUser.uid), { name, country, whatsapp, bio });
   currentUserData = { ...currentUserData, name, country, whatsapp, bio };
-  document.getElementById('sidebar-name').textContent = name;
+  const sidebarName = document.getElementById('sidebar-name'); if (sidebarName) sidebarName.textContent = name;
   const profileComplete = name && country && whatsapp && bio;
   if (profileComplete) await awardPoints(currentUser.uid, 'profile_completed', 'Profile completed', 10);
   showToast('Profile updated!' + (profileComplete ? ' +10 Legacy Points!' : ''));
