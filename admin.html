@@ -844,8 +844,24 @@ window.switchGroupTab = function(groupId, tabId) {
   const container = document.getElementById('group-content-' + groupId);
   if (!container) return;
   container.innerHTML = '<div class="loading">Loading...</div>';
-  const fnName = 'load' + tabId.charAt(0).toUpperCase() + tabId.slice(1);
-  const fn = window[fnName];
+  const tabFnMap = {
+    mentors: window.loadMentorApplications,
+    applications: window.loadProgramApplications,
+    programsadmin: window.loadProgramsAdmin,
+    errors: window.loadSystemErrors,
+    headaccess: window.loadHeadAccessRequests,
+    hubs: window.loadHubsAdmin,
+    forms: window.loadFormsAdmin,
+    notifications: window.loadNotificationCenter,
+    newsletters: window.loadNewslettersAdmin,
+    partnerships: window.loadPartnershipsAdmin,
+    opportunities: window.loadOpportunitiesManager,
+    lab: window.loadLabListings,
+    redemptions: window.loadRedemptions,
+    recommendations: window.loadRecommendations,
+    capstone: window.loadCapstoneReviews,
+  };
+  const fn = tabFnMap[tabId] || window['load' + tabId.charAt(0).toUpperCase() + tabId.slice(1)];
   if (typeof fn === 'function') fn(container);
   else container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--gray);">Coming soon!</div>';
 };
