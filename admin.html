@@ -44,7 +44,10 @@ const db = getFirestore(app);
 window._db = db;
 const auth = getAuth(app);
 signInWithEmailAndPassword(auth, 'yan.admin.cms@youngafricansnetwork.org', 'YAN@Admin2026@CMS')
-  .then(() => console.log('Admin auth ready '))
+  .then(() => {
+    console.log('Admin auth ready ');
+    window._adminAuthReady = true;
+  })
   .catch(e => console.log('Auth error:', e));
 
 // ===== AUTH =====
@@ -3950,6 +3953,7 @@ window.loadHeadaccess = async function(c) {
 };
 
 window.approveHeadAccess = async function(docId, userId, userName) {
+  if (!window._adminAuthReady) return showToast('Please wait, authenticating...', 'error');
   await updateDoc(doc(db, 'headAccess', docId), {granted: true, approvedAt: serverTimestamp(), approvedBy: 'Admin'});
   if (userId) await addDoc(collection(db,'notifications'), {
     title: '🎉 Head Panel Access Granted!',
@@ -3961,6 +3965,7 @@ window.approveHeadAccess = async function(docId, userId, userName) {
 };
 
 window.revokeHeadAccess = async function(docId, userId) {
+  if (!window._adminAuthReady) return showToast('Please wait, authenticating...', 'error');
   if (!confirm('Revoke head access?')) return;
   await updateDoc(doc(db, 'headAccess', docId), {granted: false, revokedAt: serverTimestamp()});
   showToast('Access revoked.');
