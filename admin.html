@@ -3596,6 +3596,20 @@ async function loadOpportunitiesManager(c) {
     </div>`;
 }
 
+window.filterApps = function(status) {
+  document.querySelectorAll('.app-card').forEach(card => {
+    if (status === 'all') {
+      card.style.display = '';
+    } else {
+      card.style.display = card.dataset.status === status ? '' : 'none';
+    }
+  });
+  document.querySelectorAll('[onclick^="filterApps"]').forEach(btn => {
+    btn.style.opacity = '0.6';
+  });
+  const active = document.querySelector('[onclick="filterApps(\'' + status + '\')"]');
+  if (active) active.style.opacity = '1';
+};
 window.filterOpportunities = function(cat) {
   document.querySelectorAll('[id^="opp-filter-"]').forEach(b => {
     b.style.background = 'transparent';
