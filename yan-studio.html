@@ -1758,54 +1758,53 @@ function drawScene(canvas, scene, progress, currentWord = -1) {
   ctx.textAlign = 'center';
   ctx.fillText('BUILDING THE FUTURE, TOGETHER', W/2, H*0.78 + 20);
 
-  // Progressive text reveal - words appear top to bottom as spoken
+  // Rolling text reveal - top to bottom, scrolls when full
   if (scene.voiceover && currentWord >= 0) {
     const words = scene.voiceover.split(' ');
-    const wordsPerLine = 6;
-    const lineHeight = 34;
-    const startY = H * 0.15;
-    const maxLines = Math.floor((H * 0.75) / lineHeight);
+    const wordsPerLine = 5;
+    const lineHeight = 42;
+    const maxVisibleLines = Math.floor((H * 0.72) / lineHeight);
+    const startY = 100;
     
-    // Group words into lines
-    const lines = [];
+    // Group into lines
+    const allLines = [];
     for (let i = 0; i < words.length; i += wordsPerLine) {
-      lines.push(words.slice(i, i + wordsPerLine));
+      allLines.push(words.slice(i, i + wordsPerLine));
     }
     
-    // Dark overlay for text area
-    ctx.fillStyle = 'rgba(0,0,0,0.45)';
-    ctx.fillRect(W * 0.05, startY - 10, W * 0.9, Math.min(lines.length, maxLines) * lineHeight + 20);
+    // Current line being spoken
+    const currentLine = Math.floor(currentWord / wordsPerLine);
     
-    // Draw each line progressively
-    lines.forEach((lineWords, lineIdx) => {
-      if (lineIdx >= maxLines) return;
-      const y = startY + lineIdx * lineHeight;
-      const lineStartWord = lineIdx * wordsPerLine;
+    // Scroll offset - keep current line visible
+    const scrollOffset = Math.max(0, currentLine - maxVisibleLines + 2);
+    const visibleLines = allLines.slice(scrollOffset, scrollOffset + maxVisibleLines);
+    
+    visibleLines.forEach((lineWords, visIdx) => {
+      const actualLineIdx = visIdx + scrollOffset;
+      const y = startY + visIdx * lineHeight;
+      const lineStartWord = actualLineIdx * wordsPerLine;
       
-      let x = W * 0.08;
+      let x = W * 0.06;
       lineWords.forEach((word, wordIdx) => {
-        const globalWordIdx = lineStartWord + wordIdx;
-        const isActive = globalWordIdx === currentWord;
-        const isRevealed = globalWordIdx <= currentWord;
+        const globalIdx = lineStartWord + wordIdx;
+        if (globalIdx > currentWord) return; // not yet spoken
         
-        if (!isRevealed) return; // Don't show future words
+        const isActive = globalIdx === currentWord;
+        const isCurrent = actualLineIdx === currentLine;
         
-        if (isActive) {
-          ctx.fillStyle = colors.accent;
-          ctx.font = 'bold 26px Syne, sans-serif';
-          // Glow effect on active word
-          ctx.shadowColor = colors.accent;
-          ctx.shadowBlur = 12;
-        } else {
-          ctx.fillStyle = 'rgba(255,255,255,0.9)';
-          ctx.font = 'bold 24px Syne, sans-serif';
-          ctx.shadowBlur = 0;
-        }
+        // Fade old lines
+        const lineFade = Math.max(0.3, 1 - (currentLine - actualLineIdx) * 0.15);
         
+        ctx.shadowColor = isActive ? colors.accent : 'transparent';
+        ctx.shadowBlur = isActive ? 12 : 0;
+        ctx.globalAlpha = isActive ? 1 : lineFade;
+        ctx.fillStyle = isActive ? colors.accent : colors.text;
+        ctx.font = `bold ${isActive ? 30 : 27}px Syne, sans-serif`;
         ctx.textAlign = 'left';
-        ctx.fillText(word, x, y + 24);
+        ctx.fillText(word, x, y);
         ctx.shadowBlur = 0;
-        x += ctx.measureText(word + ' ').width + 4;
+        ctx.globalAlpha = 1;
+        x += ctx.measureText(word + ' ').width + 3;
       });
     });
   }
