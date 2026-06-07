@@ -1270,7 +1270,7 @@ async function downloadMP4() {
 function detectSceneType(text) {
   if (!text) return 'normal';
   const codePatterns = [/```[\s\S]*```/, /def |function |class |import |const |let |var |if\(|for\(|while\(/, /\{/, /<\w+>/, /=>/, /\(\) =>/];
-  const mathPatterns = [/\d+\s*[\+\-\*\/\^]\s*\d+/, /=\s*\d/, /[∑∫∏√∞∆]/,  /equation|formula|calculate|solve|theorem/i];
+  const mathPatterns = [/equation|formula|calculate|solve|theorem/i];
   const chartPatterns = [/(\d+)%/, /increased|decreased|grew|declined|percent|ratio|compared/i, /chart|graph|data|statistics|survey/i];
   if (codePatterns.some(p => p.test(text))) return 'code';
   if (mathPatterns.some(p => p.test(text))) return 'math';
