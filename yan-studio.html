@@ -38,6 +38,8 @@
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('app').style.display = 'block';
       updateUserUI();
+      console.log("Logged in as:", user.email);
+      console.log("Is admin:", ADMIN_EMAILS.includes(user.email));
       if (ADMIN_EMAILS.includes(user.email)) showAdminTab();
     } else {
       currentUser = null;
