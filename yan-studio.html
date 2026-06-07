@@ -825,7 +825,6 @@ async function startRecording() {
   goToStep(3);
 
   const canvas = document.getElementById('video-canvas');
-  const container = document.getElementById('canvas-container');
   canvas.width = 1280;
   canvas.height = 720;
 
@@ -837,72 +836,86 @@ async function startRecording() {
   recordedChunks = [];
   isRecording = true;
 
-  // Simple stable canvas-only recording
+  const speed = parseFloat(document.getElementById('voice-speed').value);
+
+  // Draw first scene immediately
+  drawScene(canvas, scriptData.scenes[0], 0);
+
+  // Request tab audio capture
+  let tabStream = null;
+  try {
+    tabStream = await navigator.mediaDevices.getDisplayMedia({
+      video: { displaySurface: 'browser' },
+      audio: { suppressLocalAudioPlayback: false },
+      preferCurrentTab: true
+    });
+    addLog('info', '🎤 Tab audio enabled — voice will be in video!');
+  } catch(e) {
+    addLog('info', '⚠ No audio capture — video will be silent.');
+  }
+
+  // Canvas stream
   const canvasStream = canvas.captureStream(30);
-  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : '';
-  mediaRecorder = new MediaRecorder(canvasStream, { mimeType, videoBitsPerSecond: 2500000 });
+
+  // Merge canvas + tab audio if available
+  let finalStream = canvasStream;
+  if (tabStream) {
+    const audioTracks = tabStream.getAudioTracks();
+    audioTracks.forEach(track => finalStream.addTrack(track));
+  }
+
+  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
+    ? 'video/webm;codecs=vp9,opus'
+    : MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
+    ? 'video/webm;codecs=vp8,opus'
+    : 'video/webm';
+
+  mediaRecorder = new MediaRecorder(finalStream, { mimeType, videoBitsPerSecond: 2500000 });
   mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
-  mediaRecorder.onstop = finishVideo;
+  mediaRecorder.onstop = () => {
+    if (tabStream) tabStream.getTracks().forEach(t => t.stop());
+    finishVideo();
+  };
   mediaRecorder.start(100);
   addLog('info', '▶ Recording started...');
 
-  // Play through all scenes
+  function speakScene(scene) {
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(scene.voiceover);
+    utt.rate = speed; utt.pitch = 1; utt.volume = 1;
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v => v.lang === 'en-GB') ||
+                      voices.find(v => v.lang.startsWith('en')) || voices[0];
+    if (preferred) utt.voice = preferred;
+    window.speechSynthesis.speak(utt);
+    addLog('success', `✓ Scene ${scene.sceneNumber}: ${scene.slideTitle}`);
+  }
+
   const totalDuration = scriptData.duration * 1000;
   const sceneDurations = scriptData.scenes.map(s => s.duration * 1000);
   let sceneIndex = 0;
   let sceneStart = Date.now();
   let totalStart = Date.now();
 
-  const speed = parseFloat(document.getElementById('voice-speed').value);
-
-  function speakScene(scene) {
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(scene.voiceover);
-    utt.rate = speed;
-    utt.pitch = 1;
-    utt.volume = 1;
-    const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v => v.lang === 'en-GB') || voices.find(v => v.lang.startsWith('en')) || voices[0];
-    if (preferred) utt.voice = preferred;
-    window.speechSynthesis.speak(utt);
-    addLog('success', `✓ Scene ${scene.sceneNumber}: ${scene.slideTitle}`);
-  }
-
   speakScene(scriptData.scenes[0]);
 
   function renderLoop() {
     if (!isRecording) return;
-
     const now = Date.now();
     const totalElapsed = now - totalStart;
     const sceneElapsed = now - sceneStart;
     const totalProgress = Math.min(totalElapsed / totalDuration, 1);
-    const sceneProgress = Math.min(sceneElapsed / (sceneDurations[sceneIndex] || 1), 1);
-
-    // Update UI
     const pct = Math.round(totalProgress * 100);
     document.getElementById('progress-fill').style.width = pct + '%';
     document.getElementById('progress-pct').textContent = pct + '%';
     document.getElementById('progress-label-text').textContent = `Scene ${sceneIndex + 1} of ${scriptData.scenes.length}`;
-
-    // Draw current scene
     drawScene(canvas, scriptData.scenes[sceneIndex], totalProgress);
-
-    // Advance scene
     if (sceneElapsed >= sceneDurations[sceneIndex]) {
       sceneIndex++;
       sceneStart = now;
-      if (sceneIndex < scriptData.scenes.length) {
-        speakScene(scriptData.scenes[sceneIndex]);
-      }
+      if (sceneIndex < scriptData.scenes.length) speakScene(scriptData.scenes[sceneIndex]);
     }
-
-    // Auto-stop
-    if (totalElapsed >= totalDuration + 500) {
-      stopRecording();
-      return;
-    }
-
+    if (totalElapsed >= totalDuration + 500) { stopRecording(); return; }
     animFrame = requestAnimationFrame(renderLoop);
   }
 
