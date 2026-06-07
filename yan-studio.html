@@ -855,59 +855,46 @@ async function startRecording() {
   recordedChunks = [];
   isRecording = true;
 
-  const speed = parseFloat(document.getElementById('voice-speed').value);
+  addLog('info', '🎤 Generating voiceover audio...');
 
-  // Draw first scene immediately
-  drawScene(canvas, scriptData.scenes[0], 0);
-
-  // Use global tabStream from enableVoice
-  try {
-    tabStream = await navigator.mediaDevices.getDisplayMedia({
-      video: { displaySurface: 'browser' },
-      audio: { suppressLocalAudioPlayback: false },
-      preferCurrentTab: true
-    });
-    addLog('info', '🎤 Tab audio enabled — voice will be in video!');
-  } catch(e) {
-    addLog('info', '⚠ No audio capture — video will be silent.');
+  // Generate all scene audio first
+  const audioBuffers = [];
+  for (let i = 0; i < scriptData.scenes.length; i++) {
+    const scene = scriptData.scenes[i];
+    try {
+      const res = await fetch('https://yan-studio-worker.youngafricansn.workers.dev/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: scene.voiceover, voice: 'asteria' })
+      });
+      const blob = await res.blob();
+      const arrayBuffer = await blob.arrayBuffer();
+      audioBuffers.push(arrayBuffer);
+      addLog('success', `✓ Audio generated: Scene ${scene.sceneNumber}`);
+    } catch(e) {
+      audioBuffers.push(null);
+      addLog('error', `✗ Audio failed: Scene ${scene.sceneNumber}`);
+    }
   }
 
-  // Canvas stream
+  // Setup AudioContext
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const dest = audioCtx.createMediaStreamDestination();
+
+  // Setup canvas stream + audio
   const canvasStream = canvas.captureStream(30);
-
-  // Merge canvas + tab audio if available
-  let finalStream = canvasStream;
-  if (tabStream) {
-    const audioTracks = tabStream.getAudioTracks();
-    audioTracks.forEach(track => finalStream.addTrack(track));
-  }
+  canvasStream.addTrack(dest.stream.getAudioTracks()[0]);
 
   const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
     ? 'video/webm;codecs=vp9,opus'
-    : MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
-    ? 'video/webm;codecs=vp8,opus'
     : 'video/webm';
 
-  mediaRecorder = new MediaRecorder(finalStream, { mimeType, videoBitsPerSecond: 2500000 });
+  mediaRecorder = new MediaRecorder(canvasStream, { mimeType, videoBitsPerSecond: 2500000 });
   mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
-  mediaRecorder.onstop = () => {
-    if (tabStream) tabStream.getTracks().forEach(t => t.stop());
-    finishVideo();
-  };
+  mediaRecorder.onstop = finishVideo;
   mediaRecorder.start(100);
-  addLog('info', '▶ Recording started...');
 
-  function speakScene(scene) {
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(scene.voiceover);
-    utt.rate = speed; utt.pitch = 1; utt.volume = 1;
-    const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v => v.lang === 'en-GB') ||
-                      voices.find(v => v.lang.startsWith('en')) || voices[0];
-    if (preferred) utt.voice = preferred;
-    window.speechSynthesis.speak(utt);
-    addLog('success', `✓ Scene ${scene.sceneNumber}: ${scene.slideTitle}`);
-  }
+  addLog('info', '▶ Recording video with voice...');
 
   const totalDuration = scriptData.duration * 1000;
   const sceneDurations = scriptData.scenes.map(s => s.duration * 1000);
@@ -915,7 +902,23 @@ async function startRecording() {
   let sceneStart = Date.now();
   let totalStart = Date.now();
 
-  speakScene(scriptData.scenes[0]);
+  // Play audio for first scene
+  async function playSceneAudio(index) {
+    if (!audioBuffers[index]) return;
+    try {
+      const decoded = await audioCtx.decodeAudioData(audioBuffers[index].slice(0));
+      const source = audioCtx.createBufferSource();
+      source.buffer = decoded;
+      source.connect(dest);
+      source.connect(audioCtx.destination);
+      source.start();
+    } catch(e) {
+      addLog('error', 'Audio decode error: ' + e.message);
+    }
+  }
+
+  drawScene(canvas, scriptData.scenes[0], 0);
+  playSceneAudio(0);
 
   function renderLoop() {
     if (!isRecording) return;
@@ -931,7 +934,9 @@ async function startRecording() {
     if (sceneElapsed >= sceneDurations[sceneIndex]) {
       sceneIndex++;
       sceneStart = now;
-      if (sceneIndex < scriptData.scenes.length) speakScene(scriptData.scenes[sceneIndex]);
+      if (sceneIndex < scriptData.scenes.length) {
+        playSceneAudio(sceneIndex);
+      }
     }
     if (totalElapsed >= totalDuration + 500) { stopRecording(); return; }
     animFrame = requestAnimationFrame(renderLoop);
