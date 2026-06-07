@@ -1761,53 +1761,50 @@ function drawScene(canvas, scene, progress, currentWord = -1) {
   ctx.textAlign = 'center';
   ctx.fillText('BUILDING THE FUTURE, TOGETHER', W/2, H*0.78 + 20);
 
-  // Rolling text reveal - top to bottom, scrolls when full
+  // Rolling text reveal - TOP of slide, scrolls down then up
   if (scene.voiceover && currentWord >= 0) {
     const words = scene.voiceover.split(' ');
     const wordsPerLine = 5;
-    const lineHeight = 42;
-    const maxVisibleLines = Math.floor((H * 0.72) / lineHeight);
-    const startY = 100;
-    
+    const lineHeight = 44;
+    const maxVisibleLines = Math.floor((H * 0.78) / lineHeight);
+    const topPadding = 85;
+
     // Group into lines
     const allLines = [];
-    for (let i = 0; i < words.length; i += wordsPerLine) {
-      allLines.push(words.slice(i, i + wordsPerLine));
+    for (let wi = 0; wi < words.length; wi += wordsPerLine) {
+      allLines.push(words.slice(wi, wi + wordsPerLine));
     }
-    
-    // Current line being spoken
+
+    // Which line is currently being spoken
     const currentLine = Math.floor(currentWord / wordsPerLine);
-    
-    // Scroll offset - keep current line visible
+
+    // Scroll so current line is always visible - keep it near bottom of visible area
     const scrollOffset = Math.max(0, currentLine - maxVisibleLines + 2);
     const visibleLines = allLines.slice(scrollOffset, scrollOffset + maxVisibleLines);
-    
+
     visibleLines.forEach((lineWords, visIdx) => {
       const actualLineIdx = visIdx + scrollOffset;
-      const y = startY + visIdx * lineHeight;
+      const y = topPadding + visIdx * lineHeight;
       const lineStartWord = actualLineIdx * wordsPerLine;
-      
-      let x = W * 0.06;
+
+      let x = W * 0.05;
       lineWords.forEach((word, wordIdx) => {
         const globalIdx = lineStartWord + wordIdx;
-        if (globalIdx > currentWord) return; // not yet spoken
-        
+        if (globalIdx > currentWord) return;
+
         const isActive = globalIdx === currentWord;
-        const isCurrent = actualLineIdx === currentLine;
-        
-        // Fade old lines
-        const lineFade = Math.max(0.3, 1 - (currentLine - actualLineIdx) * 0.15);
-        
-        ctx.shadowColor = isActive ? colors.accent : 'transparent';
-        ctx.shadowBlur = isActive ? 12 : 0;
+        const lineFade = Math.max(0.25, 1 - (currentLine - actualLineIdx) * 0.2);
+
         ctx.globalAlpha = isActive ? 1 : lineFade;
+        ctx.shadowColor = isActive ? colors.accent : 'transparent';
+        ctx.shadowBlur = isActive ? 14 : 0;
         ctx.fillStyle = isActive ? colors.accent : colors.text;
-        ctx.font = `bold ${isActive ? 30 : 27}px Syne, sans-serif`;
+        ctx.font = `bold ${isActive ? 32 : 28}px Syne, sans-serif`;
         ctx.textAlign = 'left';
         ctx.fillText(word, x, y);
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
-        x += ctx.measureText(word + ' ').width + 3;
+        x += ctx.measureText(word + ' ').width + 4;
       });
     });
   }
@@ -2097,7 +2094,9 @@ async function startRecording() {
       // Word-by-word karaoke timing
       const scene = scriptData.scenes[index];
       const words = scene.voiceover.split(' ');
-      const timePerWord = (scene.duration * 1000) / words.length;
+        // Sync word timing with actual audio - voice speaks at ~2.5 words/sec
+        const wordsPerSecond = 2.5;
+        const timePerWord = 1000 / wordsPerSecond;
       window.currentWord = 0;
       if (window.wordTimer) clearInterval(window.wordTimer);
       window.wordTimer = setInterval(() => {
