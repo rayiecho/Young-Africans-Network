@@ -971,7 +971,10 @@ Make exactly ${scenes} scenes. Use the provided content for voiceover text — d
     let text = '';
     if (data.content && data.content[0]) text = data.content[0].text.trim();
     const clean = text.replace(/```json|```/g, '').trim();
-    scriptData = JSON.parse(clean);
+    // Extract JSON object robustly
+    const jsonMatch = clean.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON found in response');
+    scriptData = JSON.parse(jsonMatch[0]);
     renderScript();
     document.getElementById('loading-script').style.display = 'none';
     document.querySelector('#panel-1 .card').style.display = 'block';
