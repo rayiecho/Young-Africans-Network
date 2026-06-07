@@ -838,9 +838,23 @@ async function startRecording() {
   isRecording = true;
 
   // Setup MediaRecorder
-  const stream = canvas.captureStream(30);
-  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
-  mediaRecorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 2500000 });
+  // Capture canvas + system audio
+  const canvasStream = canvas.captureStream(30);
+  
+  // Try to capture tab audio
+  let finalStream = canvasStream;
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const dest = audioCtx.createMediaStreamDestination();
+    finalStream = new MediaStream([...canvasStream.getTracks(), ...dest.stream.getTracks()]);
+  } catch(e) {}
+
+  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus') 
+    ? 'video/webm;codecs=vp9,opus' 
+    : MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
+    ? 'video/webm;codecs=vp8,opus'
+    : 'video/webm';
+  mediaRecorder = new MediaRecorder(finalStream, { mimeType, videoBitsPerSecond: 2500000 });
   mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
   mediaRecorder.onstop = finishVideo;
   mediaRecorder.start(100);
@@ -854,21 +868,21 @@ async function startRecording() {
   let sceneStart = Date.now();
   let totalStart = Date.now();
 
-  // Speech synthesis
-  const synth = window.speechSynthesis;
+  // Audio Context for capturing speech
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const dest = audioCtx.createMediaStreamDestination();
   const speed = parseFloat(document.getElementById('voice-speed').value);
 
   function speakScene(scene) {
-    synth.cancel();
+    window.speechSynthesis.cancel();
     const utt = new SpeechSynthesisUtterance(scene.voiceover);
     utt.rate = speed;
     utt.pitch = 1;
     utt.volume = 1;
-    // Try to find a good voice
-    const voices = synth.getVoices();
+    const voices = window.speechSynthesis.getVoices();
     const preferred = voices.find(v => v.lang === 'en-GB') || voices.find(v => v.lang.startsWith('en')) || voices[0];
     if (preferred) utt.voice = preferred;
-    synth.speak(utt);
+    window.speechSynthesis.speak(utt);
     addLog('success', `✓ Scene ${scene.sceneNumber}: ${scene.slideTitle}`);
   }
 
