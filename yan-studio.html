@@ -839,7 +839,7 @@ async function startRecording() {
 
   // Simple stable canvas-only recording
   const canvasStream = canvas.captureStream(30);
-  const mimeType = 'video/webm';
+  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : '';
   mediaRecorder = new MediaRecorder(canvasStream, { mimeType, videoBitsPerSecond: 2500000 });
   mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
   mediaRecorder.onstop = finishVideo;
@@ -853,9 +853,6 @@ async function startRecording() {
   let sceneStart = Date.now();
   let totalStart = Date.now();
 
-  // Audio Context for capturing speech
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const dest = audioCtx.createMediaStreamDestination();
   const speed = parseFloat(document.getElementById('voice-speed').value);
 
   function speakScene(scene) {
