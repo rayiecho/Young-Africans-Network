@@ -499,7 +499,8 @@
         </div>
 
         <div class="btn-row">
-          <button class="btn btn-gold" id="btn-record" onclick="startRecording()">▶ Start Recording</button>
+          <button class="btn btn-gold" id="btn-record" onclick="enableVoice()">🎤 Enable Voice First</button>
+          <button class="btn btn-gold" id="btn-record-go" onclick="startRecording()" style="display:none;">▶ Start Recording</button>
           <button class="btn btn-red" id="btn-stop" onclick="stopRecording()" style="display:none;">⏹ Stop</button>
           <button class="btn btn-outline" onclick="goToStep(2)">← Back to Script</button>
         </div>
@@ -819,6 +820,24 @@ function addLog(type, msg) {
   log.scrollTop = log.scrollHeight;
 }
 
+let tabStream = null;
+
+async function enableVoice() {
+  try {
+    tabStream = await navigator.mediaDevices.getDisplayMedia({
+      video: { displaySurface: "browser" },
+      audio: true,
+      preferCurrentTab: true
+    });
+    document.getElementById("btn-record").style.display = "none";
+    document.getElementById("btn-record-go").style.display = "inline-flex";
+    addLog("success", "🎤 Voice enabled! Now click Start Recording.");
+  } catch(e) {
+    addLog("error", "⚠ Voice not enabled. Click Enable Voice First and allow tab audio.");
+    document.getElementById("btn-record-go").style.display = "inline-flex";
+  }
+}
+
 async function startRecording() {
   if (!scriptData) { alert('No script found. Please go back and generate a script first.'); return; }
 
@@ -841,8 +860,7 @@ async function startRecording() {
   // Draw first scene immediately
   drawScene(canvas, scriptData.scenes[0], 0);
 
-  // Request tab audio capture
-  let tabStream = null;
+  // Use global tabStream from enableVoice
   try {
     tabStream = await navigator.mediaDevices.getDisplayMedia({
       video: { displaySurface: 'browser' },
