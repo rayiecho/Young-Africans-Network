@@ -35,6 +35,7 @@
     if (user) {
       currentUser = user;
       await loadUserProfile(user);
+      document.getElementById('landing-screen').style.display = 'none';
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('app').style.display = 'block';
       updateUserUI();
@@ -46,7 +47,8 @@
       }
     } else {
       currentUser = null;
-      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('landing-screen').style.display = 'flex';
+      document.getElementById('login-screen').style.display = 'none';
       document.getElementById('app').style.display = 'none';
     }
   });
@@ -153,6 +155,16 @@
 
   window.logout = async function() {
     await signOut(auth);
+  };
+
+  window.showLogin = function() {
+    document.getElementById('landing-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  };
+
+  window.showLanding = function() {
+    document.getElementById('landing-screen').style.display = 'flex';
+    document.getElementById('login-screen').style.display = 'none';
   };
 
   window.showAuthTab = function(tab) {
@@ -615,8 +627,110 @@
 </head>
 <body>
 
+<!-- LANDING PAGE -->
+<div id="landing-screen" style="position:fixed;inset:0;z-index:999;background:var(--navy);overflow-y:auto;display:flex;flex-direction:column;">
+  
+  <!-- NAV -->
+  <nav style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 3rem;background:rgba(10,22,40,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:10;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <img src="https://youngafricansnetwork.org/images/logo.jpeg" style="width:36px;height:36px;border-radius:50%;border:2px solid var(--gold);">
+      <span style="font-size:1.1rem;font-weight:800;">YAN <span style="color:var(--gold);">Studio</span></span>
+      <span style="font-size:0.68rem;background:rgba(245,166,35,0.12);border:1px solid var(--border);color:var(--gold);padding:0.2rem 0.6rem;border-radius:50px;font-family:var(--font-mono);">BETA</span>
+    </div>
+    <div style="display:flex;gap:1rem;align-items:center;">
+      <a href="https://youngafricansnetwork.org" style="color:var(--muted);text-decoration:none;font-size:0.82rem;">← YAN Home</a>
+      <button onclick="showLogin()" style="background:var(--gold);color:var(--navy);border:none;padding:0.6rem 1.5rem;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem;">Get Started Free</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div style="text-align:center;padding:5rem 2rem 3rem;max-width:900px;margin:0 auto;">
+    <div style="font-size:0.75rem;letter-spacing:3px;color:var(--gold);font-family:var(--font-mono);margin-bottom:1.5rem;">POWERED BY CLAUDE AI + CLOUDFLARE</div>
+    <h1 style="font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;line-height:1.1;margin-bottom:1.5rem;">
+      Generate Professional<br><span style="color:var(--gold);">African Videos</span> with AI
+    </h1>
+    <p style="font-size:1.1rem;color:var(--muted);max-width:600px;margin:0 auto 2.5rem;line-height:1.8;">Type a topic. Get a complete video with AI voice, animated slides, background music and subtitles — in minutes. No camera. No editing. No cost.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+      <button onclick="showLogin()" style="background:var(--gold);color:var(--navy);border:none;padding:1rem 2.5rem;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;">🚀 Start Creating Free</button>
+      <button onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})" style="background:transparent;border:1px solid var(--border);color:var(--white);padding:1rem 2.5rem;border-radius:10px;font-weight:600;font-size:1rem;cursor:pointer;">See Features ↓</button>
+    </div>
+    <div style="margin-top:1.5rem;font-size:0.78rem;color:var(--muted);font-family:var(--font-mono);">✓ Free during beta &nbsp;·&nbsp; ✓ No credit card &nbsp;·&nbsp; ✓ Built for Africa</div>
+  </div>
+
+  <!-- DEMO VIDEO PREVIEW -->
+  <div style="max-width:800px;margin:0 auto 4rem;padding:0 2rem;">
+    <div style="background:var(--navy2);border:1px solid var(--border);border-radius:16px;overflow:hidden;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;position:relative;">
+      <div style="text-align:center;">
+        <div style="font-size:4rem;margin-bottom:1rem;">🎬</div>
+        <div style="font-size:1rem;color:var(--muted);">Your video will look like this</div>
+        <div style="font-size:0.78rem;color:var(--gold);font-family:var(--font-mono);margin-top:0.5rem;">AI-generated slides + voice + music</div>
+      </div>
+      <div style="position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--gold),#74C69D,var(--gold));"></div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div id="features" style="max-width:1100px;margin:0 auto;padding:0 2rem 4rem;">
+    <div style="text-align:center;margin-bottom:3rem;">
+      <div style="font-size:0.72rem;letter-spacing:3px;color:var(--gold);font-family:var(--font-mono);margin-bottom:0.75rem;">EVERYTHING YOU NEED</div>
+      <h2 style="font-size:2.2rem;font-weight:800;">One tool. Complete videos.</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;">
+      ${[
+        ['🤖','AI Script Generator','Type a topic — Claude AI writes a complete script with scenes, voiceover and slides automatically'],
+        ['🎤','Real AI Voice','Choose from 12 voices. Natural speech generated by Cloudflare AI — no recording needed'],
+        ['🎬','4 Video Styles','Slides, Whiteboard, Cinematic or Photo Background — each scene auto-matches your content'],
+        ['🎵','Background Music','4 music styles generated automatically and mixed under your voice at the right volume'],
+        ['📝','Rolling Subtitles','Words appear on screen as they are spoken — top to bottom, perfectly synchronized'],
+        ['✂️','Video Enhancer','Upload any existing video and enhance it — brightness, subtitles, watermark, music'],
+        ['📚','Video Library','Every video you create is saved automatically — download or reshare anytime'],
+        ['▶️','YouTube Upload','Upload directly to any YouTube channel with one click after generating'],
+        ['💬','WhatsApp Share','Share your video link directly to WhatsApp with one tap']
+      ].map(([icon, title, desc]) => `
+        <div style="background:var(--navy2);border:1px solid var(--border2);border-radius:14px;padding:1.5rem;">
+          <div style="font-size:2rem;margin-bottom:0.75rem;">${icon}</div>
+          <div style="font-weight:700;margin-bottom:0.5rem;">${title}</div>
+          <div style="font-size:0.82rem;color:var(--muted);line-height:1.6;">${desc}</div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div style="max-width:800px;margin:0 auto;padding:0 2rem 4rem;text-align:center;">
+    <div style="font-size:0.72rem;letter-spacing:3px;color:var(--gold);font-family:var(--font-mono);margin-bottom:0.75rem;">SIMPLE PRICING</div>
+    <h2 style="font-size:2.2rem;font-weight:800;margin-bottom:3rem;">Free during beta</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;max-width:600px;margin:0 auto;">
+      <div style="background:var(--navy2);border:1px solid var(--border2);border-radius:16px;padding:2rem;">
+        <div style="font-size:0.78rem;color:var(--muted);font-family:var(--font-mono);margin-bottom:0.5rem;">BETA</div>
+        <div style="font-size:2.5rem;font-weight:800;margin-bottom:0.25rem;">Free</div>
+        <div style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem;">During testing period</div>
+        <div style="font-size:0.82rem;color:var(--muted);line-height:2;">✓ 10 videos<br>✓ All styles<br>✓ AI voice<br>✓ Video enhancer</div>
+        <button onclick="showLogin()" style="width:100%;margin-top:1.5rem;background:var(--gold);color:var(--navy);border:none;padding:0.85rem;border-radius:8px;font-weight:700;cursor:pointer;">Get Started Free</button>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(245,166,35,0.1),rgba(27,67,50,0.2));border:1px solid var(--gold);border-radius:16px;padding:2rem;">
+        <div style="font-size:0.78rem;color:var(--gold);font-family:var(--font-mono);margin-bottom:0.5rem;">COMING SOON</div>
+        <div style="font-size:2.5rem;font-weight:800;margin-bottom:0.25rem;">$5<span style="font-size:1rem;color:var(--muted);">/mo</span></div>
+        <div style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem;">After beta period</div>
+        <div style="font-size:0.82rem;color:var(--muted);line-height:2;">✓ Unlimited videos<br>✓ Priority voice<br>✓ No watermark<br>✓ Team access</div>
+        <button disabled style="width:100%;margin-top:1.5rem;background:var(--border2);color:var(--muted);border:none;padding:0.85rem;border-radius:8px;font-weight:700;cursor:not-allowed;">Coming Soon</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="border-top:1px solid var(--border2);padding:2rem 3rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+    <div style="font-size:0.82rem;color:var(--muted);">© 2026 Young Africans Network · YAN Studio Beta</div>
+    <div style="display:flex;gap:1.5rem;">
+      <a href="https://youngafricansnetwork.org" style="font-size:0.82rem;color:var(--muted);text-decoration:none;">youngafricansnetwork.org</a>
+      <a href="https://youngafricansnetwork.org/contact.html" style="font-size:0.82rem;color:var(--muted);text-decoration:none;">Contact</a>
+    </div>
+  </div>
+
+</div>
+
 <!-- LOGIN -->
-<div id="login-screen">
+<div id="login-screen" style="display:none;">
   <div class="login-box">
     <div class="login-logo">
       <img src="https://youngafricansnetwork.org/images/logo.jpeg" alt="YAN" onerror="this.style.display='none'">
