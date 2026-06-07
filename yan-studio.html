@@ -698,7 +698,7 @@ const COLORS = {
   dark: { bg: '#050C14', text: '#F8F9FC', accent: '#F5A623' }
 };
 
-function drawScene(canvas, scene, progress) {
+function drawScene(canvas, scene, progress, currentWord = -1) {
   const ctx = canvas.getContext('2d');
   const W = canvas.width;
   const H = canvas.height;
@@ -783,6 +783,52 @@ function drawScene(canvas, scene, progress) {
   ctx.font = '11px Space Mono, monospace';
   ctx.textAlign = 'center';
   ctx.fillText('BUILDING THE FUTURE, TOGETHER', W/2, H*0.78 + 20);
+
+  // Karaoke subtitles
+  if (scene.voiceover) {
+    const words = scene.voiceover.split(' ');
+    const subtitleY = H * 0.91;
+    const subtitleBgH = 52;
+    
+    // Subtitle background
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillRect(0, subtitleY - subtitleBgH/2, W, subtitleBgH);
+    
+    // Show current line (5 words at a time)
+    const wordsPerLine = 7;
+    const lineIndex = currentWord >= 0 ? Math.floor(currentWord / wordsPerLine) : 0;
+    const lineStart = lineIndex * wordsPerLine;
+    const lineWords = words.slice(lineStart, lineStart + wordsPerLine);
+    const currentWordInLine = currentWord - lineStart;
+    
+    // Calculate total line width to center it
+    ctx.font = 'bold 22px Syne, sans-serif';
+    let totalWidth = 0;
+    lineWords.forEach((w, i) => {
+      totalWidth += ctx.measureText(w + ' ').width;
+    });
+    
+    let x = W/2 - totalWidth/2;
+    lineWords.forEach((word, i) => {
+      const isActive = i === currentWordInLine;
+      const isPast = i < currentWordInLine;
+      
+      if (isActive) {
+        ctx.fillStyle = colors.accent; // Gold for current word
+        ctx.font = 'bold 24px Syne, sans-serif';
+      } else if (isPast) {
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; // Dim for past words
+        ctx.font = 'bold 22px Syne, sans-serif';
+      } else {
+        ctx.fillStyle = 'rgba(255,255,255,0.85)'; // White for upcoming
+        ctx.font = 'bold 22px Syne, sans-serif';
+      }
+      
+      ctx.textAlign = 'left';
+      ctx.fillText(word, x, subtitleY + 8);
+      x += ctx.measureText(word + ' ').width;
+    });
+  }
 }
 
 function wrapText(ctx, text, x, y, maxW, lineH) {
@@ -916,12 +962,28 @@ async function startRecording() {
       source.connect(dest);
       source.connect(audioCtx.destination);
       source.start();
+
+      // Word-by-word karaoke timing
+      const scene = scriptData.scenes[index];
+      const words = scene.voiceover.split(' ');
+      const timePerWord = (scene.duration * 1000) / words.length;
+      window.currentWord = 0;
+      if (window.wordTimer) clearInterval(window.wordTimer);
+      window.wordTimer = setInterval(() => {
+        window.currentWord++;
+        if (window.currentWord >= words.length) {
+          clearInterval(window.wordTimer);
+        }
+      }, timePerWord);
+
     } catch(e) {
       addLog('error', 'Audio decode error: ' + e.message);
     }
   }
 
-  drawScene(canvas, scriptData.scenes[0], 0);
+  window.currentWord = 0;
+  window.wordTimer = null;
+  drawScene(canvas, scriptData.scenes[0], 0, 0);
   playSceneAudio(0);
 
   function renderLoop() {
@@ -934,7 +996,7 @@ async function startRecording() {
     document.getElementById('progress-fill').style.width = pct + '%';
     document.getElementById('progress-pct').textContent = pct + '%';
     document.getElementById('progress-label-text').textContent = `Scene ${sceneIndex + 1} of ${scriptData.scenes.length}`;
-    drawScene(canvas, scriptData.scenes[sceneIndex], totalProgress);
+    drawScene(canvas, scriptData.scenes[sceneIndex], totalProgress, window.currentWord || 0);
     if (sceneElapsed >= sceneDurations[sceneIndex]) {
       sceneIndex++;
       sceneStart = now;
