@@ -643,8 +643,8 @@ Make exactly ${scenes} scenes. Each voiceover should be natural, inspiring and a
   } catch (err) {
     document.getElementById('loading-script').style.display = 'none';
     document.querySelector('#panel-1 .card').style.display = 'block';
-    addLog('error', '✗ Failed to generate script. Check your connection and try again.');
-    alert('Script generation failed. Please try again.');
+    addLog('error', '✗ Error: ' + err.message);
+    alert('Error: ' + err.message);
   }
 }
 
