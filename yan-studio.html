@@ -620,7 +620,7 @@ Return ONLY a JSON object with this exact structure, no other text:
 Make exactly ${scenes} scenes. Each voiceover should be natural, inspiring and appropriate for African youth. Include YAN's website youngafricansnetwork.org in the last scene.`;
 
   try {
-    const response = await fetch('https://yan-ai-worker.youngafricansn.workers.dev', {
+    const response = await fetch('https://yan-studio-worker.youngafricansn.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
