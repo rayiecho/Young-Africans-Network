@@ -3064,7 +3064,7 @@ function deleteFromLibrary(id) {
 
 function switchTab(tab) {
   if (tab === 'library') renderLibrary();
-  ['create','enhance','library'].forEach(t => {
+  ['create','enhance','library','photo'].forEach(t => {
     document.getElementById('section-'+t).classList.toggle('active', t === tab);
     document.getElementById('tab-'+t).classList.toggle('active', t === tab);
   });
