@@ -1006,7 +1006,7 @@ window.loadSection = async function(section, customContainer) {
     notifications:(c)=>window.loadNotificationCenter(c),finance:(c)=>window.loadFinance(c),
     recommendations:(c)=>window.loadRecommendations(c),
     errors:(c)=>window.loadSystemErrors(c),mentors:(c)=>window.loadMentorApplications(c),
-    opportunities:(c)=>window.loadOpportunitiesManager(c),lab:(c)=>window.loadLabListings(c),redemptions:(c)=>window.loadRedemptions(c)
+    opportunities:(c)=>window.loadOpportunitiesManager(c),lab:(c)=>window.loadLabListings(c),redemptions:(c)=>window.loadRedemptions(c),healthcheck:(c)=>window.loadHealthCheck(c),sos:(c)=>window.loadSOSReports(c)
   };
   if (fns[section]) {
     try {
