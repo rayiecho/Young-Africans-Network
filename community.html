@@ -261,9 +261,11 @@ onAuthStateChanged(auth, async user => {
     // Try cached data from localStorage for instant load
     const cacheKey = 'yan_user_' + user.uid;
     const cached = localStorage.getItem(cacheKey);
+    console.log('[YAN Auth] Cache found:', !!cached);
     if (cached) {
       try {
         currentUserData = JSON.parse(cached);
+        console.log('[YAN Auth] Using cached data, calling enterPlatform...');
         enterPlatform();
         setTimeout(() => loadUnreadBadge(), 1000);
         setTimeout(() => subscribeToPush(user.uid), 3000);
