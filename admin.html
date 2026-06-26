@@ -4515,7 +4515,7 @@ window.searchNewsletterMembers = function(query) {
   if (!query) { results.innerHTML = ''; return; }
   const filtered = users.filter(function(u){ return (u.name||'').toLowerCase().includes(query.toLowerCase())||(u.email||'').toLowerCase().includes(query.toLowerCase()); }).slice(0,10);
   results.innerHTML = filtered.length ? filtered.map(function(u){
-    return '<div onclick="addNewsletterMember(\'' + u.id + '\',\'' + encodeURIComponent(u.name||'') + '\',\'' + encodeURIComponent(u.email||'') + '\')" style="padding:0.6rem 0.75rem;cursor:pointer;border-bottom:1px solid var(--light);font-size:0.82rem;"><strong>' + sanitize(u.name||'') + '</strong> — ' + sanitize(u.email||'') + '</div>';
+    return '<div onclick="addNewsletterMember(\'' + u.id + '\',\'' + encodeURIComponent(u.name||'') + '\',\'' + encodeURIComponent(u.email||'') + '\')" style="padding:0.6rem 0.75rem;cursor:pointer;border-bottom:1px solid var(--light);font-size:0.82rem;"><strong>' + window.sanitizeNl(u.name||'') + '</strong> — ' + window.sanitizeNl(u.email||'') + '</div>';
   }).join('') : '<p style="padding:0.5rem;color:var(--gray);font-size:0.82rem;">No members found</p>';
 };
 window.addNewsletterMember = function(uid, nameEnc, emailEnc) {
