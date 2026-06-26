@@ -4506,6 +4506,7 @@ window.updateRecipientCount = function() {
   const el = document.getElementById('nl-recipient-count');
   if (el) el.textContent = count + ' member' + (count!==1?'s':'');
 };
+window.sanitizeNl = function(str) { return String(str||'').replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c])); };
 window.searchNewsletterMembers = function(query) {
   const users = window._nlAllUsers || [];
   console.log('[NL Search] query:', query, 'users:', users.length);
