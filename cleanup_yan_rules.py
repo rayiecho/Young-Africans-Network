@@ -1,0 +1,410 @@
+import json
+import requests
+from google.oauth2 import service_account
+import google.auth.transport.requests
+
+sa_path = '/home/ayiecho/projects/yan_website/serviceAccount.json'
+with open(sa_path, 'r') as f:
+    sa = json.load(f)
+project_id = sa['project_id']
+
+creds = service_account.Credentials.from_service_account_file(
+    sa_path, scopes=['https://www.googleapis.com/auth/cloud-platform']
+)
+creds.refresh(google.auth.transport.requests.Request())
+token = creds.token
+headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+
+# Rules WITHOUT studio collections
+clean_rules = '''rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isLoggedIn() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    function isSystemAdmin() {
+      return request.auth != null && request.auth.uid == 'tNbO0jryVeadlpIkKQnv6mjYJn42';
+    }
+    function isAdmin() {
+      return isSystemAdmin() || (isLoggedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true);
+    }
+    function isDeptHead() {
+      return isLoggedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isDeptHead == true;
+    }
+    function isAdminOrHead() {
+      return isSystemAdmin() || isAdmin() || isDeptHead();
+    }
+
+    match /{document=**} {
+      allow read, write: if isSystemAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if true;
+      allow create: if isLoggedIn() && isOwner(userId);
+      allow update: if isLoggedIn() && (isOwner(userId) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /posts/{postId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn();
+      allow delete: if isLoggedIn() && (resource.data.authorId == request.auth.uid || isAdmin());
+      match /replies/{replyId} { allow read, write: if isLoggedIn(); }
+    }
+
+    match /notifications/{notifId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn() && (isAdminOrHead() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy']));
+      allow delete: if isAdmin();
+    }
+
+    match /mentorshipSlots/{slotId} { allow read, write: if isLoggedIn(); }
+    match /sessionNotes/{noteId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn() && resource.data.mentorId == request.auth.uid;
+    }
+
+    match /departments/{deptId}/materials/{materialId} {
+      allow read: if isLoggedIn();
+      allow create, update, delete: if isAdminOrHead();
+      match /discussions/{discId} { allow read, create: if isLoggedIn(); allow delete: if isAdmin(); }
+      match /quiz/{quizId} { allow read: if isLoggedIn(); allow write: if isAdminOrHead(); }
+    }
+
+    match /results/{userId}/materials/{materialId} {
+      allow read, write: if isLoggedIn() && isOwner(userId);
+      allow read: if isAdmin();
+    }
+
+    match /memberPoints/{userId} {
+      allow read: if isLoggedIn();
+      allow write: if isAdmin();
+    }
+    match /pointsHistory/{docId} { allow read: if isLoggedIn(); allow create: if isLoggedIn(); }
+
+    match /mentorProfiles/{userId} {
+      allow read: if isLoggedIn();
+      allow write: if isLoggedIn() && (request.auth.uid == userId || isAdminOrHead());
+    }
+    match /mentorships/{docId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn() && (resource.data.mentorId == request.auth.uid || resource.data.menteeId == request.auth.uid || isAdminOrHead());
+    }
+    match /mentorshipMeetings/{docId} { allow read, write: if isLoggedIn(); }
+    match /mentoringSessions/{docId} { allow read: if isLoggedIn(); allow create: if isLoggedIn(); }
+
+    match /programApplications/{appId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn() && (resource.data.userId == request.auth.uid || isAdminOrHead());
+      allow delete: if isAdminOrHead();
+    }
+
+    match /config/{docId} { allow read: if isLoggedIn(); allow write: if isAdmin(); }
+
+    match /conversations/{convId} {
+      allow read, write: if isLoggedIn() && (resource == null || request.auth.uid in resource.data.participants || request.auth.uid in request.resource.data.participants);
+      match /messages/{msgId} {
+        allow read: if isLoggedIn();
+        allow create: if isLoggedIn() && request.resource.data.senderId == request.auth.uid;
+      }
+    }
+
+    match /certificates/{certId} { allow read: if true; allow create: if isLoggedIn(); allow update, delete: if isLoggedIn(); }
+    match /meetings/{meetingId} {
+      allow read: if isLoggedIn();
+      allow create, update: if isAdminOrHead();
+      allow delete: if isLoggedIn() && (resource.data.createdBy == request.auth.uid || isAdmin());
+    }
+    match /attendance/{meetingId}/attendees/{userId} {
+      allow read: if isLoggedIn() && (isOwner(userId) || isAdmin());
+      allow create: if isLoggedIn() && isOwner(userId);
+      allow update, delete: if isAdmin();
+    }
+
+    match /scholarships/{schId} {
+      allow read: if isLoggedIn();
+      allow create, update: if isAdminOrHead();
+      allow delete: if isAdminOrHead();
+    }
+
+    match /applications/{appId} {
+      allow read: if isLoggedIn();
+      allow create, update: if isLoggedIn();
+      allow delete: if isLoggedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    match /recommendations/{recId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn();
+      allow delete: if isAdmin();
+    }
+
+    match /successStories/{storyId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow delete: if isLoggedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    match /polls/{pollId} {
+      allow read: if isLoggedIn();
+      allow create, delete: if isAdmin();
+      allow update: if isLoggedIn() && (isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes']));
+    }
+
+    match /resources/{resId} {
+      allow read: if isLoggedIn();
+      allow create, delete: if isAdmin();
+      allow update: if isLoggedIn() && (isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['downloads']));
+    }
+
+    match /chat/{deptId}/messages/{msgId} { allow read, create: if isLoggedIn(); allow delete: if isAdmin(); }
+    match /team/{memberId} { allow read: if true; allow write: if isAdmin(); }
+    match /magazine/{editionId} { allow read: if isLoggedIn(); allow write: if isAdmin(); }
+    match /events/{eventId} { allow read: if true; allow write: if isAdminOrHead(); }
+    match /gallery/{itemId} { allow read: if true; allow write: if isAdmin(); }
+    match /stories/{storyId} { allow read: if true; allow write: if isAdmin(); }
+    match /aiUsage/{userId} { allow read, write: if isLoggedIn() && isOwner(userId); allow read: if isAdmin(); }
+
+    match /careerMaterials/{matId} {
+      allow read: if isLoggedIn();
+      allow create, update, delete: if isAdminOrHead();
+    }
+
+    match /careerJobs/{jobId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn() && (resource.data.postedById == request.auth.uid || isAdminOrHead());
+      allow delete: if isLoggedIn() && (resource.data.postedById == request.auth.uid || isAdminOrHead());
+    }
+
+    match /careerAssignments/{assignId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn();
+      allow delete: if isAdmin();
+    }
+
+    match /careerProgress/{progressId} { allow read, write: if isLoggedIn(); }
+    match /careerLearningProgress/{progressId} { allow read, write: if isLoggedIn(); }
+
+    match /communityTasks/{taskId} {
+      allow read: if isLoggedIn();
+      allow create: if isAdminOrHead();
+      allow update: if isLoggedIn();
+      allow delete: if isAdminOrHead();
+    }
+
+    match /communityProjects/{projId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update, delete: if isLoggedIn() && (resource.data.proposedById == request.auth.uid || isAdminOrHead());
+    }
+
+    match /communityReports/{reportId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn();
+      allow delete: if isAdmin();
+    }
+
+    match /communityImpact/{userId} { allow read: if isLoggedIn(); allow write: if isLoggedIn() && isOwner(userId); }
+    match /mentalPosts/{postId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow delete: if isLoggedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    match /moodCheckins/{checkinId} { allow read: if isLoggedIn(); allow create, update: if isLoggedIn(); }
+    match /mentalSessions/{sessionId} {
+      allow read: if isLoggedIn();
+      allow create: if isAdminOrHead();
+      allow update: if isLoggedIn();
+      allow delete: if isAdminOrHead();
+    }
+
+    match /mentalVisitations/{visitId} {
+      allow read: if isLoggedIn();
+      allow create, update: if isLoggedIn();
+      allow delete: if isLoggedIn() && (resource.data.postedById == request.auth.uid || isAdminOrHead());
+    }
+
+    match /peerRequests/{reqId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn();
+    }
+
+    match /memberIds/{memberId} { allow read: if true; allow write: if isLoggedIn(); }
+    match /pushSubscriptions/{userId} {
+      allow read: if isLoggedIn() && (isOwner(userId) || isAdmin());
+      allow write: if isLoggedIn() && isOwner(userId);
+    }
+
+    match /financeIncome/{docId} { allow read, write: if isAdminOrHead(); }
+    match /financeExpenses/{docId} { allow read, write: if isAdminOrHead(); }
+    match /financeLoans/{docId} { allow read, write: if isAdminOrHead(); }
+
+    match /trainingPrograms/{progId} {
+      allow read: if isLoggedIn();
+      allow create: if isAdminOrHead();
+      allow update: if isLoggedIn();
+      allow delete: if isAdminOrHead();
+      match /modules/{moduleId} { allow read: if isLoggedIn(); allow write: if isAdminOrHead(); }
+      match /lessons/{lessonId} { allow read: if isLoggedIn(); allow write: if isAdminOrHead(); }
+    }
+
+    match /careerPrograms/{progId} {
+      allow read: if isLoggedIn();
+      allow create: if isAdminOrHead();
+      allow update: if isLoggedIn();
+      allow delete: if isAdminOrHead();
+      match /modules/{moduleId} { allow read: if isLoggedIn(); allow write: if isAdminOrHead(); }
+      match /lessons/{lessonId} { allow read: if isLoggedIn(); allow write: if isAdminOrHead(); }
+    }
+
+    match /trainingPartners/{partnerId} { allow read: if isLoggedIn(); allow create, update, delete: if isAdminOrHead(); }
+    match /trainingSessions/{sessionId} {
+      allow read: if isLoggedIn();
+      allow create: if isAdminOrHead();
+      allow update: if isLoggedIn();
+      allow delete: if isAdminOrHead();
+    }
+
+    match /programAssignments/{assignId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn();
+      allow delete: if isAdmin();
+    }
+
+    match /learningProgress/{progressId} { allow read, write: if isLoggedIn(); }
+    match /moduleProgress/{progressId} { allow read, write: if isLoggedIn(); }
+
+    match /socialCalendar/{postId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update, delete: if isLoggedIn() && (resource.data.postedById == request.auth.uid || isAdmin());
+    }
+
+    match /contentTasks/{taskId} { allow read: if isLoggedIn(); allow create, update: if isLoggedIn(); allow delete: if isLoggedIn() && (resource.data.postedById == request.auth.uid || isAdmin()); }
+    match /contentSubmissions/{subId} { allow read: if isLoggedIn(); allow create: if isLoggedIn(); allow update: if isAdminOrHead(); }
+    match /newsroom/{newsId} { allow read: if isLoggedIn(); allow create: if isLoggedIn(); allow delete: if isLoggedIn() && (resource.data.postedById == request.auth.uid || isAdmin()); }
+    match /mediaLibrary/{mediaId} { allow read: if isLoggedIn(); allow create: if isLoggedIn(); allow delete: if isLoggedIn() && (resource.data.uploadedById == request.auth.uid || isAdmin()); }
+    match /newsletters/{nlId} { allow read: if isLoggedIn(); allow create: if isLoggedIn(); allow update, delete: if isLoggedIn() && (resource.data.createdById == request.auth.uid || isAdmin()); }
+
+    match /yanPartners/{partnerId} { allow read: if isLoggedIn(); allow create: if isLoggedIn(); allow update, delete: if isAdminOrHead(); }
+    match /partnershipOpportunities/{oppId} { allow read: if isLoggedIn(); allow create: if isLoggedIn(); allow delete: if isLoggedIn() && (resource.data.postedById == request.auth.uid || isAdmin()); }
+    match /partnershipProposals/{propId} { allow read: if isLoggedIn(); allow create: if isLoggedIn(); allow update: if isAdminOrHead(); allow delete: if isLoggedIn() && (resource.data.proposedById == request.auth.uid || isAdmin()); }
+
+    match /joinRequests/{reqId} { allow create: if true; allow read, update, delete: if isAdmin(); }
+    match /contactSubmissions/{subId} { allow create: if true; allow read, update, delete: if isAdmin(); }
+
+    match /onlineUsers/{userId} { allow read: if isLoggedIn(); allow write: if isLoggedIn() && isOwner(userId); }
+    match /moderation_log/{logId} { allow read: if isAdmin(); allow create: if isLoggedIn(); allow delete: if isAdmin(); }
+
+    match /memberGrades/{gradeId} { allow read: if isLoggedIn(); allow create: if isLoggedIn(); allow update: if isLoggedIn() && (resource.data.userId == request.auth.uid || isAdminOrHead()); allow delete: if isAdmin(); }
+    match /quizAttempts/{attemptId} { allow read, write: if isLoggedIn(); }
+    match /quizFailures/{failureId} { allow read: if isLoggedIn(); allow create: if isLoggedIn(); allow update: if isAdminOrHead(); }
+
+    match /hubs/{hubId} {
+      allow read: if isLoggedIn();
+      allow write: if isAdminOrHead();
+    }
+
+    match /formSubmissions/{subId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update, delete: if isAdminOrHead();
+    }
+
+    match /labListings/{listingId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reviews','avgRating','reviewCount']);
+      allow delete: if isAdmin();
+    }
+
+    match /systemErrors/{errorId} {
+      allow read: if isAdmin();
+      allow create: if isLoggedIn();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /capstoneProjects/{projectId} {
+      allow read: if isLoggedIn();
+      allow write: if isAdmin();
+    }
+
+    match /capstoneReviews/{reviewId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+    }
+
+    match /programFeedback/{feedbackId} {
+      allow read: if isAdmin();
+      allow create: if isLoggedIn();
+    }
+
+    match /capstoneSubmissions/{submissionId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isAdmin();
+    }
+
+    match /moduleDiscussions/{discussionId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+    }
+
+    match /headAccess/{docId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isAdmin() || isSystemAdmin();
+      allow delete: if isAdmin() || isSystemAdmin();
+    }
+
+    match /rewardRedemptions/{redemptionId} {
+      allow create: if isLoggedIn();
+      allow read, update: if isAdmin();
+    }
+  }
+}'''
+
+# Deploy rules
+resp = requests.post(
+    f'https://firebaserules.googleapis.com/v1/projects/{project_id}/rulesets',
+    headers=headers,
+    json={'source': {'files': [{'name': 'firestore.rules', 'content': clean_rules}]}}
+)
+print(f"Create ruleset: {resp.status_code}")
+
+if resp.status_code == 200:
+    ruleset_name = resp.json()['name']
+    rel = requests.patch(
+        f'https://firebaserules.googleapis.com/v1/projects/{project_id}/releases/cloud.firestore',
+        headers=headers,
+        json={'release': {'name': f'projects/{project_id}/releases/cloud.firestore', 'rulesetName': ruleset_name}}
+    )
+    print(f"Release: {rel.status_code}")
+    if rel.status_code == 200:
+        print("✅ YAN Firestore rules cleaned — studio rules removed!")
+    else:
+        print(rel.text)
+else:
+    print(resp.text)
