@@ -259,9 +259,16 @@ onAuthStateChanged(auth, async user => {
       return;
     }
     // Try cached data from localStorage for instant load
-    const cacheKey = 'yan_user_' + user.uid;
-    const cached = localStorage.getItem(cacheKey);
-    console.log('[YAN Auth] Cache found:', !!cached);
+    console.log('[YAN Auth] About to check cache...');
+    let cacheKey, cached;
+    try {
+      cacheKey = 'yan_user_' + user.uid;
+      cached = localStorage.getItem(cacheKey);
+      console.log('[YAN Auth] Cache found:', !!cached);
+    } catch(cacheErr) {
+      console.error('[YAN Auth] Cache error:', cacheErr);
+      cached = null;
+    }
     if (cached) {
       try {
         currentUserData = JSON.parse(cached);
