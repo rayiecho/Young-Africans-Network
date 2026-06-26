@@ -638,26 +638,231 @@ async function loadPartnershipsAdmin(c) {
 
 async function loadNewslettersAdmin(c) {
   try {
-    const snap = await getDocs(query(collection(db, 'newsletters'), orderBy('createdAt', 'desc')));
-    let html = '<h3 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Newsletters</h3>';
+    const [snap, usersSnap] = await Promise.all([
+      getDocs(query(collection(db, 'newsletters'), orderBy('createdAt', 'desc'))).catch(() => getDocs(collection(db, 'newsletters'))),
+      getDocs(collection(db, 'users'))
+    ]);
+    const allUsers = usersSnap.docs.map(d => ({id: d.id, ...d.data()}));
+
+    let html = '<div style="max-width:900px;margin:0 auto;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">';
+    html += '<div><h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);">Newsletter Manager</h2>';
+    html += '<p style="color:var(--gray);font-size:0.82rem;">Send emails to all members, specific departments, or individual members</p></div>';
+    html += '<button onclick="showNewsletterComposer()" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">+ Compose Newsletter</button>';
+    html += '</div>';
+
+    // Newsletter composer
+    html += '<div id="newsletter-composer" style="display:none;background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:1.5rem;">';
+    html += '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:1.25rem;">Compose Newsletter</h3>';
+    
+    // Subject
+    html += '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Subject *</label>';
+    html += '<input id="nl-subject" type="text" placeholder="Newsletter subject..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>';
+    
+    // Message
+    html += '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Message *</label>';
+    html += '<textarea id="nl-message" rows="8" placeholder="Write your newsletter content here..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;"></textarea></div>';
+    
+    // Recipients
+    html += '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Send To</label>';
+    html += '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;">';
+    html += '<button onclick="setNewsletterTarget('all')" id="nl-btn-all" class="nl-target-btn active" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">All Members (' + allUsers.length + ')</button>';
+    
+    // Department buttons
+    const depts = ['programs','scholarships','career','community','mental','communications','partnerships','finance'];
+    const deptNames = {'programs':'Programs','scholarships':'Scholarships','career':'Career','community':'Community','mental':'Mental Health','communications':'Communications','partnerships':'Partnerships','finance':'Finance'};
+    depts.forEach(d => {
+      const count = allUsers.filter(u => u.department === d).length;
+      html += '<button onclick="setNewsletterTarget(\'' + d + '\')" id="nl-btn-' + d + '" class="nl-target-btn" style="background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">' + deptNames[d] + ' (' + count + ')</button>';
+    });
+    html += '<button onclick="setNewsletterTarget('specific')" id="nl-btn-specific" class="nl-target-btn" style="background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">Specific Members</button>';
+    html += '</div>';
+    
+    // Member search for specific targeting
+    html += '<div id="nl-member-search" style="display:none;">';
+    html += '<input type="text" id="nl-search-input" placeholder="Search by name or email..." oninput="searchNewsletterMembers(this.value)" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;margin-bottom:0.5rem;">';
+    html += '<div id="nl-search-results" style="max-height:200px;overflow-y:auto;border:1.5px solid rgba(27,42,107,0.1);border-radius:10px;"></div>';
+    html += '<div id="nl-selected-members" style="margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.4rem;"></div>';
+    html += '</div>';
+    html += '</div>';
+
+    // Preview recipients
+    html += '<div id="nl-recipients-preview" style="background:rgba(27,42,107,0.04);border-radius:10px;padding:0.75rem;margin-bottom:1rem;font-size:0.82rem;color:var(--navy);">Will send to: <strong id="nl-recipient-count">' + allUsers.length + ' members</strong></div>';
+    
+    // Action buttons
+    html += '<div style="display:flex;gap:0.75rem;">';
+    html += '<button onclick="sendNewsletter()" style="background:var(--red);color:#fff;border:none;padding:0.85rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Send Newsletter</button>';
+    html += '<button onclick="saveNewsletterDraft()" style="background:var(--light);color:var(--navy);border:none;padding:0.85rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;">Save Draft</button>';
+    html += '<button onclick="document.getElementById('newsletter-composer').style.display='none'" style="background:none;border:none;color:var(--gray);cursor:pointer;font-family:Poppins,sans-serif;">Cancel</button>';
+    html += '</div></div>';
+
+    // Past newsletters
+    html += '<div class="section-card"><h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Sent Newsletters</h3>';
     if (snap.empty) {
-      html += '<p style="color:var(--gray);">No newsletters yet.</p>';
+      html += '<p style="color:var(--gray);font-size:0.85rem;">No newsletters sent yet.</p>';
     } else {
       snap.docs.forEach(d => {
         const n = d.data();
-        html += '<div class="section-card" style="margin-bottom:1rem;">'
-          + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">'
-          + '<div><strong style="font-size:0.92rem;color:var(--navy);">' + (n.subject||'') + '</strong>'
-          + '<p style="font-size:0.78rem;color:var(--gray);margin-top:0.25rem;">' + (n.sent ? 'Sent to ' + (n.sentTo||0) + ' members' : 'Draft') + ' · ' + (n.createdBy||'') + '</p></div>'
-          + '<span style="background:' + (n.sent ? 'rgba(39,174,96,0.1)' : 'rgba(245,166,35,0.1)') + ';color:' + (n.sent ? '#27AE60' : '#b37800') + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (n.sent ? 'Sent' : 'Draft') + '</span>'
-          + '</div></div>';
+        html += '<div style="padding:1rem;border-bottom:1px solid var(--light);">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">';
+        html += '<div><p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + sanitize(n.subject||'') + '</p>';
+        html += '<p style="font-size:0.75rem;color:var(--gray);">Sent to ' + (n.sentTo||0) + ' members · ' + (n.createdAt?.toDate ? n.createdAt.toDate().toLocaleDateString() : '') + '</p></div>';
+        html += '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">Sent</span>';
+        html += '</div></div>';
       });
     }
+    html += '</div></div>';
+    
     c.innerHTML = html;
+    
+    // Store users for search
+    window._nlAllUsers = allUsers;
+    window._nlTarget = 'all';
+    window._nlSelectedUIDs = [];
+    
   } catch(e) {
     c.innerHTML = '<p style="color:var(--gray);">Error: ' + e.message + '</p>';
   }
 }
+
+window.showNewsletterComposer = function() {
+  document.getElementById('newsletter-composer').style.display = 'block';
+  document.getElementById('newsletter-composer').scrollIntoView({behavior:'smooth'});
+};
+
+window.setNewsletterTarget = function(target) {
+  window._nlTarget = target;
+  window._nlSelectedUIDs = [];
+  document.querySelectorAll('.nl-target-btn').forEach(b => {
+    b.style.background = 'var(--light)';
+    b.style.color = 'var(--navy)';
+    b.style.border = '1.5px solid rgba(27,42,107,0.15)';
+  });
+  const activeBtn = document.getElementById('nl-btn-' + target);
+  if (activeBtn) { activeBtn.style.background = 'var(--navy)'; activeBtn.style.color = '#fff'; }
+  
+  const searchDiv = document.getElementById('nl-member-search');
+  if (target === 'specific') {
+    searchDiv.style.display = 'block';
+  } else {
+    searchDiv.style.display = 'none';
+  }
+  updateRecipientCount();
+};
+
+window.updateRecipientCount = function() {
+  const users = window._nlAllUsers || [];
+  let count = 0;
+  if (window._nlTarget === 'all') count = users.length;
+  else if (window._nlTarget === 'specific') count = window._nlSelectedUIDs.length;
+  else count = users.filter(u => u.department === window._nlTarget).length;
+  document.getElementById('nl-recipient-count').textContent = count + ' member' + (count !== 1 ? 's' : '');
+};
+
+window.searchNewsletterMembers = function(query) {
+  const users = window._nlAllUsers || [];
+  const results = document.getElementById('nl-search-results');
+  if (!query) { results.innerHTML = ''; return; }
+  const filtered = users.filter(u => 
+    (u.name||'').toLowerCase().includes(query.toLowerCase()) ||
+    (u.email||'').toLowerCase().includes(query.toLowerCase())
+  ).slice(0, 10);
+  results.innerHTML = filtered.map(u => 
+    '<div onclick="addNewsletterMember(\'' + u.id + '\',\'' + encodeURIComponent(u.name||'') + '\',\'' + encodeURIComponent(u.email||'') + '\')" '
+    + 'style="padding:0.6rem 0.75rem;cursor:pointer;border-bottom:1px solid var(--light);font-size:0.82rem;" '
+    + 'onmouseover="this.style.background='var(--light)'" onmouseout="this.style.background=''">'
+    + '<strong>' + sanitize(u.name||'') + '</strong> — ' + sanitize(u.email||'')
+    + '</div>'
+  ).join('') || '<p style="padding:0.5rem;color:var(--gray);font-size:0.82rem;">No members found</p>';
+};
+
+window.addNewsletterMember = function(uid, nameEnc, emailEnc) {
+  if (window._nlSelectedUIDs.includes(uid)) return;
+  window._nlSelectedUIDs.push(uid);
+  const name = decodeURIComponent(nameEnc);
+  const selected = document.getElementById('nl-selected-members');
+  const tag = document.createElement('span');
+  tag.style.cssText = 'background:var(--navy);color:#fff;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.75rem;display:inline-flex;align-items:center;gap:0.4rem;';
+  tag.innerHTML = sanitize(name) + ' <span onclick="removeNewsletterMember(\'' + uid + '\',this.parentElement)" style="cursor:pointer;opacity:0.7;">x</span>';
+  tag.dataset.uid = uid;
+  selected.appendChild(tag);
+  document.getElementById('nl-search-input').value = '';
+  document.getElementById('nl-search-results').innerHTML = '';
+  updateRecipientCount();
+};
+
+window.removeNewsletterMember = function(uid, el) {
+  window._nlSelectedUIDs = window._nlSelectedUIDs.filter(id => id !== uid);
+  el.remove();
+  updateRecipientCount();
+};
+
+window.sendNewsletter = async function() {
+  const subject = document.getElementById('nl-subject').value.trim();
+  const message = document.getElementById('nl-message').value.trim();
+  if (!subject) return showToast('Please enter a subject', 'error');
+  if (!message || message.length < 20) return showToast('Please write a message', 'error');
+  
+  const users = window._nlAllUsers || [];
+  let recipients = [];
+  if (window._nlTarget === 'all') recipients = users;
+  else if (window._nlTarget === 'specific') recipients = users.filter(u => window._nlSelectedUIDs.includes(u.id));
+  else recipients = users.filter(u => u.department === window._nlTarget);
+  
+  if (recipients.length === 0) return showToast('No recipients selected', 'error');
+  if (!confirm('Send newsletter to ' + recipients.length + ' member(s)?')) return;
+
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  let sent = 0;
+  let failed = 0;
+
+  for (const user of recipients) {
+    if (!user.email) continue;
+    try {
+      await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
+        to_email: user.email,
+        name: user.name || 'Member',
+        subject: subject,
+        message: message + '\n\nBuilding the Future, Together.\n\nYAN Administration Office\nYoung Africans Network\nyoungafricansnetwork.org | info@youngafricansnetwork.org'
+      });
+      sent++;
+    } catch(e) {
+      failed++;
+      console.log('Failed for', user.email, e);
+    }
+    // Small delay to avoid rate limiting
+    await new Promise(r => setTimeout(r, 300));
+  }
+
+  // Save to Firestore
+  await addDoc(collection(db, 'newsletters'), {
+    subject, message, target: window._nlTarget,
+    sentTo: sent, failed,
+    createdBy: auth.currentUser?.email || 'Admin',
+    createdAt: serverTimestamp(), sent: true
+  });
+
+  showToast('Newsletter sent to ' + sent + ' members!' + (failed > 0 ? ' (' + failed + ' failed)' : ''));
+  btn.disabled = false;
+  btn.textContent = 'Send Newsletter';
+  loadSection('newsletters');
+};
+
+window.saveNewsletterDraft = async function() {
+  const subject = document.getElementById('nl-subject').value.trim();
+  const message = document.getElementById('nl-message').value.trim();
+  if (!subject) return showToast('Please enter a subject', 'error');
+  await addDoc(collection(db, 'newsletters'), {
+    subject, message, target: window._nlTarget,
+    createdBy: auth.currentUser?.email || 'Admin',
+    createdAt: serverTimestamp(), sent: false
+  });
+  showToast('Draft saved!');
+  loadSection('newsletters');
+};
 
 async function approveProposalAdmin(id) {
   await updateDoc(doc(db, 'partnershipProposals', id), {status: 'approved'});
