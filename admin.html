@@ -666,7 +666,7 @@ async function loadNewslettersAdmin(c) {
     // Recipients
     html += '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Send To</label>';
     html += '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;">';
-    html += '<button onclick="setNewsletterTarget('all')" id="nl-btn-all" class="nl-target-btn active" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">All Members (' + allUsers.length + ')</button>';
+    html += '<button onclick="setNewsletterTarget(\'all\')" id="nl-btn-all" class="nl-target-btn active" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">All Members (' + allUsers.length + ')</button>';
     
     // Department buttons
     const depts = ['programs','scholarships','career','community','mental','communications','partnerships','finance'];
