@@ -4518,6 +4518,7 @@ window.updateRecipientCount = function() {
 };
 window.searchNewsletterMembers = function(query) {
   const users = window._nlAllUsers || [];
+  console.log('[NL Search] query:', query, 'users:', users.length);
   const results = document.getElementById('nl-search-results');
   if (!results) return;
   if (!query) { results.innerHTML = ''; return; }
