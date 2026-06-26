@@ -1024,14 +1024,16 @@ window.loadSection = async function(section, customContainer) {
 
 // ===== OVERVIEW =====
 async function loadOverview(c) {
+  const empty = {size:0, docs:[]};
+  const safe = fn => fn.catch(() => empty);
   const [usersSnap, gallerySnap, teamSnap, eventsSnap, storiesSnap, matsSnap, certsSnap] = await Promise.all([
-    getDocs(collection(db, 'users')),
-    getDocs(collection(db, 'gallery')),
-    getDocs(collection(db, 'team')),
-    getDocs(collection(db, 'events')),
-    getDocs(collection(db, 'stories')),
-    getDocs(collection(db, 'trainingPrograms')),
-    getDocs(query(collection(db, 'certificates'), where('status', '==', 'pending')))
+    safe(getDocs(collection(db, 'users'))),
+    safe(getDocs(collection(db, 'gallery'))),
+    safe(getDocs(collection(db, 'team'))),
+    safe(getDocs(collection(db, 'events'))),
+    safe(getDocs(collection(db, 'stories'))),
+    safe(getDocs(collection(db, 'trainingPrograms'))),
+    safe(getDocs(query(collection(db, 'certificates'), where('status', '==', 'pending'))))
   ]);
   c.innerHTML = `
     <div class="stats-grid">
