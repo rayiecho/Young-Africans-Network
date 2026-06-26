@@ -312,14 +312,18 @@ onAuthStateChanged(auth, async user => {
       } catch(e) { localStorage.removeItem(cacheKey); }
     }
     // No cache - show loading and fetch
+    console.log('[YAN Auth] No cache, fetching from Firestore...');
     const loading = document.getElementById('screen-loading');
     const loadingMsg = document.getElementById('loading-message');
     if (loading) { loading.classList.add('active'); loading.style.display = 'flex'; }
     if (loadingMsg) loadingMsg.textContent = 'Loading your profile...';
     try {
+      console.log('[YAN Auth] Calling getDoc...');
       const snap = await getDoc(doc(db, 'users', user.uid));
+      console.log('[YAN Auth] getDoc result - exists:', snap.exists());
       if (snap.exists()) {
         currentUserData = snap.data();
+        console.log('[YAN Auth] Got user data, calling enterPlatform...');
         // Cache for next login
         localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
         if (!currentUserData.profileComplete) {
@@ -327,6 +331,7 @@ onAuthStateChanged(auth, async user => {
           currentUserData.profileComplete = true;
         }
         enterPlatform();
+        console.log('[YAN Auth] enterPlatform called!');
         setTimeout(() => loadUnreadBadge(), 1000);
         setTimeout(() => subscribeToPush(user.uid), 3000);
         const lastTab = localStorage.getItem('yan_last_tab');
