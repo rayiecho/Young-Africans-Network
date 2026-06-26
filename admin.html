@@ -4073,6 +4073,140 @@ window.revokeHeadAccess = async function(docId, userId) {
 };
 
 
+
+window.loadHealthCheck = async function(c) {
+  c.innerHTML = '<div style="max-width:900px;margin:0 auto;"><h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">User Health Check</h2><p style="color:var(--gray);font-size:0.85rem;margin-bottom:1.5rem;">Check and fix users who have Firebase Auth accounts but no Firestore profile</p><button onclick="runHealthCheck()" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;margin-bottom:1.5rem;">Run Health Check</button><div id="health-results"></div></div>';
+};
+
+window.loadSOSReports = async function(c) {
+  try {
+    const snap = await getDocs(query(collection(db,'sosReports'), orderBy('createdAt','desc'))).catch(()=>getDocs(collection(db,'sosReports')));
+    const pending = snap.docs.filter(d => d.data().status === 'pending').length;
+    
+    let html = '<div style="max-width:900px;margin:0 auto;">';
+    html += '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">';
+    html += '<div style="width:12px;height:12px;border-radius:50%;background:#E63329;animation:sos-pulse 2s infinite;"></div>';
+    html += '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);">SOS Emergency Reports</h2>';
+    if (pending > 0) html += '<span style="background:rgba(230,51,41,0.1);color:#E63329;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.78rem;font-weight:700;">' + pending + ' pending</span>';
+    html += '</div>';
+
+    if (snap.empty) {
+      html += '<div style="text-align:center;padding:3rem;color:var(--gray);">No SOS reports yet.</div>';
+    } else {
+      snap.docs.forEach(d => {
+        const r = d.data();
+        const urgencyColor = r.urgency === 'high' ? '#E63329' : r.urgency === 'medium' ? '#F5A623' : '#27AE60';
+        const urgencyBg = r.urgency === 'high' ? 'rgba(230,51,41,0.1)' : r.urgency === 'medium' ? 'rgba(245,166,35,0.1)' : 'rgba(39,174,96,0.1)';
+        html += '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid ' + urgencyColor + ';">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">';
+        html += '<div>';
+        html += '<p style="font-size:0.92rem;font-weight:800;color:var(--navy);">' + sanitize(r.name||'Anonymous') + '</p>';
+        html += '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize(r.email||'') + ' · ' + (r.createdAt?.toDate ? r.createdAt.toDate().toLocaleString() : '') + '</p>';
+        html += '</div>';
+        html += '<div style="display:flex;gap:0.5rem;align-items:center;">';
+        html += '<span style="background:' + urgencyBg + ';color:' + urgencyColor + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (r.urgency||'').toUpperCase() + '</span>';
+        html += '<span style="background:' + (r.status==='resolved'?'rgba(39,174,96,0.1)':'rgba(245,166,35,0.1)') + ';color:' + (r.status==='resolved'?'#27AE60':'#b37800') + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (r.status||'pending').toUpperCase() + '</span>';
+        html += '</div></div>';
+        html += '<div style="background:var(--light);border-radius:10px;padding:1rem;margin-bottom:1rem;">';
+        html += '<p style="font-size:0.85rem;color:var(--navy);line-height:1.6;">' + sanitize(r.message||'') + '</p></div>';
+        if (r.status !== 'resolved') {
+          html += '<div style="display:flex;gap:0.75rem;flex-wrap:wrap;">';
+          html += '<button onclick="replySOS(\''+d.id+'\',\''+encodeURIComponent(r.email||'')+'\',\''+encodeURIComponent(r.name||'')+'\',\''+encodeURIComponent(r.message||'')+'\')" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">Reply & Resolve</button>';
+          html += '<button onclick="markSOSResolved(\''+d.id+'\')" style="background:rgba(39,174,96,0.1);color:#27AE60;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">Mark Resolved</button>';
+          html += '</div>';
+        }
+        html += '</div>';
+      });
+    }
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) {
+    c.innerHTML = '<p style="color:var(--red);padding:1rem;">Error: ' + e.message + '</p>';
+  }
+};
+
+window.runHealthCheck = async function() {
+  const results = document.getElementById('health-results');
+  results.innerHTML = '<p style="color:var(--gray);">Checking all users...</p>';
+  try {
+    const fsSnap = await getDocs(collection(db, 'users'));
+    const incomplete = fsSnap.docs.filter(d => {
+      const data = d.data();
+      return !data.name || !data.email || !data.department || !data.country;
+    });
+    let html = '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">';
+    html += '<div style="background:rgba(39,174,96,0.1);border-radius:12px;padding:1rem;text-align:center;"><p style="font-size:2rem;font-weight:900;color:#27AE60;">' + fsSnap.size + '</p><p style="font-size:0.82rem;color:var(--gray);">Total Users</p></div>';
+    html += '<div style="background:rgba(230,51,41,0.1);border-radius:12px;padding:1rem;text-align:center;"><p style="font-size:2rem;font-weight:900;color:var(--red);">' + incomplete.length + '</p><p style="font-size:0.82rem;color:var(--gray);">Incomplete Profiles</p></div>';
+    html += '</div>';
+    if (incomplete.length > 0) {
+      html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Incomplete Profiles</h3>';
+      incomplete.forEach(d => {
+        const u = d.data();
+        const missing = [];
+        if (!u.name) missing.push('name');
+        if (!u.email) missing.push('email');
+        if (!u.department) missing.push('department');
+        if (!u.country) missing.push('country');
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--light);border-radius:10px;margin-bottom:0.5rem;flex-wrap:wrap;gap:0.5rem;">';
+        html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(u.name||'No name') + '</p>';
+        html += '<p style="font-size:0.75rem;color:var(--gray);">' + sanitize(u.email||'No email') + '</p>';
+        html += '<p style="font-size:0.72rem;color:var(--red);">Missing: ' + missing.join(', ') + '</p></div>';
+        html += '<button onclick="fixUserProfile(\'' + d.id + '\',\'' + encodeURIComponent(u.email||'') + '\',\'' + encodeURIComponent(u.name||'') + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Fix Profile</button>';
+        html += '</div>';
+      });
+    } else {
+      html += '<div style="background:rgba(39,174,96,0.1);border-radius:12px;padding:1rem;text-align:center;color:#27AE60;font-weight:700;">All profiles are complete!</div>';
+    }
+    html += '</div>';
+    results.innerHTML = html;
+  } catch(e) {
+    results.innerHTML = '<p style="color:var(--red);">Error: ' + e.message + '</p>';
+  }
+};
+
+window.fixUserProfile = async function(uid, emailEnc, nameEnc) {
+  const email = decodeURIComponent(emailEnc);
+  const name = decodeURIComponent(nameEnc);
+  const dept = prompt('Department for ' + (name||email) + ':\nprograms, scholarships, career, community, mental, communications, partnerships, finance', 'programs');
+  if (!dept) return;
+  const country = prompt('Country:', 'Kenya');
+  if (!country) return;
+  const role = prompt('Role:', 'Member');
+  await setDoc(doc(db, 'users', uid), {
+    department: dept, country, role: role||'Member',
+    profileComplete: true, updatedAt: serverTimestamp()
+  }, {merge: true});
+  showToast('Profile fixed for ' + (name||email) + '!');
+  window.runHealthCheck();
+};
+
+window.replySOS = async function(reportId, emailEnc, nameEnc, messageEnc) {
+  const email = decodeURIComponent(emailEnc);
+  const name = decodeURIComponent(nameEnc);
+  const reply = prompt('Write your reply to ' + name + ':');
+  if (!reply) return;
+  try {
+    await fetch('https://yan-email-worker.youngafricansn.workers.dev', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        to_email: email, name,
+        subject: 'RE: Your YAN Emergency Report — Response from YAN Admin',
+        message: 'Thank you for reaching out. Here is our response:\n\n' + reply + '\n\nFor further assistance contact info@youngafricansnetwork.org',
+        type: 'sos'
+      })
+    });
+    await updateDoc(doc(db,'sosReports',reportId), {status:'resolved', resolvedAt:serverTimestamp(), reply});
+    showToast('Reply sent to ' + name + '!');
+    loadSection('sos');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+window.markSOSResolved = async function(reportId) {
+  await updateDoc(doc(db,'sosReports',reportId), {status:'resolved', resolvedAt:serverTimestamp()});
+  showToast('Marked as resolved!');
+  loadSection('sos');
+};
 </script>
 
 <style>
@@ -4348,155 +4482,11 @@ document.addEventListener('click', function(e) {
 
 
 
-window.loadHealthCheck = async function(c) {
-  c.innerHTML = '<div style="max-width:900px;margin:0 auto;"><h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">User Health Check</h2><p style="color:var(--gray);font-size:0.85rem;margin-bottom:1.5rem;">Check and fix users who have Firebase Auth accounts but no Firestore profile</p><button onclick="runHealthCheck()" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;margin-bottom:1.5rem;">Run Health Check</button><div id="health-results"></div></div>';
-};
 
-window.runHealthCheck = async function() {
-  const results = document.getElementById('health-results');
-  results.innerHTML = '<p style="color:var(--gray);">Checking all users...</p>';
-  try {
-    // Get all Firestore users
-    const fsSnap = await getDocs(collection(db, 'users'));
-    const fsUIDs = new Set(fsSnap.docs.map(d => d.id));
-    
-    // Get auth users via admin - we check against known list
-    // Show all Firestore users and their status
-    let html = '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">';
-    html += '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Firestore Users (' + fsSnap.size + ')</h3>';
-    
-    // Check for incomplete profiles
-    const incomplete = fsSnap.docs.filter(d => {
-      const data = d.data();
-      return !data.name || !data.email || !data.department || !data.country;
-    });
 
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">';
-    html += '<div style="background:rgba(39,174,96,0.1);border-radius:12px;padding:1rem;text-align:center;"><p style="font-size:2rem;font-weight:900;color:#27AE60;">' + fsSnap.size + '</p><p style="font-size:0.82rem;color:var(--gray);">Total Users</p></div>';
-    html += '<div style="background:rgba(230,51,41,0.1);border-radius:12px;padding:1rem;text-align:center;"><p style="font-size:2rem;font-weight:900;color:var(--red);">' + incomplete.length + '</p><p style="font-size:0.82rem;color:var(--gray);">Incomplete Profiles</p></div>';
-    html += '</div>';
 
-    if (incomplete.length > 0) {
-      html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Incomplete Profiles</h3>';
-      incomplete.forEach(d => {
-        const u = d.data();
-        const missing = [];
-        if (!u.name) missing.push('name');
-        if (!u.email) missing.push('email');
-        if (!u.department) missing.push('department');
-        if (!u.country) missing.push('country');
-        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--light);border-radius:10px;margin-bottom:0.5rem;flex-wrap:wrap;gap:0.5rem;">';
-        html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(u.name||'No name') + '</p>';
-        html += '<p style="font-size:0.75rem;color:var(--gray);">' + sanitize(u.email||'No email') + '</p>';
-        html += '<p style="font-size:0.72rem;color:var(--red);">Missing: ' + missing.join(', ') + '</p></div>';
-        html += '<button onclick="fixUserProfile(\'' + d.id + '\',\'' + encodeURIComponent(u.email||'') + '\',\'' + encodeURIComponent(u.name||'') + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Fix Profile</button>';
-        html += '</div>';
-      });
-    } else {
-      html += '<div style="background:rgba(39,174,96,0.1);border-radius:12px;padding:1rem;text-align:center;color:#27AE60;font-weight:700;">All profiles are complete!</div>';
-    }
-    html += '</div>';
-    results.innerHTML = html;
-  } catch(e) {
-    results.innerHTML = '<p style="color:var(--red);">Error: ' + e.message + '</p>';
-  }
-};
 
-window.fixUserProfile = async function(uid, emailEnc, nameEnc) {
-  const email = decodeURIComponent(emailEnc);
-  const name = decodeURIComponent(nameEnc);
-  const dept = prompt('Department for ' + (name||email) + ':\nprograms, scholarships, career, community, mental, communications, partnerships, finance', 'programs');
-  if (!dept) return;
-  const country = prompt('Country:', 'Kenya');
-  if (!country) return;
-  const role = prompt('Role:', 'Member');
-  
-  await setDoc(doc(db, 'users', uid), {
-    department: dept, country, role: role||'Member',
-    profileComplete: true, updatedAt: serverTimestamp()
-  }, {merge: true});
-  
-  showToast('Profile fixed for ' + (name||email) + '!');
-  runHealthCheck();
-};
 
-window.loadSOSReports = async function(c) {
-  try {
-    const snap = await getDocs(query(collection(db,'sosReports'), orderBy('createdAt','desc'))).catch(()=>getDocs(collection(db,'sosReports')));
-    const pending = snap.docs.filter(d => d.data().status === 'pending').length;
-    
-    let html = '<div style="max-width:900px;margin:0 auto;">';
-    html += '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">';
-    html += '<div style="width:12px;height:12px;border-radius:50%;background:#E63329;animation:sos-pulse 2s infinite;"></div>';
-    html += '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);">SOS Emergency Reports</h2>';
-    if (pending > 0) html += '<span style="background:rgba(230,51,41,0.1);color:#E63329;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.78rem;font-weight:700;">' + pending + ' pending</span>';
-    html += '</div>';
-
-    if (snap.empty) {
-      html += '<div style="text-align:center;padding:3rem;color:var(--gray);">No SOS reports yet.</div>';
-    } else {
-      snap.docs.forEach(d => {
-        const r = d.data();
-        const urgencyColor = r.urgency === 'high' ? '#E63329' : r.urgency === 'medium' ? '#F5A623' : '#27AE60';
-        const urgencyBg = r.urgency === 'high' ? 'rgba(230,51,41,0.1)' : r.urgency === 'medium' ? 'rgba(245,166,35,0.1)' : 'rgba(39,174,96,0.1)';
-        html += '<div style="background:var(--white);border-radius:16px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid ' + urgencyColor + ';">';
-        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">';
-        html += '<div>';
-        html += '<p style="font-size:0.92rem;font-weight:800;color:var(--navy);">' + sanitize(r.name||'Anonymous') + '</p>';
-        html += '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize(r.email||'') + ' · ' + (r.createdAt?.toDate ? r.createdAt.toDate().toLocaleString() : '') + '</p>';
-        html += '</div>';
-        html += '<div style="display:flex;gap:0.5rem;align-items:center;">';
-        html += '<span style="background:' + urgencyBg + ';color:' + urgencyColor + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (r.urgency||'').toUpperCase() + '</span>';
-        html += '<span style="background:' + (r.status==='resolved'?'rgba(39,174,96,0.1)':'rgba(245,166,35,0.1)') + ';color:' + (r.status==='resolved'?'#27AE60':'#b37800') + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + (r.status||'pending').toUpperCase() + '</span>';
-        html += '</div></div>';
-        html += '<div style="background:var(--light);border-radius:10px;padding:1rem;margin-bottom:1rem;">';
-        html += '<p style="font-size:0.85rem;color:var(--navy);line-height:1.6;">' + sanitize(r.message||'') + '</p></div>';
-        if (r.status !== 'resolved') {
-          html += '<div style="display:flex;gap:0.75rem;flex-wrap:wrap;">';
-          html += '<button onclick="replySOS(\''+d.id+'\',\''+encodeURIComponent(r.email||'')+'\',\''+encodeURIComponent(r.name||'')+'\',\''+encodeURIComponent(r.message||'')+'\')" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">Reply & Resolve</button>';
-          html += '<button onclick="markSOSResolved(\''+d.id+'\')" style="background:rgba(39,174,96,0.1);color:#27AE60;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;">Mark Resolved</button>';
-          html += '</div>';
-        }
-        html += '</div>';
-      });
-    }
-    html += '</div>';
-    c.innerHTML = html;
-  } catch(e) {
-    c.innerHTML = '<p style="color:var(--red);padding:1rem;">Error: ' + e.message + '</p>';
-  }
-};
-
-window.replySOS = async function(reportId, emailEnc, nameEnc, messageEnc) {
-  const email = decodeURIComponent(emailEnc);
-  const name = decodeURIComponent(nameEnc);
-  const originalMsg = decodeURIComponent(messageEnc);
-  const reply = prompt('Write your reply to ' + name + ':');
-  if (!reply) return;
-  
-  try {
-    await fetch('https://yan-email-worker.youngafricansn.workers.dev', {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        to_email: email, name,
-        subject: 'RE: Your YAN Emergency Report — Response from YAN Admin',
-        message: 'Thank you for reaching out to us. We have received your emergency report and here is our response:\n\n' + reply + '\n\nIf you need further assistance, please do not hesitate to contact us at info@youngafricansnetwork.org or submit another SOS report.',
-        type: 'sos'
-      })
-    });
-    await updateDoc(doc(db,'sosReports',reportId), {status:'resolved', resolvedAt:serverTimestamp(), reply});
-    showToast('Reply sent to ' + name + '!');
-    loadSection('sos');
-  } catch(e) {
-    showToast('Error: ' + e.message, 'error');
-  }
-};
-
-window.markSOSResolved = async function(reportId) {
-  await updateDoc(doc(db,'sosReports',reportId), {status:'resolved', resolvedAt:serverTimestamp()});
-  showToast('Marked as resolved!');
-  loadSection('sos');
-};
 
 window.setNewsletterTarget = function(target) {
   window._nlTarget = target;
