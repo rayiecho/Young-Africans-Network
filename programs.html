@@ -649,5 +649,67 @@ window.sendYANGuideMessage = async function() {
 </script>
 <!-- END YAN GUIDE -->
 
+
+<!-- SOS EMERGENCY BUTTON -->
+<div id="sos-widget" style="position:fixed;bottom:1.5rem;left:1.5rem;z-index:99998;">
+  <button onclick="document.getElementById('sos-modal-pub').style.display='flex'" style="width:56px;height:56px;border-radius:50%;background:#E63329;color:#fff;border:none;font-family:Poppins,sans-serif;font-weight:900;font-size:0.75rem;cursor:pointer;box-shadow:0 4px 20px rgba(230,51,41,0.5);animation:sos-pulse 2s infinite;letter-spacing:0.5px;">SOS</button>
+</div>
+
+<div id="sos-modal-pub" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:99999;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#fff;border-radius:16px;padding:1.5rem;max-width:400px;width:100%;border-top:4px solid #E63329;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <h3 style="font-size:1rem;font-weight:800;color:#E63329;margin:0;">SOS — Emergency Report</h3>
+      <button onclick="document.getElementById('sos-modal-pub').style.display='none'" style="background:none;border:none;font-size:1.2rem;cursor:pointer;">x</button>
+    </div>
+    <p style="font-size:0.78rem;color:#6B7280;margin-bottom:1rem;">Report an urgent issue. YAN admin will respond to your email.</p>
+    <input id="pub-sos-name" type="text" placeholder="Your name *" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid #E5E7EB;border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;margin-bottom:0.5rem;">
+    <input id="pub-sos-email" type="email" placeholder="Your email *" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid #E5E7EB;border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;margin-bottom:0.5rem;">
+    <select id="pub-sos-urgency" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid #E5E7EB;border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;margin-bottom:0.5rem;">
+      <option value="high">High — Urgent issue</option>
+      <option value="medium">Medium — Needs attention soon</option>
+      <option value="low">Low — General concern</option>
+    </select>
+    <textarea id="pub-sos-message" rows="3" placeholder="Describe your issue *" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid #E5E7EB;border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;resize:none;margin-bottom:0.75rem;"></textarea>
+    <button onclick="submitPublicSOS()" style="width:100%;background:#E63329;color:#fff;border:none;padding:0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Send Emergency Report</button>
+  </div>
+</div>
+
+<style>
+@keyframes sos-pulse{0%,100%{box-shadow:0 4px 20px rgba(230,51,41,0.5);}50%{box-shadow:0 4px 30px rgba(230,51,41,0.9),0 0 0 8px rgba(230,51,41,0.2);}}
+</style>
+
+<script>
+async function submitPublicSOS() {
+  const name = document.getElementById('pub-sos-name').value.trim();
+  const email = document.getElementById('pub-sos-email').value.trim();
+  const urgency = document.getElementById('pub-sos-urgency').value;
+  const message = document.getElementById('pub-sos-message').value.trim();
+  if (!name || !email || !message) return alert('Please fill all required fields');
+  
+  try {
+    await fetch('https://yan-ai-worker.youngafricansn.workers.dev/sos', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name, email, urgency, message})
+    });
+  } catch(e) {}
+  
+  // Try EmailJS if available
+  if (typeof emailjs !== 'undefined') {
+    try {
+      await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
+        to_email: 'info@youngafricansnetwork.org',
+        name: 'YAN Admin',
+        subject: '[SOS ' + urgency.toUpperCase() + '] Emergency Report from ' + name,
+        message: 'From: ' + name + ' (' + email + ')\nUrgency: ' + urgency + '\n\n' + message
+      });
+    } catch(e) {}
+  }
+  
+  document.getElementById('sos-modal-pub').style.display = 'none';
+  alert('Emergency report submitted! YAN admin will respond to ' + email + ' as soon as possible.');
+}
+</script>
+
 </body>
 </html>

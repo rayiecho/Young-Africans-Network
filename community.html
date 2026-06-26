@@ -11751,6 +11751,53 @@ window.aiMatchMentor = async function() {
 };
 
 
+
+// ===== SOS EMERGENCY SYSTEM =====
+window.toggleSOS = function() {
+  const modal = document.getElementById('sos-modal');
+  const isOpen = modal.style.display !== 'none';
+  modal.style.display = isOpen ? 'none' : 'block';
+  // Auto-fill if logged in
+  if (!isOpen && typeof currentUserData !== 'undefined' && currentUserData) {
+    const nameEl = document.getElementById('sos-name');
+    const emailEl = document.getElementById('sos-email');
+    if (nameEl && !nameEl.value) nameEl.value = currentUserData.name || '';
+    if (emailEl && !emailEl.value) emailEl.value = currentUserData.email || '';
+  }
+};
+
+window.submitSOS = async function() {
+  const name = document.getElementById('sos-name').value.trim();
+  const email = document.getElementById('sos-email').value.trim();
+  const urgency = document.getElementById('sos-urgency').value;
+  const message = document.getElementById('sos-message').value.trim();
+  
+  if (!name) return alert('Please enter your name');
+  if (!email) return alert('Please enter your email');
+  if (!message || message.length < 10) return alert('Please describe your issue');
+
+  try {
+    // Save to Firestore
+    const ref = typeof db !== 'undefined' ? db : null;
+    if (ref) {
+      await addDoc(collection(db, 'sosReports'), {
+        name, email, urgency, message,
+        userId: (typeof currentUser !== 'undefined' && currentUser) ? currentUser.uid : null,
+        status: 'pending',
+        createdAt: serverTimestamp()
+      });
+    }
+    // Clear form
+    document.getElementById('sos-name').value = '';
+    document.getElementById('sos-email').value = '';
+    document.getElementById('sos-message').value = '';
+    document.getElementById('sos-modal').style.display = 'none';
+    alert('Your emergency report has been submitted. YAN admin will respond to your email as soon as possible.');
+  } catch(e) {
+    alert('Error submitting report: ' + e.message);
+  }
+};
+
 // ===== MENTORSHIP MEETINGS =====
 window.startMentorshipMeeting = async function(menteeId, menteeNameEncoded, mentorshipId) {
   const menteeName = decodeURIComponent(menteeNameEncoded);
@@ -13024,5 +13071,34 @@ window.viewMemberProgress = async function(userId, userName) {
 };
 </script>
 <!-- v1780508636 -->
+
+<!-- SOS EMERGENCY BUTTON -->
+<div id="sos-widget" style="position:fixed;bottom:1.5rem;left:1.5rem;z-index:99998;">
+  <button onclick="toggleSOS()" id="sos-btn" style="width:56px;height:56px;border-radius:50%;background:var(--red);color:#fff;border:none;font-family:Poppins,sans-serif;font-weight:900;font-size:0.75rem;cursor:pointer;box-shadow:0 4px 20px rgba(230,51,41,0.5);animation:sos-pulse 2s infinite;letter-spacing:0.5px;">SOS</button>
+  <div id="sos-modal" style="display:none;position:absolute;bottom:70px;left:0;background:#fff;border-radius:16px;padding:1.25rem;width:300px;box-shadow:0 8px 40px rgba(0,0,0,0.2);border:2px solid var(--red);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <h3 style="font-size:0.95rem;font-weight:800;color:var(--red);margin:0;">Emergency Report</h3>
+      <button onclick="toggleSOS()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--gray);">x</button>
+    </div>
+    <p style="font-size:0.75rem;color:var(--gray);margin-bottom:1rem;line-height:1.5;">Report an urgent issue. YAN admin will respond to your email as soon as possible.</p>
+    <input id="sos-name" type="text" placeholder="Your name *" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;margin-bottom:0.5rem;">
+    <input id="sos-email" type="email" placeholder="Your email *" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;margin-bottom:0.5rem;">
+    <select id="sos-urgency" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;margin-bottom:0.5rem;">
+      <option value="high">High — Urgent issue</option>
+      <option value="medium">Medium — Needs attention soon</option>
+      <option value="low">Low — General concern</option>
+    </select>
+    <textarea id="sos-message" rows="3" placeholder="Describe your issue *" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;resize:none;margin-bottom:0.75rem;"></textarea>
+    <button onclick="submitSOS()" style="width:100%;background:var(--red);color:#fff;border:none;padding:0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">Send Emergency Report</button>
+  </div>
+</div>
+
+<style>
+@keyframes sos-pulse {
+  0%,100%{box-shadow:0 4px 20px rgba(230,51,41,0.5);}
+  50%{box-shadow:0 4px 30px rgba(230,51,41,0.9),0 0 0 8px rgba(230,51,41,0.2);}
+}
+</style>
+
 </body>
 </html>
