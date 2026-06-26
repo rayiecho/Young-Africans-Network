@@ -525,15 +525,42 @@ async function handleGoogleRedirect() {
 }
 
 async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-pass').value;
-  if (!email||!pass) return showToast('Enter email and password','error');
+  console.log('[YAN Login] doLogin called');
+  const emailEl = document.getElementById('login-email');
+  const passEl = document.getElementById('login-pass');
   const btn = document.getElementById('login-btn');
+  
+  if (!emailEl || !passEl) {
+    console.error('[YAN Login] Email or password field not found!');
+    return;
+  }
+  
+  const email = emailEl.value.trim();
+  const pass = passEl.value;
+  
+  console.log('[YAN Login] Email:', email, 'Pass length:', pass.length);
+  
+  if (!email || !pass) {
+    showToast('Enter email and password','error');
+    return;
+  }
+  
   btn.disabled = true; btn.textContent = 'Signing in...';
   try {
-    await signInWithEmailAndPassword(auth, email, pass);
+    console.log('[YAN Login] Calling signInWithEmailAndPassword...');
+    const result = await signInWithEmailAndPassword(auth, email, pass);
+    console.log('[YAN Login] Success:', result.user.uid);
   } catch(e) {
-    showToast('Invalid email or password','error');
+    console.error('[YAN Login] Error code:', e.code, 'Message:', e.message);
+    if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+      showToast('Invalid email or password. Please try again.', 'error');
+    } else if (e.code === 'auth/too-many-requests') {
+      showToast('Too many attempts. Please wait a few minutes and try again.', 'error');
+    } else if (e.code === 'auth/network-request-failed') {
+      showToast('Network error. Please check your internet connection.', 'error');
+    } else {
+      showToast('Login error: ' + e.message, 'error');
+    }
   } finally {
     btn.disabled = false; btn.textContent = 'Sign In';
   }
