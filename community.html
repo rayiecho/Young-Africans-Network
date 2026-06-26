@@ -248,10 +248,13 @@ async function subscribeToPush(userId) {
 }
 
 onAuthStateChanged(auth, async user => {
+  console.log('[YAN Auth] onAuthStateChanged fired, user:', user ? user.uid : 'null');
   if (user) {
     currentUser = user;
+    console.log('[YAN Auth] Email verified:', user.emailVerified);
     // Check email verification first (fast - no Firestore needed)
     if (!user.emailVerified) {
+      console.log('[YAN Auth] Email not verified - showing verify screen');
       showScreen('screen-verify-email');
       return;
     }
