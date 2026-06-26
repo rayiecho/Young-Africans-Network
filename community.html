@@ -11787,6 +11787,18 @@ window.submitSOS = async function() {
         createdAt: serverTimestamp()
       });
     }
+    // Notify admin via email
+    await fetch('https://yan-email-worker.youngafricansn.workers.dev', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        to_email: 'info@youngafricansnetwork.org',
+        name: 'YAN Admin',
+        subject: '[SOS ' + urgency.toUpperCase() + '] Emergency Report from ' + name,
+        message: 'You have received an emergency SOS report.\n\nFrom: ' + name + '\nEmail: ' + email + '\nUrgency: ' + urgency.toUpperCase() + '\n\nMessage:\n' + message + '\n\nPlease log in to admin.html to respond.',
+        type: urgency === 'high' ? 'sos' : 'general'
+      })
+    }).catch(() => {});
     // Clear form
     document.getElementById('sos-name').value = '';
     document.getElementById('sos-email').value = '';
