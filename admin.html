@@ -675,7 +675,7 @@ async function loadNewslettersAdmin(c) {
       const count = allUsers.filter(u => u.department === d).length;
       html += '<button onclick="setNewsletterTarget(\'' + d + '\')" id="nl-btn-' + d + '" class="nl-target-btn" style="background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">' + deptNames[d] + ' (' + count + ')</button>';
     });
-    html += '<button onclick="setNewsletterTarget('specific')" id="nl-btn-specific" class="nl-target-btn" style="background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">Specific Members</button>';
+    html += '<button onclick="setNewsletterTarget(\'specific\')" id="nl-btn-specific" class="nl-target-btn" style="background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">Specific Members</button>';
     html += '</div>';
     
     // Member search for specific targeting
@@ -4520,7 +4520,7 @@ window.runHealthCheck = async function() {
         html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(u.name||'No name') + '</p>';
         html += '<p style="font-size:0.75rem;color:var(--gray);">' + sanitize(u.email||'No email') + '</p>';
         html += '<p style="font-size:0.72rem;color:var(--red);">Missing: ' + missing.join(', ') + '</p></div>';
-        html += '<button onclick="fixUserProfile('' + d.id + '','' + encodeURIComponent(u.email||'') + '','' + encodeURIComponent(u.name||'') + '')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Fix Profile</button>';
+        html += '<button onclick="fixUserProfile(\'' + d.id + '\',\'' + encodeURIComponent(u.email||'') + '\',\'' + encodeURIComponent(u.name||'') + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Fix Profile</button>';
         html += '</div>';
       });
     } else {
