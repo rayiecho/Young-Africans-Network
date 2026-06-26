@@ -783,7 +783,7 @@ window.addNewsletterMember = function(uid, nameEnc, emailEnc) {
   const selected = document.getElementById('nl-selected-members');
   const tag = document.createElement('span');
   tag.style.cssText = 'background:var(--navy);color:#fff;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.75rem;display:inline-flex;align-items:center;gap:0.4rem;';
-  tag.innerHTML = sanitize(name) + ' <span onclick="removeNewsletterMember(\'' + uid + '\',this.parentElement)" style="cursor:pointer;opacity:0.7;">x</span>';
+  tag.innerHTML = sanitize(name) + ' <span onclick="removeNewsletterMember(\"' + uid + '\",this.parentElement)" style="cursor:pointer;opacity:0.7;">x</span>';
   tag.dataset.uid = uid;
   selected.appendChild(tag);
   document.getElementById('nl-search-input').value = '';
