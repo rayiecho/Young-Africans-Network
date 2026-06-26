@@ -4486,6 +4486,87 @@ window.markSOSResolved = async function(reportId) {
   showToast('Marked as resolved!');
   loadSection('sos');
 };
+
+window.setNewsletterTarget = function(target) {
+  window._nlTarget = target;
+  window._nlSelectedUIDs = window._nlSelectedUIDs || [];
+  document.querySelectorAll('.nl-target-btn').forEach(function(b) {
+    b.style.background = 'var(--light)'; b.style.color = 'var(--navy)'; b.style.border = '1.5px solid rgba(27,42,107,0.15)';
+  });
+  const ab = document.getElementById('nl-btn-' + target);
+  if (ab) { ab.style.background = 'var(--navy)'; ab.style.color = '#fff'; ab.style.border = 'none'; }
+  const sd = document.getElementById('nl-member-search');
+  if (sd) sd.style.display = target === 'specific' ? 'block' : 'none';
+  window.updateRecipientCount();
+};
+window.updateRecipientCount = function() {
+  const users = window._nlAllUsers || [];
+  let count = window._nlTarget === 'all' ? users.length : window._nlTarget === 'specific' ? (window._nlSelectedUIDs||[]).length : users.filter(function(u){return u.department===window._nlTarget;}).length;
+  const el = document.getElementById('nl-recipient-count');
+  if (el) el.textContent = count + ' member' + (count!==1?'s':'');
+};
+window.searchNewsletterMembers = function(query) {
+  const users = window._nlAllUsers || [];
+  const results = document.getElementById('nl-search-results');
+  if (!results) return;
+  if (!query) { results.innerHTML = ''; return; }
+  const filtered = users.filter(function(u){ return (u.name||'').toLowerCase().includes(query.toLowerCase())||(u.email||'').toLowerCase().includes(query.toLowerCase()); }).slice(0,10);
+  results.innerHTML = filtered.length ? filtered.map(function(u){
+    return '<div onclick="addNewsletterMember(\'' + u.id + '\',\'' + encodeURIComponent(u.name||'') + '\',\'' + encodeURIComponent(u.email||'') + '\')" style="padding:0.6rem 0.75rem;cursor:pointer;border-bottom:1px solid var(--light);font-size:0.82rem;"><strong>' + sanitize(u.name||'') + '</strong> — ' + sanitize(u.email||'') + '</div>';
+  }).join('') : '<p style="padding:0.5rem;color:var(--gray);font-size:0.82rem;">No members found</p>';
+};
+window.addNewsletterMember = function(uid, nameEnc, emailEnc) {
+  if (!window._nlSelectedUIDs) window._nlSelectedUIDs = [];
+  if (window._nlSelectedUIDs.includes(uid)) return;
+  window._nlSelectedUIDs.push(uid);
+  const name = decodeURIComponent(nameEnc);
+  const selected = document.getElementById('nl-selected-members');
+  if (!selected) return;
+  const tag = document.createElement('span');
+  tag.dataset.uid = uid;
+  tag.style.cssText = 'background:var(--navy);color:#fff;padding:0.25rem 0.75rem;border-radius:50px;font-size:0.75rem;display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;margin:0.2rem;';
+  tag.textContent = name + ' x';
+  tag.onclick = function(){ window._nlSelectedUIDs = window._nlSelectedUIDs.filter(function(id){return id!==uid;}); tag.remove(); window.updateRecipientCount(); };
+  selected.appendChild(tag);
+  const inp = document.getElementById('nl-search-input');
+  const res = document.getElementById('nl-search-results');
+  if (inp) inp.value = '';
+  if (res) res.innerHTML = '';
+  window.updateRecipientCount();
+};
+window.sendNewsletter = async function() {
+  const subject = document.getElementById('nl-subject').value.trim();
+  const message = document.getElementById('nl-message').value.trim();
+  if (!subject) return showToast('Please enter a subject','error');
+  if (!message||message.length<20) return showToast('Please write a message','error');
+  const users = window._nlAllUsers||[];
+  let recipients = [];
+  if (window._nlTarget==='all') recipients=users;
+  else if (window._nlTarget==='specific') recipients=users.filter(function(u){return (window._nlSelectedUIDs||[]).includes(u.id);});
+  else recipients=users.filter(function(u){return u.department===window._nlTarget;});
+  if (recipients.length===0) return showToast('No recipients selected','error');
+  if (!confirm('Send newsletter to '+recipients.length+' member(s)?')) return;
+  let sent=0, failed=0;
+  for (const user of recipients) {
+    if (!user.email) continue;
+    try {
+      await fetch('https://yan-email-worker.youngafricansn.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to_email:user.email,name:user.name||'Member',subject:subject,message:message,type:'general'})});
+      sent++;
+    } catch(e){ failed++; }
+    await new Promise(function(r){setTimeout(r,300);});
+  }
+  await addDoc(collection(db,'newsletters'),{subject,message,target:window._nlTarget,sentTo:sent,failed,createdBy:auth.currentUser?.email||'Admin',createdAt:serverTimestamp(),sent:true});
+  showToast('Newsletter sent to '+sent+' members!'+(failed>0?' ('+failed+' failed)':''));
+  loadSection('newsletters');
+};
+window.saveNewsletterDraft = async function() {
+  const subject = document.getElementById('nl-subject').value.trim();
+  const message = document.getElementById('nl-message').value.trim();
+  if (!subject) return showToast('Please enter a subject','error');
+  await addDoc(collection(db,'newsletters'),{subject,message,target:window._nlTarget,createdBy:auth.currentUser?.email||'Admin',createdAt:serverTimestamp(),sent:false});
+  showToast('Draft saved!');
+  loadSection('newsletters');
+};
 </script>
 <!-- emailjs replaced with resend worker -->
 </div>
