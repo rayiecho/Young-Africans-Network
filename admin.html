@@ -822,11 +822,14 @@ window.sendNewsletter = async function() {
   for (const user of recipients) {
     if (!user.email) continue;
     try {
-      await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
-        to_email: user.email,
-        name: user.name || 'Member',
-        subject: subject,
-        message: message + '\n\nBuilding the Future, Together.\n\nYAN Administration Office\nYoung Africans Network\nyoungafricansnetwork.org | info@youngafricansnetwork.org'
+      await fetch('https://yan-email-worker.youngafricansn.workers.dev', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          to_email: user.email, name: user.name || 'Member',
+          subject: subject,
+          message: message + '\n\nBuilding the Future, Together.\n\nYAN Administration Office\nYoung Africans Network\nyoungafricansnetwork.org | info@youngafricansnetwork.org',
+          type: 'general'
+        })
       });
       sent++;
     } catch(e) {
@@ -4603,10 +4606,14 @@ window.replySOS = async function(reportId, emailEnc, nameEnc, messageEnc) {
   if (!reply) return;
   
   try {
-    await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
-      to_email: email, name,
-      subject: 'RE: Your YAN Emergency Report — Response from YAN Admin',
-      message: 'Dear ' + name + ',\n\nThank you for reaching out to us. We have received your emergency report and here is our response:\n\n' + reply + '\n\nIf you need further assistance, please do not hesitate to contact us at info@youngafricansnetwork.org or submit another SOS report.\n\nBuilding the Future, Together.\n\nYAN Administration Office\nYoung Africans Network\nyoungafricansnetwork.org'
+    await fetch('https://yan-email-worker.youngafricansn.workers.dev', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        to_email: email, name,
+        subject: 'RE: Your YAN Emergency Report — Response from YAN Admin',
+        message: 'Thank you for reaching out to us. We have received your emergency report and here is our response:\n\n' + reply + '\n\nIf you need further assistance, please do not hesitate to contact us at info@youngafricansnetwork.org or submit another SOS report.',
+        type: 'sos'
+      })
     });
     await updateDoc(doc(db,'sosReports',reportId), {status:'resolved', resolvedAt:serverTimestamp(), reply});
     showToast('Reply sent to ' + name + '!');
