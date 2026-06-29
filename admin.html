@@ -4207,6 +4207,95 @@ window.markSOSResolved = async function(reportId) {
   showToast('Marked as resolved!');
   loadSection('sos');
 };
+
+window.loadSessionFeedback = async function(c) {
+  try {
+    const snap = await getDocs(query(collection(db,'sessionFeedback'), orderBy('submittedAt','desc'))).catch(()=>getDocs(collection(db,'sessionFeedback')));
+
+    // Get unique sessions
+    const sessions = [...new Set(snap.docs.map(d => d.data().session).filter(Boolean))];
+
+    let html = '<div style="max-width:960px;margin:0 auto;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">';
+    html += '<div><h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);">Session Feedback</h2>';
+    html += '<p style="color:var(--gray);font-size:0.82rem;">' + snap.size + ' total responses</p></div>';
+    html += '<a href="feedback.html" target="_blank" style="background:var(--navy);color:#fff;padding:0.6rem 1.25rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:700;">View Form</a>';
+    html += '</div>';
+
+    // Stats overview
+    if (!snap.empty) {
+      const allRatings = snap.docs.map(d => parseFloat(d.data().averageRating||0)).filter(r=>r>0);
+      const avgRating = allRatings.length ? (allRatings.reduce((a,b)=>a+b,0)/allRatings.length).toFixed(1) : 0;
+      const wouldRecommend = snap.docs.filter(d => (d.data().wouldRecommend||'').includes('Yes')||( d.data().wouldRecommend||'').includes('absolutely')).length;
+
+      html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
+      html += '<div style="background:#fff;border-radius:12px;padding:1rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><p style="font-size:2rem;font-weight:900;color:var(--navy);">' + snap.size + '</p><p style="font-size:0.75rem;color:var(--gray);">Total Responses</p></div>';
+      html += '<div style="background:#fff;border-radius:12px;padding:1rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><p style="font-size:2rem;font-weight:900;color:var(--gold);">⭐ ' + avgRating + '</p><p style="font-size:0.75rem;color:var(--gray);">Avg Rating</p></div>';
+      html += '<div style="background:#fff;border-radius:12px;padding:1rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><p style="font-size:2rem;font-weight:900;color:#27AE60;">' + sessions.length + '</p><p style="font-size:0.75rem;color:var(--gray);">Sessions</p></div>';
+      html += '<div style="background:#fff;border-radius:12px;padding:1rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><p style="font-size:2rem;font-weight:900;color:#27AE60;">' + wouldRecommend + '</p><p style="font-size:0.75rem;color:var(--gray);">Would Recommend</p></div>';
+      html += '</div>';
+
+      // Filter by session
+      html += '<div style="margin-bottom:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">';
+      html += '<button onclick="filterFeedback('all')" class="fb-filter active" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">All Sessions</button>';
+      sessions.forEach(s => {
+        html += '<button onclick="filterFeedback(\'' + encodeURIComponent(s) + '\')" class="fb-filter" style="background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">' + sanitize(s) + '</button>';
+      });
+      html += '</div>';
+    }
+
+    // Responses
+    if (snap.empty) {
+      html += '<div style="text-align:center;padding:3rem;color:var(--gray);">No feedback submitted yet. Share the form link during sessions.</div>';
+    } else {
+      html += '<div id="feedback-list">';
+      snap.docs.forEach(d => {
+        const f = d.data();
+        const avg = parseFloat(f.averageRating||0);
+        const stars = '★'.repeat(Math.round(avg)) + '☆'.repeat(5-Math.round(avg));
+        html += '<div class="fb-card" data-session="' + encodeURIComponent(f.session||'') + '" style="background:#fff;border-radius:16px;padding:1.25rem;margin-bottom:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">';
+        html += '<div><p style="font-size:0.9rem;font-weight:800;color:var(--navy);">' + sanitize(f.name||'Anonymous') + ' <span style="font-weight:400;font-size:0.75rem;color:var(--gray);">· ' + sanitize(f.role||'') + ' · ' + sanitize(f.country||'') + '</span></p>';
+        html += '<p style="font-size:0.75rem;color:var(--gray);">' + sanitize(f.email||'') + ' · ' + (f.submittedAt?.toDate ? f.submittedAt.toDate().toLocaleDateString() : '') + '</p></div>';
+        html += '<div style="text-align:right;"><p style="color:var(--gold);font-size:1.1rem;">' + stars + '</p><p style="font-size:0.72rem;color:var(--gray);">' + avg + '/5 avg</p></div>';
+        html += '</div>';
+        html += '<div style="background:rgba(27,42,107,0.04);border-radius:8px;padding:0.75rem;margin-bottom:0.75rem;">';
+        html += '<p style="font-size:0.72rem;font-weight:700;color:var(--gray);margin-bottom:0.25rem;">SESSION: ' + sanitize(f.session||'') + ' · ' + sanitize(f.sessionDate||'') + ' · ' + sanitize(f.format||'') + '</p>';
+        html += '</div>';
+        if (f.highlight) { html += '<p style="font-size:0.82rem;color:var(--navy);margin-bottom:0.5rem;"><strong>Highlight:</strong> ' + sanitize(f.highlight) + '</p>'; }
+        if (f.improvements) { html += '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem;"><strong>Improvements:</strong> ' + sanitize(f.improvements) + '</p>'; }
+        if (f.topicsWanted) { html += '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem;"><strong>Topics wanted:</strong> ' + sanitize(f.topicsWanted) + '</p>'; }
+        if (f.feeling) { html += '<span style="background:rgba(27,42,107,0.07);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">' + sanitize(f.feeling) + '</span>'; }
+        if (f.wouldRecommend) { html += ' <span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">' + sanitize(f.wouldRecommend) + '</span>'; }
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    // Share links
+    html += '<div style="background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-top:1rem;">';
+    html += '<h3 style="font-size:0.9rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Share Feedback Form</h3>';
+    html += '<p style="font-size:0.78rem;color:var(--gray);margin-bottom:0.75rem;">Share these links during your sessions:</p>';
+    html += '<div style="background:var(--light);border-radius:8px;padding:0.75rem;font-size:0.78rem;font-family:monospace;word-break:break-all;margin-bottom:0.5rem;">https://youngafricansnetwork.org/feedback.html</div>';
+    html += '<p style="font-size:0.75rem;color:var(--gray);margin-bottom:0.5rem;">With session pre-filled:</p>';
+    html += '<div style="background:var(--light);border-radius:8px;padding:0.75rem;font-size:0.78rem;font-family:monospace;word-break:break-all;">https://youngafricansnetwork.org/feedback.html?session=YOUR+SESSION+NAME&date=2026-06-01</div>';
+    html += '</div>';
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) {
+    c.innerHTML = '<p style="color:var(--red);padding:1rem;">Error: ' + e.message + '</p>';
+  }
+};
+
+window.filterFeedback = function(session) {
+  document.querySelectorAll('.fb-filter').forEach(b => {
+    b.style.background = 'var(--light)'; b.style.color = 'var(--navy)';
+  });
+  event.target.style.background = 'var(--navy)'; event.target.style.color = '#fff';
+  document.querySelectorAll('.fb-card').forEach(card => {
+    card.style.display = (session === 'all' || card.dataset.session === session) ? 'block' : 'none';
+  });
+};
 </script>
 
 <style>
@@ -4572,94 +4661,7 @@ window.saveNewsletterDraft = async function() {
   loadSection('newsletters');
 };
 
-window.loadSessionFeedback = async function(c) {
-  try {
-    const snap = await getDocs(query(collection(db,'sessionFeedback'), orderBy('submittedAt','desc'))).catch(()=>getDocs(collection(db,'sessionFeedback')));
 
-    // Get unique sessions
-    const sessions = [...new Set(snap.docs.map(d => d.data().session).filter(Boolean))];
-
-    let html = '<div style="max-width:960px;margin:0 auto;">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">';
-    html += '<div><h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);">Session Feedback</h2>';
-    html += '<p style="color:var(--gray);font-size:0.82rem;">' + snap.size + ' total responses</p></div>';
-    html += '<a href="feedback.html" target="_blank" style="background:var(--navy);color:#fff;padding:0.6rem 1.25rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:700;">View Form</a>';
-    html += '</div>';
-
-    // Stats overview
-    if (!snap.empty) {
-      const allRatings = snap.docs.map(d => parseFloat(d.data().averageRating||0)).filter(r=>r>0);
-      const avgRating = allRatings.length ? (allRatings.reduce((a,b)=>a+b,0)/allRatings.length).toFixed(1) : 0;
-      const wouldRecommend = snap.docs.filter(d => (d.data().wouldRecommend||'').includes('Yes')||( d.data().wouldRecommend||'').includes('absolutely')).length;
-
-      html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
-      html += '<div style="background:#fff;border-radius:12px;padding:1rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><p style="font-size:2rem;font-weight:900;color:var(--navy);">' + snap.size + '</p><p style="font-size:0.75rem;color:var(--gray);">Total Responses</p></div>';
-      html += '<div style="background:#fff;border-radius:12px;padding:1rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><p style="font-size:2rem;font-weight:900;color:var(--gold);">⭐ ' + avgRating + '</p><p style="font-size:0.75rem;color:var(--gray);">Avg Rating</p></div>';
-      html += '<div style="background:#fff;border-radius:12px;padding:1rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><p style="font-size:2rem;font-weight:900;color:#27AE60;">' + sessions.length + '</p><p style="font-size:0.75rem;color:var(--gray);">Sessions</p></div>';
-      html += '<div style="background:#fff;border-radius:12px;padding:1rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><p style="font-size:2rem;font-weight:900;color:#27AE60;">' + wouldRecommend + '</p><p style="font-size:0.75rem;color:var(--gray);">Would Recommend</p></div>';
-      html += '</div>';
-
-      // Filter by session
-      html += '<div style="margin-bottom:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">';
-      html += '<button onclick="filterFeedback('all')" class="fb-filter active" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">All Sessions</button>';
-      sessions.forEach(s => {
-        html += '<button onclick="filterFeedback(\'' + encodeURIComponent(s) + '\')" class="fb-filter" style="background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">' + sanitize(s) + '</button>';
-      });
-      html += '</div>';
-    }
-
-    // Responses
-    if (snap.empty) {
-      html += '<div style="text-align:center;padding:3rem;color:var(--gray);">No feedback submitted yet. Share the form link during sessions.</div>';
-    } else {
-      html += '<div id="feedback-list">';
-      snap.docs.forEach(d => {
-        const f = d.data();
-        const avg = parseFloat(f.averageRating||0);
-        const stars = '★'.repeat(Math.round(avg)) + '☆'.repeat(5-Math.round(avg));
-        html += '<div class="fb-card" data-session="' + encodeURIComponent(f.session||'') + '" style="background:#fff;border-radius:16px;padding:1.25rem;margin-bottom:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
-        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">';
-        html += '<div><p style="font-size:0.9rem;font-weight:800;color:var(--navy);">' + sanitize(f.name||'Anonymous') + ' <span style="font-weight:400;font-size:0.75rem;color:var(--gray);">· ' + sanitize(f.role||'') + ' · ' + sanitize(f.country||'') + '</span></p>';
-        html += '<p style="font-size:0.75rem;color:var(--gray);">' + sanitize(f.email||'') + ' · ' + (f.submittedAt?.toDate ? f.submittedAt.toDate().toLocaleDateString() : '') + '</p></div>';
-        html += '<div style="text-align:right;"><p style="color:var(--gold);font-size:1.1rem;">' + stars + '</p><p style="font-size:0.72rem;color:var(--gray);">' + avg + '/5 avg</p></div>';
-        html += '</div>';
-        html += '<div style="background:rgba(27,42,107,0.04);border-radius:8px;padding:0.75rem;margin-bottom:0.75rem;">';
-        html += '<p style="font-size:0.72rem;font-weight:700;color:var(--gray);margin-bottom:0.25rem;">SESSION: ' + sanitize(f.session||'') + ' · ' + sanitize(f.sessionDate||'') + ' · ' + sanitize(f.format||'') + '</p>';
-        html += '</div>';
-        if (f.highlight) { html += '<p style="font-size:0.82rem;color:var(--navy);margin-bottom:0.5rem;"><strong>Highlight:</strong> ' + sanitize(f.highlight) + '</p>'; }
-        if (f.improvements) { html += '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem;"><strong>Improvements:</strong> ' + sanitize(f.improvements) + '</p>'; }
-        if (f.topicsWanted) { html += '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem;"><strong>Topics wanted:</strong> ' + sanitize(f.topicsWanted) + '</p>'; }
-        if (f.feeling) { html += '<span style="background:rgba(27,42,107,0.07);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">' + sanitize(f.feeling) + '</span>'; }
-        if (f.wouldRecommend) { html += ' <span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">' + sanitize(f.wouldRecommend) + '</span>'; }
-        html += '</div>';
-      });
-      html += '</div>';
-    }
-
-    // Share links
-    html += '<div style="background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-top:1rem;">';
-    html += '<h3 style="font-size:0.9rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Share Feedback Form</h3>';
-    html += '<p style="font-size:0.78rem;color:var(--gray);margin-bottom:0.75rem;">Share these links during your sessions:</p>';
-    html += '<div style="background:var(--light);border-radius:8px;padding:0.75rem;font-size:0.78rem;font-family:monospace;word-break:break-all;margin-bottom:0.5rem;">https://youngafricansnetwork.org/feedback.html</div>';
-    html += '<p style="font-size:0.75rem;color:var(--gray);margin-bottom:0.5rem;">With session pre-filled:</p>';
-    html += '<div style="background:var(--light);border-radius:8px;padding:0.75rem;font-size:0.78rem;font-family:monospace;word-break:break-all;">https://youngafricansnetwork.org/feedback.html?session=YOUR+SESSION+NAME&date=2026-06-01</div>';
-    html += '</div>';
-    html += '</div>';
-    c.innerHTML = html;
-  } catch(e) {
-    c.innerHTML = '<p style="color:var(--red);padding:1rem;">Error: ' + e.message + '</p>';
-  }
-};
-
-window.filterFeedback = function(session) {
-  document.querySelectorAll('.fb-filter').forEach(b => {
-    b.style.background = 'var(--light)'; b.style.color = 'var(--navy)';
-  });
-  event.target.style.background = 'var(--navy)'; event.target.style.color = '#fff';
-  document.querySelectorAll('.fb-card').forEach(card => {
-    card.style.display = (session === 'all' || card.dataset.session === session) ? 'block' : 'none';
-  });
-};
 </script>
 <!-- emailjs replaced with resend worker -->
 </div>
