@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>YAN Session Feedback</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#ffffff;--light:#F8F9FA;--gray:#6B7280;}
+body{font-family:Poppins,sans-serif;background:var(--light);min-height:100vh;}
+
+/* HEADER */
+.header{background:var(--navy);padding:1.25rem 2rem;display:flex;align-items:center;gap:1rem;}
+.header img{height:44px;border-radius:50%;border:2px solid var(--gold);}
+.header-text h1{font-family:Playfair Display,serif;font-size:1.1rem;font-weight:900;color:#fff;}
+.header-text p{font-size:0.72rem;color:var(--gold);font-weight:600;}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#1B2A6B,#2D3F7B);padding:2.5rem 2rem;text-align:center;color:#fff;}
+.hero h2{font-family:Playfair Display,serif;font-size:1.8rem;font-weight:900;margin-bottom:0.5rem;}
+.hero p{color:rgba(255,255,255,0.8);font-size:0.88rem;max-width:500px;margin:0 auto;}
+.session-badge{display:inline-block;background:rgba(245,166,35,0.2);border:1px solid var(--gold);color:var(--gold);padding:0.35rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;margin-top:0.75rem;}
+
+/* FORM */
+.form-container{max-width:680px;margin:2rem auto;padding:0 1rem 4rem;}
+.section-card{background:#fff;border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.section-title{font-size:0.72rem;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:1.25rem;display:flex;align-items:center;gap:0.5rem;}
+.section-title::after{content:'';flex:1;height:1px;background:rgba(27,42,107,0.1);}
+
+.form-group{margin-bottom:1.1rem;}
+.form-group label{display:block;font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.4rem;}
+.form-group label span{color:var(--gray);font-weight:400;font-size:0.75rem;}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:0.75rem 1rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;color:var(--navy);outline:none;transition:border-color 0.2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--navy);}
+.form-group textarea{resize:vertical;min-height:90px;}
+
+/* RADIO/CHECKBOX */
+.radio-group,.check-group{display:flex;flex-wrap:wrap;gap:0.5rem;}
+.radio-btn,.check-btn{display:flex;align-items:center;gap:0.4rem;cursor:pointer;}
+.radio-btn input,.check-btn input{width:auto;padding:0;}
+.pill-options{display:flex;flex-wrap:wrap;gap:0.5rem;}
+.pill-opt{padding:0.4rem 1rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:50px;font-size:0.78rem;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.2s;user-select:none;}
+.pill-opt.selected{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+/* STAR RATING */
+.star-rating-group{display:flex;flex-direction:column;gap:0.75rem;}
+.star-row{display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0.75rem;background:var(--light);border-radius:10px;}
+.star-row-label{font-size:0.82rem;color:var(--navy);font-weight:600;}
+.stars{display:flex;gap:0.3rem;}
+.star{font-size:1.4rem;cursor:pointer;color:#D1D5DB;transition:color 0.15s;line-height:1;}
+.star.active{color:#F5A623;}
+
+/* SUBMIT */
+.submit-btn{width:100%;background:linear-gradient(135deg,var(--navy),#2D3F7B);color:#fff;border:none;padding:1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;margin-top:0.5rem;}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(27,42,107,0.3);}
+.submit-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+
+/* SUCCESS */
+.success-screen{display:none;text-align:center;padding:3rem 1.5rem;}
+.success-screen .icon{font-size:4rem;margin-bottom:1rem;}
+.success-screen h2{font-family:Playfair Display,serif;font-size:1.5rem;font-weight:900;color:var(--navy);margin-bottom:0.75rem;}
+.success-screen p{color:var(--gray);font-size:0.88rem;line-height:1.7;}
+
+/* PROGRESS */
+.progress-bar{height:4px;background:rgba(255,255,255,0.2);border-radius:50px;margin-top:1rem;}
+.progress-fill{height:4px;background:var(--gold);border-radius:50px;transition:width 0.3s;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <img src="images/logo.jpeg" alt="YAN Logo">
+  <div class="header-text">
+    <h1>Young Africans Network</h1>
+    <p>Building the Future, Together</p>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <h2>Session Feedback Form</h2>
+  <p>Your feedback helps us improve every session and create better experiences for all YAN members.</p>
+  <div class="session-badge" id="session-badge">YAN Department Session</div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+</div>
+
+<!-- FORM -->
+<div class="form-container">
+  <form id="feedback-form">
+
+    <!-- SECTION 1: About You -->
+    <div class="section-card">
+      <div class="section-title">About You</div>
+      <div class="form-group">
+        <label>Full Name <span>(optional — leave blank to submit anonymously)</span></label>
+        <input type="text" id="f-name" placeholder="Your name">
+      </div>
+      <div class="form-group">
+        <label>Email Address <span style="color:var(--red);">*</span></label>
+        <input type="email" id="f-email" placeholder="your@email.com" required>
+      </div>
+      <div class="form-group">
+        <label>Your Role in YAN</label>
+        <div class="pill-options" id="role-options">
+          <div class="pill-opt" onclick="selectPill(this,'role')">Member</div>
+          <div class="pill-opt" onclick="selectPill(this,'role')">Guest</div>
+          <div class="pill-opt" onclick="selectPill(this,'role')">Volunteer</div>
+          <div class="pill-opt" onclick="selectPill(this,'role')">Executive</div>
+          <div class="pill-opt" onclick="selectPill(this,'role')">Department Head</div>
+          <div class="pill-opt" onclick="selectPill(this,'role')">Partner</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Your Country</label>
+        <input type="text" id="f-country" placeholder="e.g. Kenya, Rwanda, Uganda...">
+      </div>
+    </div>
+
+    <!-- SECTION 2: About the Session -->
+    <div class="section-card">
+      <div class="section-title">About the Session</div>
+      <div class="form-group">
+        <label>Department / Session Name <span style="color:var(--red);">*</span></label>
+        <input type="text" id="f-session" placeholder="e.g. Tech Hub Monthly Meeting" required>
+      </div>
+      <div class="form-group">
+        <label>Session Date</label>
+        <input type="date" id="f-date">
+      </div>
+      <div class="form-group">
+        <label>Session Format</label>
+        <div class="pill-options" id="format-options">
+          <div class="pill-opt" onclick="selectPill(this,'format')">Online (Zoom/Meet)</div>
+          <div class="pill-opt" onclick="selectPill(this,'format')">In-Person</div>
+          <div class="pill-opt" onclick="selectPill(this,'format')">Hybrid</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Did you attend the full session?</label>
+        <div class="pill-options" id="attendance-options">
+          <div class="pill-opt" onclick="selectPill(this,'attendance')">Yes, full session</div>
+          <div class="pill-opt" onclick="selectPill(this,'attendance')">Partially</div>
+          <div class="pill-opt" onclick="selectPill(this,'attendance')">No, joined late</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>How did you hear about this session?</label>
+        <div class="pill-options" id="heardFrom-options">
+          <div class="pill-opt" onclick="selectPill(this,'heardFrom')">WhatsApp Group</div>
+          <div class="pill-opt" onclick="selectPill(this,'heardFrom')">YAN Platform</div>
+          <div class="pill-opt" onclick="selectPill(this,'heardFrom')">Email</div>
+          <div class="pill-opt" onclick="selectPill(this,'heardFrom')">Friend/Member</div>
+          <div class="pill-opt" onclick="selectPill(this,'heardFrom')">Social Media</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Star Ratings -->
+    <div class="section-card">
+      <div class="section-title">Session Quality Ratings</div>
+      <p style="font-size:0.78rem;color:var(--gray);margin-bottom:1rem;">Rate each aspect from 1 (poor) to 5 (excellent)</p>
+      <div class="star-rating-group">
+        <div class="star-row">
+          <span class="star-row-label">Overall Session Quality</span>
+          <div class="stars" data-rating="overall">
+            <span class="star" onclick="setRating('overall',1)">★</span>
+            <span class="star" onclick="setRating('overall',2)">★</span>
+            <span class="star" onclick="setRating('overall',3)">★</span>
+            <span class="star" onclick="setRating('overall',4)">★</span>
+            <span class="star" onclick="setRating('overall',5)">★</span>
+          </div>
+        </div>
+        <div class="star-row">
+          <span class="star-row-label">Content Relevance</span>
+          <div class="stars" data-rating="content">
+            <span class="star" onclick="setRating('content',1)">★</span>
+            <span class="star" onclick="setRating('content',2)">★</span>
+            <span class="star" onclick="setRating('content',3)">★</span>
+            <span class="star" onclick="setRating('content',4)">★</span>
+            <span class="star" onclick="setRating('content',5)">★</span>
+          </div>
+        </div>
+        <div class="star-row">
+          <span class="star-row-label">Facilitator Effectiveness</span>
+          <div class="stars" data-rating="facilitator">
+            <span class="star" onclick="setRating('facilitator',1)">★</span>
+            <span class="star" onclick="setRating('facilitator',2)">★</span>
+            <span class="star" onclick="setRating('facilitator',3)">★</span>
+            <span class="star" onclick="setRating('facilitator',4)">★</span>
+            <span class="star" onclick="setRating('facilitator',5)">★</span>
+          </div>
+        </div>
+        <div class="star-row">
+          <span class="star-row-label">Time Management</span>
+          <div class="stars" data-rating="time">
+            <span class="star" onclick="setRating('time',1)">★</span>
+            <span class="star" onclick="setRating('time',2)">★</span>
+            <span class="star" onclick="setRating('time',3)">★</span>
+            <span class="star" onclick="setRating('time',4)">★</span>
+            <span class="star" onclick="setRating('time',5)">★</span>
+          </div>
+        </div>
+        <div class="star-row">
+          <span class="star-row-label">Engagement & Interaction</span>
+          <div class="stars" data-rating="engagement">
+            <span class="star" onclick="setRating('engagement',1)">★</span>
+            <span class="star" onclick="setRating('engagement',2)">★</span>
+            <span class="star" onclick="setRating('engagement',3)">★</span>
+            <span class="star" onclick="setRating('engagement',4)">★</span>
+            <span class="star" onclick="setRating('engagement',5)">★</span>
+          </div>
+        </div>
+        <div class="star-row">
+          <span class="star-row-label">Organization & Structure</span>
+          <div class="stars" data-rating="organization">
+            <span class="star" onclick="setRating('organization',1)">★</span>
+            <span class="star" onclick="setRating('organization',2)">★</span>
+            <span class="star" onclick="setRating('organization',3)">★</span>
+            <span class="star" onclick="setRating('organization',4)">★</span>
+            <span class="star" onclick="setRating('organization',5)">★</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: Open Feedback -->
+    <div class="section-card">
+      <div class="section-title">Open Feedback</div>
+      <div class="form-group">
+        <label>What was the highlight of this session? <span style="color:var(--red);">*</span></label>
+        <textarea id="f-highlight" placeholder="Tell us what stood out, what was most valuable or inspiring..." required></textarea>
+      </div>
+      <div class="form-group">
+        <label>What could be improved?</label>
+        <textarea id="f-improve" placeholder="Constructive feedback helps us grow. What would make the next session better?"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Topics you'd like covered in future sessions</label>
+        <textarea id="f-topics" placeholder="What topics, skills or discussions would you like to see in upcoming sessions?"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Any other comments or suggestions</label>
+        <textarea id="f-other" placeholder="Anything else you'd like to share with the YAN team..."></textarea>
+      </div>
+    </div>
+
+    <!-- SECTION 5: Impact -->
+    <div class="section-card">
+      <div class="section-title">Session Impact</div>
+      <div class="form-group">
+        <label>Will you apply what you learned from this session?</label>
+        <div class="pill-options" id="apply-options">
+          <div class="pill-opt" onclick="selectPill(this,'apply')">Yes, definitely</div>
+          <div class="pill-opt" onclick="selectPill(this,'apply')">Maybe</div>
+          <div class="pill-opt" onclick="selectPill(this,'apply')">Not sure yet</div>
+          <div class="pill-opt" onclick="selectPill(this,'apply')">No</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Would you recommend YAN sessions to others?</label>
+        <div class="pill-options" id="recommend-options">
+          <div class="pill-opt" onclick="selectPill(this,'recommend')">Yes, absolutely</div>
+          <div class="pill-opt" onclick="selectPill(this,'recommend')">Probably</div>
+          <div class="pill-opt" onclick="selectPill(this,'recommend')">Not sure</div>
+          <div class="pill-opt" onclick="selectPill(this,'recommend')">No</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>How do you feel after this session?</label>
+        <div class="pill-options" id="feeling-options">
+          <div class="pill-opt" onclick="selectPill(this,'feeling')">Inspired & Motivated</div>
+          <div class="pill-opt" onclick="selectPill(this,'feeling')">Informed & Equipped</div>
+          <div class="pill-opt" onclick="selectPill(this,'feeling')">Satisfied</div>
+          <div class="pill-opt" onclick="selectPill(this,'feeling')">Neutral</div>
+          <div class="pill-opt" onclick="selectPill(this,'feeling')">Disappointed</div>
+        </div>
+      </div>
+    </div>
+
+    <button type="button" class="submit-btn" id="submit-btn" onclick="submitFeedback()">Submit Feedback</button>
+  </form>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="success-screen">
+    <div class="icon">🎉</div>
+    <h2>Thank You!</h2>
+    <p>Your feedback has been received and will help us improve future YAN sessions.<br><br>
+    We appreciate you taking the time to share your thoughts.<br><br>
+    <strong style="color:var(--navy);">Building the Future, Together.</strong></p>
+    <div style="margin-top:1.5rem;">
+      <a href="https://youngafricansnetwork.org" style="display:inline-block;background:var(--navy);color:#fff;padding:0.75rem 2rem;border-radius:50px;text-decoration:none;font-weight:700;font-size:0.85rem;">Visit YAN Platform</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div style="background:var(--navy);padding:1.5rem;text-align:center;color:rgba(255,255,255,0.6);font-size:0.75rem;">
+  <p>Young Africans Network · youngafricansnetwork.org · info@youngafricansnetwork.org</p>
+  <p style="margin-top:0.25rem;color:rgba(255,255,255,0.4);">Building the Future, Together — Pan-African Youth Organization</p>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyCPCPMnW4JByx3P9UVy7EhqfJFX6DIYJ0s",
+  authDomain: "young-africans-network.firebaseapp.com",
+  projectId: "young-africans-network",
+  storageBucket: "young-africans-network.appspot.com",
+  messagingSenderId: "224204618916",
+  appId: "1:224204618916:web:5f4b5b0b6b6b6b6b6b6b6b"
+});
+const db = getFirestore(app);
+
+// Read URL params
+const params = new URLSearchParams(window.location.search);
+const sessionParam = params.get('session');
+const dateParam = params.get('date');
+
+if (sessionParam) {
+  document.getElementById('f-session').value = decodeURIComponent(sessionParam);
+  document.getElementById('session-badge').textContent = decodeURIComponent(sessionParam);
+}
+if (dateParam) {
+  document.getElementById('f-date').value = dateParam;
+} else {
+  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+}
+
+// Ratings storage
+const ratings = { overall: 0, content: 0, facilitator: 0, time: 0, engagement: 0, organization: 0 };
+const pillSelections = {};
+
+window.setRating = function(category, value) {
+  ratings[category] = value;
+  const stars = document.querySelectorAll(`[data-rating="${category}"] .star`);
+  stars.forEach((s, i) => s.classList.toggle('active', i < value));
+  updateProgress();
+};
+
+window.selectPill = function(el, group) {
+  document.querySelectorAll(`#${group}-options .pill-opt`).forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  pillSelections[group] = el.textContent;
+  updateProgress();
+};
+
+function updateProgress() {
+  const fields = ['f-email', 'f-session', 'f-highlight'];
+  let filled = 0;
+  let total = 10;
+  fields.forEach(id => { if (document.getElementById(id)?.value.trim()) filled++; });
+  filled += Object.values(ratings).filter(r => r > 0).length;
+  filled += Object.keys(pillSelections).length;
+  document.getElementById('progress-fill').style.width = Math.min(100, (filled / total) * 100) + '%';
+}
+
+// Update progress on input
+document.querySelectorAll('input, textarea').forEach(el => {
+  el.addEventListener('input', updateProgress);
+});
+
+window.submitFeedback = async function() {
+  const email = document.getElementById('f-email').value.trim();
+  const session = document.getElementById('f-session').value.trim();
+  const highlight = document.getElementById('f-highlight').value.trim();
+
+  if (!email) return alert('Please enter your email address.');
+  if (!session) return alert('Please enter the session name.');
+  if (!highlight) return alert('Please tell us the highlight of the session.');
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  try {
+    await addDoc(collection(db, 'sessionFeedback'), {
+      name: document.getElementById('f-name').value.trim() || 'Anonymous',
+      email,
+      role: pillSelections['role'] || '',
+      country: document.getElementById('f-country').value.trim(),
+      session,
+      sessionDate: document.getElementById('f-date').value,
+      format: pillSelections['format'] || '',
+      attendance: pillSelections['attendance'] || '',
+      heardFrom: pillSelections['heardFrom'] || '',
+      ratings: { ...ratings },
+      averageRating: Object.values(ratings).filter(r=>r>0).length > 0
+        ? (Object.values(ratings).reduce((a,b)=>a+b,0) / Object.values(ratings).filter(r=>r>0).length).toFixed(1)
+        : 0,
+      highlight,
+      improvements: document.getElementById('f-improve').value.trim(),
+      topicsWanted: document.getElementById('f-topics').value.trim(),
+      otherComments: document.getElementById('f-other').value.trim(),
+      willApply: pillSelections['apply'] || '',
+      wouldRecommend: pillSelections['recommend'] || '',
+      feeling: pillSelections['feeling'] || '',
+      submittedAt: serverTimestamp()
+    });
+
+    document.getElementById('feedback-form').style.display = 'none';
+    document.getElementById('success-screen').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch(e) {
+    alert('Error submitting feedback: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = 'Submit Feedback';
+  }
+};
+</script>
+</body>
+</html>

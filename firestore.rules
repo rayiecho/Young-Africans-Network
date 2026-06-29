@@ -83,6 +83,10 @@ service cloud.firestore {
       allow create: if isLoggedIn();
       allow update: if isLoggedIn() && (resource.data.mentorId == request.auth.uid || resource.data.menteeId == request.auth.uid || isAdminOrHead());
     }
+    match /sessionFeedback/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
     match /sosReports/{docId} {
       allow create: if true;
       allow read, update: if isAdmin();
