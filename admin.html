@@ -4237,7 +4237,7 @@ window.loadSessionFeedback = async function(c) {
 
       // Filter by session
       html += '<div style="margin-bottom:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">';
-      html += '<button onclick="filterFeedback('all')" class="fb-filter active" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">All Sessions</button>';
+      html += '<button onclick="filterFeedback(\'all\')" class="fb-filter active" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">All Sessions</button>';
       sessions.forEach(s => {
         html += '<button onclick="filterFeedback(\'' + encodeURIComponent(s) + '\')" class="fb-filter" style="background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">' + sanitize(s) + '</button>';
       });
