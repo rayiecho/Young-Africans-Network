@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>YAN — Email Verification</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#ffffff;--light:#F8F9FA;--gray:#6B7280;}
+body{font-family:Poppins,sans-serif;background:var(--light);min-height:100vh;display:flex;flex-direction:column;}
+
+.header{background:var(--navy);padding:1.25rem 2rem;display:flex;align-items:center;gap:1rem;}
+.header img{height:44px;border-radius:50%;border:2px solid var(--gold);}
+.header-text h1{font-family:Playfair Display,serif;font-size:1.1rem;font-weight:900;color:#fff;}
+.header-text p{font-size:0.72rem;color:var(--gold);font-weight:600;}
+
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem 1rem;}
+
+.card{background:#fff;border-radius:24px;padding:2.5rem;max-width:480px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.1);text-align:center;}
+
+.icon-circle{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2.5rem;}
+.icon-circle.loading{background:rgba(27,42,107,0.08);}
+.icon-circle.success{background:rgba(39,174,96,0.1);}
+.icon-circle.error{background:rgba(230,51,41,0.1);}
+.icon-circle.reset{background:rgba(245,166,35,0.1);}
+
+.card h2{font-family:Playfair Display,serif;font-size:1.5rem;font-weight:900;color:var(--navy);margin-bottom:0.75rem;}
+.card p{font-size:0.88rem;color:var(--gray);line-height:1.7;margin-bottom:1.5rem;}
+
+.btn-primary{display:inline-block;background:var(--navy);color:#fff;padding:0.85rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.88rem;font-weight:700;text-decoration:none;border:none;cursor:pointer;transition:all 0.2s;width:100%;margin-bottom:0.75rem;}
+.btn-primary:hover{background:#2D3F7B;transform:translateY(-1px);}
+.btn-secondary{display:inline-block;background:var(--light);color:var(--navy);padding:0.85rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.88rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;width:100%;}
+
+/* Password reset form */
+.form-group{text-align:left;margin-bottom:1rem;}
+.form-group label{display:block;font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.4rem;}
+.form-group input{width:100%;padding:0.85rem 1rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.88rem;color:var(--navy);outline:none;transition:border 0.2s;}
+.form-group input:focus{border-color:var(--navy);}
+
+.password-strength{height:4px;border-radius:50px;margin-top:6px;transition:all 0.3s;}
+.strength-text{font-size:0.72rem;margin-top:4px;}
+
+.divider{height:1px;background:linear-gradient(to right,transparent,rgba(27,42,107,0.15),transparent);margin:1.5rem 0;}
+
+/* Loading spinner */
+.spinner{width:40px;height:40px;border:3px solid rgba(27,42,107,0.1);border-top:3px solid var(--navy);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.card{animation:fadeIn 0.4s ease;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="images/logo.jpeg" alt="YAN Logo">
+  <div class="header-text">
+    <h1>Young Africans Network</h1>
+    <p>Building the Future, Together</p>
+  </div>
+</div>
+
+<div class="main">
+  <!-- LOADING STATE -->
+  <div class="card" id="card-loading">
+    <div class="spinner"></div>
+    <h2>Please wait...</h2>
+    <p>We are processing your request.</p>
+  </div>
+
+  <!-- EMAIL VERIFIED -->
+  <div class="card" id="card-verified" style="display:none;">
+    <div class="icon-circle success">✅</div>
+    <h2>Email Verified!</h2>
+    <p>Your email address has been successfully verified. You are now a full member of the Young Africans Network community.<br><br>Welcome aboard — let's build the future together! 🌍</p>
+    <a href="community.html" class="btn-primary">Enter YAN Platform</a>
+    <a href="index.html" class="btn-secondary">Go to Homepage</a>
+  </div>
+
+  <!-- ALREADY VERIFIED -->
+  <div class="card" id="card-already-verified" style="display:none;">
+    <div class="icon-circle success">✅</div>
+    <h2>Already Verified</h2>
+    <p>Your email address is already verified. You can go ahead and log into the YAN platform.</p>
+    <a href="community.html" class="btn-primary">Go to Platform</a>
+  </div>
+
+  <!-- RESET PASSWORD FORM -->
+  <div class="card" id="card-reset" style="display:none;">
+    <div class="icon-circle reset">🔐</div>
+    <h2>Reset Your Password</h2>
+    <p>Create a new secure password for your YAN account.</p>
+    <div class="form-group">
+      <label>New Password</label>
+      <input type="password" id="new-pass" placeholder="Enter new password" oninput="checkStrength(this.value)">
+      <div class="password-strength" id="strength-bar" style="background:#E5E7EB;width:0%;"></div>
+      <p class="strength-text" id="strength-text" style="color:var(--gray);"></p>
+    </div>
+    <div class="form-group">
+      <label>Confirm Password</label>
+      <input type="password" id="confirm-pass" placeholder="Confirm new password">
+    </div>
+    <button class="btn-primary" onclick="doPasswordReset()" id="reset-btn">Set New Password</button>
+    <a href="community.html" class="btn-secondary">Back to Login</a>
+  </div>
+
+  <!-- RESET SUCCESS -->
+  <div class="card" id="card-reset-success" style="display:none;">
+    <div class="icon-circle success">🎉</div>
+    <h2>Password Updated!</h2>
+    <p>Your password has been successfully changed. You can now log in to the YAN platform with your new password.</p>
+    <a href="community.html" class="btn-primary">Log In Now</a>
+  </div>
+
+  <!-- ERROR STATE -->
+  <div class="card" id="card-error" style="display:none;">
+    <div class="icon-circle error">⚠️</div>
+    <h2>Link Expired</h2>
+    <p id="error-message">This link has expired or is invalid. Please request a new one from the YAN platform.</p>
+    <div class="divider"></div>
+    <a href="community.html" class="btn-primary">Go to Platform</a>
+    <a href="index.html" class="btn-secondary">Back to Homepage</a>
+  </div>
+</div>
+
+<div style="background:var(--navy);padding:1.25rem;text-align:center;color:rgba(255,255,255,0.5);font-size:0.75rem;">
+  <p>Young Africans Network · youngafricansnetwork.org · info@youngafricansnetwork.org</p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, applyActionCode, verifyPasswordResetCode, confirmPasswordReset, checkActionCode } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyCPCPMnW4JByx3P9UVy7EhqfJFX6DIYJ0s",
+  authDomain: "young-africans-network.firebaseapp.com",
+  projectId: "young-africans-network",
+  storageBucket: "young-africans-network.appspot.com",
+  messagingSenderId: "224204618916",
+  appId: "1:224204618916:web:5f4b5b0b6b6b6b6b6b6b6b"
+});
+const auth = getAuth(app);
+
+function show(id) {
+  ['card-loading','card-verified','card-already-verified','card-reset','card-reset-success','card-error'].forEach(c => {
+    document.getElementById(c).style.display = c === id ? 'block' : 'none';
+  });
+}
+
+const params = new URLSearchParams(window.location.search);
+const mode = params.get('mode');
+const oobCode = params.get('oobCode');
+
+window.oobCode = oobCode;
+
+if (!mode || !oobCode) {
+  show('card-error');
+  document.getElementById('error-message').textContent = 'Invalid link. Please request a new one from the YAN platform.';
+} else if (mode === 'verifyEmail') {
+  applyActionCode(auth, oobCode)
+    .then(() => show('card-verified'))
+    .catch(err => {
+      if (err.code === 'auth/invalid-action-code') {
+        show('card-already-verified');
+      } else {
+        show('card-error');
+        document.getElementById('error-message').textContent = 'This verification link has expired. Please log in and request a new verification email.';
+      }
+    });
+} else if (mode === 'resetPassword') {
+  verifyPasswordResetCode(auth, oobCode)
+    .then(() => show('card-reset'))
+    .catch(() => {
+      show('card-error');
+      document.getElementById('error-message').textContent = 'This password reset link has expired. Please request a new one from the login page.';
+    });
+} else {
+  show('card-error');
+}
+
+window.checkStrength = function(pass) {
+  const bar = document.getElementById('strength-bar');
+  const text = document.getElementById('strength-text');
+  if (!pass) { bar.style.width = '0'; text.textContent = ''; return; }
+  let strength = 0;
+  if (pass.length >= 8) strength++;
+  if (/[A-Z]/.test(pass)) strength++;
+  if (/[0-9]/.test(pass)) strength++;
+  if (/[^A-Za-z0-9]/.test(pass)) strength++;
+  const levels = [
+    { label: 'Too short', color: '#E63329', width: '25%' },
+    { label: 'Weak', color: '#F5A623', width: '50%' },
+    { label: 'Good', color: '#3B82F6', width: '75%' },
+    { label: 'Strong', color: '#27AE60', width: '100%' },
+  ];
+  const level = levels[Math.min(strength - 1, 3)] || levels[0];
+  bar.style.width = level.width;
+  bar.style.background = level.color;
+  text.textContent = level.label;
+  text.style.color = level.color;
+};
+
+window.doPasswordReset = async function() {
+  const newPass = document.getElementById('new-pass').value;
+  const confirmPass = document.getElementById('confirm-pass').value;
+  const btn = document.getElementById('reset-btn');
+
+  if (!newPass || newPass.length < 8) return alert('Password must be at least 8 characters.');
+  if (newPass !== confirmPass) return alert('Passwords do not match.');
+
+  btn.disabled = true;
+  btn.textContent = 'Updating...';
+
+  try {
+    await confirmPasswordReset(auth, window.oobCode, newPass);
+    show('card-reset-success');
+  } catch(e) {
+    alert('Error: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = 'Set New Password';
+  }
+};
+</script>
+</body>
+</html>

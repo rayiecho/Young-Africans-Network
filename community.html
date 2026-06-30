@@ -247,6 +247,11 @@ async function subscribeToPush(userId) {
   } catch(e) { console.log('Push setup skipped:', e); }
 }
 
+const actionCodeSettings = {
+  url: 'https://youngafricansnetwork.org/community.html',
+  handleCodeInApp: false
+};
+
 onAuthStateChanged(auth, async user => {
   console.log('[YAN Auth] onAuthStateChanged fired, user:', user ? user.uid : 'null');
   if (user) {
@@ -387,7 +392,7 @@ async function doRegister() {
     }
     const refCode = localStorage.getItem('yan_referral');
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    await sendEmailVerification(cred.user);
+    await sendEmailVerification(cred.user, actionCodeSettings);
     await setDoc(doc(db, 'users', cred.user.uid), {
       ...sanitizeInputs({name, email, country, whatsapp, dob, role}), department: dept,
       referredBy: localStorage.getItem('yan_referral') || '',
@@ -595,7 +600,7 @@ async function doForgotPassword() {
   if (!email) return showToast('Please enter your email address first','error');
   if (!isValidEmail(email)) return showToast('Please enter a valid email address','error');
   try {
-    await sendPasswordResetEmail(auth, email);
+    await sendPasswordResetEmail(auth, email, actionCodeSettings);
     showToast('Password reset email sent! Check your inbox and spam folder.');
   } catch(e) {
     if (e.code === 'auth/user-not-found') {
@@ -11031,7 +11036,7 @@ window.doSignOut = async function() {
 
 window.resendVerificationEmail = async function() {
   try {
-    await sendEmailVerification(currentUser);
+    await sendEmailVerification(currentUser, actionCodeSettings);
     if (typeof showToast === 'function') showToast('Verification email sent! Check your inbox.');
     else alert('Verification email sent! Check your inbox.');
   } catch(e) {
