@@ -6,70 +6,107 @@
 <title>YAN Session Feedback</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#ffffff;--light:#F8F9FA;--gray:#6B7280;}
-body{font-family:Poppins,sans-serif;background:var(--light);min-height:100vh;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{--navy:#1B2A6B;--navy2:#2D3F7B;--red:#E63329;--gold:#F5A623;--white:#ffffff;--light:#F8F9FA;--gray:#6B7280;--green:#27AE60;}
+body{font-family:Poppins,sans-serif;background:var(--light);min-height:100vh;overflow-x:hidden;}
 
 /* HEADER */
-.header{background:var(--navy);padding:1.25rem 2rem;display:flex;align-items:center;gap:1rem;}
-.header img{height:44px;border-radius:50%;border:2px solid var(--gold);}
-.header-text h1{font-family:Playfair Display,serif;font-size:1.1rem;font-weight:900;color:#fff;}
-.header-text p{font-size:0.72rem;color:var(--gold);font-weight:600;}
+.header{background:linear-gradient(120deg,var(--navy) 0%,var(--navy2) 60%,#3a4f9e 100%);background-size:200% 200%;animation:gradientShift 8s ease infinite;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:0.85rem;position:relative;overflow:hidden;}
+@keyframes gradientShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.header::after{content:'';position:absolute;top:-50%;right:-10%;width:200px;height:200px;background:radial-gradient(circle,rgba(245,166,35,0.15),transparent 70%);border-radius:50%;}
+.header img{height:42px;width:42px;border-radius:50%;border:2px solid var(--gold);object-fit:cover;position:relative;z-index:1;}
+.header-text{position:relative;z-index:1;}
+.header-text h1{font-family:Playfair Display,serif;font-size:1.05rem;font-weight:900;color:#fff;}
+.header-text p{font-size:0.68rem;color:var(--gold);font-weight:600;}
 
-/* HERO */
-.hero{background:linear-gradient(135deg,#1B2A6B,#2D3F7B);padding:2.5rem 2rem;text-align:center;color:#fff;}
-.hero h2{font-family:Playfair Display,serif;font-size:1.8rem;font-weight:900;margin-bottom:0.5rem;}
-.hero p{color:rgba(255,255,255,0.8);font-size:0.88rem;max-width:500px;margin:0 auto;}
-.session-badge{display:inline-block;background:rgba(245,166,35,0.2);border:1px solid var(--gold);color:var(--gold);padding:0.35rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;margin-top:0.75rem;}
+/* WIZARD CONTAINER */
+.wizard{max-width:600px;margin:0 auto;padding:1.5rem 1rem 3rem;}
 
-/* FORM */
-.form-container{max-width:680px;margin:2rem auto;padding:0 1rem 4rem;}
-.section-card{background:#fff;border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
-.section-title{font-size:0.72rem;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:1.25rem;display:flex;align-items:center;gap:0.5rem;}
-.section-title::after{content:'';flex:1;height:1px;background:rgba(27,42,107,0.1);}
+/* PROGRESS DOTS */
+.progress-track{display:flex;align-items:center;justify-content:center;gap:0.35rem;margin-bottom:1.75rem;padding:0 0.5rem;}
+.progress-dot{width:8px;height:8px;border-radius:50%;background:rgba(27,42,107,0.15);transition:all 0.35s cubic-bezier(.4,0,.2,1);flex-shrink:0;}
+.progress-dot.active{width:24px;border-radius:50px;background:linear-gradient(90deg,var(--navy),var(--gold));}
+.progress-dot.done{background:var(--green);}
 
-.form-group{margin-bottom:1.1rem;}
-.form-group label{display:block;font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.4rem;}
-.form-group label span{color:var(--gray);font-weight:400;font-size:0.75rem;}
-.form-group input,.form-group select,.form-group textarea{width:100%;padding:0.75rem 1rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;color:var(--navy);outline:none;transition:border-color 0.2s;}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--navy);}
-.form-group textarea{resize:vertical;min-height:90px;}
+.step-label{text-align:center;font-size:0.7rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:0.35rem;}
+.step-title{text-align:center;font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:0.4rem;}
+.step-sub{text-align:center;font-size:0.82rem;color:var(--gray);margin-bottom:1.75rem;line-height:1.6;max-width:440px;margin-left:auto;margin-right:auto;}
 
-/* RADIO/CHECKBOX */
-.radio-group,.check-group{display:flex;flex-wrap:wrap;gap:0.5rem;}
-.radio-btn,.check-btn{display:flex;align-items:center;gap:0.4rem;cursor:pointer;}
-.radio-btn input,.check-btn input{width:auto;padding:0;}
+/* STEP PANELS */
+.steps-wrap{position:relative;min-height:340px;}
+.step{display:none;animation:stepIn 0.4s cubic-bezier(.4,0,.2,1);}
+.step.active{display:block;}
+@keyframes stepIn{from{opacity:0;transform:translateX(16px);}to{opacity:1;transform:translateX(0);}}
+
+.card{background:#fff;border-radius:20px;padding:1.5rem;box-shadow:0 4px 24px rgba(27,42,107,0.08);}
+
+.form-group{margin-bottom:1.15rem;}
+.form-group label{display:block;font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.45rem;}
+.form-group label span{color:var(--gray);font-weight:400;font-size:0.74rem;}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:0.8rem 1rem;border:1.5px solid rgba(27,42,107,0.13);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;color:var(--navy);outline:none;transition:all 0.2s;background:var(--light);}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--navy);background:#fff;box-shadow:0 0 0 4px rgba(27,42,107,0.06);}
+.form-group textarea{resize:vertical;min-height:88px;}
+.hint{font-size:0.7rem;color:var(--gold);margin-top:0.35rem;font-weight:600;height:14px;opacity:0;transition:opacity 0.2s;}
+.hint.show{opacity:1;}
+
+/* PILLS */
 .pill-options{display:flex;flex-wrap:wrap;gap:0.5rem;}
-.pill-opt{padding:0.4rem 1rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:50px;font-size:0.78rem;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.2s;user-select:none;}
-.pill-opt.selected{background:var(--navy);color:#fff;border-color:var(--navy);}
+.pill-opt{padding:0.5rem 1.1rem;border:1.5px solid rgba(27,42,107,0.13);border-radius:50px;font-size:0.78rem;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.18s cubic-bezier(.4,0,.2,1);user-select:none;background:var(--light);}
+.pill-opt:active{transform:scale(0.95);}
+.pill-opt.selected{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border-color:var(--navy);transform:scale(1.04);box-shadow:0 4px 12px rgba(27,42,107,0.25);}
 
-/* STAR RATING */
-.star-rating-group{display:flex;flex-direction:column;gap:0.75rem;}
-.star-row{display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0.75rem;background:var(--light);border-radius:10px;}
-.star-row-label{font-size:0.82rem;color:var(--navy);font-weight:600;}
-.stars{display:flex;gap:0.3rem;}
-.star{font-size:1.4rem;cursor:pointer;color:#D1D5DB;transition:color 0.15s;line-height:1;}
-.star.active{color:#F5A623;}
+/* MONTH GRID */
+.month-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;}
+.month-opt{padding:0.65rem 0.25rem;text-align:center;border:1.5px solid rgba(27,42,107,0.13);border-radius:10px;font-size:0.74rem;font-weight:700;color:var(--gray);cursor:pointer;transition:all 0.18s;background:var(--light);}
+.month-opt.selected{background:linear-gradient(135deg,var(--gold),#e8951a);color:#fff;border-color:var(--gold);transform:scale(1.05);box-shadow:0 4px 12px rgba(245,166,35,0.3);}
 
-/* SUBMIT */
-.submit-btn{width:100%;background:linear-gradient(135deg,var(--navy),#2D3F7B);color:#fff;border:none;padding:1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;margin-top:0.5rem;}
-.submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(27,42,107,0.3);}
-.submit-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+/* STARS */
+.star-rating-group{display:flex;flex-direction:column;gap:0.6rem;}
+.star-row{display:flex;justify-content:space-between;align-items:center;padding:0.7rem 0.85rem;background:var(--light);border-radius:12px;transition:background 0.2s;}
+.star-row.rated{background:rgba(245,166,35,0.06);}
+.star-row-label{font-size:0.8rem;color:var(--navy);font-weight:600;}
+.stars{display:flex;gap:0.2rem;}
+.star{font-size:1.5rem;cursor:pointer;color:#D1D5DB;transition:all 0.15s cubic-bezier(.4,0,.2,1);line-height:1;display:inline-block;}
+.star.active{color:var(--gold);transform:scale(1.15);text-shadow:0 2px 6px rgba(245,166,35,0.4);}
+.rating-feedback{text-align:center;font-size:0.72rem;font-weight:700;color:var(--gold);height:16px;margin-top:0.75rem;transition:opacity 0.2s;}
+
+/* NAV BUTTONS */
+.nav-buttons{display:flex;gap:0.75rem;margin-top:1.5rem;}
+.btn{flex:1;padding:0.95rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;border:none;transition:all 0.2s cubic-bezier(.4,0,.2,1);}
+.btn-next{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;box-shadow:0 6px 16px rgba(27,42,107,0.25);}
+.btn-next:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(27,42,107,0.35);}
+.btn-next:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-back{background:var(--light);color:var(--navy);flex:0 0 110px;}
+.btn-back:hover{background:#eef0f3;}
+.btn-submit{background:linear-gradient(135deg,var(--green),#1f9c52);color:#fff;box-shadow:0 6px 16px rgba(39,174,96,0.3);}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(39,174,96,0.4);}
+
+/* REVIEW SCREEN */
+.review-section{margin-bottom:1.1rem;padding-bottom:1.1rem;border-bottom:1px solid rgba(27,42,107,0.08);}
+.review-section:last-child{border:none;margin-bottom:0;padding-bottom:0;}
+.review-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;}
+.review-head h4{font-size:0.72rem;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:1px;}
+.review-edit{font-size:0.72rem;color:var(--navy);font-weight:700;cursor:pointer;text-decoration:underline;}
+.review-row{font-size:0.82rem;color:var(--navy);margin-bottom:0.25rem;line-height:1.6;}
+.review-row b{color:var(--gray);font-weight:600;}
+.review-stars{color:var(--gold);}
 
 /* SUCCESS */
-.success-screen{display:none;text-align:center;padding:3rem 1.5rem;}
-.success-screen .icon{font-size:4rem;margin-bottom:1rem;}
-.success-screen h2{font-family:Playfair Display,serif;font-size:1.5rem;font-weight:900;color:var(--navy);margin-bottom:0.75rem;}
-.success-screen p{color:var(--gray);font-size:0.88rem;line-height:1.7;}
+.success-wrap{display:none;text-align:center;padding:2.5rem 1.5rem;}
+.success-icon{width:90px;height:90px;border-radius:50%;background:rgba(39,174,96,0.1);display:flex;align-items:center;justify-content:center;font-size:2.8rem;margin:0 auto 1.25rem;animation:popIn 0.5s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popIn{0%{transform:scale(0);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+.success-wrap h2{font-family:Playfair Display,serif;font-size:1.6rem;font-weight:900;color:var(--navy);margin-bottom:0.75rem;}
+.success-wrap p{color:var(--gray);font-size:0.88rem;line-height:1.7;margin-bottom:1.5rem;}
+.confetti{position:fixed;top:-10px;width:8px;height:8px;border-radius:2px;animation:fall linear forwards;z-index:999;pointer-events:none;}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg);opacity:0.3;}}
 
-/* PROGRESS */
-.progress-bar{height:4px;background:rgba(255,255,255,0.2);border-radius:50px;margin-top:1rem;}
-.progress-fill{height:4px;background:var(--gold);border-radius:50px;transition:width 0.3s;}
+.btn-home{display:inline-block;background:var(--navy);color:#fff;padding:0.85rem 2.2rem;border-radius:50px;text-decoration:none;font-weight:700;font-size:0.85rem;}
+
+@media(max-width:380px){.month-grid{grid-template-columns:repeat(3,1fr);}}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <img src="images/logo.jpeg" alt="YAN Logo">
   <div class="header-text">
@@ -78,236 +115,30 @@ body{font-family:Poppins,sans-serif;background:var(--light);min-height:100vh;}
   </div>
 </div>
 
-<!-- HERO -->
-<div class="hero">
-  <h2>Session Feedback Form</h2>
-  <p>Your feedback helps us improve every session and create better experiences for all YAN members.</p>
-  <div class="session-badge" id="session-badge">YAN Department Session</div>
-  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-</div>
-
-<!-- FORM -->
-<div class="form-container">
+<div class="wizard">
+  <div class="progress-track" id="progress-track"></div>
   <form id="feedback-form">
-
-    <!-- SECTION 1: About You -->
-    <div class="section-card">
-      <div class="section-title">About You</div>
-      <div class="form-group">
-        <label>Full Name <span>(optional — leave blank to submit anonymously)</span></label>
-        <input type="text" id="f-name" placeholder="Your name">
-      </div>
-      <div class="form-group">
-        <label>Email Address <span style="color:var(--red);">*</span></label>
-        <input type="email" id="f-email" placeholder="your@email.com" required>
-      </div>
-      <div class="form-group">
-        <label>Your Role in YAN</label>
-        <div class="pill-options" id="role-options">
-          <div class="pill-opt" onclick="selectPill(this,'role')">Member</div>
-          <div class="pill-opt" onclick="selectPill(this,'role')">Guest</div>
-          <div class="pill-opt" onclick="selectPill(this,'role')">Volunteer</div>
-          <div class="pill-opt" onclick="selectPill(this,'role')">Executive</div>
-          <div class="pill-opt" onclick="selectPill(this,'role')">Department Head</div>
-          <div class="pill-opt" onclick="selectPill(this,'role')">Partner</div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Your Country</label>
-        <input type="text" id="f-country" placeholder="e.g. Kenya, Rwanda, Uganda...">
-      </div>
-    </div>
-
-    <!-- SECTION 2: About the Session -->
-    <div class="section-card">
-      <div class="section-title">About the Session</div>
-      <div class="form-group">
-        <label>Department / Session Name <span style="color:var(--red);">*</span></label>
-        <input type="text" id="f-session" placeholder="e.g. Tech Hub Monthly Meeting" required>
-      </div>
-      <div class="form-group">
-        <label>Session Date</label>
-        <input type="date" id="f-date">
-      </div>
-      <div class="form-group">
-        <label>Session Format</label>
-        <div class="pill-options" id="format-options">
-          <div class="pill-opt" onclick="selectPill(this,'format')">Online (Zoom/Meet)</div>
-          <div class="pill-opt" onclick="selectPill(this,'format')">In-Person</div>
-          <div class="pill-opt" onclick="selectPill(this,'format')">Hybrid</div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Did you attend the full session?</label>
-        <div class="pill-options" id="attendance-options">
-          <div class="pill-opt" onclick="selectPill(this,'attendance')">Yes, full session</div>
-          <div class="pill-opt" onclick="selectPill(this,'attendance')">Partially</div>
-          <div class="pill-opt" onclick="selectPill(this,'attendance')">No, joined late</div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>How did you hear about this session?</label>
-        <div class="pill-options" id="heardFrom-options">
-          <div class="pill-opt" onclick="selectPill(this,'heardFrom')">WhatsApp Group</div>
-          <div class="pill-opt" onclick="selectPill(this,'heardFrom')">YAN Platform</div>
-          <div class="pill-opt" onclick="selectPill(this,'heardFrom')">Email</div>
-          <div class="pill-opt" onclick="selectPill(this,'heardFrom')">Friend/Member</div>
-          <div class="pill-opt" onclick="selectPill(this,'heardFrom')">Social Media</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 3: Star Ratings -->
-    <div class="section-card">
-      <div class="section-title">Session Quality Ratings</div>
-      <p style="font-size:0.78rem;color:var(--gray);margin-bottom:1rem;">Rate each aspect from 1 (poor) to 5 (excellent)</p>
-      <div class="star-rating-group">
-        <div class="star-row">
-          <span class="star-row-label">Overall Session Quality</span>
-          <div class="stars" data-rating="overall">
-            <span class="star" onclick="setRating('overall',1)">★</span>
-            <span class="star" onclick="setRating('overall',2)">★</span>
-            <span class="star" onclick="setRating('overall',3)">★</span>
-            <span class="star" onclick="setRating('overall',4)">★</span>
-            <span class="star" onclick="setRating('overall',5)">★</span>
-          </div>
-        </div>
-        <div class="star-row">
-          <span class="star-row-label">Content Relevance</span>
-          <div class="stars" data-rating="content">
-            <span class="star" onclick="setRating('content',1)">★</span>
-            <span class="star" onclick="setRating('content',2)">★</span>
-            <span class="star" onclick="setRating('content',3)">★</span>
-            <span class="star" onclick="setRating('content',4)">★</span>
-            <span class="star" onclick="setRating('content',5)">★</span>
-          </div>
-        </div>
-        <div class="star-row">
-          <span class="star-row-label">Facilitator Effectiveness</span>
-          <div class="stars" data-rating="facilitator">
-            <span class="star" onclick="setRating('facilitator',1)">★</span>
-            <span class="star" onclick="setRating('facilitator',2)">★</span>
-            <span class="star" onclick="setRating('facilitator',3)">★</span>
-            <span class="star" onclick="setRating('facilitator',4)">★</span>
-            <span class="star" onclick="setRating('facilitator',5)">★</span>
-          </div>
-        </div>
-        <div class="star-row">
-          <span class="star-row-label">Time Management</span>
-          <div class="stars" data-rating="time">
-            <span class="star" onclick="setRating('time',1)">★</span>
-            <span class="star" onclick="setRating('time',2)">★</span>
-            <span class="star" onclick="setRating('time',3)">★</span>
-            <span class="star" onclick="setRating('time',4)">★</span>
-            <span class="star" onclick="setRating('time',5)">★</span>
-          </div>
-        </div>
-        <div class="star-row">
-          <span class="star-row-label">Engagement & Interaction</span>
-          <div class="stars" data-rating="engagement">
-            <span class="star" onclick="setRating('engagement',1)">★</span>
-            <span class="star" onclick="setRating('engagement',2)">★</span>
-            <span class="star" onclick="setRating('engagement',3)">★</span>
-            <span class="star" onclick="setRating('engagement',4)">★</span>
-            <span class="star" onclick="setRating('engagement',5)">★</span>
-          </div>
-        </div>
-        <div class="star-row">
-          <span class="star-row-label">Organization & Structure</span>
-          <div class="stars" data-rating="organization">
-            <span class="star" onclick="setRating('organization',1)">★</span>
-            <span class="star" onclick="setRating('organization',2)">★</span>
-            <span class="star" onclick="setRating('organization',3)">★</span>
-            <span class="star" onclick="setRating('organization',4)">★</span>
-            <span class="star" onclick="setRating('organization',5)">★</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 4: Open Feedback -->
-    <div class="section-card">
-      <div class="section-title">Open Feedback</div>
-      <div class="form-group">
-        <label>What was the highlight of this session? <span style="color:var(--red);">*</span></label>
-        <textarea id="f-highlight" placeholder="Tell us what stood out, what was most valuable or inspiring..." required></textarea>
-      </div>
-      <div class="form-group">
-        <label>What could be improved?</label>
-        <textarea id="f-improve" placeholder="Constructive feedback helps us grow. What would make the next session better?"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Topics you'd like covered in future sessions</label>
-        <textarea id="f-topics" placeholder="What topics, skills or discussions would you like to see in upcoming sessions?"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Any other comments or suggestions</label>
-        <textarea id="f-other" placeholder="Anything else you'd like to share with the YAN team..."></textarea>
-      </div>
-    </div>
-
-    <!-- SECTION 5: Impact -->
-    <div class="section-card">
-      <div class="section-title">Session Impact</div>
-      <div class="form-group">
-        <label>Will you apply what you learned from this session?</label>
-        <div class="pill-options" id="apply-options">
-          <div class="pill-opt" onclick="selectPill(this,'apply')">Yes, definitely</div>
-          <div class="pill-opt" onclick="selectPill(this,'apply')">Maybe</div>
-          <div class="pill-opt" onclick="selectPill(this,'apply')">Not sure yet</div>
-          <div class="pill-opt" onclick="selectPill(this,'apply')">No</div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Would you recommend YAN sessions to others?</label>
-        <div class="pill-options" id="recommend-options">
-          <div class="pill-opt" onclick="selectPill(this,'recommend')">Yes, absolutely</div>
-          <div class="pill-opt" onclick="selectPill(this,'recommend')">Probably</div>
-          <div class="pill-opt" onclick="selectPill(this,'recommend')">Not sure</div>
-          <div class="pill-opt" onclick="selectPill(this,'recommend')">No</div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>How do you feel after this session?</label>
-        <div class="pill-options" id="feeling-options">
-          <div class="pill-opt" onclick="selectPill(this,'feeling')">Inspired & Motivated</div>
-          <div class="pill-opt" onclick="selectPill(this,'feeling')">Informed & Equipped</div>
-          <div class="pill-opt" onclick="selectPill(this,'feeling')">Satisfied</div>
-          <div class="pill-opt" onclick="selectPill(this,'feeling')">Neutral</div>
-          <div class="pill-opt" onclick="selectPill(this,'feeling')">Disappointed</div>
-        </div>
-      </div>
-    </div>
-
-    <button type="button" class="submit-btn" id="submit-btn" onclick="submitFeedback()">Submit Feedback</button>
+    <div class="steps-wrap" id="steps-wrap"></div>
   </form>
 
-  <!-- SUCCESS -->
-  <div class="success-screen" id="success-screen">
-    <div class="icon">🎉</div>
+  <div class="success-wrap" id="success-wrap">
+    <div class="success-icon">🎉</div>
     <h2>Thank You!</h2>
-    <p>Your feedback has been received and will help us improve future YAN sessions.<br><br>
-    We appreciate you taking the time to share your thoughts.<br><br>
-    <strong style="color:var(--navy);">Building the Future, Together.</strong></p>
-    <div style="margin-top:1.5rem;">
-      <a href="https://youngafricansnetwork.org" style="display:inline-block;background:var(--navy);color:#fff;padding:0.75rem 2rem;border-radius:50px;text-decoration:none;font-weight:700;font-size:0.85rem;">Visit YAN Platform</a>
-    </div>
+    <p>Your feedback has been received and will help us improve future YAN sessions.<br><br>We appreciate you taking the time to share your thoughts.<br><br><strong style="color:var(--navy);">Building the Future, Together.</strong></p>
+    <a href="https://youngafricansnetwork.org" class="btn-home">Visit YAN Platform</a>
   </div>
 </div>
 
-<!-- FOOTER -->
-<div style="background:var(--navy);padding:1.5rem;text-align:center;color:rgba(255,255,255,0.6);font-size:0.75rem;">
+<div style="background:var(--navy);padding:1.25rem;text-align:center;color:rgba(255,255,255,0.55);font-size:0.72rem;">
   <p>Young Africans Network · youngafricansnetwork.org · info@youngafricansnetwork.org</p>
-  <p style="margin-top:0.25rem;color:rgba(255,255,255,0.4);">Building the Future, Together — Pan-African Youth Organization</p>
 </div>
 
-<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
-  apiKey: "AIzaSyCPCPMnW4JByx3P9UVy7EhqfJFX6DIYJ0s",
+  apiKey: "AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",
   authDomain: "young-africans-network.firebaseapp.com",
   projectId: "young-africans-network",
   storageBucket: "young-africans-network.appspot.com",
@@ -316,101 +147,361 @@ const app = initializeApp({
 });
 const db = getFirestore(app);
 
-// Read URL params
 const params = new URLSearchParams(window.location.search);
-const sessionParam = params.get('session');
-const dateParam = params.get('date');
+const sessionParam = params.get('session') ? decodeURIComponent(params.get('session')) : '';
+const dateParam = params.get('date') || new Date().toISOString().split('T')[0];
 
-if (sessionParam) {
-  document.getElementById('f-session').value = decodeURIComponent(sessionParam);
-  document.getElementById('session-badge').textContent = decodeURIComponent(sessionParam);
-}
-if (dateParam) {
-  document.getElementById('f-date').value = dateParam;
-} else {
-  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
-}
-
-// Ratings storage
-const ratings = { overall: 0, content: 0, facilitator: 0, time: 0, engagement: 0, organization: 0 };
-const pillSelections = {};
-
-window.setRating = function(category, value) {
-  ratings[category] = value;
-  const stars = document.querySelectorAll(`[data-rating="${category}"] .star`);
-  stars.forEach((s, i) => s.classList.toggle('active', i < value));
-  updateProgress();
+const state = {
+  name:'', email:'', role:'', country:'',
+  session: sessionParam, sessionDate: dateParam, format:'', attendance:'', heardFrom:'',
+  ratings:{overall:0,content:0,facilitator:0,time:0,engagement:0,organization:0},
+  highlight:'', improvements:'', topicsWanted:'', otherComments:'',
+  willApply:'', wouldRecommend:'', feeling:'',
+  volunteeredThisSession:'', volunteerMonths:[]
 };
 
-window.selectPill = function(el, group) {
-  document.querySelectorAll(`#${group}-options .pill-opt`).forEach(p => p.classList.remove('selected'));
-  el.classList.add('selected');
-  pillSelections[group] = el.textContent;
-  updateProgress();
-};
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const STAR_LABELS = ['','Poor','Fair','Good','Very Good','Excellent!'];
 
-function updateProgress() {
-  const fields = ['f-email', 'f-session', 'f-highlight'];
-  let filled = 0;
-  let total = 10;
-  fields.forEach(id => { if (document.getElementById(id)?.value.trim()) filled++; });
-  filled += Object.values(ratings).filter(r => r > 0).length;
-  filled += Object.keys(pillSelections).length;
-  document.getElementById('progress-fill').style.width = Math.min(100, (filled / total) * 100) + '%';
+const steps = [
+  {
+    key:'about', label:'Step 1 of 6', title:'About You', sub:'Tell us a little about yourself. Your name is optional — you may submit anonymously.',
+    render: () => `
+      <div class="card">
+        <div class="form-group"><label>Full Name <span>(optional)</span></label>
+        <input type="text" id="f-name" placeholder="Your name" value="${state.name}"></div>
+        <div class="form-group"><label>Email Address <span style="color:var(--red);">*</span></label>
+        <input type="email" id="f-email" placeholder="your@email.com" value="${state.email}"></div>
+        <div class="form-group"><label>Your Role in YAN</label>
+        <div class="pill-options" id="role-options">
+          ${['Member','Guest','Volunteer','Executive','Department Head','Partner'].map(r=>`<div class="pill-opt ${state.role===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+        <div class="form-group"><label>Your Country</label>
+        <input type="text" id="f-country" placeholder="e.g. Kenya, Rwanda, Uganda..." value="${state.country}"></div>
+      </div>`,
+    bind: () => {
+      document.getElementById('f-name').oninput = e => state.name = e.target.value;
+      document.getElementById('f-email').oninput = e => state.email = e.target.value;
+      document.getElementById('f-country').oninput = e => state.country = e.target.value;
+      bindPills('role-options','role');
+    },
+    valid: () => state.email.trim().length > 3 && state.email.includes('@')
+  },
+  {
+    key:'session', label:'Step 2 of 6', title:'About the Session', sub:'Help us understand which session you attended and how.',
+    render: () => `
+      <div class="card">
+        <div class="form-group"><label>Department / Session Name <span style="color:var(--red);">*</span></label>
+        <input type="text" id="f-session" placeholder="e.g. Tech Hub Monthly Meeting" value="${state.session}"></div>
+        <div class="form-group"><label>Session Date</label>
+        <input type="date" id="f-date" value="${state.sessionDate}"></div>
+        <div class="form-group"><label>Session Format</label>
+        <div class="pill-options" id="format-options">
+          ${['Online (Zoom/Meet)','In-Person','Hybrid'].map(r=>`<div class="pill-opt ${state.format===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+        <div class="form-group"><label>Did you attend the full session?</label>
+        <div class="pill-options" id="attendance-options">
+          ${['Yes, full session','Partially','No, joined late'].map(r=>`<div class="pill-opt ${state.attendance===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+        <div class="form-group"><label>How did you hear about this session?</label>
+        <div class="pill-options" id="heardFrom-options">
+          ${['WhatsApp Group','YAN Platform','Email','Friend/Member','Social Media'].map(r=>`<div class="pill-opt ${state.heardFrom===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+      </div>`,
+    bind: () => {
+      document.getElementById('f-session').oninput = e => state.session = e.target.value;
+      document.getElementById('f-date').onchange = e => state.sessionDate = e.target.value;
+      bindPills('format-options','format');
+      bindPills('attendance-options','attendance');
+      bindPills('heardFrom-options','heardFrom');
+    },
+    valid: () => state.session.trim().length > 1
+  },
+  {
+    key:'volunteer', label:'Step 3 of 6', title:'Volunteering', sub:'Tell us about your involvement and interest in volunteering for YAN.',
+    render: () => `
+      <div class="card">
+        <div class="form-group"><label>Did you volunteer in this session?</label>
+        <div class="pill-options" id="volThis-options">
+          ${['Yes','No'].map(r=>`<div class="pill-opt ${state.volunteeredThisSession===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+        <div class="form-group"><label>Which months would you like to volunteer in upcoming YAN sessions? <span>(select all that apply)</span></label>
+        <div class="month-grid" id="month-grid">
+          ${MONTHS.map(m=>`<div class="month-opt ${state.volunteerMonths.includes(m)?'selected':''}" data-val="${m}">${m}</div>`).join('')}
+        </div></div>
+      </div>`,
+    bind: () => {
+      bindPills('volThis-options','volunteeredThisSession');
+      document.querySelectorAll('#month-grid .month-opt').forEach(el => {
+        el.onclick = () => {
+          const v = el.dataset.val;
+          if (state.volunteerMonths.includes(v)) {
+            state.volunteerMonths = state.volunteerMonths.filter(m=>m!==v);
+            el.classList.remove('selected');
+          } else {
+            state.volunteerMonths.push(v);
+            el.classList.add('selected');
+          }
+        };
+      });
+    },
+    valid: () => true
+  },
+  {
+    key:'ratings', label:'Step 4 of 6', title:'Rate the Session', sub:'Rate each aspect from 1 (poor) to 5 (excellent).',
+    render: () => `
+      <div class="card">
+        <div class="star-rating-group">
+          ${[['overall','Overall Session Quality'],['content','Content Relevance'],['facilitator','Facilitator Effectiveness'],['time','Time Management'],['engagement','Engagement & Interaction'],['organization','Organization & Structure']]
+            .map(([key,label])=>`
+            <div class="star-row ${state.ratings[key]?'rated':''}" data-key="${key}">
+              <span class="star-row-label">${label}</span>
+              <div class="stars" data-rating="${key}">
+                ${[1,2,3,4,5].map(n=>`<span class="star ${state.ratings[key]>=n?'active':''}" data-val="${n}">★</span>`).join('')}
+              </div>
+            </div>`).join('')}
+        </div>
+        <div class="rating-feedback" id="rating-feedback"></div>
+      </div>`,
+    bind: () => {
+      document.querySelectorAll('.stars').forEach(starsEl => {
+        const key = starsEl.dataset.rating;
+        starsEl.querySelectorAll('.star').forEach(starEl => {
+          starEl.onclick = () => {
+            const val = parseInt(starEl.dataset.val);
+            state.ratings[key] = val;
+            starsEl.querySelectorAll('.star').forEach((s,i) => s.classList.toggle('active', i < val));
+            starsEl.closest('.star-row').classList.add('rated');
+            const fb = document.getElementById('rating-feedback');
+            fb.textContent = STAR_LABELS[val];
+            fb.classList.add('show');
+            setTimeout(()=>fb.classList.remove('show'), 1400);
+          };
+        });
+      });
+    },
+    valid: () => state.ratings.overall > 0
+  },
+  {
+    key:'open', label:'Step 5 of 6', title:'Open Feedback', sub:'Your words help us understand what truly matters.',
+    render: () => `
+      <div class="card">
+        <div class="form-group"><label>What was the highlight of this session? <span style="color:var(--red);">*</span></label>
+        <textarea id="f-highlight" placeholder="Tell us what stood out, what was most valuable or inspiring...">${state.highlight}</textarea>
+        <div class="hint" id="hint-highlight">Great detail — thank you!</div></div>
+        <div class="form-group"><label>What could be improved?</label>
+        <textarea id="f-improve" placeholder="Constructive feedback helps us grow...">${state.improvements}</textarea></div>
+        <div class="form-group"><label>Topics you'd like covered in future sessions</label>
+        <textarea id="f-topics" placeholder="What topics, skills or discussions interest you?">${state.topicsWanted}</textarea></div>
+        <div class="form-group"><label>Any other comments or suggestions</label>
+        <textarea id="f-other" placeholder="Anything else you'd like to share...">${state.otherComments}</textarea></div>
+      </div>`,
+    bind: () => {
+      const hi = document.getElementById('f-highlight');
+      hi.oninput = e => {
+        state.highlight = e.target.value;
+        document.getElementById('hint-highlight').classList.toggle('show', e.target.value.trim().length > 40);
+      };
+      document.getElementById('f-improve').oninput = e => state.improvements = e.target.value;
+      document.getElementById('f-topics').oninput = e => state.topicsWanted = e.target.value;
+      document.getElementById('f-other').oninput = e => state.otherComments = e.target.value;
+    },
+    valid: () => state.highlight.trim().length > 3
+  },
+  {
+    key:'impact', label:'Step 6 of 6', title:'Session Impact', sub:'Last few questions about how this session affected you.',
+    render: () => `
+      <div class="card">
+        <div class="form-group"><label>Will you apply what you learned?</label>
+        <div class="pill-options" id="apply-options">
+          ${['Yes, definitely','Maybe','Not sure yet','No'].map(r=>`<div class="pill-opt ${state.willApply===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+        <div class="form-group"><label>Would you recommend YAN sessions to others?</label>
+        <div class="pill-options" id="recommend-options">
+          ${['Yes, absolutely','Probably','Not sure','No'].map(r=>`<div class="pill-opt ${state.wouldRecommend===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+        <div class="form-group"><label>How do you feel after this session?</label>
+        <div class="pill-options" id="feeling-options">
+          ${['Inspired & Motivated','Informed & Equipped','Satisfied','Neutral','Disappointed'].map(r=>`<div class="pill-opt ${state.feeling===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+      </div>`,
+    bind: () => {
+      bindPills('apply-options','willApply');
+      bindPills('recommend-options','wouldRecommend');
+      bindPills('feeling-options','feeling');
+    },
+    valid: () => true
+  },
+  {
+    key:'review', label:'Review', title:'Review & Submit', sub:'Please confirm everything looks right before submitting.',
+    render: () => `
+      <div class="card">
+        <div class="review-section">
+          <div class="review-head"><h4>About You</h4><span class="review-edit" data-goto="0">Edit</span></div>
+          <div class="review-row"><b>Name:</b> ${state.name || 'Anonymous'}</div>
+          <div class="review-row"><b>Email:</b> ${state.email}</div>
+          <div class="review-row"><b>Role:</b> ${state.role || '—'} &nbsp; <b>Country:</b> ${state.country || '—'}</div>
+        </div>
+        <div class="review-section">
+          <div class="review-head"><h4>Session</h4><span class="review-edit" data-goto="1">Edit</span></div>
+          <div class="review-row"><b>Session:</b> ${state.session}</div>
+          <div class="review-row"><b>Date:</b> ${state.sessionDate} &nbsp; <b>Format:</b> ${state.format || '—'}</div>
+        </div>
+        <div class="review-section">
+          <div class="review-head"><h4>Volunteering</h4><span class="review-edit" data-goto="2">Edit</span></div>
+          <div class="review-row"><b>Volunteered this session:</b> ${state.volunteeredThisSession || '—'}</div>
+          <div class="review-row"><b>Available months:</b> ${state.volunteerMonths.length ? state.volunteerMonths.join(', ') : 'None selected'}</div>
+        </div>
+        <div class="review-section">
+          <div class="review-head"><h4>Ratings</h4><span class="review-edit" data-goto="3">Edit</span></div>
+          <div class="review-row review-stars">Overall: ${'★'.repeat(state.ratings.overall)}${'☆'.repeat(5-state.ratings.overall)}</div>
+        </div>
+        <div class="review-section">
+          <div class="review-head"><h4>Feedback</h4><span class="review-edit" data-goto="4">Edit</span></div>
+          <div class="review-row">${state.highlight.substring(0,100)}${state.highlight.length>100?'...':''}</div>
+        </div>
+      </div>`,
+    bind: () => {
+      document.querySelectorAll('.review-edit').forEach(el => {
+        el.onclick = () => goToStep(parseInt(el.dataset.goto));
+      });
+    },
+    valid: () => true
+  }
+];
+
+let current = 0;
+
+function bindPills(containerId, stateKey) {
+  document.querySelectorAll(`#${containerId} .pill-opt`).forEach(el => {
+    el.onclick = () => {
+      document.querySelectorAll(`#${containerId} .pill-opt`).forEach(p=>p.classList.remove('selected'));
+      el.classList.add('selected');
+      state[stateKey] = el.dataset.val;
+      updateNavState();
+    };
+  });
 }
 
-// Update progress on input
-document.querySelectorAll('input, textarea').forEach(el => {
-  el.addEventListener('input', updateProgress);
-});
+function renderProgress() {
+  const track = document.getElementById('progress-track');
+  track.innerHTML = steps.map((_,i) => {
+    let cls = 'progress-dot';
+    if (i < current) cls += ' done';
+    if (i === current) cls += ' active';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
 
-window.submitFeedback = async function() {
-  const email = document.getElementById('f-email').value.trim();
-  const session = document.getElementById('f-session').value.trim();
-  const highlight = document.getElementById('f-highlight').value.trim();
+function renderStep() {
+  const wrap = document.getElementById('steps-wrap');
+  const s = steps[current];
+  wrap.innerHTML = `
+    <div class="step active">
+      <div class="step-label">${s.label}</div>
+      <div class="step-title">${s.title}</div>
+      <div class="step-sub">${s.sub}</div>
+      ${s.render()}
+      <div class="nav-buttons">
+        ${current > 0 ? `<button type="button" class="btn btn-back" id="btn-back">Back</button>` : ''}
+        ${current < steps.length - 1
+          ? `<button type="button" class="btn btn-next" id="btn-next">Continue</button>`
+          : `<button type="button" class="btn btn-submit" id="btn-submit">Submit Feedback</button>`}
+      </div>
+    </div>`;
+  s.bind();
+  renderProgress();
 
-  if (!email) return alert('Please enter your email address.');
-  if (!session) return alert('Please enter the session name.');
-  if (!highlight) return alert('Please tell us the highlight of the session.');
+  if (document.getElementById('btn-back')) document.getElementById('btn-back').onclick = () => goToStep(current - 1);
+  if (document.getElementById('btn-next')) document.getElementById('btn-next').onclick = () => {
+    if (s.valid()) goToStep(current + 1);
+    else shake();
+  };
+  if (document.getElementById('btn-submit')) document.getElementById('btn-submit').onclick = submitFeedback;
 
-  const btn = document.getElementById('submit-btn');
+  updateNavState();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function updateNavState() {
+  const btn = document.getElementById('btn-next');
+  if (btn) btn.disabled = !steps[current].valid();
+}
+
+function shake() {
+  const card = document.querySelector('.card');
+  card.style.animation = 'none';
+  requestAnimationFrame(() => { card.style.animation = 'shakeX 0.4s'; });
+}
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `@keyframes shakeX{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}`;
+document.head.appendChild(styleSheet);
+
+function goToStep(i) {
+  current = i;
+  renderStep();
+}
+
+async function submitFeedback() {
+  const btn = document.getElementById('btn-submit');
   btn.disabled = true;
   btn.textContent = 'Submitting...';
 
   try {
     await addDoc(collection(db, 'sessionFeedback'), {
-      name: document.getElementById('f-name').value.trim() || 'Anonymous',
-      email,
-      role: pillSelections['role'] || '',
-      country: document.getElementById('f-country').value.trim(),
-      session,
-      sessionDate: document.getElementById('f-date').value,
-      format: pillSelections['format'] || '',
-      attendance: pillSelections['attendance'] || '',
-      heardFrom: pillSelections['heardFrom'] || '',
-      ratings: { ...ratings },
-      averageRating: Object.values(ratings).filter(r=>r>0).length > 0
-        ? (Object.values(ratings).reduce((a,b)=>a+b,0) / Object.values(ratings).filter(r=>r>0).length).toFixed(1)
+      name: state.name.trim() || 'Anonymous',
+      email: state.email.trim(),
+      role: state.role,
+      country: state.country.trim(),
+      session: state.session.trim(),
+      sessionDate: state.sessionDate,
+      format: state.format,
+      attendance: state.attendance,
+      heardFrom: state.heardFrom,
+      volunteeredThisSession: state.volunteeredThisSession,
+      volunteerMonths: state.volunteerMonths,
+      ratings: { ...state.ratings },
+      averageRating: Object.values(state.ratings).filter(r=>r>0).length
+        ? (Object.values(state.ratings).reduce((a,b)=>a+b,0) / Object.values(state.ratings).filter(r=>r>0).length).toFixed(1)
         : 0,
-      highlight,
-      improvements: document.getElementById('f-improve').value.trim(),
-      topicsWanted: document.getElementById('f-topics').value.trim(),
-      otherComments: document.getElementById('f-other').value.trim(),
-      willApply: pillSelections['apply'] || '',
-      wouldRecommend: pillSelections['recommend'] || '',
-      feeling: pillSelections['feeling'] || '',
+      highlight: state.highlight.trim(),
+      improvements: state.improvements.trim(),
+      topicsWanted: state.topicsWanted.trim(),
+      otherComments: state.otherComments.trim(),
+      willApply: state.willApply,
+      wouldRecommend: state.wouldRecommend,
+      feeling: state.feeling,
       submittedAt: serverTimestamp()
     });
 
     document.getElementById('feedback-form').style.display = 'none';
-    document.getElementById('success-screen').style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('progress-track').style.display = 'none';
+    document.getElementById('success-wrap').style.display = 'block';
+    launchConfetti();
+    window.scrollTo({top:0, behavior:'smooth'});
   } catch(e) {
     alert('Error submitting feedback: ' + e.message);
     btn.disabled = false;
     btn.textContent = 'Submit Feedback';
   }
-};
+}
+
+function launchConfetti() {
+  const colors = ['#1B2A6B','#F5A623','#E63329','#27AE60'];
+  for (let i = 0; i < 40; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random()*100 + 'vw';
+      c.style.background = colors[Math.floor(Math.random()*colors.length)];
+      c.style.animationDuration = (2 + Math.random()*1.5) + 's';
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(), 3500);
+    }, i * 30);
+  }
+}
+
+renderStep();
 </script>
 </body>
 </html>
