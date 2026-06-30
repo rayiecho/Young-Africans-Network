@@ -152,8 +152,8 @@ const sessionParam = params.get('session') ? decodeURIComponent(params.get('sess
 const dateParam = params.get('date') || new Date().toISOString().split('T')[0];
 
 const state = {
-  name:'', email:'', role:'', country:'',
-  session: sessionParam, sessionDate: dateParam, format:'', attendance:'', heardFrom:'',
+  name:'', email:'', role:'', country:'', memberDepartment:'',
+  session: sessionParam, sessionDate: dateParam, sessionDepartment:'', format:'', attendance:'', heardFrom:'',
   ratings:{overall:0,content:0,facilitator:0,time:0,engagement:0,organization:0},
   highlight:'', improvements:'', topicsWanted:'', otherComments:'',
   willApply:'', wouldRecommend:'', feeling:'',
@@ -162,6 +162,7 @@ const state = {
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const STAR_LABELS = ['','Poor','Fair','Good','Very Good','Excellent!'];
+const DEPARTMENTS = ['Programs','Scholarships','Career','Community','Mental Health','Communications','Partnerships','Finance'];
 
 const steps = [
   {
@@ -178,12 +179,17 @@ const steps = [
         </div></div>
         <div class="form-group"><label>Your Country</label>
         <input type="text" id="f-country" placeholder="e.g. Kenya, Rwanda, Uganda..." value="${state.country}"></div>
+        <div class="form-group"><label>Which department do you belong to?</label>
+        <div class="pill-options" id="memberDept-options">
+          ${DEPARTMENTS.map(r=>`<div class="pill-opt ${state.memberDepartment===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
       </div>`,
     bind: () => {
       document.getElementById('f-name').oninput = e => state.name = e.target.value;
       document.getElementById('f-email').oninput = e => state.email = e.target.value;
       document.getElementById('f-country').oninput = e => state.country = e.target.value;
       bindPills('role-options','role');
+      bindPills('memberDept-options','memberDepartment');
     },
     valid: () => state.email.trim().length > 3 && state.email.includes('@')
   },
@@ -193,6 +199,10 @@ const steps = [
       <div class="card">
         <div class="form-group"><label>Department / Session Name <span style="color:var(--red);">*</span></label>
         <input type="text" id="f-session" placeholder="e.g. Tech Hub Monthly Meeting" value="${state.session}"></div>
+        <div class="form-group"><label>Which department led this session?</label>
+        <div class="pill-options" id="sessionDept-options">
+          ${DEPARTMENTS.map(r=>`<div class="pill-opt ${state.sessionDepartment===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
         <div class="form-group"><label>Session Date</label>
         <input type="date" id="f-date" value="${state.sessionDate}"></div>
         <div class="form-group"><label>Session Format</label>
@@ -211,6 +221,7 @@ const steps = [
     bind: () => {
       document.getElementById('f-session').oninput = e => state.session = e.target.value;
       document.getElementById('f-date').onchange = e => state.sessionDate = e.target.value;
+      bindPills('sessionDept-options','sessionDepartment');
       bindPills('format-options','format');
       bindPills('attendance-options','attendance');
       bindPills('heardFrom-options','heardFrom');
@@ -453,8 +464,10 @@ async function submitFeedback() {
       email: state.email.trim(),
       role: state.role,
       country: state.country.trim(),
+      memberDepartment: state.memberDepartment,
       session: state.session.trim(),
       sessionDate: state.sessionDate,
+      sessionDepartment: state.sessionDepartment,
       format: state.format,
       attendance: state.attendance,
       heardFrom: state.heardFrom,
