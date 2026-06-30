@@ -4211,91 +4211,308 @@ window.markSOSResolved = async function(reportId) {
 window.loadSessionFeedback = async function(c) {
   try {
     const snap = await getDocs(query(collection(db,'sessionFeedback'), orderBy('submittedAt','desc'))).catch(()=>getDocs(collection(db,'sessionFeedback')));
-
-    // Get unique sessions
-    const sessions = [...new Set(snap.docs.map(d => d.data().session).filter(Boolean))];
-
-    let html = '<div style="max-width:960px;margin:0 auto;">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">';
-    html += '<div><h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);">Session Feedback</h2>';
-    html += '<p style="color:var(--gray);font-size:0.82rem;">' + snap.size + ' total responses</p></div>';
-    html += '<a href="feedback.html" target="_blank" style="background:var(--navy);color:#fff;padding:0.6rem 1.25rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:700;">View Form</a>';
-    html += '</div>';
-
-    // Stats overview
-    if (!snap.empty) {
-      const allRatings = snap.docs.map(d => parseFloat(d.data().averageRating||0)).filter(r=>r>0);
-      const avgRating = allRatings.length ? (allRatings.reduce((a,b)=>a+b,0)/allRatings.length).toFixed(1) : 0;
-      const wouldRecommend = snap.docs.filter(d => (d.data().wouldRecommend||'').includes('Yes')||( d.data().wouldRecommend||'').includes('absolutely')).length;
-
-      html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
-      html += '<div style="background:#fff;border-radius:12px;padding:1rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><p style="font-size:2rem;font-weight:900;color:var(--navy);">' + snap.size + '</p><p style="font-size:0.75rem;color:var(--gray);">Total Responses</p></div>';
-      html += '<div style="background:#fff;border-radius:12px;padding:1rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><p style="font-size:2rem;font-weight:900;color:var(--gold);">⭐ ' + avgRating + '</p><p style="font-size:0.75rem;color:var(--gray);">Avg Rating</p></div>';
-      html += '<div style="background:#fff;border-radius:12px;padding:1rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><p style="font-size:2rem;font-weight:900;color:#27AE60;">' + sessions.length + '</p><p style="font-size:0.75rem;color:var(--gray);">Sessions</p></div>';
-      html += '<div style="background:#fff;border-radius:12px;padding:1rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><p style="font-size:2rem;font-weight:900;color:#27AE60;">' + wouldRecommend + '</p><p style="font-size:0.75rem;color:var(--gray);">Would Recommend</p></div>';
-      html += '</div>';
-
-      // Filter by session
-      html += '<div style="margin-bottom:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">';
-      html += '<button onclick="filterFeedback(\'all\')" class="fb-filter active" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">All Sessions</button>';
-      sessions.forEach(s => {
-        html += '<button onclick="filterFeedback(\'' + encodeURIComponent(s) + '\')" class="fb-filter" style="background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;">' + sanitize(s) + '</button>';
-      });
-      html += '</div>';
-    }
-
-    // Responses
-    if (snap.empty) {
-      html += '<div style="text-align:center;padding:3rem;color:var(--gray);">No feedback submitted yet. Share the form link during sessions.</div>';
-    } else {
-      html += '<div id="feedback-list">';
-      snap.docs.forEach(d => {
-        const f = d.data();
-        const avg = parseFloat(f.averageRating||0);
-        const stars = '★'.repeat(Math.round(avg)) + '☆'.repeat(5-Math.round(avg));
-        html += '<div class="fb-card" data-session="' + encodeURIComponent(f.session||'') + '" style="background:#fff;border-radius:16px;padding:1.25rem;margin-bottom:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
-        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">';
-        html += '<div><p style="font-size:0.9rem;font-weight:800;color:var(--navy);">' + sanitize(f.name||'Anonymous') + ' <span style="font-weight:400;font-size:0.75rem;color:var(--gray);">· ' + sanitize(f.role||'') + ' · ' + sanitize(f.country||'') + '</span></p>';
-        html += '<p style="font-size:0.75rem;color:var(--gray);">' + sanitize(f.email||'') + ' · ' + (f.submittedAt?.toDate ? f.submittedAt.toDate().toLocaleDateString() : '') + '</p></div>';
-        html += '<div style="text-align:right;"><p style="color:var(--gold);font-size:1.1rem;">' + stars + '</p><p style="font-size:0.72rem;color:var(--gray);">' + avg + '/5 avg</p></div>';
-        html += '</div>';
-        html += '<div style="background:rgba(27,42,107,0.04);border-radius:8px;padding:0.75rem;margin-bottom:0.75rem;">';
-        html += '<p style="font-size:0.72rem;font-weight:700;color:var(--gray);margin-bottom:0.25rem;">SESSION: ' + sanitize(f.session||'') + ' · ' + sanitize(f.sessionDate||'') + ' · ' + sanitize(f.format||'') + '</p>';
-        html += '</div>';
-        if (f.highlight) { html += '<p style="font-size:0.82rem;color:var(--navy);margin-bottom:0.5rem;"><strong>Highlight:</strong> ' + sanitize(f.highlight) + '</p>'; }
-        if (f.improvements) { html += '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem;"><strong>Improvements:</strong> ' + sanitize(f.improvements) + '</p>'; }
-        if (f.topicsWanted) { html += '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem;"><strong>Topics wanted:</strong> ' + sanitize(f.topicsWanted) + '</p>'; }
-        if (f.feeling) { html += '<span style="background:rgba(27,42,107,0.07);color:var(--navy);padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">' + sanitize(f.feeling) + '</span>'; }
-        if (f.wouldRecommend) { html += ' <span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:600;">' + sanitize(f.wouldRecommend) + '</span>'; }
-        html += '</div>';
-      });
-      html += '</div>';
-    }
-
-    // Share links
-    html += '<div style="background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-top:1rem;">';
-    html += '<h3 style="font-size:0.9rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Share Feedback Form</h3>';
-    html += '<p style="font-size:0.78rem;color:var(--gray);margin-bottom:0.75rem;">Share these links during your sessions:</p>';
-    html += '<div style="background:var(--light);border-radius:8px;padding:0.75rem;font-size:0.78rem;font-family:monospace;word-break:break-all;margin-bottom:0.5rem;">https://youngafricansnetwork.org/feedback.html</div>';
-    html += '<p style="font-size:0.75rem;color:var(--gray);margin-bottom:0.5rem;">With session pre-filled:</p>';
-    html += '<div style="background:var(--light);border-radius:8px;padding:0.75rem;font-size:0.78rem;font-family:monospace;word-break:break-all;">https://youngafricansnetwork.org/feedback.html?session=YOUR+SESSION+NAME&date=2026-06-01</div>';
-    html += '</div>';
-    html += '</div>';
-    c.innerHTML = html;
+    window._fbAllDocs = snap.docs;
+    renderFeedbackShell(c);
+    renderFeedbackDashboard();
   } catch(e) {
     c.innerHTML = '<p style="color:var(--red);padding:1rem;">Error: ' + e.message + '</p>';
   }
 };
 
-window.filterFeedback = function(session) {
-  document.querySelectorAll('.fb-filter').forEach(b => {
-    b.style.background = 'var(--light)'; b.style.color = 'var(--navy)';
+function renderFeedbackShell(c) {
+  let html = '<div style="max-width:980px;margin:0 auto;">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:1rem;">';
+  html += '<div><h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);">Session Feedback</h2>';
+  html += '<p style="color:var(--gray);font-size:0.82rem;">' + window._fbAllDocs.length + ' total responses</p></div>';
+  html += '<a href="feedback" target="_blank" style="background:var(--navy);color:#fff;padding:0.6rem 1.25rem;border-radius:50px;text-decoration:none;font-size:0.82rem;font-weight:700;">View Form</a>';
+  html += '</div>';
+
+  html += '<div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:2px solid rgba(27,42,107,0.08);">';
+  html += '<button class="fb-tab active" data-tab="dashboard" onclick="switchFeedbackTab(\'dashboard\')" style="background:none;border:none;padding:0.75rem 1.25rem;font-family:Poppins,sans-serif;font-size:0.85rem;font-weight:700;color:var(--navy);cursor:pointer;border-bottom:3px solid var(--navy);">Dashboard</button>';
+  html += '<button class="fb-tab" data-tab="bysession" onclick="switchFeedbackTab(\'bysession\')" style="background:none;border:none;padding:0.75rem 1.25rem;font-family:Poppins,sans-serif;font-size:0.85rem;font-weight:700;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;">By Session</button>';
+  html += '<button class="fb-tab" data-tab="volunteers" onclick="switchFeedbackTab(\'volunteers\')" style="background:none;border:none;padding:0.75rem 1.25rem;font-family:Poppins,sans-serif;font-size:0.85rem;font-weight:700;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;">Volunteer Finder</button>';
+  html += '<button class="fb-tab" data-tab="responses" onclick="switchFeedbackTab(\'responses\')" style="background:none;border:none;padding:0.75rem 1.25rem;font-family:Poppins,sans-serif;font-size:0.85rem;font-weight:700;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;">All Responses</button>';
+  html += '</div>';
+
+  html += '<div id="fb-tab-content"></div>';
+  html += '</div>';
+  c.innerHTML = html;
+}
+
+window.switchFeedbackTab = function(tab) {
+  document.querySelectorAll('.fb-tab').forEach(t => {
+    const isActive = t.dataset.tab === tab;
+    t.style.color = isActive ? 'var(--navy)' : 'var(--gray)';
+    t.style.borderBottom = isActive ? '3px solid var(--navy)' : '3px solid transparent';
   });
-  event.target.style.background = 'var(--navy)'; event.target.style.color = '#fff';
-  document.querySelectorAll('.fb-card').forEach(card => {
-    card.style.display = (session === 'all' || card.dataset.session === session) ? 'block' : 'none';
-  });
+  if (tab === 'dashboard') renderFeedbackDashboard();
+  if (tab === 'bysession') renderFeedbackBySession();
+  if (tab === 'volunteers') renderVolunteerFinder();
+  if (tab === 'responses') renderFeedbackResponses();
 };
+
+function fbStats(docs) {
+  const ratingsArr = docs.map(d => parseFloat(d.data().averageRating||0)).filter(r=>r>0);
+  const avgRating = ratingsArr.length ? (ratingsArr.reduce((a,b)=>a+b,0)/ratingsArr.length).toFixed(1) : 0;
+  const recommendYes = docs.filter(d => {
+    const r = (d.data().wouldRecommend||'');
+    return r.includes('Yes') || r.includes('absolutely') || r.includes('Probably');
+  }).length;
+  const recommendPct = docs.length ? Math.round((recommendYes/docs.length)*100) : 0;
+  const flagged = docs.filter(d => {
+    const data = d.data();
+    return parseFloat(data.averageRating||5) <= 2.5 || data.feeling === 'Disappointed';
+  });
+  return { avgRating, recommendPct, flagged };
+}
+
+function renderFeedbackDashboard() {
+  const target = document.getElementById('fb-tab-content');
+  const docs = window._fbAllDocs;
+  if (!docs.length) {
+    target.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--gray);">No feedback submitted yet. Share the form link during sessions.</div>';
+    return;
+  }
+  const { avgRating, recommendPct, flagged } = fbStats(docs);
+  const sessions = [...new Set(docs.map(d => d.data().session).filter(Boolean))];
+
+  // Session average ratings for bar chart
+  const sessionAverages = sessions.map(s => {
+    const sDocs = docs.filter(d => d.data().session === s);
+    const avgs = sDocs.map(d => parseFloat(d.data().averageRating||0)).filter(r=>r>0);
+    const avg = avgs.length ? (avgs.reduce((a,b)=>a+b,0)/avgs.length) : 0;
+    return { session: s, avg, count: sDocs.length };
+  }).sort((a,b) => b.avg - a.avg);
+
+  // Volunteer pool per month
+  const monthCounts = {};
+  ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].forEach(m => monthCounts[m] = 0);
+  docs.forEach(d => {
+    (d.data().volunteerMonths||[]).forEach(m => { if (monthCounts[m] !== undefined) monthCounts[m]++; });
+  });
+  const maxMonthCount = Math.max(1, ...Object.values(monthCounts));
+
+  let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
+  html += statCard(docs.length, 'Total Responses', 'var(--navy)');
+  html += statCard('⭐ ' + avgRating, 'Avg Rating', 'var(--gold)');
+  html += statCard(sessions.length, 'Sessions', '#27AE60');
+  html += statCard(recommendPct + '%', 'Would Recommend', '#27AE60');
+  html += '</div>';
+
+  if (flagged.length > 0) {
+    html += '<div style="background:rgba(230,51,41,0.06);border:1.5px solid rgba(230,51,41,0.2);border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:1.5rem;">';
+    html += '<h3 style="font-size:0.85rem;font-weight:800;color:var(--red);margin-bottom:0.75rem;">⚠ Flagged Responses (' + flagged.length + ') — Needs Attention</h3>';
+    flagged.forEach(d => {
+      const f = d.data();
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid rgba(230,51,41,0.1);flex-wrap:wrap;gap:0.5rem;">';
+      html += '<div><span style="font-size:0.82rem;font-weight:700;color:var(--navy);">' + sanitize(f.name||'Anonymous') + '</span> <span style="font-size:0.75rem;color:var(--gray);">· ' + sanitize(f.session||'') + ' · ' + (f.averageRating||0) + '/5</span></div>';
+      html += '<button onclick="openFeedbackReply(\'' + d.id + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.35rem 0.9rem;border-radius:50px;font-size:0.72rem;font-weight:700;cursor:pointer;">Reply</button>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  html += '<div style="display:grid;grid-template-columns:1.2fr 1fr;gap:1.25rem;align-items:start;">';
+
+  // Session ratings bar chart
+  html += '<div style="background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">';
+  html += '<h3 style="font-size:0.9rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Average Rating by Session</h3>';
+  sessionAverages.slice(0,8).forEach(s => {
+    const pct = (s.avg/5)*100;
+    const color = s.avg >= 4 ? '#27AE60' : s.avg >= 3 ? 'var(--gold)' : 'var(--red)';
+    html += '<div style="margin-bottom:0.75rem;">';
+    html += '<div style="display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:0.3rem;"><span style="color:var(--navy);font-weight:600;">' + sanitize(s.session) + '</span><span style="color:var(--gray);">' + s.avg.toFixed(1) + ' (' + s.count + ')</span></div>';
+    html += '<div style="background:var(--light);border-radius:50px;height:8px;overflow:hidden;"><div style="width:' + pct + '%;height:100%;background:' + color + ';border-radius:50px;transition:width 0.4s;"></div></div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  // Volunteer pool widget
+  html += '<div style="background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">';
+  html += '<h3 style="font-size:0.9rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Volunteer Availability</h3>';
+  Object.entries(monthCounts).forEach(([m,count]) => {
+    const pct = (count/maxMonthCount)*100;
+    html += '<div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.45rem;">';
+    html += '<span style="font-size:0.74rem;color:var(--navy);font-weight:700;width:28px;">' + m + '</span>';
+    html += '<div style="flex:1;background:var(--light);border-radius:50px;height:14px;overflow:hidden;"><div style="width:' + pct + '%;height:100%;background:linear-gradient(90deg,var(--gold),#e8951a);border-radius:50px;"></div></div>';
+    html += '<span style="font-size:0.72rem;color:var(--gray);width:18px;text-align:right;">' + count + '</span>';
+    html += '</div>';
+  });
+  html += '<p style="font-size:0.72rem;color:var(--gray);margin-top:0.75rem;">Click "Volunteer Finder" tab to see names per month.</p>';
+  html += '</div>';
+
+  html += '</div>';
+  target.innerHTML = html;
+}
+
+function statCard(value, label, color) {
+  return '<div style="background:#fff;border-radius:14px;padding:1.1rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);">'
+    + '<p style="font-size:1.7rem;font-weight:900;color:' + color + ';">' + value + '</p>'
+    + '<p style="font-size:0.74rem;color:var(--gray);">' + label + '</p></div>';
+}
+
+function renderFeedbackBySession() {
+  const target = document.getElementById('fb-tab-content');
+  const docs = window._fbAllDocs;
+  const sessions = [...new Set(docs.map(d => d.data().session).filter(Boolean))];
+
+  if (!sessions.length) {
+    target.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--gray);">No sessions recorded yet.</div>';
+    return;
+  }
+
+  let html = '';
+  sessions.forEach(s => {
+    const sDocs = docs.filter(d => d.data().session === s);
+    const avgs = sDocs.map(d => parseFloat(d.data().averageRating||0)).filter(r=>r>0);
+    const avg = avgs.length ? (avgs.reduce((a,b)=>a+b,0)/avgs.length).toFixed(1) : 0;
+    const sessionId = 'sess_' + s.replace(/[^a-zA-Z0-9]/g,'_');
+    html += '<div style="background:#fff;border-radius:16px;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);overflow:hidden;">';
+    html += '<div onclick="toggleSessionGroup(\'' + sessionId + '\')" style="padding:1.1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">';
+    html += '<div><p style="font-size:0.92rem;font-weight:800;color:var(--navy);">' + sanitize(s) + '</p><p style="font-size:0.75rem;color:var(--gray);">' + sDocs.length + ' responses</p></div>';
+    html += '<div style="display:flex;align-items:center;gap:0.75rem;"><span style="color:var(--gold);font-weight:700;font-size:0.9rem;">⭐ ' + avg + '</span><span style="color:var(--gray);">▾</span></div>';
+    html += '</div>';
+    html += '<div id="' + sessionId + '" style="display:none;border-top:1px solid var(--light);padding:0.5rem 1.25rem 1rem;">';
+    sDocs.forEach(d => { html += feedbackCardCompact(d); });
+    html += '</div></div>';
+  });
+  target.innerHTML = html;
+}
+
+window.toggleSessionGroup = function(id) {
+  const el = document.getElementById(id);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+};
+
+function renderVolunteerFinder() {
+  const target = document.getElementById('fb-tab-content');
+  const docs = window._fbAllDocs;
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  let html = '<div style="background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-bottom:1.25rem;">';
+  html += '<h3 style="font-size:0.9rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Select a Month</h3>';
+  html += '<div style="display:flex;flex-wrap:wrap;gap:0.5rem;">';
+  months.forEach((m,i) => {
+    html += '<button onclick="showVolunteersForMonth(\'' + m + '\')" id="vm-btn-' + m + '" class="vm-btn" style="background:' + (i===0?'var(--navy)':'var(--light)') + ';color:' + (i===0?'#fff':'var(--navy)') + ';border:none;padding:0.5rem 1.1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;">' + m + '</button>';
+  });
+  html += '</div></div>';
+  html += '<div id="volunteer-list"></div>';
+  target.innerHTML = html;
+  showVolunteersForMonth(months[0]);
+}
+
+window.showVolunteersForMonth = function(month) {
+  document.querySelectorAll('.vm-btn').forEach(b => {
+    const isActive = b.id === 'vm-btn-' + month;
+    b.style.background = isActive ? 'var(--navy)' : 'var(--light)';
+    b.style.color = isActive ? '#fff' : 'var(--navy)';
+  });
+  const docs = window._fbAllDocs.filter(d => (d.data().volunteerMonths||[]).includes(month));
+  const list = document.getElementById('volunteer-list');
+  if (!docs.length) {
+    list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);background:#fff;border-radius:16px;">No one has volunteered for ' + month + ' yet.</div>';
+    return;
+  }
+  let html = '<div style="background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">';
+  html += '<h3 style="font-size:0.9rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">' + docs.length + ' Available in ' + month + '</h3>';
+  docs.forEach(d => {
+    const f = d.data();
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;border-bottom:1px solid var(--light);flex-wrap:wrap;gap:0.5rem;">';
+    html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(f.name||'Anonymous') + '</p><p style="font-size:0.74rem;color:var(--gray);">' + sanitize(f.email||'') + ' · ' + sanitize(f.role||'') + ' · ' + sanitize(f.country||'') + '</p></div>';
+    html += '<a href="mailto:' + sanitize(f.email||'') + '" style="background:var(--navy);color:#fff;padding:0.4rem 1rem;border-radius:50px;text-decoration:none;font-size:0.74rem;font-weight:700;">Contact</a>';
+    html += '</div>';
+  });
+  html += '</div>';
+  list.innerHTML = html;
+};
+
+function renderFeedbackResponses() {
+  const target = document.getElementById('fb-tab-content');
+  const docs = window._fbAllDocs;
+  if (!docs.length) {
+    target.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--gray);">No feedback submitted yet.</div>';
+    return;
+  }
+  let html = '<div id="feedback-list">';
+  docs.forEach(d => { html += feedbackCardCompact(d); });
+  html += '</div>';
+  target.innerHTML = html;
+}
+
+function feedbackCardCompact(d) {
+  const f = d.data();
+  const avg = parseFloat(f.averageRating||0);
+  const stars = '★'.repeat(Math.round(avg)) + '☆'.repeat(5-Math.round(avg));
+  const cardId = 'fbcard_' + d.id;
+  let html = '<div style="background:var(--light);border-radius:12px;padding:1rem;margin:0.6rem 0;">';
+  html += '<div onclick="toggleFeedbackCard(\'' + cardId + '\')" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;flex-wrap:wrap;gap:0.5rem;">';
+  html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">' + sanitize(f.name||'Anonymous') + ' <span style="font-weight:400;color:var(--gray);font-size:0.75rem;">· ' + sanitize(f.session||'') + '</span></p>';
+  html += '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize((f.highlight||'').substring(0,80)) + ((f.highlight||'').length>80?'...':'') + '</p></div>';
+  html += '<span style="color:var(--gold);font-size:0.95rem;flex-shrink:0;">' + stars + '</span>';
+  html += '</div>';
+  html += '<div id="' + cardId + '" style="display:none;margin-top:0.85rem;padding-top:0.85rem;border-top:1px solid rgba(27,42,107,0.08);">';
+  html += '<p style="font-size:0.74rem;color:var(--gray);margin-bottom:0.5rem;">' + sanitize(f.email||'') + ' · ' + sanitize(f.role||'') + ' · ' + sanitize(f.country||'') + ' · ' + (f.submittedAt?.toDate ? f.submittedAt.toDate().toLocaleDateString() : '') + '</p>';
+  if (f.highlight) html += '<p style="font-size:0.8rem;color:var(--navy);margin-bottom:0.4rem;"><b>Highlight:</b> ' + sanitize(f.highlight) + '</p>';
+  if (f.improvements) html += '<p style="font-size:0.8rem;color:var(--gray);margin-bottom:0.4rem;"><b>Improvements:</b> ' + sanitize(f.improvements) + '</p>';
+  if (f.topicsWanted) html += '<p style="font-size:0.8rem;color:var(--gray);margin-bottom:0.4rem;"><b>Topics wanted:</b> ' + sanitize(f.topicsWanted) + '</p>';
+  if (f.otherComments) html += '<p style="font-size:0.8rem;color:var(--gray);margin-bottom:0.4rem;"><b>Other:</b> ' + sanitize(f.otherComments) + '</p>';
+  if (f.volunteeredThisSession) html += '<p style="font-size:0.8rem;color:var(--gray);margin-bottom:0.4rem;"><b>Volunteered this session:</b> ' + sanitize(f.volunteeredThisSession) + '</p>';
+  if (f.volunteerMonths && f.volunteerMonths.length) html += '<p style="font-size:0.8rem;color:var(--gray);margin-bottom:0.4rem;"><b>Available to volunteer:</b> ' + f.volunteerMonths.join(', ') + '</p>';
+  html += '<button onclick="openFeedbackReply(\'' + d.id + '\')" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;margin-top:0.5rem;">Reply via Email</button>';
+  html += '</div></div>';
+  return html;
+}
+
+window.toggleFeedbackCard = function(id) {
+  const el = document.getElementById(id);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+};
+
+window.openFeedbackReply = function(docId) {
+  const d = window._fbAllDocs.find(x => x.id === docId);
+  if (!d) return;
+  const f = d.data();
+  const modal = document.createElement('div');
+  modal.id = 'fb-reply-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  modal.innerHTML = '<div style="background:#fff;border-radius:18px;padding:1.5rem;max-width:480px;width:100%;">'
+    + '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:0.4rem;">Reply to ' + sanitize(f.name||'Anonymous') + '</h3>'
+    + '<p style="font-size:0.78rem;color:var(--gray);margin-bottom:1rem;">' + sanitize(f.email||'') + ' · ' + sanitize(f.session||'') + '</p>'
+    + '<textarea id="fb-reply-text" rows="6" placeholder="Write your reply..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;margin-bottom:1rem;"></textarea>'
+    + '<div style="display:flex;gap:0.75rem;">'
+    + '<button onclick="sendFeedbackReply(\'' + docId + '\')" style="flex:1;background:var(--navy);color:#fff;border:none;padding:0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Send Reply</button>'
+    + '<button onclick="document.getElementById(\'fb-reply-modal\').remove()" style="background:var(--light);color:var(--navy);border:none;padding:0.75rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:600;cursor:pointer;">Cancel</button>'
+    + '</div></div>';
+  document.body.appendChild(modal);
+};
+
+window.sendFeedbackReply = async function(docId) {
+  const d = window._fbAllDocs.find(x => x.id === docId);
+  if (!d) return;
+  const f = d.data();
+  const reply = document.getElementById('fb-reply-text').value.trim();
+  if (!reply) return showToast('Please write a reply', 'error');
+  if (!f.email) return showToast('No email on this response', 'error');
+
+  try {
+    await fetch('https://yan-email-worker.youngafricansn.workers.dev', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        to_email: f.email,
+        name: f.name || 'Member',
+        subject: 'RE: Your YAN Session Feedback — ' + (f.session||''),
+        message: 'Thank you for taking the time to share your feedback on "' + (f.session||'') + '". Here is our response:\n\n' + reply + '\n\nWe truly value your input as it helps us improve every YAN session.',
+        type: 'general'
+      })
+    });
+    document.getElementById('fb-reply-modal').remove();
+    showToast('Reply sent to ' + (f.name||f.email) + '!');
+  } catch(e) {
+    showToast('Error sending reply: ' + e.message, 'error');
+  }
+};
+
 </script>
 
 <style>
