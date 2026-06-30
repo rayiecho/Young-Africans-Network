@@ -4452,6 +4452,8 @@ function feedbackCardCompact(d) {
   html += '</div>';
   html += '<div id="' + cardId + '" style="display:none;margin-top:0.85rem;padding-top:0.85rem;border-top:1px solid rgba(27,42,107,0.08);">';
   html += '<p style="font-size:0.74rem;color:var(--gray);margin-bottom:0.5rem;">' + sanitize(f.email||'') + ' · ' + sanitize(f.role||'') + ' · ' + sanitize(f.country||'') + ' · ' + (f.submittedAt?.toDate ? f.submittedAt.toDate().toLocaleDateString() : '') + '</p>';
+  if (f.memberDepartment) html += '<p style="font-size:0.8rem;color:var(--gray);margin-bottom:0.4rem;"><b>Member Department:</b> ' + sanitize(f.memberDepartment) + '</p>';
+  if (f.sessionDepartment) html += '<p style="font-size:0.8rem;color:var(--gray);margin-bottom:0.4rem;"><b>Session Led By:</b> ' + sanitize(f.sessionDepartment) + '</p>';
   if (f.highlight) html += '<p style="font-size:0.8rem;color:var(--navy);margin-bottom:0.4rem;"><b>Highlight:</b> ' + sanitize(f.highlight) + '</p>';
   if (f.improvements) html += '<p style="font-size:0.8rem;color:var(--gray);margin-bottom:0.4rem;"><b>Improvements:</b> ' + sanitize(f.improvements) + '</p>';
   if (f.topicsWanted) html += '<p style="font-size:0.8rem;color:var(--gray);margin-bottom:0.4rem;"><b>Topics wanted:</b> ' + sanitize(f.topicsWanted) + '</p>';
