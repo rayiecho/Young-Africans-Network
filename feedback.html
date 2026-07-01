@@ -440,6 +440,7 @@ function renderStep() {
 }
 
 function updateNavState() {
+  console.log("[DEBUG] updateNavState called. current step:", current, "valid():", steps[current].valid(), "state:", JSON.stringify(state.ratings), state.email, state.session, state.highlight);
   const btn = document.getElementById('btn-next');
   if (btn) btn.disabled = !steps[current].valid();
 }
