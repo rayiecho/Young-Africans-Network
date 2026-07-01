@@ -186,7 +186,7 @@ const steps = [
       </div>`,
     bind: () => {
       document.getElementById('f-name').oninput = e => state.name = e.target.value;
-      document.getElementById('f-email').oninput = e => state.email = e.target.value;
+      document.getElementById('f-email').oninput = e => { state.email = e.target.value; updateNavState(); };
       document.getElementById('f-country').oninput = e => state.country = e.target.value;
       bindPills('role-options','role');
       bindPills('memberDept-options','memberDepartment');
@@ -219,7 +219,7 @@ const steps = [
         </div></div>
       </div>`,
     bind: () => {
-      document.getElementById('f-session').oninput = e => state.session = e.target.value;
+      document.getElementById('f-session').oninput = e => { state.session = e.target.value; updateNavState(); };
       document.getElementById('f-date').onchange = e => state.sessionDate = e.target.value;
       bindPills('sessionDept-options','sessionDepartment');
       bindPills('format-options','format');
@@ -287,6 +287,7 @@ const steps = [
             fb.textContent = STAR_LABELS[val];
             fb.classList.add('show');
             setTimeout(()=>fb.classList.remove('show'), 1400);
+            updateNavState();
           };
         });
       });
@@ -312,6 +313,7 @@ const steps = [
       hi.oninput = e => {
         state.highlight = e.target.value;
         document.getElementById('hint-highlight').classList.toggle('show', e.target.value.trim().length > 40);
+            updateNavState();
       };
       document.getElementById('f-improve').oninput = e => state.improvements = e.target.value;
       document.getElementById('f-topics').oninput = e => state.topicsWanted = e.target.value;
