@@ -390,6 +390,9 @@ function bindPills(containerId, stateKey) {
       el.classList.add('selected');
       state[stateKey] = el.dataset.val;
       updateNavState();
+      // Also update submit button if on last step
+      const submitBtn = document.getElementById('btn-submit');
+      if (submitBtn) submitBtn.disabled = !steps[current].valid();
     };
   });
 }
