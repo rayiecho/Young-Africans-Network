@@ -9078,6 +9078,8 @@ window.sendNewsletter = async function() {
     } catch(e) {
       failed++;
     }
+  }
+    }
       sent++;
     } catch(e){ failed++; }
     await new Promise(function(r){setTimeout(r,300);});
