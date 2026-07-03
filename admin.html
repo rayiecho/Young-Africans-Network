@@ -4875,7 +4875,25 @@ window.sendNewsletter = async function() {
   for (const user of recipients) {
     if (!user.email) continue;
     try {
-      await fetch('https://yan-email-worker.youngafricansn.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to_email:user.email,name:user.name||'Member',subject:subject,message:message,type:'general'})});
+      let response = await fetch('https://yan-email-worker.youngafricansn.workers.dev', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to_email: user.email,
+          name: user.name || 'Member',
+          subject: subject,
+          message: message,
+          type: 'general'
+        })
+      });
+      if (response.ok) {
+        sent++;
+      } else {
+        failed++;
+      }
+    } catch(e) {
+      failed++;
+    }
       sent++;
     } catch(e){ failed++; }
     await new Promise(function(r){setTimeout(r,300);});
