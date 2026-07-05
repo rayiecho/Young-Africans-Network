@@ -4864,7 +4864,11 @@ window.sendNewsletter = async function() {
   const message = document.getElementById('nl-message').value.trim();
   if (!subject || !message) return showToast('Please enter both subject and message', 'error');
 
-  const recipients = window._nlTarget === 'all' ? allUsers : window._nlSelectedMembers || [];
+  const allUsers = window._nlAllUsers || [];
+  let recipients = [];
+  if (window._nlTarget === 'all') recipients = allUsers;
+  else if (window._nlTarget === 'specific') recipients = allUsers.filter(function(u){ return (window._nlSelectedUIDs||[]).includes(u.id); });
+  else recipients = allUsers.filter(function(u){ return u.department === window._nlTarget; });
   if (recipients.length === 0) return showToast('No recipients selected', 'error');
 
   let sent = 0, failed = 0;
