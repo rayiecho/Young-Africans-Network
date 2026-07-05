@@ -4877,7 +4877,7 @@ window.sendNewsletter = async function() {
   for (const user of recipients) {
     if (!user.email) continue;
     try {
-      let response = await fetch('https://workers.dev', {
+      let response = await fetch('https://yan-email-worker.youngafricansn.workers.dev', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
