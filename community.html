@@ -13038,18 +13038,16 @@ window.sendYANGuideFloat = async function() {
   messages.innerHTML += '<div id="' + typingId + '" style="display:flex;gap:0.5rem;align-items:flex-start;"><img src="images/AI.jpg" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;"><div style="background:#fff;border-radius:12px;padding:0.65rem 0.85rem;font-size:0.8rem;color:#6B7280;font-family:Poppins,sans-serif;">Thinking...</div></div>';
   messages.scrollTop = messages.scrollHeight;
   try {
-    var response = await fetch('https://yan-ai-worker.youngafricansn.workers.dev', {
+    var response = await fetch('https://yan-ai-worker.youngafricansn.workers.dev/ai', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1000,
-        messages: [{role:'user', content: 'You are the Young Africans Network Guide for YAN — a pan-African youth organization. Help with scholarships, career advice, YAN programs and African opportunities. Be warm and concise. Contact: info@youngafricansnetwork.org (general), tech@youngafricansnetwork.org (technical), marketing@youngafricansnetwork.org (partnerships). Website: youngafricansnetwork.org. Question: ' + message}]
+        message: 'You are the Young Africans Network (YAN) AI Guide — a warm, helpful assistant for a pan-African youth organization. Help with scholarships, career advice, YAN programs and African opportunities. Be concise and encouraging. Contacts: info@youngafricansnetwork.org (general), tech@youngafricansnetwork.org (technical). Website: youngafricansnetwork.org. Question: ' + message
       })
     });
     var data = await response.json();
     var reply = 'Sorry, I could not connect. Please try again!';
-    try { reply = data.content[0].text; } catch(e) { console.log('AI parse error:', e, 'Data:', JSON.stringify(data)); }
+    try { reply = data.response || data.choices?.[0]?.message?.content || 'Sorry, I could not connect. Please try again!'; } catch(e) { console.log('AI parse error:', e, 'Data:', JSON.stringify(data)); }
     var typing = document.getElementById(typingId);
     if (typing) typing.remove();
     messages.innerHTML += '<div style="display:flex;gap:0.5rem;align-items:flex-start;"><img src="images/AI.jpg" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;"><div style="background:#fff;border-radius:12px;padding:0.65rem 0.85rem;max-width:85%;font-size:0.8rem;color:#1B2A6B;line-height:1.6;font-family:Poppins,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,0.06);">' + reply.split('\n').join('<br>') + '</div></div>';
