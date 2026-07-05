@@ -591,6 +591,18 @@ async function doLogin() {
 async function doLogout() {
   unsubscribers.forEach(u => u());
   unsubscribers = [];
+  // Clear ALL user cache on logout to prevent account bleed between users
+  if (currentUser) {
+    localStorage.removeItem('yan_user_' + currentUser.uid);
+  }
+  // Clear all yan_ keys that could identify a user session
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith('yan_user_') || key === 'yan_last_uid' || key === 'yan_last_tab' || key === 'yan_launch_banner_seen') {
+      localStorage.removeItem(key);
+    }
+  });
+  currentUser = null;
+  currentUserData = null;
   await signOut(auth);
   showScreen('screen-landing');
 }
