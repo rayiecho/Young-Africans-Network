@@ -654,6 +654,7 @@ async function doLogin() {
 }
 
 async function doLogout() {
+  if (auth.currentUser) sessionStorage.removeItem('yan_login_verified_' + auth.currentUser.uid);
   unsubscribers.forEach(u => u());
   unsubscribers = [];
   // Clear ALL user cache on logout to prevent account bleed between users
