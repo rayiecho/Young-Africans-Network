@@ -80,9 +80,6 @@ onAuthStateChanged(auth, async (user) => {
     await signOut(auth);
   }
 });
-  }
-}
-
 window.doAdminLogin = async function() {
   const email = document.getElementById('admin-email').value.trim();
   const pass = document.getElementById('admin-pass').value;
