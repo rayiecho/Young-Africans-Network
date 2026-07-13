@@ -11107,6 +11107,7 @@ window.saveProfile=saveProfile; window.downloadIDCard=downloadIDCard; window.cha
 
 // old admin functions removed
 window.doSignOut = async function() {
+  if (auth.currentUser) sessionStorage.removeItem('yan_login_verified_' + auth.currentUser.uid);
   await signOut(auth);
   showScreen('screen-landing');
 };
