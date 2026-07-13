@@ -70,8 +70,17 @@ onAuthStateChanged(auth, async (user) => {
       document.getElementById('screen-dashboard').style.display = 'none';
       return;
     }
+    window._adminName = snap.data().name || 'Admin';
+    const vScreen = document.getElementById('screen-admin-verify');
+    if (!sessionStorage.getItem('yan_admin_verified_' + user.uid)) {
+      document.getElementById('screen-login').style.display = 'none';
+      if (vScreen) vScreen.style.display = 'flex';
+      sendAdminVerificationCode(user.uid, user.email, window._adminName);
+      return;
+    }
     window._adminAuthReady = true;
     document.getElementById('screen-login').style.display = 'none';
+    if (vScreen) vScreen.style.display = 'none';
     document.getElementById('screen-dashboard').style.display = 'flex';
     tryLoad(0);
   } catch(e) {
@@ -80,6 +89,67 @@ onAuthStateChanged(auth, async (user) => {
     await signOut(auth);
   }
 });
+
+window.sendAdminVerificationCode = async function(uid, email, name) {
+  try {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+    const trimmedName = (name || '').trim();
+    const lastLetter = trimmedName.length ? trimmedName.charAt(trimmedName.length - 1).toUpperCase() : 'X';
+    code += lastLetter;
+    await setDoc(doc(db, 'adminVerification', uid), {
+      code: code,
+      expiresAt: Date.now() + 10 * 60 * 1000
+    });
+    await fetch('https://yan-email-worker.youngafricansn.workers.dev', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        to_email: email,
+        name: name || 'Admin',
+        subject: 'Your YAN Admin Verification Code',
+        message: 'Your admin sign-in verification code is: **' + code + '**\n\nThis code expires in 10 minutes. Enter it on the admin sign-in screen to continue.\n\nIf you did not try to sign in, please secure your account immediately.',
+        type: 'general'
+      })
+    });
+  } catch(e) {
+    console.error('Failed to send admin verification code:', e);
+    showToast('Could not send verification code. Try Resend.', 'error');
+  }
+};
+
+window.verifyAdminCode = async function() {
+  const input = document.getElementById('admin-verify-input');
+  const btn = document.getElementById('admin-verify-btn');
+  const code = (input.value || '').trim().toUpperCase();
+  if (!code) return showToast('Enter the code from your email.', 'error');
+  if (!auth.currentUser) return showToast('Session expired, please sign in again.', 'error');
+  btn.disabled = true; btn.textContent = 'Verifying...';
+  try {
+    const uid = auth.currentUser.uid;
+    const snap = await getDoc(doc(db, 'adminVerification', uid));
+    if (!snap.exists()) { showToast('No code found. Click Resend.', 'error'); return; }
+    const data = snap.data();
+    if (Date.now() > data.expiresAt) { showToast('Code expired. Click Resend.', 'error'); return; }
+    if (code !== (data.code || '').toUpperCase()) { showToast('Incorrect code.', 'error'); return; }
+    sessionStorage.setItem('yan_admin_verified_' + uid, 'true');
+    showToast('Verified! Welcome back.');
+    location.reload();
+  } catch(e) {
+    console.error('Admin code verification error:', e);
+    showToast('Verification failed. Try again.', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Verify & Continue';
+  }
+};
+
+window.resendAdminVerificationCode = function() {
+  if (auth.currentUser) {
+    sendAdminVerificationCode(auth.currentUser.uid, auth.currentUser.email, window._adminName);
+    showToast('Code resent — check your email.');
+  }
+};
 window.doAdminLogin = async function() {
   const email = document.getElementById('admin-email').value.trim();
   const pass = document.getElementById('admin-pass').value;
@@ -2192,6 +2262,7 @@ window.rejectLabListing = async function(id) {
 checkAuth();
 
 window.doAdminLogout = async function() {
+  if (auth.currentUser) sessionStorage.removeItem('yan_admin_verified_' + auth.currentUser.uid);
   await signOut(auth);
   location.reload();
 };
@@ -4696,6 +4767,17 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
     <a href="index.html" class="login-back">← Back to website</a>
   </div>
 </div>
+<div id="screen-admin-verify" style="display:none;">
+  <div class="login-card">
+    <img src="images/logo.jpeg" alt="YAN Logo">
+    <h2>Verify Your Sign-In</h2>
+    <p>Enter the verification code sent to your email.</p>
+    <input type="text" id="admin-verify-input" placeholder="Enter code" onkeydown="if(event.key==='Enter')verifyAdminCode()" style="width:100%;padding:0.85rem 1rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.88rem;outline:none;box-sizing:border-box;margin-bottom:1rem;text-align:center;text-transform:uppercase;">
+    <button class="btn-login" id="admin-verify-btn" onclick="verifyAdminCode()">Verify &amp; Continue</button>
+    <button class="btn-login" onclick="resendAdminVerificationCode()" style="background:transparent;border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);margin-top:0.75rem;">Resend Code</button>
+    <a href="#" onclick="doAdminLogout();return false;" class="login-back">Sign out and use a different account</a>
+  </div>
+</div>
 <!-- DASHBOARD -->
 </div>
 
@@ -6373,6 +6455,7 @@ window.rejectLabListing = async function(id) {
 checkAuth();
 
 window.doAdminLogout = async function() {
+  if (auth.currentUser) sessionStorage.removeItem('yan_admin_verified_' + auth.currentUser.uid);
   await signOut(auth);
   location.reload();
 };

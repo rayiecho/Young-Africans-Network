@@ -31,9 +31,15 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read: if true;
-      allow create: if isLoggedIn() && isOwner(userId);
-      allow update: if isLoggedIn() && (isOwner(userId) || isAdmin());
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn() && isOwner(userId) &&
+        (request.resource.data.isAdmin == false || !('isAdmin' in request.resource.data)) &&
+        (request.resource.data.isDeptHead == false || !('isDeptHead' in request.resource.data)) &&
+        (request.resource.data.isExec == false || !('isExec' in request.resource.data));
+      allow update: if isLoggedIn() && (
+        isAdmin() ||
+        (isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin','isDeptHead','isExec']))
+      );
       allow delete: if isAdmin();
     }
 
@@ -237,7 +243,11 @@ service cloud.firestore {
       allow update: if isLoggedIn();
     }
 
-    match /memberIds/{memberId} { allow read: if true; allow write: if isLoggedIn(); }
+    match /memberIds/{memberId} {
+      allow read: if true;
+      allow create: if isLoggedIn();
+      allow update: if isAdmin();
+    }
     match /pushSubscriptions/{userId} {
       allow read: if isLoggedIn() && (isOwner(userId) || isAdmin());
       allow write: if isLoggedIn() && isOwner(userId);
@@ -322,7 +332,7 @@ service cloud.firestore {
 
     match /labListings/{listingId} {
       allow read: if true;
-      allow create: if true;
+      allow create: if isLoggedIn();
       allow update: if isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reviews','avgRating','reviewCount']);
       allow delete: if isAdmin();
     }
@@ -362,13 +372,30 @@ service cloud.firestore {
 
     match /headAccess/{docId} {
       allow read: if isLoggedIn();
-      allow create: if isLoggedIn();
+      allow create: if isLoggedIn() && request.resource.data.granted == false;
       allow update: if isAdmin();
     }
 
     match /rewardRedemptions/{redemptionId} {
       allow create: if isLoggedIn();
       allow read, update: if isAdmin();
+    }
+
+    match /studio_users/{userId} {
+      allow read, write: if isLoggedIn() && isOwner(userId);
+      allow read: if isAdmin();
+    }
+    match /studio_videos/{videoId} {
+      allow read, create: if isLoggedIn();
+      allow read: if isAdmin();
+    }
+    match /studio_feedback/{feedbackId} {
+      allow create: if isLoggedIn();
+      allow read: if isAdmin();
+    }
+
+    match /adminVerification/{uid} {
+      allow read, write: if isLoggedIn() && isOwner(uid) && isAdmin();
     }
   }
 }
