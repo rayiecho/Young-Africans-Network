@@ -654,6 +654,7 @@ async function doLogin() {
 }
 
 async function doLogout() {
+  stopIdleWatcher();
   if (auth.currentUser) sessionStorage.removeItem('yan_login_verified_' + auth.currentUser.uid);
   unsubscribers.forEach(u => u());
   unsubscribers = [];
@@ -689,8 +690,62 @@ async function doForgotPassword() {
   }
 }
 
+// ===== IDLE TIMEOUT =====
+let idleTimer = null;
+let idleCountdownInterval = null;
+const IDLE_LIMIT_MS = 30000;
+
+function resetIdleTimer() {
+  if (document.getElementById('idle-modal-overlay')) return; // ignore activity while modal is up
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(showIdleModal, IDLE_LIMIT_MS);
+}
+
+function startIdleWatcher() {
+  ['mousemove','click','keydown'].forEach(evt => document.addEventListener(evt, resetIdleTimer));
+  resetIdleTimer();
+}
+
+function stopIdleWatcher() {
+  ['mousemove','click','keydown'].forEach(evt => document.removeEventListener(evt, resetIdleTimer));
+  clearTimeout(idleTimer);
+  clearInterval(idleCountdownInterval);
+  const modal = document.getElementById('idle-modal-overlay');
+  if (modal) modal.remove();
+}
+
+function showIdleModal() {
+  if (document.getElementById('idle-modal-overlay')) return;
+  let secondsLeft = 30;
+  const overlay = document.createElement('div');
+  overlay.id = 'idle-modal-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  overlay.innerHTML = `<div style="background:#fff;border-radius:20px;padding:2rem;max-width:400px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);font-family:Poppins,sans-serif;">
+    <h3 style="font-family:'Playfair Display',serif;color:#1B2A6B;margin-bottom:0.75rem;">Still there?</h3>
+    <p style="color:#6B7280;font-size:0.88rem;margin-bottom:1rem;">You'll be signed out in <span id="idle-countdown" style="font-weight:700;color:#E63329;">30</span> seconds due to inactivity.</p>
+    <button id="idle-stay-btn" style="background:#E63329;color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-weight:700;font-size:0.9rem;cursor:pointer;width:100%;">Stay Logged In</button>
+  </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('idle-stay-btn').addEventListener('click', () => {
+    clearInterval(idleCountdownInterval);
+    overlay.remove();
+    resetIdleTimer();
+  });
+  idleCountdownInterval = setInterval(() => {
+    secondsLeft--;
+    const el = document.getElementById('idle-countdown');
+    if (el) el.textContent = secondsLeft;
+    if (secondsLeft <= 0) {
+      clearInterval(idleCountdownInterval);
+      overlay.remove();
+      doLogout();
+    }
+  }, 1000);
+}
+
 // PLATFORM ENTRY
 function enterPlatform() {
+  startIdleWatcher();
   showScreen('screen-platform');
   const photo = currentUserData.photoUrl;
   const avatarHtml = photo
