@@ -254,62 +254,6 @@ const actionCodeSettings = {
   handleCodeInApp: true
 };
 
-async function sendLoginCode(uid, email) {
-  try {
-    const midDocId = uid.substring(0,8).toUpperCase();
-    const midSnap = await getDoc(doc(db, 'memberIds', midDocId));
-    const code = midSnap.exists() ? midSnap.data().memberId : ('YAN-' + midDocId);
-    await fetch('https://yan-email-worker.youngafricansn.workers.dev', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        to_email: email,
-        name: 'Member',
-        subject: 'Your YAN Sign-In Verification Code',
-        message: 'Your verification code is: **' + code + '**\n\nEnter this code on the sign-in screen to continue.\n\nIf you did not try to sign in, you can safely ignore this email.',
-        type: 'general'
-      })
-    });
-  } catch(e) {
-    console.error('[YAN Auth] Failed to send login code:', e);
-    showToast('Could not send verification code. Try "Resend Code".', 'error');
-  }
-}
-
-async function verifyLoginCode() {
-  const input = document.getElementById('login-code-input');
-  const btn = document.getElementById('verify-code-btn');
-  const code = (input.value || '').trim().toUpperCase();
-  if (!code) return showToast('Enter the code from your email', 'error');
-  if (!auth.currentUser) return showToast('Session expired, please sign in again', 'error');
-  btn.disabled = true; btn.textContent = 'Verifying...';
-  try {
-    const uid = auth.currentUser.uid;
-    const midDocId = uid.substring(0,8).toUpperCase();
-    const snap = await getDoc(doc(db, 'memberIds', midDocId));
-    const actualCode = snap.exists() ? (snap.data().memberId || '').toUpperCase() : null;
-    if (actualCode && code === actualCode) {
-      sessionStorage.setItem('yan_login_verified_' + uid, 'true');
-      showToast('Verified! Welcome back.');
-      location.reload();
-    } else {
-      showToast('Incorrect code. Please check your email and try again.', 'error');
-    }
-  } catch(e) {
-    console.error('[YAN Auth] Code verification error:', e);
-    showToast('Verification failed. Try again.', 'error');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Verify & Continue';
-  }
-}
-
-function resendLoginCode() {
-  if (auth.currentUser) {
-    sendLoginCode(auth.currentUser.uid, auth.currentUser.email);
-    showToast('Code resent — check your email.');
-  }
-}
-
 onAuthStateChanged(auth, async user => {
   console.log('[YAN Auth] onAuthStateChanged fired, user:', user ? user.uid : 'null');
   if (user) {
@@ -319,13 +263,6 @@ onAuthStateChanged(auth, async user => {
     if (!user.emailVerified) {
       console.log('[YAN Auth] Email not verified - showing verify screen');
       showScreen('screen-verify-email');
-      return;
-    }
-    // Require a fresh login-code verification every browser session
-    if (!sessionStorage.getItem('yan_login_verified_' + user.uid)) {
-      console.log('[YAN Auth] Login not verified this session - showing code screen');
-      showScreen('screen-login-verify');
-      sendLoginCode(user.uid, user.email);
       return;
     }
     // Try cached data from localStorage for instant load
@@ -11126,7 +11063,7 @@ window.reviewCareerAssignment = reviewCareerAssignment;
 window.handleGlobalSearch = handleGlobalSearch;
 // EXPOSE TO WINDOW
 window.showPostNotification=showPostNotification; window.postNotification=postNotification; window.markNotifRead=markNotifRead; window.deleteNotification=deleteNotification; window.filterDirectory=filterDirectory; window.sendAIMessage=sendAIMessage; window.askQuick=askQuick; window.showScholarshipForm=showScholarshipForm; window.previewScholarship=previewScholarship; window.showScholarshipSection=showScholarshipSection; window.postScholarship=postScholarship; window.trackApplication=trackApplication; window.updateApplicationStatus=updateApplicationStatus; window.deleteApplication=deleteApplication; window.deleteScholarship=deleteScholarship; window.showAIHelp=showAIHelp; window.requestRecommendation=requestRecommendation; window.approveRecommendation=approveRecommendation; window.rejectRecommendation=rejectRecommendation; window.shareSuccessStory=shareSuccessStory; window.downloadRecommendationLetter=downloadRecommendationLetter; window.downloadRecommendationLetter=downloadRecommendationLetter;
-window.doRegister=doRegister; window.doLogin=doLogin; window.doLogout=doLogout; window.doForgotPassword=doForgotPassword; window.doGoogleSignIn=doGoogleSignIn; window.verifyLoginCode=verifyLoginCode; window.resendLoginCode=resendLoginCode;
+window.doRegister=doRegister; window.doLogin=doLogin; window.doLogout=doLogout; window.doForgotPassword=doForgotPassword; window.doGoogleSignIn=doGoogleSignIn; 
 window.showTab=showTab; window.showScreen=showScreen; window.submitPost=submitPost; window.deletePost=deletePost;
 window.toggleLike=toggleLike; window.toggleReplies=toggleReplies; window.submitReply=submitReply;
 window.showDeptSection=showDeptSection; window.switchDept=switchDept; window.markWatched=markWatched; window.toggleDiscussion=toggleDiscussion;
@@ -12761,19 +12698,6 @@ h2,h3{position:relative;}
     </div>
     <button onclick="resendVerificationEmail()" class="btn-primary" style="width:100%;margin-bottom:1rem;">Resend Verification Email</button>
     <button onclick="checkEmailVerified()" class="btn-outline" style="width:100%;margin-bottom:1rem;">I have verified my email</button>
-    <button onclick="doSignOut()" style="background:none;border:none;color:var(--gray);font-size:0.82rem;cursor:pointer;font-family:Poppins,sans-serif;">Sign out and use a different account</button>
-  </div>
-</div>
-
-<!-- LOGIN VERIFY CODE -->
-<div id="screen-login-verify" class="screen">
-  <div class="auth-card" style="text-align:center;max-width:480px;">
-    <img src="images/logo.jpeg" alt="YAN" style="width:70px;height:70px;border-radius:50%;border:2px solid var(--gold);margin:0 auto 1.5rem;display:block;">
-    <h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:0.75rem;">Verify Your Sign-In</h2>
-    <p style="color:var(--gray);font-size:0.88rem;line-height:1.7;margin-bottom:1.5rem;">We've sent a verification code to your email. Enter it below to continue.</p>
-    <div class="form-group"><input type="text" id="login-code-input" placeholder="e.g. YAN-XXXXXXXX" style="text-align:center;text-transform:uppercase;"></div>
-    <button onclick="verifyLoginCode()" class="btn-primary" id="verify-code-btn" style="width:100%;margin:1rem 0;">Verify & Continue</button>
-    <button onclick="resendLoginCode()" class="btn-outline" style="width:100%;margin-bottom:1rem;">Resend Code</button>
     <button onclick="doSignOut()" style="background:none;border:none;color:var(--gray);font-size:0.82rem;cursor:pointer;font-family:Poppins,sans-serif;">Sign out and use a different account</button>
   </div>
 </div>
