@@ -2428,7 +2428,7 @@ async function downloadCertificate(certId, deptOverride, programId) {
     + '<text x="145" y="425" text-anchor="middle" font-family="Playfair Display,serif" font-size="11" font-style="italic" fill="#F5A623" opacity="0.95">Together\"</text>'
     + '</svg>';
 
-  const qrSvg = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=' + encodeURIComponent(verifyUrl) + '" style="width:75px;height:75px;display:block;" alt="QR Code"/>';
+  const qrSvg = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=' + encodeURIComponent(verifyUrl) + '" crossorigin="anonymous" style="width:75px;height:75px;display:block;" alt="QR Code"/>';
 
 
   const photoBlock = photoUrl
@@ -2510,24 +2510,38 @@ async function downloadCertificate(certId, deptOverride, programId) {
     + '</div>'
     + '</div>';
 
-  const printWin = window.open('', '_blank', 'width=1400,height=850');
-  printWin.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8">'
-    + '<div class="no-print" style="background:#f0ece4;padding:10px;font-family:Montserrat,sans-serif;font-size:11px;color:#666;text-align:center;margin-bottom:8px;">'
-    + '&#9432; <strong style="color:#E63329;">PDF:</strong> Set <strong>Orientation = Landscape</strong>, Paper = A4, Margins = None'
-    + ' &nbsp;|&nbsp; <button onclick="window.print()" style="background:#1B2A6B;color:#fff;border:none;padding:4px 16px;border-radius:4px;cursor:pointer;font-weight:700;font-family:Montserrat,sans-serif;">&#128424; Save as PDF</button>'
-    + ' &nbsp;|&nbsp; <button onclick="saveCertAsImage(this)" style="background:#27AE60;color:#fff;border:none;padding:4px 16px;border-radius:4px;cursor:pointer;font-weight:700;font-family:Montserrat,sans-serif;">&#128248; Save as Image</button>'
-    + '</div>'
-    + body
-    + '<scr' + 'ipt>'
-    + 'function saveCertAsImage(btn){'
-    + '  btn.textContent = "Generating..."; btn.disabled = true;'
-    + '  var cert = document.querySelector(".cert");'
-    + '  var wrap = document.querySelector(".cert").parentElement;'
-    + '  window.opener.saveCertFromPopup(wrap, btn);'
-    + '}'
-    + 'setTimeout(function(){ window.print(); },1500);'
-    + '<\/script><\/bo' + 'dy><\/html>');
-  printWin.document.close();
+  showToast('Generating your certificate...');
+  const holder = document.createElement('div');
+  holder.id = 'yan-cert-render-holder';
+  holder.style.cssText = 'position:fixed;top:0;left:-99999px;width:297mm;height:210mm;z-index:-1;';
+  holder.innerHTML = '<style>' + css + '</style>' + body;
+  document.body.appendChild(holder);
+
+  const imgs = Array.from(holder.querySelectorAll('img'));
+  await Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(resolve => {
+    img.addEventListener('load', resolve, {once:true});
+    img.addEventListener('error', resolve, {once:true});
+  })));
+  await new Promise(resolve => setTimeout(resolve, 300));
+
+  const certEl = holder.querySelector('.cert');
+  html2canvas(certEl, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: '#fff',
+    width: certEl.scrollWidth,
+    height: certEl.scrollHeight
+  }).then(function(canvas) {
+    document.body.removeChild(holder);
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jspdf.jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    pdf.addImage(imgData, 'PNG', 0, 0, 297, 210);
+    pdf.save('YAN-Certificate-' + memberName.replace(/ /g, '_') + '.pdf');
+    showToast('Certificate downloaded!');
+  }).catch(function(e) {
+    if (document.body.contains(holder)) document.body.removeChild(holder);
+    showToast('Certificate generation failed: ' + e.message, 'error');
+  });
 }
 
 // MAGAZINE
@@ -12298,7 +12312,7 @@ window.toggleMembersDrawer = function() {
 };
 </script>
 <!-- emailjs replaced with resend worker -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>\n<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 // emailjs replaced
 function safeShowScreen(id) {
