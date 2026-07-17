@@ -895,7 +895,7 @@ window.sendYANGuideMessage = async function() {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",
@@ -906,14 +906,12 @@ const db = getFirestore(app);
 
 async function loadLiveStats() {
   try {
-    const [usersSnap, certsSnap] = await Promise.all([
-      getDocs(collection(db, 'users')),
-      getDocs(collection(db, 'certificates'))
-    ]);
-
-    const members = usersSnap.size;
-    const countries = new Set(usersSnap.docs.map(d => d.data().country).filter(Boolean)).size;
-    const certs = certsSnap.docs.filter(d => d.data().status === 'approved').length;
+    const statsSnap = await getDoc(doc(db, 'config', 'publicStats'));
+    if (statsSnap.exists() === false) { console.log('Stats load error: publicStats doc missing'); return; }
+    const data = statsSnap.data();
+    const members = data.members;
+    const countries = data.countries;
+    const certs = data.certs;
 
     // Update hero
     const heroCount = document.getElementById('hero-member-count');
