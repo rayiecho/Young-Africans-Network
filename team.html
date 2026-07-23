@@ -569,12 +569,14 @@ window.sendYANGuideMessage = async function() {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        contents: [{role:'user', parts:[{text: 'You are the Young Africans Network Guide for Young Africans Network (YAN). Help with scholarships, career advice, YAN programs and African opportunities. Be warm, concise and encouraging. Question: ' + message}]}]
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 500,
+        messages: [{role:'user', content: 'You are the Young Africans Network Guide for Young Africans Network (YAN). Help with scholarships, career advice, YAN programs and African opportunities. Be warm, concise and encouraging. Question: ' + message}]
       })
     });
     var data = await response.json();
     var reply = 'Sorry, I could not connect. Please try again!';
-    try { reply = data.candidates[0].content.parts[0].text; } catch(e) {}
+    try { reply = data.content[0].text; } catch(e) {}
     var typing = document.getElementById(typingId);
     if (typing) typing.remove();
     messages.innerHTML += '<div style="display:flex;gap:0.5rem;align-items:flex-start;"><img src="/images/AI.jpg" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;"><div style="background:#fff;border-radius:12px;padding:0.65rem 0.85rem;max-width:85%;font-size:0.8rem;color:#1B2A6B;line-height:1.6;font-family:Poppins,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,0.06);">' + reply.split('\n').join('<br>') + '</div></div>';

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>YAN Session Feedback</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{--navy:#1B2A6B;--navy2:#2D3F7B;--red:#E63329;--gold:#F5A623;--white:#ffffff;--light:#F8F9FA;--gray:#6B7280;--green:#27AE60;}
+body{font-family:Poppins,sans-serif;background:var(--light);min-height:100vh;overflow-x:hidden;}
+
+/* HEADER */
+.header{background:linear-gradient(120deg,var(--navy) 0%,var(--navy2) 60%,#3a4f9e 100%);background-size:200% 200%;animation:gradientShift 8s ease infinite;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:0.85rem;position:relative;overflow:hidden;}
+@keyframes gradientShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.header::after{content:'';position:absolute;top:-50%;right:-10%;width:200px;height:200px;background:radial-gradient(circle,rgba(245,166,35,0.15),transparent 70%);border-radius:50%;}
+.header img{height:42px;width:42px;border-radius:50%;border:2px solid var(--gold);object-fit:cover;position:relative;z-index:1;}
+.header-text{position:relative;z-index:1;}
+.header-text h1{font-family:Playfair Display,serif;font-size:1.05rem;font-weight:900;color:#fff;}
+.header-text p{font-size:0.68rem;color:var(--gold);font-weight:600;}
+
+/* WIZARD CONTAINER */
+.wizard{max-width:600px;margin:0 auto;padding:1.5rem 1rem 3rem;}
+
+/* PROGRESS DOTS */
+.progress-track{display:flex;align-items:center;justify-content:center;gap:0.35rem;margin-bottom:1.75rem;padding:0 0.5rem;}
+.progress-dot{width:8px;height:8px;border-radius:50%;background:rgba(27,42,107,0.15);transition:all 0.35s cubic-bezier(.4,0,.2,1);flex-shrink:0;}
+.progress-dot.active{width:24px;border-radius:50px;background:linear-gradient(90deg,var(--navy),var(--gold));}
+.progress-dot.done{background:var(--green);}
+
+.step-label{text-align:center;font-size:0.7rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:0.35rem;}
+.step-title{text-align:center;font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:0.4rem;}
+.step-sub{text-align:center;font-size:0.82rem;color:var(--gray);margin-bottom:1.75rem;line-height:1.6;max-width:440px;margin-left:auto;margin-right:auto;}
+
+/* STEP PANELS */
+.steps-wrap{position:relative;min-height:340px;}
+.step{display:none;animation:stepIn 0.4s cubic-bezier(.4,0,.2,1);}
+.step.active{display:block;}
+@keyframes stepIn{from{opacity:0;transform:translateX(16px);}to{opacity:1;transform:translateX(0);}}
+
+.card{background:#fff;border-radius:20px;padding:1.5rem;box-shadow:0 4px 24px rgba(27,42,107,0.08);}
+
+.form-group{margin-bottom:1.15rem;}
+.form-group label{display:block;font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.45rem;}
+.form-group label span{color:var(--gray);font-weight:400;font-size:0.74rem;}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:0.8rem 1rem;border:1.5px solid rgba(27,42,107,0.13);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.85rem;color:var(--navy);outline:none;transition:all 0.2s;background:var(--light);}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--navy);background:#fff;box-shadow:0 0 0 4px rgba(27,42,107,0.06);}
+.form-group textarea{resize:vertical;min-height:88px;}
+.hint{font-size:0.7rem;color:var(--gold);margin-top:0.35rem;font-weight:600;height:14px;opacity:0;transition:opacity 0.2s;}
+.hint.show{opacity:1;}
+
+/* PILLS */
+.pill-options{display:flex;flex-wrap:wrap;gap:0.5rem;}
+.pill-opt{padding:0.5rem 1.1rem;border:1.5px solid rgba(27,42,107,0.13);border-radius:50px;font-size:0.78rem;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.18s cubic-bezier(.4,0,.2,1);user-select:none;background:var(--light);}
+.pill-opt:active{transform:scale(0.95);}
+.pill-opt.selected{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border-color:var(--navy);transform:scale(1.04);box-shadow:0 4px 12px rgba(27,42,107,0.25);}
+
+/* MONTH GRID */
+.month-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;}
+.month-opt{padding:0.65rem 0.25rem;text-align:center;border:1.5px solid rgba(27,42,107,0.13);border-radius:10px;font-size:0.74rem;font-weight:700;color:var(--gray);cursor:pointer;transition:all 0.18s;background:var(--light);}
+.month-opt.selected{background:linear-gradient(135deg,var(--gold),#e8951a);color:#fff;border-color:var(--gold);transform:scale(1.05);box-shadow:0 4px 12px rgba(245,166,35,0.3);}
+
+/* STARS */
+.star-rating-group{display:flex;flex-direction:column;gap:0.6rem;}
+.star-row{display:flex;justify-content:space-between;align-items:center;padding:0.7rem 0.85rem;background:var(--light);border-radius:12px;transition:background 0.2s;}
+.star-row.rated{background:rgba(245,166,35,0.06);}
+.star-row-label{font-size:0.8rem;color:var(--navy);font-weight:600;}
+.stars{display:flex;gap:0.2rem;}
+.star{font-size:1.5rem;cursor:pointer;color:#D1D5DB;transition:all 0.15s cubic-bezier(.4,0,.2,1);line-height:1;display:inline-block;}
+.star.active{color:var(--gold);transform:scale(1.15);text-shadow:0 2px 6px rgba(245,166,35,0.4);}
+.rating-feedback{text-align:center;font-size:0.72rem;font-weight:700;color:var(--gold);height:16px;margin-top:0.75rem;transition:opacity 0.2s;}
+
+/* NAV BUTTONS */
+.nav-buttons{display:flex;gap:0.75rem;margin-top:1.5rem;}
+.btn{flex:1;padding:0.95rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;border:none;transition:all 0.2s cubic-bezier(.4,0,.2,1);}
+.btn-next{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;box-shadow:0 6px 16px rgba(27,42,107,0.25);}
+.btn-next:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(27,42,107,0.35);}
+.btn-next:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-back{background:var(--light);color:var(--navy);flex:0 0 110px;}
+.btn-back:hover{background:#eef0f3;}
+.btn-submit{background:linear-gradient(135deg,var(--green),#1f9c52);color:#fff;box-shadow:0 6px 16px rgba(39,174,96,0.3);}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(39,174,96,0.4);}
+
+/* REVIEW SCREEN */
+.review-section{margin-bottom:1.1rem;padding-bottom:1.1rem;border-bottom:1px solid rgba(27,42,107,0.08);}
+.review-section:last-child{border:none;margin-bottom:0;padding-bottom:0;}
+.review-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;}
+.review-head h4{font-size:0.72rem;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:1px;}
+.review-edit{font-size:0.72rem;color:var(--navy);font-weight:700;cursor:pointer;text-decoration:underline;}
+.review-row{font-size:0.82rem;color:var(--navy);margin-bottom:0.25rem;line-height:1.6;}
+.review-row b{color:var(--gray);font-weight:600;}
+.review-stars{color:var(--gold);}
+
+/* SUCCESS */
+.success-wrap{display:none;text-align:center;padding:2.5rem 1.5rem;}
+.success-icon{width:90px;height:90px;border-radius:50%;background:rgba(39,174,96,0.1);display:flex;align-items:center;justify-content:center;font-size:2.8rem;margin:0 auto 1.25rem;animation:popIn 0.5s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popIn{0%{transform:scale(0);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+.success-wrap h2{font-family:Playfair Display,serif;font-size:1.6rem;font-weight:900;color:var(--navy);margin-bottom:0.75rem;}
+.success-wrap p{color:var(--gray);font-size:0.88rem;line-height:1.7;margin-bottom:1.5rem;}
+.confetti{position:fixed;top:-10px;width:8px;height:8px;border-radius:2px;animation:fall linear forwards;z-index:999;pointer-events:none;}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg);opacity:0.3;}}
+
+.btn-home{display:inline-block;background:var(--navy);color:#fff;padding:0.85rem 2.2rem;border-radius:50px;text-decoration:none;font-weight:700;font-size:0.85rem;}
+
+@media(max-width:380px){.month-grid{grid-template-columns:repeat(3,1fr);}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="images/logo.jpeg" alt="YAN Logo">
+  <div class="header-text">
+    <h1>Young Africans Network</h1>
+    <p>Building the Future, Together</p>
+  </div>
+</div>
+
+<div class="wizard">
+  <div class="progress-track" id="progress-track"></div>
+  <form id="feedback-form">
+    <div class="steps-wrap" id="steps-wrap"></div>
+  </form>
+
+  <div class="success-wrap" id="success-wrap">
+    <div class="success-icon">🎉</div>
+    <h2>Thank You!</h2>
+    <p>Your feedback has been received and will help us improve future YAN sessions.<br><br>We appreciate you taking the time to share your thoughts.<br><br><strong style="color:var(--navy);">Building the Future, Together.</strong></p>
+    <a href="https://youngafricansnetwork.org" class="btn-home">Visit YAN Platform</a>
+  </div>
+</div>
+
+<div style="background:var(--navy);padding:1.25rem;text-align:center;color:rgba(255,255,255,0.55);font-size:0.72rem;">
+  <p>Young Africans Network · youngafricansnetwork.org · info@youngafricansnetwork.org</p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",
+  authDomain: "young-africans-network.firebaseapp.com",
+  projectId: "young-africans-network",
+  storageBucket: "young-africans-network.appspot.com",
+  messagingSenderId: "224204618916",
+  appId: "1:224204618916:web:5f4b5b0b6b6b6b6b6b6b6b"
+});
+const db = getFirestore(app);
+
+const params = new URLSearchParams(window.location.search);
+const sessionParam = params.get('session') ? decodeURIComponent(params.get('session')) : '';
+const dateParam = params.get('date') || new Date().toISOString().split('T')[0];
+
+const state = {
+  name:'', email:'', role:'', country:'', memberDepartment:'',
+  session: sessionParam, sessionDate: dateParam, sessionDepartment:'', format:'', attendance:'', heardFrom:'',
+  ratings:{overall:0,content:0,facilitator:0,time:0,engagement:0,organization:0},
+  highlight:'', improvements:'', topicsWanted:'', otherComments:'',
+  willApply:'', wouldRecommend:'', feeling:'',
+  volunteeredThisSession:'', volunteerMonths:[]
+};
+
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const STAR_LABELS = ['','Poor','Fair','Good','Very Good','Excellent!'];
+const DEPARTMENTS = ['Programs','Scholarships','Career','Community','Mental Health','Communications','Partnerships','Finance'];
+
+const steps = [
+  {
+    key:'about', label:'Step 1 of 6', title:'About You', sub:'Tell us a little about yourself. Your name is optional — you may submit anonymously.',
+    render: () => `
+      <div class="card">
+        <div class="form-group"><label>Full Name <span>(optional)</span></label>
+        <input type="text" id="f-name" placeholder="Your name" value="${state.name}"></div>
+        <div class="form-group"><label>Email Address <span style="color:var(--red);">*</span></label>
+        <input type="email" id="f-email" placeholder="your@email.com" value="${state.email}"></div>
+        <div class="form-group"><label>Your Role in YAN</label>
+        <div class="pill-options" id="role-options">
+          ${['Member','Guest','Volunteer','Executive','Department Head','Partner'].map(r=>`<div class="pill-opt ${state.role===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+        <div class="form-group"><label>Your Country</label>
+        <input type="text" id="f-country" placeholder="e.g. Kenya, Rwanda, Uganda..." value="${state.country}"></div>
+        <div class="form-group"><label>Which department do you belong to?</label>
+        <div class="pill-options" id="memberDept-options">
+          ${DEPARTMENTS.map(r=>`<div class="pill-opt ${state.memberDepartment===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+      </div>`,
+    bind: () => {
+      document.getElementById('f-name').oninput = e => state.name = e.target.value;
+      document.getElementById('f-email').oninput = e => state.email = e.target.value;
+      document.getElementById('f-country').oninput = e => state.country = e.target.value;
+      bindPills('role-options','role');
+      bindPills('memberDept-options','memberDepartment');
+    },
+    valid: () => state.email.trim().length > 3 && state.email.includes('@')
+  },
+  {
+    key:'session', label:'Step 2 of 6', title:'About the Session', sub:'Help us understand which session you attended and how.',
+    render: () => `
+      <div class="card">
+        <div class="form-group"><label>Department / Session Name <span style="color:var(--red);">*</span></label>
+        <input type="text" id="f-session" placeholder="e.g. Tech Hub Monthly Meeting" value="${state.session}"></div>
+        <div class="form-group"><label>Which department led this session?</label>
+        <div class="pill-options" id="sessionDept-options">
+          ${DEPARTMENTS.map(r=>`<div class="pill-opt ${state.sessionDepartment===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+        <div class="form-group"><label>Session Date</label>
+        <input type="date" id="f-date" value="${state.sessionDate}"></div>
+        <div class="form-group"><label>Session Format</label>
+        <div class="pill-options" id="format-options">
+          ${['Online (Zoom/Meet)','In-Person','Hybrid'].map(r=>`<div class="pill-opt ${state.format===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+        <div class="form-group"><label>Did you attend the full session?</label>
+        <div class="pill-options" id="attendance-options">
+          ${['Yes, full session','Partially','No, joined late'].map(r=>`<div class="pill-opt ${state.attendance===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+        <div class="form-group"><label>How did you hear about this session?</label>
+        <div class="pill-options" id="heardFrom-options">
+          ${['WhatsApp Group','YAN Platform','Email','Friend/Member','Social Media'].map(r=>`<div class="pill-opt ${state.heardFrom===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+      </div>`,
+    bind: () => {
+      document.getElementById('f-session').oninput = e => state.session = e.target.value;
+      document.getElementById('f-date').onchange = e => state.sessionDate = e.target.value;
+      bindPills('sessionDept-options','sessionDepartment');
+      bindPills('format-options','format');
+      bindPills('attendance-options','attendance');
+      bindPills('heardFrom-options','heardFrom');
+    },
+    valid: () => state.session.trim().length > 1
+  },
+  {
+    key:'volunteer', label:'Step 3 of 6', title:'Volunteering', sub:'Tell us about your involvement and interest in volunteering for YAN.',
+    render: () => `
+      <div class="card">
+        <div class="form-group"><label>Did you volunteer in this session?</label>
+        <div class="pill-options" id="volThis-options">
+          ${['Yes','No'].map(r=>`<div class="pill-opt ${state.volunteeredThisSession===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+        <div class="form-group"><label>Which months would you like to volunteer in upcoming YAN sessions? <span>(select all that apply)</span></label>
+        <div class="month-grid" id="month-grid">
+          ${MONTHS.map(m=>`<div class="month-opt ${state.volunteerMonths.includes(m)?'selected':''}" data-val="${m}">${m}</div>`).join('')}
+        </div></div>
+      </div>`,
+    bind: () => {
+      bindPills('volThis-options','volunteeredThisSession');
+      document.querySelectorAll('#month-grid .month-opt').forEach(el => {
+        el.onclick = () => {
+          const v = el.dataset.val;
+          if (state.volunteerMonths.includes(v)) {
+            state.volunteerMonths = state.volunteerMonths.filter(m=>m!==v);
+            el.classList.remove('selected');
+          } else {
+            state.volunteerMonths.push(v);
+            el.classList.add('selected');
+          }
+        };
+      });
+    },
+    valid: () => true
+  },
+  {
+    key:'ratings', label:'Step 4 of 6', title:'Rate the Session', sub:'Rate each aspect from 1 (poor) to 5 (excellent).',
+    render: () => `
+      <div class="card">
+        <div class="star-rating-group">
+          ${[['overall','Overall Session Quality'],['content','Content Relevance'],['facilitator','Facilitator Effectiveness'],['time','Time Management'],['engagement','Engagement & Interaction'],['organization','Organization & Structure']]
+            .map(([key,label])=>`
+            <div class="star-row ${state.ratings[key]?'rated':''}" data-key="${key}">
+              <span class="star-row-label">${label}</span>
+              <div class="stars" data-rating="${key}">
+                ${[1,2,3,4,5].map(n=>`<span class="star ${state.ratings[key]>=n?'active':''}" data-val="${n}">★</span>`).join('')}
+              </div>
+            </div>`).join('')}
+        </div>
+        <div class="rating-feedback" id="rating-feedback"></div>
+      </div>`,
+    bind: () => {
+      document.querySelectorAll('.stars').forEach(starsEl => {
+        const key = starsEl.dataset.rating;
+        starsEl.querySelectorAll('.star').forEach(starEl => {
+          starEl.onclick = () => {
+            const val = parseInt(starEl.dataset.val);
+            state.ratings[key] = val;
+            starsEl.querySelectorAll('.star').forEach((s,i) => s.classList.toggle('active', i < val));
+            starsEl.closest('.star-row').classList.add('rated');
+            const fb = document.getElementById('rating-feedback');
+            fb.textContent = STAR_LABELS[val];
+            fb.classList.add('show');
+            setTimeout(()=>fb.classList.remove('show'), 1400);
+          };
+        });
+      });
+    },
+    valid: () => state.ratings.overall > 0
+  },
+  {
+    key:'open', label:'Step 5 of 6', title:'Open Feedback', sub:'Your words help us understand what truly matters.',
+    render: () => `
+      <div class="card">
+        <div class="form-group"><label>What was the highlight of this session? <span style="color:var(--red);">*</span></label>
+        <textarea id="f-highlight" placeholder="Tell us what stood out, what was most valuable or inspiring...">${state.highlight}</textarea>
+        <div class="hint" id="hint-highlight">Great detail — thank you!</div></div>
+        <div class="form-group"><label>What could be improved?</label>
+        <textarea id="f-improve" placeholder="Constructive feedback helps us grow...">${state.improvements}</textarea></div>
+        <div class="form-group"><label>Topics you'd like covered in future sessions</label>
+        <textarea id="f-topics" placeholder="What topics, skills or discussions interest you?">${state.topicsWanted}</textarea></div>
+        <div class="form-group"><label>Any other comments or suggestions</label>
+        <textarea id="f-other" placeholder="Anything else you'd like to share...">${state.otherComments}</textarea></div>
+      </div>`,
+    bind: () => {
+      const hi = document.getElementById('f-highlight');
+      hi.oninput = e => {
+        state.highlight = e.target.value;
+        document.getElementById('hint-highlight').classList.toggle('show', e.target.value.trim().length > 40);
+      };
+      document.getElementById('f-improve').oninput = e => state.improvements = e.target.value;
+      document.getElementById('f-topics').oninput = e => state.topicsWanted = e.target.value;
+      document.getElementById('f-other').oninput = e => state.otherComments = e.target.value;
+    },
+    valid: () => state.highlight.trim().length > 3
+  },
+  {
+    key:'impact', label:'Step 6 of 6', title:'Session Impact', sub:'Last few questions about how this session affected you.',
+    render: () => `
+      <div class="card">
+        <div class="form-group"><label>Will you apply what you learned?</label>
+        <div class="pill-options" id="apply-options">
+          ${['Yes, definitely','Maybe','Not sure yet','No'].map(r=>`<div class="pill-opt ${state.willApply===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+        <div class="form-group"><label>Would you recommend YAN sessions to others?</label>
+        <div class="pill-options" id="recommend-options">
+          ${['Yes, absolutely','Probably','Not sure','No'].map(r=>`<div class="pill-opt ${state.wouldRecommend===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+        <div class="form-group"><label>How do you feel after this session?</label>
+        <div class="pill-options" id="feeling-options">
+          ${['Inspired & Motivated','Informed & Equipped','Satisfied','Neutral','Disappointed'].map(r=>`<div class="pill-opt ${state.feeling===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
+        </div></div>
+      </div>`,
+    bind: () => {
+      bindPills('apply-options','willApply');
+      bindPills('recommend-options','wouldRecommend');
+      bindPills('feeling-options','feeling');
+    },
+    valid: () => true
+  },
+  {
+    key:'review', label:'Review', title:'Review & Submit', sub:'Please confirm everything looks right before submitting.',
+    render: () => `
+      <div class="card">
+        <div class="review-section">
+          <div class="review-head"><h4>About You</h4><span class="review-edit" data-goto="0">Edit</span></div>
+          <div class="review-row"><b>Name:</b> ${state.name || 'Anonymous'}</div>
+          <div class="review-row"><b>Email:</b> ${state.email}</div>
+          <div class="review-row"><b>Role:</b> ${state.role || '—'} &nbsp; <b>Country:</b> ${state.country || '—'}</div>
+        </div>
+        <div class="review-section">
+          <div class="review-head"><h4>Session</h4><span class="review-edit" data-goto="1">Edit</span></div>
+          <div class="review-row"><b>Session:</b> ${state.session}</div>
+          <div class="review-row"><b>Date:</b> ${state.sessionDate} &nbsp; <b>Format:</b> ${state.format || '—'}</div>
+        </div>
+        <div class="review-section">
+          <div class="review-head"><h4>Volunteering</h4><span class="review-edit" data-goto="2">Edit</span></div>
+          <div class="review-row"><b>Volunteered this session:</b> ${state.volunteeredThisSession || '—'}</div>
+          <div class="review-row"><b>Available months:</b> ${state.volunteerMonths.length ? state.volunteerMonths.join(', ') : 'None selected'}</div>
+        </div>
+        <div class="review-section">
+          <div class="review-head"><h4>Ratings</h4><span class="review-edit" data-goto="3">Edit</span></div>
+          <div class="review-row review-stars">Overall: ${'★'.repeat(state.ratings.overall)}${'☆'.repeat(5-state.ratings.overall)}</div>
+        </div>
+        <div class="review-section">
+          <div class="review-head"><h4>Feedback</h4><span class="review-edit" data-goto="4">Edit</span></div>
+          <div class="review-row">${state.highlight.substring(0,100)}${state.highlight.length>100?'...':''}</div>
+        </div>
+      </div>`,
+    bind: () => {
+      document.querySelectorAll('.review-edit').forEach(el => {
+        el.onclick = () => goToStep(parseInt(el.dataset.goto));
+      });
+    },
+    valid: () => true
+  }
+];
+
+let current = 0;
+
+function bindPills(containerId, stateKey) {
+  document.querySelectorAll(`#${containerId} .pill-opt`).forEach(el => {
+    el.onclick = () => {
+      document.querySelectorAll(`#${containerId} .pill-opt`).forEach(p=>p.classList.remove('selected'));
+      el.classList.add('selected');
+      state[stateKey] = el.dataset.val;
+      updateNavState();
+      // Also update submit button if on last step
+      const submitBtn = document.getElementById('btn-submit');
+      if (submitBtn) submitBtn.disabled = !steps[current].valid();
+    };
+  });
+}
+
+function renderProgress() {
+  const track = document.getElementById('progress-track');
+  track.innerHTML = steps.map((_,i) => {
+    let cls = 'progress-dot';
+    if (i < current) cls += ' done';
+    if (i === current) cls += ' active';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function renderStep() {
+  const wrap = document.getElementById('steps-wrap');
+  const s = steps[current];
+  wrap.innerHTML = `
+    <div class="step active">
+      <div class="step-label">${s.label}</div>
+      <div class="step-title">${s.title}</div>
+      <div class="step-sub">${s.sub}</div>
+      ${s.render()}
+      <div class="nav-buttons">
+        ${current > 0 ? `<button type="button" class="btn btn-back" id="btn-back">Back</button>` : ''}
+        ${current < steps.length - 1
+          ? `<button type="button" class="btn btn-next" id="btn-next">Continue</button>`
+          : `<button type="button" class="btn btn-submit" id="btn-submit">Submit Feedback</button>`}
+      </div>
+    </div>`;
+  s.bind();
+  renderProgress();
+
+  if (document.getElementById('btn-back')) document.getElementById('btn-back').onclick = () => goToStep(current - 1);
+  if (document.getElementById('btn-next')) document.getElementById('btn-next').onclick = () => {
+    if (s.valid()) goToStep(current + 1);
+    else shake();
+  };
+  if (document.getElementById('btn-submit')) document.getElementById('btn-submit').onclick = submitFeedback;
+
+  updateNavState();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function updateNavState() {
+  const btn = document.getElementById('btn-next');
+  if (btn) btn.disabled = !steps[current].valid();
+}
+
+function shake() {
+  const card = document.querySelector('.card');
+  card.style.animation = 'none';
+  requestAnimationFrame(() => { card.style.animation = 'shakeX 0.4s'; });
+}
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `@keyframes shakeX{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}`;
+document.head.appendChild(styleSheet);
+
+function goToStep(i) {
+  current = i;
+  renderStep();
+}
+
+async function submitFeedback() {
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  try {
+    await addDoc(collection(db, 'sessionFeedback'), {
+      name: state.name.trim() || 'Anonymous',
+      email: state.email.trim(),
+      role: state.role,
+      country: state.country.trim(),
+      memberDepartment: state.memberDepartment,
+      session: state.session.trim(),
+      sessionDate: state.sessionDate,
+      sessionDepartment: state.sessionDepartment,
+      format: state.format,
+      attendance: state.attendance,
+      heardFrom: state.heardFrom,
+      volunteeredThisSession: state.volunteeredThisSession,
+      volunteerMonths: state.volunteerMonths,
+      ratings: { ...state.ratings },
+      averageRating: Object.values(state.ratings).filter(r=>r>0).length
+        ? (Object.values(state.ratings).reduce((a,b)=>a+b,0) / Object.values(state.ratings).filter(r=>r>0).length).toFixed(1)
+        : 0,
+      highlight: state.highlight.trim(),
+      improvements: state.improvements.trim(),
+      topicsWanted: state.topicsWanted.trim(),
+      otherComments: state.otherComments.trim(),
+      willApply: state.willApply,
+      wouldRecommend: state.wouldRecommend,
+      feeling: state.feeling,
+      submittedAt: serverTimestamp()
+    });
+
+    document.getElementById('feedback-form').style.display = 'none';
+    document.getElementById('progress-track').style.display = 'none';
+    document.getElementById('success-wrap').style.display = 'block';
+    launchConfetti();
+    window.scrollTo({top:0, behavior:'smooth'});
+  } catch(e) {
+    alert('Error submitting feedback: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = 'Submit Feedback';
+  }
+}
+
+function launchConfetti() {
+  const colors = ['#1B2A6B','#F5A623','#E63329','#27AE60'];
+  for (let i = 0; i < 40; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random()*100 + 'vw';
+      c.style.background = colors[Math.floor(Math.random()*colors.length)];
+      c.style.animationDuration = (2 + Math.random()*1.5) + 's';
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(), 3500);
+    }, i * 30);
+  }
+}
+
+renderStep();
+</script>
+</body>
+</html>
