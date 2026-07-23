@@ -142,6 +142,15 @@ function showToast(msg, type='success') {
   t.className = 'toast show ' + type;
   setTimeout(() => t.className = 'toast', 3000);
 }
+function toggleMoreSignIn() {
+  const box = document.getElementById('more-signin-options');
+  const link = document.getElementById('more-signin-toggle');
+  if (!box) return;
+  const show = box.style.display === 'none';
+  box.style.display = show ? 'block' : 'none';
+  if (link) link.textContent = show ? 'Hide sign-in options ▴' : 'See more sign-in options ▾';
+}
+window.toggleMoreSignIn = toggleMoreSignIn;
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => {
     s.classList.remove('active');
@@ -347,24 +356,11 @@ onAuthStateChanged(auth, async user => {
           setTimeout(() => { showTab(lastTab); }, 300);
         }
       } else if (user.providerData.some(p => p.providerId === 'google.com')) {
-        // New Google sign-in with no Firestore profile yet - auto-create one
-        // instead of sending them to the email/password register screen.
-        const newUserData = {
-          name: user.displayName || 'YAN Member',
-          email: user.email,
-          photoUrl: user.photoURL || '',
-          role: 'Member',
-          department: 'programs',
-          country: '', whatsapp: '', bio: '',
-          isAdmin: false, isDeptHead: false, isExec: false,
-          joinedAt: serverTimestamp(), createdAt: serverTimestamp(),
-          profileComplete: true
-        };
-        await setDoc(doc(db, 'users', user.uid), newUserData);
-        currentUserData = newUserData;
-        localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
-        enterPlatform();
-        showToast('Welcome to YAN! ');
+        // New Google sign-in with no Firestore profile yet. Google auth alone
+        // just proves identity - it doesn't collect the membership details or
+        // terms agreement everyone else provides at registration, so route them
+        // to a short completion form instead of dropping straight into the platform.
+        showGoogleCompleteProfile(user);
       } else {
         showScreen('screen-register');
       }
@@ -566,6 +562,59 @@ async function handleGoogleRedirect() {
     showToast('Google sign-in failed. Try again.', 'error');
   }
 }
+
+function showGoogleCompleteProfile(user) {
+  const nameEl = document.getElementById('gc-name');
+  const emailEl = document.getElementById('gc-email');
+  const photoEl = document.getElementById('gc-photo');
+  if (nameEl) nameEl.textContent = user.displayName || 'YAN Member';
+  if (emailEl) emailEl.textContent = user.email || '';
+  if (photoEl) {
+    photoEl.innerHTML = user.photoURL
+      ? '<img src="' + user.photoURL + '" style="width:100%;height:100%;object-fit:cover;">'
+      : '<span style="font-size:1.6rem;color:var(--navy);">' + (user.displayName || '?')[0].toUpperCase() + '</span>';
+  }
+  showScreen('screen-google-complete');
+}
+window.showGoogleCompleteProfile = showGoogleCompleteProfile;
+
+async function completeGoogleProfile() {
+  const user = currentUser;
+  if (!user) { showToast('Session expired, please sign in again', 'error'); showScreen('screen-login'); return; }
+  const agree = document.getElementById('gc-agree')?.checked;
+  if (!agree) return showToast('Please agree to YAN Terms and Rules first', 'error');
+  const country = document.getElementById('gc-country').value.trim();
+  const whatsapp = document.getElementById('gc-whatsapp').value.trim();
+  const dob = document.getElementById('gc-dob').value;
+  const dept = document.getElementById('gc-dept').value;
+  if (!country || !whatsapp || !dob || !dept) return showToast('Please fill all required fields', 'error');
+  if (!isValidPhone(whatsapp)) return showToast('Please enter a valid WhatsApp number', 'error');
+  const btn = document.getElementById('gc-btn');
+  btn.disabled = true; btn.textContent = 'Finishing up...';
+  try {
+    const newUserData = {
+      ...sanitizeInputs({ name: user.displayName || 'YAN Member', country, whatsapp, dob, role: 'Member' }),
+      email: user.email, photoUrl: user.photoURL || '', department: dept,
+      bio: '', joinedAt: serverTimestamp(), createdAt: serverTimestamp(),
+      isAdmin: false, isDeptHead: false, isExec: false, profileComplete: true
+    };
+    await setDoc(doc(db, 'users', user.uid), newUserData);
+    await setDoc(doc(db, 'memberIds', user.uid.substring(0,8).toUpperCase()), {
+      name: newUserData.name, role: 'Member', department: dept, country,
+      status: 'active', memberId: 'YAN-' + user.uid.substring(0,8).toUpperCase()
+    });
+    currentUserData = newUserData;
+    localStorage.setItem('yan_user_' + user.uid, JSON.stringify(currentUserData));
+    showToast('Welcome to YAN! ');
+    await awardPoints(user.uid, 'account_created', 'Welcome to YAN! Account created', 10);
+    enterPlatform();
+  } catch(e) {
+    showToast('Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Complete Registration';
+  }
+}
+window.completeGoogleProfile = completeGoogleProfile;
 
 async function doLogin() {
   console.log('[YAN Login] doLogin called');
@@ -12268,7 +12317,8 @@ window.toggleMembersDrawer = function() {
 };
 </script>
 <!-- emailjs replaced with resend worker -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>\n<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 // emailjs replaced
 function safeShowScreen(id) {
@@ -12729,6 +12779,15 @@ h2,h3{position:relative;}
       <h2>Create Account</h2>
       <p>Join the Young Africans Network Community</p>
     </div>
+    <button type="button" onclick="doGoogleSignIn()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:0.6rem;background:#fff;color:#3c4043;border:1.5px solid rgba(27,42,107,0.15);padding:0.75rem 1.5rem;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.88rem;cursor:pointer;margin-bottom:0.75rem;">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
+      Continue with Google
+    </button>
+    <div style="display:flex;align-items:center;gap:0.75rem;margin:0.75rem 0;">
+      <div style="flex:1;height:1px;background:rgba(27,42,107,0.1);"></div>
+      <span style="font-size:0.75rem;color:var(--gray);">or fill in your details</span>
+      <div style="flex:1;height:1px;background:rgba(27,42,107,0.1);"></div>
+    </div>
     <form onsubmit="return false;">
     <div class="form-row-2">
       <div class="form-group"><label>Full Name *</label><input type="text" id="reg-name" placeholder="Your full name" autocomplete="name"></div>
@@ -12764,23 +12823,51 @@ h2,h3{position:relative;}
       <h2>Welcome Back</h2>
       <p>Sign in to your YAN Community account</p>
     </div>
-    <form onsubmit="doLogin();return false;" autocomplete="on">
-    <div class="form-group"><label>Email Address</label><input type="email" id="login-email" placeholder="your@email.com" autocomplete="email"></div>
-    <div class="form-group"><label>Password</label><input type="password" id="login-pass" placeholder="Your password" autocomplete="current-password"></div>
-    <button class="btn-primary" id="login-btn" type="submit">Sign In</button>
-    </form>
-    <div style="display:flex;align-items:center;gap:0.75rem;margin:0.75rem 0;">
-      <div style="flex:1;height:1px;background:rgba(27,42,107,0.1);"></div>
-      <span style="font-size:0.75rem;color:var(--gray);">or</span>
-      <div style="flex:1;height:1px;background:rgba(27,42,107,0.1);"></div>
-    </div>
-    <button type="button" onclick="doGoogleSignIn()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:0.6rem;background:#fff;color:#3c4043;border:1.5px solid rgba(27,42,107,0.15);padding:0.75rem 1.5rem;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.88rem;cursor:pointer;margin-bottom:0.75rem;">
-      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
+    <button type="button" onclick="doGoogleSignIn()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:0.6rem;background:#fff;color:#3c4043;border:1.5px solid rgba(27,42,107,0.2);box-shadow:0 1px 4px rgba(27,42,107,0.08);padding:0.9rem 1.5rem;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;margin-bottom:0.85rem;">
+      <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
       Continue with Google
     </button>
-    <p class="auth-switch"><a onclick="doForgotPassword()" style="color:var(--gray);">Forgot password?</a></p>
+    <p style="text-align:center;margin:0 0 0.5rem;"><a onclick="toggleMoreSignIn()" id="more-signin-toggle" style="color:var(--gray);font-size:0.82rem;cursor:pointer;">See more sign-in options ▾</a></p>
+    <div id="more-signin-options" style="display:none;">
+      <div style="display:flex;align-items:center;gap:0.75rem;margin:0.75rem 0;">
+        <div style="flex:1;height:1px;background:rgba(27,42,107,0.1);"></div>
+        <span style="font-size:0.75rem;color:var(--gray);">or sign in with email</span>
+        <div style="flex:1;height:1px;background:rgba(27,42,107,0.1);"></div>
+      </div>
+      <form onsubmit="doLogin();return false;" autocomplete="on">
+      <div class="form-group"><label>Email Address</label><input type="email" id="login-email" placeholder="your@email.com" autocomplete="email"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="login-pass" placeholder="Your password" autocomplete="current-password"></div>
+      <button class="btn-primary" id="login-btn" type="submit">Sign In</button>
+      </form>
+      <p class="auth-switch"><a onclick="doForgotPassword()" style="color:var(--gray);">Forgot password?</a></p>
+    </div>
     <p class="auth-switch">Don't have an account? <a onclick="safeShowScreen('screen-register')">Create one</a></p>
     <p style="text-align:center;margin-top:0.75rem;"><a href="index.html" style="color:var(--gray);font-size:0.8rem;text-decoration:none;">← Back to website</a></p>
+  </div>
+</div>
+
+<!-- GOOGLE SIGN-UP: COMPLETE PROFILE -->
+<div id="screen-google-complete" class="screen">
+  <div class="auth-card">
+    <div class="auth-card-header">
+      <div id="gc-photo" style="width:64px;height:64px;border-radius:50%;background:var(--light);margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid var(--gold);"></div>
+      <h2>Almost there, <span id="gc-name"></span>!</h2>
+      <p>Signed in as <span id="gc-email" style="font-weight:600;"></span> — just a few more details to join YAN</p>
+    </div>
+    <form onsubmit="completeGoogleProfile();return false;">
+    <div class="form-group"><label>Country *</label><input type="text" id="gc-country" placeholder="e.g. Kenya"></div>
+    <div class="form-group"><label>WhatsApp Number *</label><input type="tel" id="gc-whatsapp" placeholder="+254 700 000 000"></div>
+    <div class="form-group"><label>Date of Birth *</label><input type="date" id="gc-dob" style="width:100%;"></div>
+    <div class="form-group"><label>Department *</label><select id="gc-dept"><option value="">Select department...</option><optgroup label=" Training & Certification Departments "><option value="programs"> Programs & Training</option><option value="scholarships"> Scholarships & Global Opportunities</option><option value="career"> Career Development & Public Speaking</option><option value="community"> Community Impact & Volunteering</option><option value="mental"> Mental Health & Wellbeing</option></optgroup><optgroup label=" Other Departments "><option value="communications"> Communications & Media</option><option value="finance"> Finance & Administration</option><option value="partnerships"> Partnership & External Relations</option></optgroup></select></div>
+    <div class="form-group" style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1rem;border:1.5px solid rgba(27,42,107,0.1);">
+      <label style="display:flex;gap:0.75rem;align-items:flex-start;cursor:pointer;">
+        <input type="checkbox" id="gc-agree" style="margin-top:3px;width:16px;height:16px;flex-shrink:0;" required>
+        <span style="font-size:0.82rem;color:var(--navy);line-height:1.6;">I have read and agree to the <a href="privacy.html" target="_blank" style="color:var(--red);font-weight:700;">YAN Terms, Rules & Privacy Policy</a>. I understand that violation of YAN rules may result in removal from the platform.</span>
+      </label>
+    </div>
+    <button class="btn-primary" id="gc-btn" type="submit">Complete Registration</button>
+    </form>
+    <button onclick="doSignOut()" style="background:none;border:none;color:var(--gray);font-size:0.82rem;cursor:pointer;font-family:Poppins,sans-serif;margin-top:0.75rem;">Sign out and use a different account</button>
   </div>
 </div>
 
