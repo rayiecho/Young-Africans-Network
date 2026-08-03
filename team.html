@@ -410,20 +410,16 @@ mobileMenu.querySelectorAll('.mobile-submenu a, .mobile-join').forEach(link => {
 </script>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-const app = initializeApp({apiKey:"AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",authDomain:"young-africans-network.firebaseapp.com",projectId:"young-africans-network",storageBucket:"young-africans-network.firebasestorage.app",messagingSenderId:"224204618916",appId:"1:224204618916:web:8ddfd36c6f112b4912fa31"});
-const db = getFirestore(app);
+const CONTENT_API = 'https://yan-content-worker.youngafricansn.workers.dev';
 
 async function loadTeam() {
-  const snap = await getDocs(query(collection(db, 'team'), orderBy('order', 'asc')));
+  const members = await fetch(CONTENT_API + '/api/team').then(r => r.json()).catch(() => []);
   const leaderGrid = document.getElementById('leadership-grid');
   const deptGrid = document.getElementById('dept-grid');
   if (leaderGrid) leaderGrid.innerHTML = '';
   if (deptGrid) deptGrid.innerHTML = '';
-  if (snap.empty) { if (leaderGrid) leaderGrid.innerHTML = '<p style="text-align:center;color:var(--gray);padding:2rem;">Team members coming soon!</p>'; return; }
-  
-  const members = snap.docs.map(d => ({id:d.id,...d.data()}));
+  if (!members.length) { if (leaderGrid) leaderGrid.innerHTML = '<p style="text-align:center;color:var(--gray);padding:2rem;">Team members coming soon!</p>'; return; }
+
   const leaders = members.filter(m => m.category === 'Leadership');
   const deptHeads = members.filter(m => m.category === 'DeptHead');
   const volunteers = members.filter(m => m.category === 'Volunteer');

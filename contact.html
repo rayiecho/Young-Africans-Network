@@ -568,22 +568,14 @@ contactForm.addEventListener('submit', async function(e) {
   contactBtn.disabled = true;
   const data = new FormData(contactForm);
   try {
-    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
-    const { getFirestore, addDoc, collection, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-    const fbApp = getApps().length ? getApps()[0] : initializeApp({apiKey:"AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",authDomain:"young-africans-network.firebaseapp.com",projectId:"young-africans-network"});
-    const db = getFirestore(fbApp);
     const formObj = {};
     data.forEach((v,k) => formObj[k] = v);
-    await addDoc(collection(db, 'contactSubmissions'), {...formObj, submittedAt: serverTimestamp(), status: 'unread', source: 'contact.html'});
-    // Send auto-response email
-    try {
-      await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
-        to_email: formObj.email || '',
-        name: formObj.name || 'Visitor',
-        subject: 'Message Received — Young Africans Network',
-        message: 'Thank you for reaching out to the Young Africans Network! We have received your message and our team will get back to you within 48 hours.\n\nWarm regards,\nYAN Administration Office\nyoungafricansnetwork.org'
-      });
-    } catch(emailErr) { console.log('Email error:', emailErr); }
+    const res = await fetch('https://yan-content-worker.youngafricansn.workers.dev/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formObj)
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Submission failed');
     if (true) {
       contactBtn.textContent = '✓ Message Sent!';
       contactBtn.style.background = '#27AE60';

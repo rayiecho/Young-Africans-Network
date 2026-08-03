@@ -662,14 +662,11 @@ mobileMenu.querySelectorAll('.mobile-submenu a, .mobile-join').forEach(link => {
 </script>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-const app = initializeApp({apiKey:"AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",authDomain:"young-africans-network.firebaseapp.com",projectId:"young-africans-network",storageBucket:"young-africans-network.firebasestorage.app",messagingSenderId:"224204618916",appId:"1:224204618916:web:8ddfd36c6f112b4912fa31"});
-const db = getFirestore(app);
+const CONTENT_API = 'https://yan-content-worker.youngafricansn.workers.dev';
 
 async function loadEvents() {
-  const snap = await getDocs(query(collection(db, 'events'), orderBy('createdAt', 'desc')));
-  if (snap.empty) return;
+  const events = await fetch(CONTENT_API + '/api/events').then(r => r.json()).catch(() => []);
+  if (!events.length) return;
   // Find a good place to inject — add a new section before footer
   const timeline = document.querySelector('.timeline');
   if (!timeline) return;
@@ -678,8 +675,7 @@ async function loadEvents() {
   newSection.innerHTML = `<div style="text-align:center;margin-bottom:2rem;"><span style="background:rgba(230,51,41,0.1);color:#E63329;padding:0.3rem 1rem;border-radius:50px;font-size:0.75rem;font-weight:600;letter-spacing:1px;">LATEST UPDATES</span><h2 style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:#1B2A6B;margin-top:0.75rem;">Events <span style="color:#E63329;">Added</span></h2></div><div id="firebase-events"></div>`;
   timeline.appendChild(newSection);
   const container = document.getElementById('firebase-events');
-  snap.docs.forEach(d => {
-    const e = d.data();
+  events.forEach(e => {
     const statusColor = e.status === 'past' ? '#27AE60' : '#E63329';
     container.insertAdjacentHTML('beforeend', `
       <div style="display:flex;gap:1.5rem;margin-bottom:2rem;background:#F8F9FF;border-radius:16px;padding:1.5rem;align-items:flex-start;flex-wrap:wrap;">

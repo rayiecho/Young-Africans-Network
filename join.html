@@ -557,22 +557,14 @@ form.addEventListener('submit', async function(e) {
   btn.disabled = true;
   const data = new FormData(form);
   try {
-    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
-    const { getFirestore, addDoc, collection, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-    const fbApp = getApps().length ? getApps()[0] : initializeApp({apiKey:"AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",authDomain:"young-africans-network.firebaseapp.com",projectId:"young-africans-network"});
-    const db = getFirestore(fbApp);
     const formObj = {};
     data.forEach((v,k) => formObj[k] = v);
-    await addDoc(collection(db, 'joinRequests'), {...formObj, submittedAt: serverTimestamp(), status: 'pending', source: 'join.html'});
-    // Send auto-response email
-    try {
-      await emailjs.send('service_0ygnc65', 'template_r1eeakd', {
-        to_email: formObj.email || formObj['email'] || '',
-        name: formObj.name || formObj['full-name'] || 'Applicant',
-        subject: 'Application Received — Young Africans Network',
-        message: 'Thank you for applying to join the Young Africans Network! We have received your application and our team will review it within 48 hours. We are excited about your interest in being part of our pan-African community.\n\nWarm regards,\nYAN Administration Office\nyoungafricansnetwork.org'
-      });
-    } catch(emailErr) { console.log('Email error:', emailErr); }
+    const res = await fetch('https://yan-content-worker.youngafricansn.workers.dev/api/join', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formObj)
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Submission failed');
     if (true) {
       successMsg.style.display = 'block';
       form.reset();

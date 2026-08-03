@@ -491,17 +491,13 @@ document.addEventListener('keydown', function(e) {
 </script>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-const app = initializeApp({apiKey:"AIzaSyCs321YuksiFN3gUql_d880w48pf9Jq0Pk",authDomain:"young-africans-network.firebaseapp.com",projectId:"young-africans-network",storageBucket:"young-africans-network.firebasestorage.app",messagingSenderId:"224204618916",appId:"1:224204618916:web:8ddfd36c6f112b4912fa31"});
-const db = getFirestore(app);
+const CONTENT_API = 'https://yan-content-worker.youngafricansn.workers.dev';
 
 async function loadGallery() {
-  const snap = await getDocs(query(collection(db, 'gallery'), orderBy('createdAt', 'desc')));
-  if (snap.empty) return;
+  const gallery = await fetch(CONTENT_API + '/api/gallery').then(r => r.json()).catch(() => []);
+  if (!gallery.length) return;
   const grid = document.getElementById('gallery-grid');
-  snap.docs.forEach(d => {
-    const g = d.data();
+  gallery.forEach(g => {
     if (g.type === 'photo' && g.url) {
       const div = document.createElement('div');
       div.className = 'gallery-card';

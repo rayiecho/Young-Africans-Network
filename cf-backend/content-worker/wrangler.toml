@@ -1,4 +1,4 @@
-name = "yan-auth-worker"
+name = "yan-content-worker"
 main = "src/index.js"
 compatibility_date = "2026-07-01"
 
@@ -8,7 +8,5 @@ database_name = "yan-db"
 database_id = "b62aff2e-d188-4cdf-9f53-dd7bfddc02ee"
 
 [vars]
-GOOGLE_CLIENT_ID = "224204618916-014ts9p8mj2vs9b0rtnq1b2o8gaetehk.apps.googleusercontent.com"
 EMAIL_WORKER_URL = "https://yan-email-worker.youngafricansn.workers.dev"
-SESSION_TTL_SECONDS = "2592000"
 ALLOWED_ORIGINS = "https://youngafricansnetwork.org,https://young-africans-network.web.app,http://localhost:8080"

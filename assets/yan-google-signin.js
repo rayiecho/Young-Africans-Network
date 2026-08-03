@@ -6,7 +6,7 @@
 // both sides must reference the same client ID or token verification will fail.
 
 (function () {
-  const GOOGLE_CLIENT_ID = 'REPLACE_WITH_GOOGLE_OAUTH_CLIENT_ID';
+  const GOOGLE_CLIENT_ID = '224204618916-014ts9p8mj2vs9b0rtnq1b2o8gaetehk.apps.googleusercontent.com';
   let gsiLoaded = false;
 
   function loadGsiScript() {
