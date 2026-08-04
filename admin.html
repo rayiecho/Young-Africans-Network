@@ -1102,7 +1102,7 @@ window.loadSection = async function(section, customContainer) {
     newsletters: ' Newsletter Manager',
     analytics: ' Analytics Dashboard',
     assignments: ' Assignment Reviews',
-    programs: ' Programs Manager', notifications: ' Notification Center', finance: ' Finance Manager', recommendations: ' Recommendation Letters', errors: '🚨 System Errors' 
+    programs: ' Programs Manager', notifications: ' Notification Center', finance: ' Finance Manager', recommendations: ' Recommendation Letters', errors: '🚨 System Errors', sessionsadmin: ' Session Coordination', volunteeradmin: ' Volunteer Room' 
   }[section] || section;
   const container = customContainer || document.getElementById('content-area');
   if (!customContainer) container.innerHTML = '<div class="loading">Loading...</div>';
@@ -1151,7 +1151,7 @@ window.loadSection = async function(section, customContainer) {
     notifications:(c)=>window.loadNotificationCenter(c),finance:(c)=>window.loadFinance(c),
     recommendations:(c)=>window.loadRecommendations(c),
     errors:(c)=>window.loadSystemErrors(c),mentors:(c)=>window.loadMentorApplications(c),
-    opportunities:(c)=>window.loadOpportunitiesManager(c),lab:(c)=>window.loadLabListings(c),redemptions:(c)=>window.loadRedemptions(c),healthcheck:(c)=>window.loadHealthCheck(c),sos:(c)=>window.loadSOSReports(c),feedback:(c)=>window.loadSessionFeedback(c)
+    opportunities:(c)=>window.loadOpportunitiesManager(c),lab:(c)=>window.loadLabListings(c),redemptions:(c)=>window.loadRedemptions(c),healthcheck:(c)=>window.loadHealthCheck(c),sos:(c)=>window.loadSOSReports(c),feedback:(c)=>window.loadSessionFeedback(c),sessionsadmin:(c)=>window.loadSessionsAdmin(c),volunteeradmin:(c)=>window.loadVolunteerAdmin(c)
   };
   if (fns[section]) {
     try {
@@ -4221,6 +4221,187 @@ window.revokeHeadAccess = async function(docId, userId) {
 
 
 
+const SESSION_DEPT_NAMES = {programs:'Programs & Training',scholarships:'Scholarships & Global Opportunities',career:'Career Development & Public Speaking',community:'Community Impact & Volunteering',mental:'Mental Health & Wellbeing',communications:'Communications & Media',finance:'Finance & Administration',partnerships:'Partnership & External Relations'};
+
+window.loadSessionsAdmin = async function(c) {
+  c.innerHTML = '<div class="loading">Loading sessions...</div>';
+  c.innerHTML = `<div style="max-width:900px;margin:0 auto;">
+    <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">Session Coordination</h2>
+    <p style="color:var(--gray);font-size:0.85rem;margin-bottom:1.5rem;">Schedule which department leads each weekly session and track confirmation.</p>
+    <div style="background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-bottom:1.5rem;">
+      <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Schedule a Session</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Date</label>
+          <input type="date" id="sa-date" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+        <div><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Department</label>
+          <select id="sa-dept" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;">
+            ${Object.entries(SESSION_DEPT_NAMES).map(([id,name])=>`<option value="${id}">${name}</option>`).join('')}
+          </select></div>
+      </div>
+      <div style="margin-bottom:1rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Topic</label>
+        <input type="text" id="sa-topic" placeholder="e.g. Intro to Public Speaking" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+      <div style="margin-bottom:1.25rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Google Meet Link (optional)</label>
+        <input type="text" id="sa-meet" placeholder="https://meet.google.com/..." style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+      <button onclick="submitSessionAdmin()" id="sa-submit" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Post Session</button>
+    </div>
+    <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Upcoming Sessions</h3>
+    <div id="sa-list"></div>
+  </div>`;
+  await loadSessionsAdminList();
+};
+
+async function loadSessionsAdminList() {
+  const list = document.getElementById('sa-list');
+  if (!list) return;
+  try {
+    const sessions = await YanAPI.getSessions();
+    if (!sessions.length) { list.innerHTML = '<p style="color:var(--gray);font-size:0.85rem;">No sessions scheduled yet.</p>'; return; }
+    const badgeColors = {awaiting_confirmation:'#6B7280',confirmed:'#27AE60',needs_help:'#E63329',completed:'#1B2A6B',cancelled:'#6B7280'};
+    list.innerHTML = sessions.map(s => `
+      <div style="background:#fff;border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:0.7rem;font-weight:700;color:var(--gold);text-transform:uppercase;">${s.sessionDate}</div>
+          <div style="font-size:0.95rem;font-weight:800;color:var(--navy);">${sanitize(s.topic)}</div>
+          <div style="font-size:0.78rem;color:var(--gray);">${SESSION_DEPT_NAMES[s.department]||s.department}${s.assignedHeadName?' · Led by '+sanitize(s.assignedHeadName):' · No head assigned yet'}</div>
+          ${s.needsAssistance ? `<div style="font-size:0.78rem;color:#E63329;margin-top:0.35rem;"><strong>Needs help:</strong> ${sanitize(s.assistanceNote||'')}</div>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:0.6rem;">
+          <span style="background:${badgeColors[s.status]}22;color:${badgeColors[s.status]};padding:0.25rem 0.75rem;border-radius:50px;font-size:0.68rem;font-weight:700;text-transform:uppercase;">${s.status.replace('_',' ')}</span>
+          <button onclick="deleteSessionAdmin('${s.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.78rem;font-weight:700;">Delete</button>
+        </div>
+      </div>`).join('');
+  } catch(e) { list.innerHTML = '<p style="color:var(--red);font-size:0.85rem;">Error loading sessions: ' + e.message + '</p>'; }
+}
+
+window.submitSessionAdmin = async function() {
+  const sessionDate = document.getElementById('sa-date').value;
+  const department = document.getElementById('sa-dept').value;
+  const topic = document.getElementById('sa-topic').value.trim();
+  const meetLink = document.getElementById('sa-meet').value.trim();
+  if (!sessionDate || !topic) return showToast('Date and topic are required', 'error');
+  const btn = document.getElementById('sa-submit');
+  btn.disabled = true; btn.textContent = 'Posting...';
+  try {
+    await YanAPI.createSession({ sessionDate, department, topic, meetLink });
+    document.getElementById('sa-topic').value = '';
+    document.getElementById('sa-meet').value = '';
+    showToast('Session posted! The department head has been notified.');
+    await loadSessionsAdminList();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Post Session'; }
+};
+
+window.deleteSessionAdmin = async function(id) {
+  if (!confirm('Delete this session?')) return;
+  try { await YanAPI.deleteSession(id); showToast('Session deleted'); await loadSessionsAdminList(); }
+  catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+window.loadVolunteerAdmin = async function(c) {
+  c.innerHTML = `<div style="max-width:900px;margin:0 auto;">
+    <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">Volunteer Room</h2>
+    <p style="color:var(--gray);font-size:0.85rem;margin-bottom:1.5rem;">Post tasks - posters, video edits, slides - for volunteers to claim and complete.</p>
+    <div style="background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-bottom:1.5rem;">
+      <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Post a Task</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Type</label>
+          <select id="va-type" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;">
+            <option value="poster">Poster / Banner</option>
+            <option value="video_edit">Video Edit</option>
+            <option value="slides">Slides / Presentation</option>
+            <option value="other">Other</option>
+          </select></div>
+        <div><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Due date (optional)</label>
+          <input type="date" id="va-due" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+      </div>
+      <div style="margin-bottom:1rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Title</label>
+        <input type="text" id="va-title" placeholder="e.g. Poster for Career Dev session" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+      <div style="margin-bottom:1rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Brief</label>
+        <textarea id="va-brief" rows="3" placeholder="What's needed - event, date, theme, required text..." style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;resize:vertical;"></textarea></div>
+      <div style="margin-bottom:1.25rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Raw file link (optional)</label>
+        <input type="text" id="va-raw" placeholder="Link to raw video/photos/brief materials (Drive, Cloudinary, etc.)" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+      <button onclick="submitVolunteerTaskAdmin()" id="va-submit" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Post Task</button>
+    </div>
+    <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Submissions Awaiting Review</h3>
+    <div id="va-review-list" style="margin-bottom:1.5rem;"></div>
+    <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">All Tasks</h3>
+    <div id="va-list"></div>
+  </div>`;
+  await loadVolunteerAdminLists();
+};
+
+const VOL_TYPE_LABELS = { poster: 'Poster / Banner', video_edit: 'Video Edit', slides: 'Slides', other: 'Other' };
+const VOL_STATUS_COLORS = { open: '#6B7280', claimed: '#B37800', submitted: '#3B82F6', approved: '#27AE60', changes_requested: '#E63329' };
+
+function volunteerTaskCardAdmin(t, showReviewBtn) {
+  return `<div style="background:#fff;border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
+      <div>
+        <span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.15rem 0.6rem;border-radius:50px;font-size:0.65rem;font-weight:700;text-transform:uppercase;">${VOL_TYPE_LABELS[t.taskType]||t.taskType}</span>
+        <div style="font-size:0.92rem;font-weight:800;color:var(--navy);margin-top:0.4rem;">${sanitize(t.title)}</div>
+        ${t.claimedByName ? `<div style="font-size:0.78rem;color:var(--gray);">Claimed by ${sanitize(t.claimedByName)}</div>` : ''}
+        ${t.submittedFileUrl ? `<a href="${sanitize(t.submittedFileUrl)}" target="_blank" style="font-size:0.78rem;color:var(--navy);font-weight:700;">View submitted deliverable →</a>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:0.6rem;">
+        <span style="background:${VOL_STATUS_COLORS[t.status]}22;color:${VOL_STATUS_COLORS[t.status]};padding:0.25rem 0.75rem;border-radius:50px;font-size:0.68rem;font-weight:700;text-transform:uppercase;">${t.status.replace('_',' ')}</span>
+        ${showReviewBtn ? `<button onclick="reviewVolunteerTaskAdmin('${t.id}','${encodeURIComponent(t.submittedFileUrl||'')}')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Review</button>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+async function loadVolunteerAdminLists() {
+  const reviewList = document.getElementById('va-review-list');
+  const allList = document.getElementById('va-list');
+  if (!reviewList || !allList) return;
+  try {
+    const [submitted, all] = await Promise.all([
+      YanAPI.getVolunteerTasks({ status: 'submitted' }),
+      YanAPI.getVolunteerTasks({})
+    ]);
+    reviewList.innerHTML = submitted.length
+      ? submitted.map(t => volunteerTaskCardAdmin(t, true)).join('')
+      : '<p style="color:var(--gray);font-size:0.85rem;">Nothing waiting for review.</p>';
+    allList.innerHTML = all.length
+      ? all.map(t => volunteerTaskCardAdmin(t, t.status === 'submitted')).join('')
+      : '<p style="color:var(--gray);font-size:0.85rem;">No tasks posted yet.</p>';
+  } catch(e) {
+    reviewList.innerHTML = allList.innerHTML = '<p style="color:var(--red);font-size:0.85rem;">Error: ' + e.message + '</p>';
+  }
+}
+
+window.submitVolunteerTaskAdmin = async function() {
+  const taskType = document.getElementById('va-type').value;
+  const title = document.getElementById('va-title').value.trim();
+  const brief = document.getElementById('va-brief').value.trim();
+  const rawFileUrl = document.getElementById('va-raw').value.trim();
+  const dueDate = document.getElementById('va-due').value;
+  if (!title) return showToast('Give the task a title', 'error');
+  const btn = document.getElementById('va-submit');
+  btn.disabled = true; btn.textContent = 'Posting...';
+  try {
+    await YanAPI.createVolunteerTask({ taskType, title, brief, rawFileUrl, dueDate });
+    document.getElementById('va-title').value = '';
+    document.getElementById('va-brief').value = '';
+    document.getElementById('va-raw').value = '';
+    document.getElementById('va-due').value = '';
+    showToast('Task posted to the Volunteer Room!');
+    await loadVolunteerAdminLists();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Post Task'; }
+};
+
+window.reviewVolunteerTaskAdmin = async function(id, fileUrlEncoded) {
+  const fileUrl = decodeURIComponent(fileUrlEncoded);
+  const approve = confirm('Deliverable: ' + (fileUrl || '(no link)') + '\n\nClick OK to APPROVE (awards 15 points), or Cancel to request changes.');
+  const note = prompt(approve ? 'Optional note for the volunteer:' : 'What changes are needed?') || '';
+  try {
+    await YanAPI.reviewVolunteerTask(id, approve, note);
+    showToast(approve ? 'Approved - points awarded!' : 'Changes requested');
+    await loadVolunteerAdminLists();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
 window.loadHealthCheck = async function(c) {
   c.innerHTML = '<div style="max-width:900px;margin:0 auto;"><h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">User Health Check</h2><p style="color:var(--gray);font-size:0.85rem;margin-bottom:1.5rem;">Check and fix users who have Firebase Auth accounts but no Firestore profile</p><button onclick="runHealthCheck()" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;margin-bottom:1.5rem;">Run Health Check</button><div id="health-results"></div></div>';
 };
@@ -4905,12 +5086,12 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> User Health Check
       </button>
       <button class="nav-item" data-section="feedback" onclick="loadSection('feedback')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Session Feedback</button>
-      <a class="nav-item" href="sessions.html" target="_blank" style="text-decoration:none;">
+      <button class="nav-item" data-section="sessionsadmin" onclick="loadSection('sessionsadmin')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Session Coordination
-      </a>
-      <a class="nav-item" href="volunteer.html" target="_blank" style="text-decoration:none;">
+      </button>
+      <button class="nav-item" data-section="volunteeradmin" onclick="loadSection('volunteeradmin')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> Volunteer Room
-      </a>
+      </button>
       <button class="nav-item" data-section="sos" onclick="loadSection('sos')" style="color:#E63329;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> SOS Reports
       </button>
@@ -5311,7 +5492,7 @@ window.loadSection = async function(section, customContainer) {
     newsletters: ' Newsletter Manager',
     analytics: ' Analytics Dashboard',
     assignments: ' Assignment Reviews',
-    programs: ' Programs Manager', notifications: ' Notification Center', finance: ' Finance Manager', recommendations: ' Recommendation Letters', errors: '🚨 System Errors' 
+    programs: ' Programs Manager', notifications: ' Notification Center', finance: ' Finance Manager', recommendations: ' Recommendation Letters', errors: '🚨 System Errors', sessionsadmin: ' Session Coordination', volunteeradmin: ' Volunteer Room' 
   }[section] || section;
   const container = customContainer || document.getElementById('content-area');
   if (!customContainer) container.innerHTML = '<div class="loading">Loading...</div>';
@@ -5360,7 +5541,7 @@ window.loadSection = async function(section, customContainer) {
     notifications:(c)=>window.loadNotificationCenter(c),finance:(c)=>window.loadFinance(c),
     recommendations:(c)=>window.loadRecommendations(c),
     errors:(c)=>window.loadSystemErrors(c),mentors:(c)=>window.loadMentorApplications(c),
-    opportunities:(c)=>window.loadOpportunitiesManager(c),lab:(c)=>window.loadLabListings(c),redemptions:(c)=>window.loadRedemptions(c),healthcheck:(c)=>window.loadHealthCheck(c),sos:(c)=>window.loadSOSReports(c),feedback:(c)=>window.loadSessionFeedback(c)
+    opportunities:(c)=>window.loadOpportunitiesManager(c),lab:(c)=>window.loadLabListings(c),redemptions:(c)=>window.loadRedemptions(c),healthcheck:(c)=>window.loadHealthCheck(c),sos:(c)=>window.loadSOSReports(c),feedback:(c)=>window.loadSessionFeedback(c),sessionsadmin:(c)=>window.loadSessionsAdmin(c),volunteeradmin:(c)=>window.loadVolunteerAdmin(c)
   };
   if (fns[section]) {
     try {
