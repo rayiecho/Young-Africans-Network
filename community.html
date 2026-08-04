@@ -972,12 +972,7 @@ async function postNotification() {
   const message = document.getElementById('notif-message').value.trim();
   const type = document.getElementById('notif-type').value;
   if (!title || !message) return showToast('Enter title and message','error');
-  await addDoc(collection(db, 'notifications'), {
-    title, message, type,
-    postedBy: currentUserData.name,
-    createdAt: serverTimestamp(),
-    readBy: []
-  });
+  await YanAPI.createNotification({ title, message, type });
   document.getElementById('notif-title').value = '';
   document.getElementById('notif-message').value = '';
   document.getElementById('notif-form').style.display = 'none';
@@ -988,26 +983,19 @@ async function postNotification() {
 async function loadNotifList() {
   const container = document.getElementById('notif-list');
   if (!container) return;
-  // Community notifications only - no userId means public
-  const q = query(collection(db, 'notifications'), where('userId','==',null), orderBy('createdAt', 'desc'), limit(20));
-  const snap = await getDocs(q).catch(async () => {
-    // Fallback: get all and filter client-side
-    return await getDocs(query(collection(db, 'notifications'), orderBy('createdAt', 'desc'), limit(50)));
-  });
-  const publicDocs = snap.docs.filter(d => !d.data().userId);
-  if (publicDocs.length === 0) { container.innerHTML = '<div class="empty-state">No community announcements yet.</div>'; return; }
-  container.innerHTML = publicDocs.map(d => {
-    const n = d.data();
-    const isRead = Array.isArray(n.readBy) && n.readBy.includes(currentUser.uid);
+  const notifs = await YanAPI.getNotifications({ scope: 'broadcast', limit: 20 }).catch(() => []);
+  if (notifs.length === 0) { container.innerHTML = '<div class="empty-state">No community announcements yet.</div>'; return; }
+  container.innerHTML = notifs.map(n => {
+    const isRead = n.isRead;
     const icons = { announcement:'', event:'', opportunity:'', urgent:'' };
-    return `<div style="background:${isRead?'var(--light)':'var(--white)'};border-radius:16px;padding:1.25rem;margin-bottom:0.75rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid ${isRead?'rgba(27,42,107,0.15)':'var(--red)'};cursor:pointer;" onclick="markNotifRead('${d.id}')">
+    return `<div style="background:${isRead?'var(--light)':'var(--white)'};border-radius:16px;padding:1.25rem;margin-bottom:0.75rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid ${isRead?'rgba(27,42,107,0.15)':'var(--red)'};cursor:pointer;" onclick="markNotifRead('${n.id}')">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
         <div style="display:flex;align-items:center;gap:0.5rem;">
           <span>${icons[n.type]||''}</span>
           <strong style="font-size:0.92rem;color:var(--navy);">${sanitize(n.title)}</strong>
           ${!isRead ? '<span style="background:var(--red);color:#fff;border-radius:50px;padding:0.1rem 0.5rem;font-size:0.65rem;font-weight:700;">NEW</span>' : ''}
         </div>
-        ${currentUserData?.isAdmin ? `<button class="btn-sm btn-red" onclick="deleteNotification('${d.id}')"></button>` : ''}
+        ${currentUserData?.isAdmin ? `<button class="btn-sm btn-red" onclick="deleteNotification('${n.id}')"></button>` : ''}
       </div>
       <p style="font-size:0.85rem;color:var(--gray);line-height:1.7;">${sanitize(n.message)}</p>
       <small style="font-size:0.72rem;color:var(--gray);">${timeAgo(n.createdAt)} · By ${sanitize(n.postedBy)}</small>
@@ -1020,23 +1008,17 @@ async function loadPersonalNotifs() {
   if (!container) return;
   container.innerHTML = '<p style="padding:1rem;color:var(--gray);">Loading...</p>';
   try {
-    const snap = await getDocs(query(
-      collection(db, 'notifications'),
-      where('userId', '==', currentUser.uid),
-      orderBy('createdAt', 'desc'),
-      limit(30)
-    ));
-    if (snap.empty) {
+    const notifs = await YanAPI.getNotifications({ scope: 'personal', limit: 30 });
+    if (!notifs.length) {
       container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--gray);">No personal notifications yet.</div>';
       return;
     }
     const icons = { meeting:'', certificate:'', mentorship:'', scholarship:'', announcement:'', application:'' };
     container.innerHTML = '<div style="max-width:700px;margin:0 auto;">' +
       '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:1.5rem;"> My Notifications</h2>' +
-      snap.docs.map(d => {
-        const n = d.data();
-        const isRead = Array.isArray(n.readBy) && n.readBy.includes(currentUser.uid);
-        return '<div style="background:' + (isRead?'var(--light)':'var(--white)') + ';border-radius:16px;padding:1.25rem;margin-bottom:0.75rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid ' + (isRead?'rgba(27,42,107,0.15)':'var(--gold)') + ';cursor:pointer;" onclick="markPersonalNotifRead(\'' + d.id + '\')">' +
+      notifs.map(n => {
+        const isRead = n.isRead;
+        return '<div style="background:' + (isRead?'var(--light)':'var(--white)') + ';border-radius:16px;padding:1.25rem;margin-bottom:0.75rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid ' + (isRead?'rgba(27,42,107,0.15)':'var(--gold)') + ';cursor:pointer;" onclick="markPersonalNotifRead(\'' + n.id + '\')">' +
           '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">' +
           '<span>' + (icons[n.type]||'') + '</span>' +
           '<strong style="font-size:0.92rem;color:var(--navy);">' + sanitize(n.title) + '</strong>' +
@@ -1052,12 +1034,12 @@ async function loadPersonalNotifs() {
 }
 
 window.markPersonalNotifRead = async function(notifId) {
-  await updateDoc(doc(db, 'notifications', notifId), { readBy: arrayUnion(currentUser.uid) });
+  await YanAPI.markNotificationRead(notifId);
   loadPersonalNotifs();
 };
 
 async function markNotifRead(notifId) {
-  await updateDoc(doc(db, 'notifications', notifId), { readBy: arrayUnion(currentUser.uid) });
+  await YanAPI.markNotificationRead(notifId);
   loadNotifList();
   updateNotifBadge();
   // Track online presence
@@ -1079,7 +1061,7 @@ async function markNotifRead(notifId) {
 
 async function deleteNotification(notifId) {
   if (!confirm('Delete this notification?')) return;
-  await deleteDoc(doc(db, 'notifications', notifId));
+  await YanAPI.deleteNotification(notifId);
   loadNotifList();
   updateNotifBadge();
   // Track online presence
@@ -1101,14 +1083,8 @@ async function deleteNotification(notifId) {
 
 async function updateNotifBadge() {
   try {
-    // Count unread community notifications
-    const communitySnap = await getDocs(query(collection(db,'notifications'), orderBy('createdAt','desc'), limit(30)));
-    let unread = 0;
-    communitySnap.docs.forEach(d => {
-      const data = d.data();
-      const readBy = data.readBy || [];
-      if (!readBy.includes(currentUser.uid)) unread++;
-    });
+    const notifs = await YanAPI.getNotifications({ scope: 'recent', limit: 30 });
+    const unread = notifs.filter(n => !n.isRead).length;
     const badge = document.getElementById('notif-badge');
     if (badge) {
       if (unread > 0) { badge.style.display='flex'; badge.textContent=unread; }
@@ -1119,22 +1095,10 @@ async function updateNotifBadge() {
 
 function startNotifListener() {
   if (!currentUser) return;
-  // Real-time listener for new notifications
-  const q = query(collection(db,'notifications'), orderBy('createdAt','desc'), limit(30));
-  const unsub = onSnapshot(q, snap => {
-    let unread = 0;
-    snap.docs.forEach(d => {
-      const data = d.data();
-      const readBy = data.readBy || [];
-      if (!readBy.includes(currentUser.uid)) unread++;
-    });
-    const badge = document.getElementById('notif-badge');
-    if (badge) {
-      if (unread > 0) { badge.style.display='flex'; badge.textContent=unread; }
-      else { badge.style.display='none'; }
-    }
-  }, err => console.log('Notif listener error:', err));
-  unsubscribers.push(unsub);
+  // D1 has no onSnapshot equivalent - poll instead, matching the Feed's pattern.
+  updateNotifBadge();
+  const intervalId = setInterval(updateNotifBadge, 30000);
+  unsubscribers.push(() => clearInterval(intervalId));
 }
 
 // MAIN FEED
@@ -1855,14 +1819,11 @@ async function createMeeting() {
   // Post bell notification
   const deptLabel = targetDept === 'all' ? 'All Members' : DEPARTMENTS.find(d => d.id === targetDept)?.name || targetDept;
   const dateLabel = dateVal ? new Date(dateVal).toLocaleString('en-GB', {day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}) : 'Soon';
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: ' New Meeting Scheduled: ' + title,
     message: 'A new session has been scheduled by ' + currentUserData.name + '. Topic: ' + (topic||title) + '. Date: ' + dateLabel + '. For: ' + deptLabel + '. Go to the Meetings tab to join!',
     type: 'event',
-    postedBy: currentUserData.name,
-    targetDept: targetDept,
-    createdAt: serverTimestamp(),
-    readBy: []
+    department: targetDept === 'all' ? null : targetDept
   });
   document.getElementById('create-meeting-form').style.display = 'none';
   document.getElementById('mtg-title').value = '';
@@ -3172,13 +3133,10 @@ async function postScholarship() {
   document.getElementById('scholarship-form').style.display = 'none';
   loadScholarshipOpportunities();
   // Send notification to all members
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: ` New Scholarship: ${title}`,
     message: `${provider} is offering a ${funding} scholarship. Deadline: ${deadline}. Apply now!`,
-    type: 'opportunity',
-    postedBy: currentUserData.name,
-    createdAt: serverTimestamp(),
-    readBy: []
+    type: 'opportunity'
   });
 }
 
@@ -3436,10 +3394,10 @@ async function requestRecommendation() {
     status: 'pending', createdAt: serverTimestamp()
   });
   showToast('Request submitted!  You will be notified when approved.');
-  await addDoc(collection(db,'notifications'), {
+  await YanAPI.createNotification({
     title: ` Recommendation Letter Request`,
     message: `${currentUserData.name} has requested a recommendation letter for ${scholarship}. Please review.`,
-    type: 'urgent', postedBy: 'System', createdAt: serverTimestamp(), readBy: []
+    type: 'urgent', postedBy: 'System'
   });
   loadRecommendationSection();
 }
@@ -3450,10 +3408,10 @@ async function approveRecommendation(recId) {
   // Send notification to member
   const recDoc = await getDoc(doc(db,'recommendations',recId));
   const r = recDoc.data();
-  await addDoc(collection(db,'notifications'),{
+  await YanAPI.createNotification({
     title: ' Recommendation Letter Approved!',
     message: `Your recommendation letter for ${r.scholarship} has been approved! Go to Scholarships → Recommendation Letter to download it.`,
-    type: 'announcement', postedBy: 'System', createdAt: serverTimestamp(), readBy: []
+    type: 'announcement', postedBy: 'System', userId: r.userId
   });
   loadRecommendationSection();
 }
@@ -4759,9 +4717,9 @@ window.gradeAssignment = async function(assignId, userId) {
   await updateDoc(doc(db,'programAssignments',assignId), {
     grade, feedback: feedback||'', gradedAt: serverTimestamp(), gradedBy: currentUserData.name
   });
-  if (userId) await addDoc(collection(db,'notifications'), {
+  if (userId) await YanAPI.createNotification({
     title: 'Assignment Graded!', message: 'Your assignment has been graded: ' + grade + '/100. ' + (feedback||''),
-    type: 'success', userId, postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
+    type: 'success', userId
   });
   showToast('Assignment graded!');
   loadHeadAssignments(document.getElementById('head-section-content'), currentUserData.department);
@@ -4777,10 +4735,10 @@ window.scheduleHeadMeeting = async function(dept) {
     createdBy: currentUserData.name, createdAt: serverTimestamp(), isLive: false
   });
   showToast('Meeting scheduled!');
-  await addDoc(collection(db,'notifications'), {
+  await YanAPI.createNotification({
     title: 'Meeting Scheduled: ' + title,
     message: 'A new meeting has been scheduled for ' + new Date(date).toLocaleString() + (link ? '. Join: ' + link : ''),
-    type: 'info', department: dept, postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
+    type: 'info', department: dept
   });
   loadHeadMeetings(document.getElementById('head-section-content'), dept);
 };
@@ -4790,9 +4748,8 @@ window.sendHeadNotification = async function(dept) {
   const msg = document.getElementById('head-notif-msg2')?.value.trim();
   if (!title || !msg) return showToast('Title and message required', 'error');
   const membersSnap = await getDocs(query(collection(db,'users'), where('department','==',dept)));
-  const batch = membersSnap.docs.map(d => addDoc(collection(db,'notifications'), {
-    title, message: msg, type: 'info', userId: d.id,
-    postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
+  const batch = membersSnap.docs.map(d => YanAPI.createNotification({
+    title, message: msg, type: 'info', userId: d.id
   }));
   await Promise.all(batch);
   showToast('Notification sent to ' + membersSnap.size + ' members!');
@@ -6048,10 +6005,10 @@ async function postCareerJob() {
     description: desc, postedBy: currentUserData.name,
     postedById: currentUser.uid, createdAt: serverTimestamp(), active: true
   });
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: ' New ' + type + ': ' + title,
     message: org + ' is looking for: ' + title + '. Location: ' + country + (deadline ? '. Deadline: ' + deadline : '') + '. Check Career Hub!',
-    type: 'opportunity', postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
+    type: 'opportunity'
   });
   showToast('Opportunity posted! ');
   toggleJobForm();
@@ -6229,10 +6186,10 @@ async function reviewCareerAssignment(assignId, status) {
     status, feedback, reviewedBy: currentUserData.name, reviewedAt: serverTimestamp()
   });
   showToast(status === 'approved' ? 'Approved! ' : 'Rejected');
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: status === 'approved' ? ' Assignment Approved!' : ' Assignment Needs Revision',
     message: 'Your Career Hub assignment has been ' + status + (feedback ? '. Feedback: ' + feedback : '') + '.',
-    type: 'announcement', postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
+    type: 'announcement'
   });
   loadCareerManage();
 }
@@ -6401,11 +6358,10 @@ async function applyForTask(taskId) {
   if (appliedBy.includes(currentUser.uid)) return showToast('Already applied!', 'error');
   appliedBy.push(currentUser.uid);
   await updateDoc(taskRef, {appliedBy: appliedBy, applicants: appliedBy.length});
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: 'New Task Application: ' + task.title,
     message: currentUserData.name + ' applied for: ' + task.title,
-    type: 'announcement', postedBy: currentUserData.name,
-    createdAt: serverTimestamp(), readBy: []
+    type: 'announcement'
   });
   showToast('Application submitted!');
   loadCommunityTasks();
@@ -6563,11 +6519,10 @@ async function submitCommunityProject() {
     proposedBy: currentUserData.name, proposedById: currentUser.uid,
     status: 'pending', createdAt: serverTimestamp()
   });
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: 'New Project Proposal: ' + title,
     message: currentUserData.name + ' proposed a project: ' + title + ' in ' + country,
-    type: 'announcement', postedBy: currentUserData.name,
-    createdAt: serverTimestamp(), readBy: []
+    type: 'announcement'
   });
   showToast('Proposal submitted! Head will review it.');
   toggleProjectForm();
@@ -6820,11 +6775,10 @@ async function approveCommunityReport(reportId, userId, userName, type) {
     status: 'approved', issuedBy: currentUserData.name,
     issuedAt: serverTimestamp(), requestedAt: serverTimestamp()
   });
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: 'Certificate Issued!',
     message: 'Congratulations ' + userName + '! Your ' + (type === 'project' ? 'Community Champion' : 'Community Service') + ' Certificate has been issued. Check your Achievements!',
-    type: 'announcement', postedBy: currentUserData.name,
-    createdAt: serverTimestamp(), readBy: []
+    type: 'announcement'
   });
   showToast('Report approved and certificate issued!');
   loadCommunityManage();
@@ -7320,10 +7274,10 @@ async function requestPeerSupport(peerId, peerName) {
     peerId: peerId, peerName: peerName,
     status: 'pending', createdAt: serverTimestamp()
   });
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: 'Peer Support Request',
     message: currentUserData.name + ' has requested peer support from ' + peerName + '. Please reach out to them.',
-    type: 'urgent', postedBy: 'System', createdAt: serverTimestamp(), readBy: []
+    type: 'urgent', postedBy: 'System'
   });
   showToast('Request sent! ' + peerName + ' will reach out to you soon.');
   loadPeerSupport();
@@ -7484,11 +7438,10 @@ async function postProfessionalSession() {
     postedBy: currentUserData.name, postedById: currentUser.uid,
     registeredBy: [], createdAt: serverTimestamp()
   });
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: 'New Professional Session: ' + title,
     message: 'A new wellness session with ' + profName + ' has been scheduled for ' + date + '. Register in the Mental Health Hub!',
-    type: 'announcement', postedBy: currentUserData.name,
-    createdAt: serverTimestamp(), readBy: []
+    type: 'announcement'
   });
   showToast('Session posted and members notified!');
   loadMentalManage();
@@ -7501,11 +7454,10 @@ async function assignPeerSupporter() {
   if (usersSnap.empty) return showToast('Member not found', 'error');
   const userId = usersSnap.docs[0].id;
   await updateDoc(doc(db, 'users', userId), {isPeerSupporter: true});
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: 'You are now a YAN Peer Supporter!',
     message: 'You have been assigned as a Peer Supporter for the Mental Health & Wellbeing department. Members may reach out to you for support. Thank you for stepping up!',
-    type: 'announcement', postedBy: currentUserData.name,
-    createdAt: serverTimestamp(), readBy: []
+    type: 'announcement', userId
   });
   showToast('Peer supporter assigned!');
   document.getElementById('peer-assign-email').value = '';
@@ -7750,11 +7702,11 @@ window.submitProgramApplication = async function(programId, type, programTitle) 
       programType:type, motivation, background, goals, commitment,
       status:'pending', appliedAt:serverTimestamp()
     });
-    await addDoc(collection(db,'notifications'),{
+    await YanAPI.createNotification({
       title:'New Program Application',
       message:currentUserData.name+' has applied for '+programTitle+'. Please review.',
       type:'info', userId:'tNbO0jryVeadlpIkKQnv6mjYJn42',
-      postedBy:'YAN System', createdAt:serverTimestamp(), readBy:[]
+      postedBy:'YAN System'
     });
     document.getElementById('apply-modal').remove();
     showToast('Application submitted! You will be notified once approved.');
@@ -9050,11 +9002,10 @@ async function postTrainingProgram() {
     enrollmentOpen: true, requiresApplication: true,
     openDate: new Date().toISOString().split('T')[0]
   });
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: 'New Training Program: ' + title,
     message: 'A new ' + category + ' program has been added to YAN Tech & Skills Academy. Check it out!',
-    type: 'announcement', postedBy: currentUserData.name,
-    createdAt: serverTimestamp(), readBy: []
+    type: 'announcement'
   });
   showToast('Program posted!');
   document.getElementById('prog-title').value = '';
@@ -9101,11 +9052,10 @@ async function postTrainingSession() {
     postedBy: currentUserData.name, postedById: currentUser.uid,
     registeredBy: [], createdAt: serverTimestamp()
   });
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: 'Live Session: ' + title,
     message: 'A new training session by ' + facilitator + ' is scheduled for ' + date + '. Register in YAN Tech & Skills Academy!',
-    type: 'announcement', postedBy: currentUserData.name,
-    createdAt: serverTimestamp(), readBy: []
+    type: 'announcement'
   });
   showToast('Session scheduled!');
   loadProgramsManage();
@@ -9115,11 +9065,10 @@ async function approveProgramAssignment(assignId, userId, userName, programId) {
   await updateDoc(doc(db, 'programAssignments', assignId), {
     status: 'approved', reviewedBy: currentUserData.name, reviewedAt: serverTimestamp()
   });
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: 'Assignment Approved!',
     message: 'Your assignment in YAN Tech & Skills Academy has been approved by ' + currentUserData.name + '. Keep up the great work!',
-    type: 'announcement', postedBy: currentUserData.name,
-    createdAt: serverTimestamp(), readBy: []
+    type: 'announcement', userId
   });
   showToast('Assignment approved!');
   loadProgramsManage();
@@ -9726,10 +9675,10 @@ async function loadCommsManage() {
 async function approveContentSubmission(submissionId, taskId, userId, userName) {
   await updateDoc(doc(db, 'contentSubmissions', submissionId), {status: 'approved', reviewedBy: currentUserData.name, reviewedAt: serverTimestamp()});
   if (taskId) await updateDoc(doc(db, 'contentTasks', taskId), {status: 'completed'});
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: 'Content Approved!',
     message: 'Your content submission has been approved by ' + currentUserData.name + '. Great work ' + userName + '!',
-    type: 'announcement', postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
+    type: 'announcement', userId
   });
   showToast('Approved!');
   loadCommsManage();
@@ -9937,10 +9886,10 @@ async function postOpportunity() {
     postedBy: currentUserData.name, postedById: currentUser.uid,
     createdAt: serverTimestamp()
   });
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: 'New Partnership Opportunity: ' + title,
     message: 'A new ' + type + ' opportunity has been posted in the Partnerships Hub. Check it out!',
-    type: 'opportunity', postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
+    type: 'opportunity'
   });
   showToast('Opportunity posted!');
   toggleOppForm();
@@ -10040,10 +9989,10 @@ async function submitProposal() {
     proposedBy: currentUserData.name, proposedById: currentUser.uid,
     status: 'pending', createdAt: serverTimestamp()
   });
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: 'New Partnership Proposal: ' + orgName,
     message: currentUserData.name + ' has proposed a partnership with ' + orgName + '. Review in Partnerships Hub.',
-    type: 'announcement', postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
+    type: 'announcement'
   });
   showToast('Proposal submitted!');
   toggleProposalForm();
@@ -10130,10 +10079,10 @@ async function addActivePartner() {
     logoUrl: logo, focus: focus, description: desc, benefits: benefits,
     addedBy: currentUserData.name, createdAt: serverTimestamp(), status: 'active'
   });
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: 'New YAN Partner: ' + name,
     message: 'YAN has a new partner: ' + name + '. Check the Partnerships Hub for details!',
-    type: 'announcement', postedBy: currentUserData.name, createdAt: serverTimestamp(), readBy: []
+    type: 'announcement'
   });
   showToast('Partner added!');
   document.getElementById('new-partner-name').value = '';
@@ -11647,11 +11596,11 @@ window.saveMentorProfile = async function() {
     appliedAt: serverTimestamp()
   }, {merge: true});
   // Notify admin
-  await addDoc(collection(db,'notifications'),{
+  await YanAPI.createNotification({
     title: 'New Mentor Application',
     message: currentUserData.name + ' has applied to become a YAN Mentor. Please review their application.',
     type: 'info', userId: 'tNbO0jryVeadlpIkKQnv6mjYJn42',
-    postedBy: 'YAN System', createdAt: serverTimestamp(), readBy: []
+    postedBy: 'YAN System'
   });
   showToast(isUpdate ? 'Application updated! Awaiting admin review.' : 'Application submitted! Admin will review shortly.');
   showMentorshipSection('become');
@@ -11673,11 +11622,10 @@ window.requestMentor = async function(mentorId, mentorNameEncoded) {
     menteeName: currentUserData.name, status: 'pending',
     createdAt: serverTimestamp()
   });
-  await addDoc(collection(db,'notifications'), {
+  await YanAPI.createNotification({
     title: 'New Mentorship Request',
     message: currentUserData.name + ' has requested you as their mentor.',
-    type: 'info', userId: mentorId, postedBy: 'YAN Mentorship',
-    createdAt: serverTimestamp(), readBy: []
+    type: 'info', userId: mentorId, postedBy: 'YAN Mentorship'
   });
   showToast('Mentorship request sent!');
   showMentorshipSection('my');
@@ -11804,11 +11752,10 @@ window.confirmMentoringSlot = async function(mentorshipId, slotIndex) {
   });
 
   // Notify mentor
-  await addDoc(collection(db,'notifications'), {
+  await YanAPI.createNotification({
     title: '✅ Session Confirmed!',
     message: s.menteeName + ' confirmed your mentorship session for ' + slot.label,
-    type: 'info', userId: s.mentorId,
-    createdAt: serverTimestamp(), readBy: []
+    type: 'info', userId: s.mentorId
   });
 
   showToast('Session confirmed for ' + slot.label + '!');
@@ -11948,12 +11895,11 @@ window.startMentorshipMeeting = async function(menteeId, menteeNameEncoded, ment
   });
 
   // Notify mentee
-  await addDoc(collection(db, 'notifications'), {
+  await YanAPI.createNotification({
     title: currentUserData.name + ' started a meeting!',
     message: 'Your mentor ' + currentUserData.name + ' has started a mentorship meeting. Click to join now!',
     type: 'meeting', userId: menteeId,
-    action: 'mentorship_meeting', mentorshipId,
-    postedBy: 'YAN Mentorship', createdAt: serverTimestamp(), readBy: []
+    postedBy: 'YAN Mentorship'
   });
 
   // Send meeting link as a direct message to mentee

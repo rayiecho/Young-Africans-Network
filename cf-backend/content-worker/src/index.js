@@ -251,6 +251,80 @@ async function createReply(request, env, cors, postId) {
   return json({ ok: true }, 201, cors);
 }
 
+// ---- notifications ----
+// Firestore rules for this collection were `allow create, read: if isLoggedIn()` with
+// no further restriction - any logged-in member can post or read any notification,
+// broadcast or targeted at someone else. Matching that exactly rather than tightening
+// it as a side effect of migrating.
+
+function notifRow(row, isRead) {
+  return {
+    id: row.id, userId: row.user_id, title: row.title, message: row.message,
+    url: row.url, type: row.type, postedBy: row.posted_by, department: row.department,
+    createdAt: row.created_at, isRead: !!isRead
+  };
+}
+
+async function createNotification(request, env, cors) {
+  const { error, user } = await requireUser(request, env, cors);
+  if (error) return error;
+  const body = await request.json();
+  if (!body.title || !body.message) return json({ error: 'Title and message required' }, 400, cors);
+  const id = newId();
+  await env.DB.prepare(
+    `INSERT INTO notifications (id,user_id,title,message,url,type,posted_by,department,created_at) VALUES (?,?,?,?,?,?,?,?,?)`
+  ).bind(id, body.userId || null, body.title, body.message, body.url || null, body.type || null,
+    body.postedBy || user.name, body.department || null, Date.now()).run();
+  return json({ id }, 201, cors);
+}
+
+async function getNotifications(request, env, cors, url) {
+  const { error, user } = await requireUser(request, env, cors);
+  if (error) return error;
+  const scope = url.searchParams.get('scope') || 'recent';
+  const limitParam = Math.min(parseInt(url.searchParams.get('limit') || '30', 10) || 30, 50);
+
+  let query, binds;
+  if (scope === 'broadcast') {
+    query = `SELECT * FROM notifications WHERE user_id IS NULL ORDER BY created_at DESC LIMIT ?`;
+    binds = [limitParam];
+  } else if (scope === 'personal') {
+    query = `SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ?`;
+    binds = [user.id, limitParam];
+  } else {
+    query = `SELECT * FROM notifications ORDER BY created_at DESC LIMIT ?`;
+    binds = [limitParam];
+  }
+  const { results } = await env.DB.prepare(query).bind(...binds).all();
+  if (!results.length) return json({ notifications: [] }, 200, cors);
+
+  const ids = results.map(r => r.id);
+  const placeholders = ids.map(() => '?').join(',');
+  const reads = await env.DB.prepare(
+    `SELECT notification_id FROM notification_reads WHERE user_id = ? AND notification_id IN (${placeholders})`
+  ).bind(user.id, ...ids).all();
+  const readSet = new Set(reads.results.map(r => r.notification_id));
+
+  return json({ notifications: results.map(r => notifRow(r, readSet.has(r.id))) }, 200, cors);
+}
+
+async function markNotificationRead(request, env, cors, id) {
+  const { error, user } = await requireUser(request, env, cors);
+  if (error) return error;
+  await env.DB.prepare(
+    `INSERT INTO notification_reads (notification_id, user_id, read_at) VALUES (?,?,?) ON CONFLICT(notification_id, user_id) DO NOTHING`
+  ).bind(id, user.id, Date.now()).run();
+  return json({ ok: true }, 200, cors);
+}
+
+async function deleteNotificationHandler(request, env, cors, id) {
+  const { error, user } = await requireUser(request, env, cors);
+  if (error) return error;
+  if (!user.is_admin) return json({ error: 'Admin only' }, 403, cors);
+  await env.DB.prepare('DELETE FROM notifications WHERE id = ?').bind(id).run();
+  return json({ ok: true }, 200, cors);
+}
+
 // ---- writes ----
 
 async function submitJoin(request, env, cors) {
@@ -310,6 +384,15 @@ export default {
       if (path === '/api/stories' && request.method === 'GET') return await getStories(env, cors);
       if (path === '/api/join' && request.method === 'POST') return await submitJoin(request, env, cors);
       if (path === '/api/contact' && request.method === 'POST') return await submitContact(request, env, cors);
+
+      if (path === '/api/notifications' && request.method === 'GET') return await getNotifications(request, env, cors, url);
+      if (path === '/api/notifications' && request.method === 'POST') return await createNotification(request, env, cors);
+      const notifMatch = path.match(/^\/api\/notifications\/([^/]+)(\/read)?$/);
+      if (notifMatch) {
+        const [, id, sub] = notifMatch;
+        if (sub === '/read' && request.method === 'POST') return await markNotificationRead(request, env, cors, id);
+        if (!sub && request.method === 'DELETE') return await deleteNotificationHandler(request, env, cors, id);
+      }
 
       if (path === '/api/posts' && request.method === 'GET') return await getPosts(request, env, cors, url);
       if (path === '/api/posts' && request.method === 'POST') return await createPost(request, env, cors);

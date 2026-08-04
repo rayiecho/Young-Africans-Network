@@ -149,6 +149,21 @@
       return contentRequest('/api/posts/' + postId + '/replies', { method: 'POST', body: { content } });
     },
 
+    // ---- notifications ----
+    async createNotification({ userId, department, title, message, type, url, postedBy }) {
+      return contentRequest('/api/notifications', { method: 'POST', body: { userId, department, title, message, type, url, postedBy } });
+    },
+    async getNotifications({ scope, limit } = {}) {
+      const params = new URLSearchParams();
+      if (scope) params.set('scope', scope);
+      if (limit) params.set('limit', limit);
+      const qs = params.toString();
+      const data = await contentRequest('/api/notifications' + (qs ? '?' + qs : ''));
+      return data.notifications;
+    },
+    async markNotificationRead(id) { return contentRequest('/api/notifications/' + id + '/read', { method: 'POST' }); },
+    async deleteNotification(id) { return contentRequest('/api/notifications/' + id, { method: 'DELETE' }); },
+
     // ---- session coordination ----
     async createSession({ sessionDate, department, topic, meetLink, assignedHeadId }) {
       return opsRequest('/api/sessions', { method: 'POST', body: { sessionDate, department, topic, meetLink, assignedHeadId } });
