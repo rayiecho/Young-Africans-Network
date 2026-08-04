@@ -167,7 +167,10 @@ async function login(request, env, cors) {
   }
 
   const sessionToken = await createSession(env, user.id, request);
-  const firebaseToken = await bridgeToken(env, user.id);
+  // Always passed, not just on first registration: self-heals any account whose
+  // Firebase record ended up email-less from before this was fixed - harmless no-op
+  // once it's already correct (falls back to an update that changes nothing).
+  const firebaseToken = await bridgeToken(env, user.id, { newAccountEmail: user.email });
   return json({ token: sessionToken, user: publicUser(user), firebaseToken }, 200, cors);
 }
 
@@ -217,7 +220,7 @@ async function googleSignIn(request, env, cors) {
   }
 
   const sessionToken = await createSession(env, user.id, request);
-  const firebaseToken = await bridgeToken(env, user.id, { markVerified: true });
+  const firebaseToken = await bridgeToken(env, user.id, { markVerified: true, newAccountEmail: user.email });
   return json({ token: sessionToken, user: publicUser(user), firebaseToken }, 200, cors);
 }
 
@@ -276,7 +279,7 @@ async function me(request, env, cors) {
 async function bridge(request, env, cors) {
   const user = await getSessionUser(request, env);
   if (!user) return json({ error: 'Not authenticated' }, 401, cors);
-  const firebaseToken = await bridgeToken(env, user.id);
+  const firebaseToken = await bridgeToken(env, user.id, { newAccountEmail: user.email });
   return json({ firebaseToken }, 200, cors);
 }
 
