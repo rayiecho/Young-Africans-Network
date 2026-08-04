@@ -1,6 +1,6 @@
 import { hashPassword, verifyPasswordWithMigration, sha256Hex, randomToken, newId } from './crypto.js';
 import { verifyGoogleIdToken } from './google.js';
-import { mintFirebaseCustomToken, markEmailVerified } from './firebase-bridge.js';
+import { mintFirebaseCustomToken, markEmailVerified, createFirebaseUser } from './firebase-bridge.js';
 import { verifyFirebaseScryptPassword } from './firebase-scrypt.js';
 
 function getServiceAccount(env) {
@@ -10,11 +10,20 @@ function getServiceAccount(env) {
 // Best-effort: if the bridge isn't configured yet, sessions still work, they just
 // won't get a Firebase custom token (community.html's Firestore calls would then
 // fail auth until this is set up - see FIREBASE_SERVICE_ACCOUNT secret).
-async function bridgeToken(env, uid, { markVerified = false } = {}) {
+async function bridgeToken(env, uid, { markVerified = false, newAccountEmail = null } = {}) {
   const sa = getServiceAccount(env);
   if (!sa) return null;
   try {
-    if (markVerified) await markEmailVerified(sa, uid).catch(e => console.error('markEmailVerified failed:', e.message));
+    // signInWithCustomToken auto-creates a bare (email-less) Firebase user on first use -
+    // that happens client-side, after this returns. For a brand-new D1 registration there
+    // is no Firebase user yet at all, so it has to be explicitly created with its email
+    // here, or sendEmailVerification() fails client-side with auth/missing-email.
+    if (newAccountEmail) {
+      await createFirebaseUser(sa, uid, { email: newAccountEmail, emailVerified: markVerified })
+        .catch(e => console.error('Firebase user create failed:', e.message));
+    } else if (markVerified) {
+      await markEmailVerified(sa, uid).catch(e => console.error('markEmailVerified failed:', e.message));
+    }
     return await mintFirebaseCustomToken(sa, uid);
   } catch (e) { console.error('Bridge token failed:', e.message); return null; }
 }
@@ -127,7 +136,7 @@ async function register(request, env, cors) {
 
   const sessionToken = await createSession(env, userId, request);
   const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(userId).first();
-  const firebaseToken = await bridgeToken(env, userId);
+  const firebaseToken = await bridgeToken(env, userId, { newAccountEmail: email.toLowerCase() });
   return json({ token: sessionToken, user: publicUser(user), firebaseToken }, 201, cors);
 }
 
@@ -249,7 +258,7 @@ async function completeProfile(request, env, cors) {
 
   const sessionToken = await createSession(env, userId, request);
   const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(userId).first();
-  const firebaseToken = await bridgeToken(env, userId, { markVerified: true });
+  const firebaseToken = await bridgeToken(env, userId, { markVerified: true, newAccountEmail: googleProfile.email.toLowerCase() });
   return json({ token: sessionToken, user: publicUser(user), firebaseToken }, 201, cors);
 }
 

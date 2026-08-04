@@ -76,13 +76,42 @@ async function getServiceAccountAccessToken(serviceAccount) {
 // via custom-token sign-in defaults to emailVerified:false, which would wrongly send
 // a Google sign-up through the (Firebase-native) email verification flow again.
 export async function markEmailVerified(serviceAccount, uid) {
+  await updateFirebaseUser(serviceAccount, uid, { emailVerified: true });
+}
+
+// signInWithCustomToken auto-creates a bare Firebase Auth user (uid only, no email) the
+// FIRST time the client uses the token - which happens after this call, not before. So
+// for a brand-new D1 registration there is no Firebase user yet to "update" - it has to
+// be explicitly created here (accounts:signUp with a fixed localId is the Admin-API
+// equivalent of admin.auth().createUser({uid, ...})), or sendEmailVerification() fails
+// client-side with auth/missing-email.
+export async function createFirebaseUser(serviceAccount, uid, { email, emailVerified } = {}) {
   const accessToken = await getServiceAccountAccessToken(serviceAccount);
+  const res = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + accessToken },
+    body: JSON.stringify({ localId: uid, email, emailVerified: !!emailVerified })
+  });
+  if (res.ok) return;
+  const errText = await res.text();
+  // Already exists (retry, or somehow raced with the first sign-in) - fall back to update.
+  if (errText.includes('DUPLICATE_LOCAL_ID') || errText.includes('EMAIL_EXISTS')) {
+    return updateFirebaseUser(serviceAccount, uid, { email, emailVerified });
+  }
+  throw new Error('createFirebaseUser failed: ' + errText);
+}
+
+export async function updateFirebaseUser(serviceAccount, uid, { email, emailVerified } = {}) {
+  const accessToken = await getServiceAccountAccessToken(serviceAccount);
+  const body = { localId: uid };
+  if (email !== undefined) body.email = email;
+  if (emailVerified !== undefined) body.emailVerified = emailVerified;
   const res = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:update', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + accessToken },
-    body: JSON.stringify({ localId: uid, emailVerified: true })
+    body: JSON.stringify(body)
   });
-  if (!res.ok) throw new Error('markEmailVerified failed: ' + (await res.text()));
+  if (!res.ok) throw new Error('updateFirebaseUser failed: ' + (await res.text()));
 }
 
 // serviceAccount: parsed serviceAccount.json ({ client_email, private_key, private_key_id, ... })
