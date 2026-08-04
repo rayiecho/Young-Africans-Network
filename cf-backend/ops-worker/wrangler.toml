@@ -9,3 +9,4 @@ database_id = "b62aff2e-d188-4cdf-9f53-dd7bfddc02ee"
 
 [vars]
 ALLOWED_ORIGINS = "https://youngafricansnetwork.org,https://young-africans-network.web.app,http://localhost:8080"
+EMAIL_WORKER_URL = "https://yan-email-worker.youngafricansn.workers.dev"

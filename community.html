@@ -1097,8 +1097,41 @@ function startNotifListener() {
   if (!currentUser) return;
   // D1 has no onSnapshot equivalent - poll instead, matching the Feed's pattern.
   updateNotifBadge();
+  checkForPopupNotifs();
   const intervalId = setInterval(updateNotifBadge, 30000);
+  const popupIntervalId = setInterval(checkForPopupNotifs, 20000);
   unsubscribers.push(() => clearInterval(intervalId));
+  unsubscribers.push(() => clearInterval(popupIntervalId));
+}
+
+// New session assignments / volunteer-help requests (type 'popup_task') get a real
+// pop-up the moment they're seen, not just a badge count - so a head/admin actually
+// notices instead of having to remember to check the bell. Only pops once per
+// notification (tracked in localStorage), and only while actively in the app -
+// email is the channel that reaches people who aren't.
+async function checkForPopupNotifs() {
+  if (!currentUser) return;
+  try {
+    const notifs = await YanAPI.getNotifications({ scope: 'personal', limit: 10 });
+    const seenKey = 'yan_popup_seen_' + currentUser.uid;
+    const seen = new Set(JSON.parse(localStorage.getItem(seenKey) || '[]'));
+    const fresh = notifs.filter(n => n.type === 'popup_task' && !n.isRead && !seen.has(n.id));
+    fresh.forEach(n => {
+      seen.add(n.id);
+      showPopupNotifModal(n);
+    });
+    if (fresh.length) localStorage.setItem(seenKey, JSON.stringify([...seen].slice(-50)));
+  } catch(e) { console.log('Popup check error:', e); }
+}
+
+function showPopupNotifModal(n) {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:1.5rem;right:1.5rem;z-index:99999;background:#fff;border-radius:16px;padding:1.25rem 1.5rem;max-width:340px;box-shadow:0 12px 40px rgba(0,0,0,0.25);border-left:5px solid var(--gold);animation:fadeIn 0.3s ease;';
+  modal.innerHTML = `<div style="font-weight:800;color:var(--navy);font-size:0.92rem;margin-bottom:0.4rem;"> ${sanitize(n.title)}</div>
+    <div style="font-size:0.82rem;color:var(--gray);line-height:1.6;margin-bottom:0.75rem;">${sanitize(n.message)}</div>
+    <button onclick="this.closest('div[style*=fixed]').remove();markNotifRead('${n.id}');" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1.1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">Got it</button>`;
+  document.body.appendChild(modal);
+  setTimeout(() => modal.remove(), 15000);
 }
 
 // MAIN FEED

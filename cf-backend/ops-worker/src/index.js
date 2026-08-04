@@ -16,6 +16,39 @@ function json(data, status, headers) {
 }
 function newId() { return crypto.randomUUID(); }
 
+async function sendEmail(env, { to, subject, message }) {
+  try {
+    await fetch(env.EMAIL_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to, subject, message })
+    });
+  } catch (e) { console.error('Email send failed:', e.message); }
+}
+
+// "Pop-up": a notifications row with a distinct type the client (community.html)
+// shows as a prominent in-app alert the moment it's seen, instead of just badge count -
+// see the pollForPopups() polling loop client-side. Email is the second, independent
+// channel so it also reaches someone not actively in the app right now.
+async function notifyUser(env, userId, { title, message, emailSubject }) {
+  await env.DB.prepare(
+    `INSERT INTO notifications (id,user_id,title,message,type,posted_by,created_at) VALUES (?,?,?,?,?,?,?)`
+  ).bind(newId(), userId, title, message, 'popup_task', 'YAN System', Date.now()).run();
+  const user = await env.DB.prepare('SELECT email FROM users WHERE id = ?').bind(userId).first();
+  if (user?.email) await sendEmail(env, { to: user.email, subject: emailSubject || title, message });
+}
+
+async function notifyAdmins(env, { title, message, emailSubject }) {
+  const admins = await env.DB.prepare('SELECT id, email FROM users WHERE is_admin = 1').all();
+  const now = Date.now();
+  await Promise.all(admins.results.map(a => env.DB.prepare(
+    `INSERT INTO notifications (id,user_id,title,message,type,posted_by,created_at) VALUES (?,?,?,?,?,?,?)`
+  ).bind(newId(), a.id, title, message, 'popup_task', 'YAN System', now).run()));
+  await Promise.all(admins.results.filter(a => a.email).map(a =>
+    sendEmail(env, { to: a.email, subject: emailSubject || title, message })
+  ));
+}
+
 async function sha256Hex(input) {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
   return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
@@ -43,6 +76,13 @@ async function requireAdminOrHead(request, env, cors) {
   return { user };
 }
 
+async function requireAdmin(request, env, cors) {
+  const { error, user } = await requireUser(request, env, cors);
+  if (error) return { error };
+  if (!user.is_admin) return { error: json({ error: 'Admin only' }, 403, cors) };
+  return { user };
+}
+
 // ---- sessions: shaping ----
 
 async function hydrateSession(env, row) {
@@ -66,7 +106,7 @@ async function hydrateSession(env, row) {
 }
 
 async function createSessionHandler(request, env, cors) {
-  const { error, user } = await requireAdminOrHead(request, env, cors);
+  const { error, user } = await requireAdmin(request, env, cors);
   if (error) return error;
   const body = await request.json();
   const { sessionDate, department, topic, meetLink } = body;
@@ -86,11 +126,11 @@ async function createSessionHandler(request, env, cors) {
   ).bind(id, sessionDate, department, topic, meetLink || null, assignedHeadId, user.id, now, now).run();
 
   if (assignedHeadId) {
-    await env.DB.prepare(
-      `INSERT INTO notifications (id,user_id,title,message,url,created_at) VALUES (?,?,?,?,?,?)`
-    ).bind(newId(), assignedHeadId, 'Your department is leading a session',
-      `${department} is leading the ${sessionDate} session: "${topic}". Please confirm and prepare.`,
-      '/sessions.html', now).run();
+    await notifyUser(env, assignedHeadId, {
+      title: 'Your department is leading a session',
+      message: `${department} is leading the ${sessionDate} session: "${topic}". Please confirm and prepare.`,
+      emailSubject: 'YAN: your department is leading a session on ' + sessionDate
+    });
   }
 
   return json({ id }, 201, cors);
@@ -149,6 +189,7 @@ async function flagNeedsHelp(request, env, cors, id) {
   if (error) return error;
   const body = await request.json();
   const note = (body.note || '').trim();
+  const taskType = ['poster','video_edit','slides','other'].includes(body.taskType) ? body.taskType : 'other';
   const now = Date.now();
   await env.DB.prepare(
     `UPDATE dept_sessions SET needs_assistance = 1, assistance_note = ?, status = 'needs_help', updated_at = ? WHERE id = ?`
@@ -159,8 +200,14 @@ async function flagNeedsHelp(request, env, cors, id) {
   const taskId = newId();
   await env.DB.prepare(
     `INSERT INTO volunteer_tasks (id,task_type,title,brief,related_session_id,status,created_by,created_at,updated_at)
-     VALUES (?,'other',?,?,?, 'open', ?,?,?)`
-  ).bind(taskId, `Help needed: ${session.topic}`, note, id, user.id, now, now).run();
+     VALUES (?,?,?,?,?, 'open', ?,?,?)`
+  ).bind(taskId, taskType, `Help needed: ${session.topic}`, note, id, user.id, now, now).run();
+
+  await notifyAdmins(env, {
+    title: 'New volunteer help request',
+    message: `${user.name} (${session.department}) needs help with "${session.topic}": ${note}`,
+    emailSubject: 'New Volunteer Room task: ' + session.topic
+  });
 
   return json({ ok: true, volunteerTaskId: taskId }, 200, cors);
 }
@@ -248,7 +295,7 @@ function taskRow(row) {
 }
 
 async function createTask(request, env, cors) {
-  const { error, user } = await requireAdminOrHead(request, env, cors);
+  const { error, user } = await requireAdmin(request, env, cors);
   if (error) return error;
   const body = await request.json();
   if (!body.title || !body.taskType) return json({ error: 'Title and task type are required' }, 400, cors);

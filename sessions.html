@@ -128,7 +128,15 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
 <div class="modal-overlay" id="needs-help-modal">
   <div class="modal">
     <h3>What do you need help with?</h3>
-    <div class="form-group"><label>Note (this becomes a Volunteer Room task)</label><textarea id="nh-note" placeholder="e.g. Need a poster designed, need someone on tech support..."></textarea></div>
+    <div class="form-group"><label>Type of help</label>
+      <select id="nh-type">
+        <option value="poster">Poster / Banner</option>
+        <option value="video_edit">Video Edit</option>
+        <option value="slides">Slides / Presentation</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Details (this becomes a Volunteer Room task)</label><textarea id="nh-note" placeholder="e.g. Need a poster designed for this session's theme..."></textarea></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('needs-help-modal')">Cancel</button>
       <button class="btn btn-red" id="nh-submit" onclick="submitNeedsHelp()">Flag & Request Help</button>
@@ -196,9 +204,6 @@ async function init() {
   if (currentUser.isAdmin) {
     document.getElementById('new-session-btn').style.display = 'inline-block';
     document.getElementById('ns-dept').value = 'programs';
-  } else if (currentUser.isDeptHead) {
-    document.getElementById('new-session-btn').style.display = 'inline-block';
-    document.getElementById('ns-dept').value = currentUser.department || 'programs';
   }
   await loadSessions();
 }
@@ -208,7 +213,7 @@ async function loadSessions() {
   try {
     const sessions = await YanAPI.getSessions();
     if (!sessions.length) {
-      list.innerHTML = '<div class="empty">No sessions scheduled yet.' + (currentUser.isAdmin || currentUser.isDeptHead ? ' Click "+ New Session" to get started.' : '') + '</div>';
+      list.innerHTML = '<div class="empty">No sessions scheduled yet.' + (currentUser.isAdmin ? ' Click "+ New Session" to get started.' : '') + '</div>';
       return;
     }
     list.innerHTML = sessions.map(renderSessionCard).join('');
@@ -301,11 +306,12 @@ async function markPrepComplete(id) {
 function openNeedsHelpModal(id) { activeSessionForModal = id; document.getElementById('nh-note').value = ''; openModal('needs-help-modal'); }
 async function submitNeedsHelp() {
   const note = document.getElementById('nh-note').value.trim();
+  const taskType = document.getElementById('nh-type').value;
   if (!note) return showToast('Describe what you need', 'error');
   const btn = document.getElementById('nh-submit');
   btn.disabled = true;
   try {
-    await YanAPI.flagSessionNeedsHelp(activeSessionForModal, note);
+    await YanAPI.flagSessionNeedsHelp(activeSessionForModal, note, taskType);
     closeModal('needs-help-modal');
     showToast('Help requested — a task was posted to the Volunteer Room');
     await loadSessions();

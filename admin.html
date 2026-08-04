@@ -4318,8 +4318,10 @@ window.loadVolunteerAdmin = async function(c) {
         <input type="text" id="va-title" placeholder="e.g. Poster for Career Dev session" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
       <div style="margin-bottom:1rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Brief</label>
         <textarea id="va-brief" rows="3" placeholder="What's needed - event, date, theme, required text..." style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;resize:vertical;"></textarea></div>
-      <div style="margin-bottom:1.25rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Raw file link (optional)</label>
-        <input type="text" id="va-raw" placeholder="Link to raw video/photos/brief materials (Drive, Cloudinary, etc.)" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+      <div style="margin-bottom:1.25rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Raw file (optional)</label>
+        <input type="file" accept="image/*,video/*" id="va-raw-file" onchange="uploadFileToAdmin('va-raw-file','va-raw-url','va-raw-status')" style="width:100%;padding:0.5rem 0;font-family:Poppins,sans-serif;font-size:0.85rem;">
+        <input type="hidden" id="va-raw-url">
+        <small id="va-raw-status" style="color:var(--gray);"></small></div>
       <button onclick="submitVolunteerTaskAdmin()" id="va-submit" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Post Task</button>
     </div>
     <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Submissions Awaiting Review</h3>
@@ -4370,11 +4372,29 @@ async function loadVolunteerAdminLists() {
   }
 }
 
+window.uploadFileToAdmin = async function(fileInputId, urlFieldId, statusId) {
+  const file = document.getElementById(fileInputId).files[0];
+  const status = document.getElementById(statusId);
+  if (!file) return;
+  status.textContent = '⏳ Uploading...';
+  const isVideo = file.type.startsWith('video/');
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY_PRESET);
+  try {
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/${isVideo?'video':'image'}/upload`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!data.secure_url) throw new Error(data.error?.message || 'Upload failed');
+    document.getElementById(urlFieldId).value = data.secure_url;
+    status.textContent = '✅ Uploaded: ' + file.name;
+  } catch(e) { status.textContent = '❌ Upload failed: ' + e.message; }
+};
+
 window.submitVolunteerTaskAdmin = async function() {
   const taskType = document.getElementById('va-type').value;
   const title = document.getElementById('va-title').value.trim();
   const brief = document.getElementById('va-brief').value.trim();
-  const rawFileUrl = document.getElementById('va-raw').value.trim();
+  const rawFileUrl = document.getElementById('va-raw-url').value.trim();
   const dueDate = document.getElementById('va-due').value;
   if (!title) return showToast('Give the task a title', 'error');
   const btn = document.getElementById('va-submit');
@@ -4383,7 +4403,8 @@ window.submitVolunteerTaskAdmin = async function() {
     await YanAPI.createVolunteerTask({ taskType, title, brief, rawFileUrl, dueDate });
     document.getElementById('va-title').value = '';
     document.getElementById('va-brief').value = '';
-    document.getElementById('va-raw').value = '';
+    document.getElementById('va-raw-url').value = '';
+    document.getElementById('va-raw-status').textContent = '';
     document.getElementById('va-due').value = '';
     showToast('Task posted to the Volunteer Room!');
     await loadVolunteerAdminLists();
