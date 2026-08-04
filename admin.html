@@ -4326,10 +4326,24 @@ window.loadVolunteerAdmin = async function(c) {
     </div>
     <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Submissions Awaiting Review</h3>
     <div id="va-review-list" style="margin-bottom:1.5rem;"></div>
+    <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Volunteer Queue</h3>
+    <div id="va-queue" style="margin-bottom:1rem;"></div>
+    <button onclick="emailVolunteerQueueAdmin()" style="background:none;border:1.5px solid rgba(27,42,107,0.2);color:var(--navy);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;margin-bottom:1.5rem;">Email Everyone in the Queue</button>
     <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">All Tasks</h3>
     <div id="va-list"></div>
   </div>`;
   await loadVolunteerAdminLists();
+};
+
+window.emailVolunteerQueueAdmin = async function() {
+  const subject = prompt('Email subject:');
+  if (!subject) return;
+  const message = prompt('Message:');
+  if (!message) return;
+  try {
+    const res = await YanAPI.emailVolunteerQueue(subject, message);
+    showToast('Sent to ' + res.sentTo + ' volunteers');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
 };
 
 const VOL_TYPE_LABELS = { poster: 'Poster / Banner', video_edit: 'Video Edit', slides: 'Slides', other: 'Other' };
@@ -4355,11 +4369,13 @@ function volunteerTaskCardAdmin(t, showReviewBtn) {
 async function loadVolunteerAdminLists() {
   const reviewList = document.getElementById('va-review-list');
   const allList = document.getElementById('va-list');
+  const queueList = document.getElementById('va-queue');
   if (!reviewList || !allList) return;
   try {
-    const [submitted, all] = await Promise.all([
+    const [submitted, all, queue] = await Promise.all([
       YanAPI.getVolunteerTasks({ status: 'submitted' }),
-      YanAPI.getVolunteerTasks({})
+      YanAPI.getVolunteerTasks({}),
+      YanAPI.getVolunteerQueue()
     ]);
     reviewList.innerHTML = submitted.length
       ? submitted.map(t => volunteerTaskCardAdmin(t, true)).join('')
@@ -4367,6 +4383,11 @@ async function loadVolunteerAdminLists() {
     allList.innerHTML = all.length
       ? all.map(t => volunteerTaskCardAdmin(t, t.status === 'submitted')).join('')
       : '<p style="color:var(--gray);font-size:0.85rem;">No tasks posted yet.</p>';
+    if (queueList) {
+      queueList.innerHTML = queue.length
+        ? queue.map((v,i) => `<span style="display:inline-block;background:rgba(27,42,107,0.06);border-radius:50px;padding:0.3rem 0.85rem;font-size:0.8rem;margin:0 0.4rem 0.4rem 0;">#${i+1} ${sanitize(v.name)}</span>`).join('')
+        : '<p style="color:var(--gray);font-size:0.85rem;">Nobody in the queue yet.</p>';
+    }
   } catch(e) {
     reviewList.innerHTML = allList.innerHTML = '<p style="color:var(--red);font-size:0.85rem;">Error: ' + e.message + '</p>';
   }

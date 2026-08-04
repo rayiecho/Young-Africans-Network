@@ -209,6 +209,13 @@ async function flagNeedsHelp(request, env, cors, id) {
     emailSubject: 'New Volunteer Room task: ' + session.topic
   });
 
+  const queue = await getVolunteerQueue(env);
+  await Promise.all(queue.slice(0, 3).map(v => notifyUser(env, v.userId, {
+    title: 'New Volunteer Room task: ' + session.topic,
+    message: `A new ${taskType.replace('_',' ')} task is open: "Help needed: ${session.topic}". First come, first served.`,
+    emailSubject: 'YAN Volunteer Room: Help needed for ' + session.topic
+  })));
+
   return json({ ok: true, volunteerTaskId: taskId }, 200, cors);
 }
 
@@ -306,6 +313,17 @@ async function createTask(request, env, cors) {
      VALUES (?,?,?,?,?,?,?, 'open', ?,?,?)`
   ).bind(id, body.taskType, body.title, body.brief || null, body.relatedSessionId || null,
     body.rawFileUrl || null, body.dueDate || null, user.id, now, now).run();
+
+  // Notify whoever's first in the rotation queue - not everyone, so it stays useful
+  // whether there are 3 volunteers or 30 (avoids a stampede/spam on every task).
+  const queue = await getVolunteerQueue(env);
+  const firstInLine = queue.slice(0, 3);
+  await Promise.all(firstInLine.map(v => notifyUser(env, v.userId, {
+    title: 'New Volunteer Room task: ' + body.title,
+    message: `A new ${body.taskType.replace('_',' ')} task is open: "${body.title}". First come, first served.`,
+    emailSubject: 'YAN Volunteer Room: ' + body.title
+  })));
+
   return json({ id }, 201, cors);
 }
 
@@ -335,9 +353,54 @@ async function claimTask(request, env, cors, id) {
   const task = await env.DB.prepare('SELECT * FROM volunteer_tasks WHERE id = ?').bind(id).first();
   if (!task) return json({ error: 'Not found' }, 404, cors);
   if (task.status !== 'open') return json({ error: 'Already claimed' }, 409, cors);
-  await env.DB.prepare(`UPDATE volunteer_tasks SET status = 'claimed', claimed_by = ?, updated_at = ? WHERE id = ?`)
-    .bind(user.id, Date.now(), id).run();
+  const now = Date.now();
+  await env.DB.batch([
+    env.DB.prepare(`UPDATE volunteer_tasks SET status = 'claimed', claimed_by = ?, updated_at = ? WHERE id = ?`)
+      .bind(user.id, now, id),
+    // Fair rotation: claiming moves you to the back of the line for next time.
+    env.DB.prepare(`INSERT INTO volunteer_queue (user_id, last_claimed_at) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET last_claimed_at = ?`)
+      .bind(user.id, now, now)
+  ]);
   return json({ ok: true }, 200, cors);
+}
+
+// Whoever has gone longest without claiming anything (or has never claimed) is first
+// in line. Not everyone is in this queue - only members who've claimed a task before,
+// so this is a rotation among people who've actually shown up before, not a broadcast
+// to all 160+ members. New members who claim their first task join the queue then.
+async function getVolunteerQueue(env) {
+  const { results } = await env.DB.prepare(
+    `SELECT u.id, u.name, u.photo_url, q.last_claimed_at FROM volunteer_queue q
+     JOIN users u ON u.id = q.user_id ORDER BY q.last_claimed_at ASC`
+  ).all();
+  return results.map(r => ({ userId: r.id, name: r.name, photoUrl: r.photo_url, lastClaimedAt: r.last_claimed_at }));
+}
+
+async function getVolunteerQueueHandler(request, env, cors) {
+  const { error } = await requireUser(request, env, cors);
+  if (error) return error;
+  return json({ queue: await getVolunteerQueue(env) }, 200, cors);
+}
+
+// Admin can message everyone currently in the rotation directly, e.g. to rally people
+// when a task's been open a while.
+async function emailVolunteerQueue(request, env, cors) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  const body = await request.json();
+  if (!body.subject || !body.message) return json({ error: 'Subject and message required' }, 400, cors);
+  const queue = await getVolunteerQueue(env);
+  await Promise.all(queue.map(v => notifyUser(env, v.userId, { title: body.subject, message: body.message, emailSubject: body.subject })));
+  return json({ ok: true, sentTo: queue.length }, 200, cors);
+}
+
+async function getHeadsHandler(request, env, cors) {
+  const { error } = await requireUser(request, env, cors);
+  if (error) return error;
+  const { results } = await env.DB.prepare(
+    `SELECT id, name, email, department FROM users WHERE is_dept_head = 1 ORDER BY department ASC`
+  ).all();
+  return json({ heads: results.map(h => ({ userId: h.id, name: h.name, email: h.email, department: h.department })) }, 200, cors);
 }
 
 async function submitTask(request, env, cors, id) {
@@ -422,10 +485,37 @@ export default {
         if (sub === 'review' && request.method === 'POST') return await reviewTask(request, env, cors, id);
       }
 
+      if (path === '/api/volunteer-queue' && request.method === 'GET') return await getVolunteerQueueHandler(request, env, cors);
+      if (path === '/api/volunteer-queue/email' && request.method === 'POST') return await emailVolunteerQueue(request, env, cors);
+      if (path === '/api/heads' && request.method === 'GET') return await getHeadsHandler(request, env, cors);
+
       return json({ error: 'Not found' }, 404, cors);
     } catch (e) {
       console.error(e);
       return json({ error: e.message || 'Internal error' }, 500, cors);
+    }
+  },
+
+  // Daily cron: reminds an assigned head at 5/3/1 days before their session if they
+  // still haven't confirmed, without spamming - each tier only fires once.
+  async scheduled(event, env, ctx) {
+    const now = Date.now();
+    const { results } = await env.DB.prepare(
+      `SELECT * FROM dept_sessions WHERE status = 'awaiting_confirmation' AND assigned_head_id IS NOT NULL`
+    ).all();
+    for (const s of results) {
+      const daysUntil = Math.round((new Date(s.session_date + 'T00:00:00').getTime() - now) / 86400000);
+      let tier = null;
+      if (daysUntil === 5 && !s.reminder_5_sent) tier = 5;
+      else if (daysUntil === 3 && !s.reminder_3_sent) tier = 3;
+      else if (daysUntil === 1 && !s.reminder_1_sent) tier = 1;
+      if (!tier) continue;
+      await notifyUser(env, s.assigned_head_id, {
+        title: `Reminder: ${s.topic} is in ${tier} day${tier === 1 ? '' : 's'}`,
+        message: `Your department is leading "${s.topic}" on ${s.session_date} and it isn't confirmed yet. Please confirm and prepare.`,
+        emailSubject: `YAN reminder: confirm your session (${tier} day${tier === 1 ? '' : 's'} left)`
+      });
+      await env.DB.prepare(`UPDATE dept_sessions SET reminder_${tier}_sent = 1 WHERE id = ?`).bind(s.id).run();
     }
   }
 };

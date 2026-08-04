@@ -96,6 +96,10 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
   </div>
 
   <div id="sessions-list"><div class="loading">Loading sessions...</div></div>
+
+  <h2 class="page-title" style="font-size:1.2rem;margin-top:2.5rem;">Department Heads</h2>
+  <p class="page-sub">Already-assigned heads new sessions auto-notify.</p>
+  <div id="heads-list"></div>
 </div>
 
 <!-- NEW SESSION MODAL -->
@@ -206,6 +210,7 @@ async function init() {
     document.getElementById('ns-dept').value = 'programs';
   }
   await loadSessions();
+  await loadHeadsList();
 }
 
 async function loadSessions() {
@@ -216,10 +221,31 @@ async function loadSessions() {
       list.innerHTML = '<div class="empty">No sessions scheduled yet.' + (currentUser.isAdmin ? ' Click "+ New Session" to get started.' : '') + '</div>';
       return;
     }
-    list.innerHTML = sessions.map(renderSessionCard).join('');
+    // Grouped by month so the list stays readable as it grows.
+    const groups = {};
+    sessions.forEach(s => {
+      const monthKey = s.sessionDate.slice(0, 7);
+      (groups[monthKey] = groups[monthKey] || []).push(s);
+    });
+    list.innerHTML = Object.keys(groups).sort().map(monthKey => {
+      const label = new Date(monthKey + '-01T00:00:00').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+      return `<h3 style="font-size:0.85rem;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:0.04em;margin:1.5rem 0 0.75rem;">${label}</h3>`
+        + groups[monthKey].map(renderSessionCard).join('');
+    }).join('');
   } catch(e) {
     list.innerHTML = '<div class="empty">Could not load sessions: ' + (e.message||'') + '</div>';
   }
+}
+
+async function loadHeadsList() {
+  const el = document.getElementById('heads-list');
+  if (!el) return;
+  try {
+    const heads = await YanAPI.getHeads();
+    el.innerHTML = heads.length
+      ? '<div class="card">' + heads.map(h => `<span class="pill">${escapeHtml(DEPT_NAMES[h.department]||h.department)}: <strong>${escapeHtml(h.name)}</strong></span>`).join('') + '</div>'
+      : '<p style="color:var(--gray);font-size:0.85rem;">No department heads assigned yet.</p>';
+  } catch(e) { el.innerHTML = ''; }
 }
 
 function renderSessionCard(s) {

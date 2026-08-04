@@ -10,3 +10,7 @@ database_id = "b62aff2e-d188-4cdf-9f53-dd7bfddc02ee"
 [vars]
 ALLOWED_ORIGINS = "https://youngafricansnetwork.org,https://young-africans-network.web.app,http://localhost:8080"
 EMAIL_WORKER_URL = "https://yan-email-worker.youngafricansn.workers.dev"
+
+# Daily at 08:00 UTC - checks for sessions 5/3/1 days out that still aren't confirmed.
+[triggers]
+crons = ["0 8 * * *"]

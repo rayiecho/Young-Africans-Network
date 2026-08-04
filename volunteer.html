@@ -99,6 +99,24 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
   </div>
 
   <div id="task-list"><div class="loading">Loading tasks...</div></div>
+
+  <h2 class="page-title" style="font-size:1.2rem;margin-top:2.5rem;">Volunteer Queue</h2>
+  <p class="page-sub">Fair rotation — whoever's waited longest gets notified first when a task posts. Claiming moves you to the back of the line.</p>
+  <div id="queue-list" style="margin-bottom:1rem;"></div>
+  <button class="btn btn-outline" id="email-queue-btn" style="display:none;" onclick="openModal('email-queue-modal')">Email Everyone in the Queue</button>
+</div>
+
+<!-- EMAIL QUEUE MODAL -->
+<div class="modal-overlay" id="email-queue-modal">
+  <div class="modal">
+    <h3>Email the Volunteer Queue</h3>
+    <div class="form-group"><label>Subject</label><input type="text" id="eq-subject"></div>
+    <div class="form-group"><label>Message</label><textarea id="eq-message"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('email-queue-modal')">Cancel</button>
+      <button class="btn btn-primary" id="eq-submit" onclick="submitEmailQueue()">Send</button>
+    </div>
+  </div>
 </div>
 
 <!-- NEW TASK MODAL -->
@@ -214,11 +232,13 @@ async function init() {
   if (!currentUser) { window.location.href = 'community.html'; return; }
   if (currentUser.isAdmin) {
     document.getElementById('new-task-btn').style.display = 'inline-block';
+    document.getElementById('email-queue-btn').style.display = 'inline-block';
   }
   if (currentUser.isAdmin || currentUser.isDeptHead) {
     document.getElementById('review-tab-btn').style.display = 'inline-block';
   }
   await loadTasks();
+  await loadQueue();
 }
 
 function switchTab(tab) {
@@ -241,10 +261,47 @@ async function loadTasks() {
       list.innerHTML = '<div class="empty">' + emptyMsg + '</div>';
       return;
     }
-    list.innerHTML = tasks.map(renderTaskCard).join('');
+    // Grouped by month so this stays browsable once there's a real history of tasks.
+    const groups = {};
+    tasks.forEach(t => {
+      const monthKey = new Date(t.createdAt).toISOString().slice(0, 7);
+      (groups[monthKey] = groups[monthKey] || []).push(t);
+    });
+    list.innerHTML = Object.keys(groups).sort().reverse().map(monthKey => {
+      const label = new Date(monthKey + '-01T00:00:00').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+      return `<h3 style="font-size:0.85rem;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:0.04em;margin:1.5rem 0 0.75rem;">${label}</h3>`
+        + groups[monthKey].map(renderTaskCard).join('');
+    }).join('');
   } catch(e) {
     list.innerHTML = '<div class="empty">Could not load tasks: ' + (e.message||'') + '</div>';
   }
+}
+
+async function loadQueue() {
+  const el = document.getElementById('queue-list');
+  if (!el) return;
+  try {
+    const queue = await YanAPI.getVolunteerQueue();
+    el.innerHTML = queue.length
+      ? '<div class="card">' + queue.map((v,i) => `<span class="pill">#${i+1} ${escapeHtml(v.name)}</span>`).join('') + '</div>'
+      : '<p style="color:var(--gray);font-size:0.85rem;">Nobody in the queue yet — it fills up as people claim their first task.</p>';
+  } catch(e) { el.innerHTML = ''; }
+}
+
+async function submitEmailQueue() {
+  const subject = document.getElementById('eq-subject').value.trim();
+  const message = document.getElementById('eq-message').value.trim();
+  if (!subject || !message) return showToast('Subject and message required', 'error');
+  const btn = document.getElementById('eq-submit');
+  btn.disabled = true;
+  try {
+    const res = await YanAPI.emailVolunteerQueue(subject, message);
+    closeModal('email-queue-modal');
+    document.getElementById('eq-subject').value = '';
+    document.getElementById('eq-message').value = '';
+    showToast('Sent to ' + res.sentTo + ' volunteers');
+  } catch(e) { showToast(e.message, 'error'); }
+  finally { btn.disabled = false; }
 }
 
 function renderTaskCard(t) {
@@ -294,8 +351,12 @@ async function submitNewTask() {
 }
 
 async function claimTask(id) {
-  try { await YanAPI.claimVolunteerTask(id); showToast('Task claimed — find it under "My Tasks"'); await loadTasks(); }
-  catch(e) { showToast(e.message, 'error'); }
+  try {
+    await YanAPI.claimVolunteerTask(id);
+    showToast('Task claimed — find it under "My Tasks"');
+    await loadTasks();
+    await loadQueue();
+  } catch(e) { showToast(e.message, 'error'); }
 }
 
 function openSubmitModal(id) { activeTaskId = id; document.getElementById('sub-url').value = ''; document.getElementById('sub-status').textContent = ''; openModal('submit-modal'); }

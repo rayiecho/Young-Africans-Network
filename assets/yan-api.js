@@ -203,6 +203,17 @@
       return data.attendance;
     },
     async deleteSession(id) { return opsRequest('/api/sessions/' + id, { method: 'DELETE' }); },
+    async getHeads() {
+      const data = await opsRequest('/api/heads');
+      return data.heads;
+    },
+    async getVolunteerQueue() {
+      const data = await opsRequest('/api/volunteer-queue');
+      return data.queue;
+    },
+    async emailVolunteerQueue(subject, message) {
+      return opsRequest('/api/volunteer-queue/email', { method: 'POST', body: { subject, message } });
+    },
 
     // ---- volunteer room ----
     async createVolunteerTask({ taskType, title, brief, rawFileUrl, dueDate, relatedSessionId }) {
