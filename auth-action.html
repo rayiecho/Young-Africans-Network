@@ -150,13 +150,21 @@ function show(id) {
 const params = new URLSearchParams(window.location.search);
 const mode = params.get('mode');
 const oobCode = params.get('oobCode');
+// Our own auth worker's password-reset emails use token+uid instead of Firebase's
+// oobCode, since login now checks the D1-stored password, not Firebase's - resetting
+// via Firebase's own oobCode flow would change a password nothing actually checks
+// anymore. Email verification still rides on Firebase's native oobCode flow (see
+// community.html's doRegister/completeGoogleProfile, which bridge into a real
+// Firebase session and call sendEmailVerification normally), so that path is unchanged.
+const resetToken = params.get('token');
+const resetUid = params.get('uid');
+const AUTH_API = 'https://yan-auth-worker.youngafricansn.workers.dev';
 
 window.oobCode = oobCode;
+window.resetToken = resetToken;
+window.resetUid = resetUid;
 
-if (!mode || !oobCode) {
-  show('card-error');
-  document.getElementById('error-message').textContent = 'Invalid link. Please request a new one from the YAN platform.';
-} else if (mode === 'verifyEmail') {
+if (mode === 'verifyEmail' && oobCode) {
   applyActionCode(auth, oobCode)
     .then(() => show('card-verified'))
     .catch(err => {
@@ -167,15 +175,20 @@ if (!mode || !oobCode) {
         document.getElementById('error-message').textContent = 'This verification link has expired. Please log in and request a new verification email.';
       }
     });
-} else if (mode === 'resetPassword') {
+} else if (mode === 'resetPassword' && oobCode) {
   verifyPasswordResetCode(auth, oobCode)
     .then(() => show('card-reset'))
     .catch(() => {
       show('card-error');
       document.getElementById('error-message').textContent = 'This password reset link has expired. Please request a new one from the login page.';
     });
+} else if (mode === 'resetPassword' && resetToken && resetUid) {
+  // Our own token - just show the form; validity is checked when they submit
+  // (avoids burning/consuming a one-time-use check twice).
+  show('card-reset');
 } else {
   show('card-error');
+  document.getElementById('error-message').textContent = 'Invalid link. Please request a new one from the YAN platform.';
 }
 
 window.checkStrength = function(pass) {
@@ -212,7 +225,17 @@ window.doPasswordReset = async function() {
   btn.textContent = 'Updating...';
 
   try {
-    await confirmPasswordReset(auth, window.oobCode, newPass);
+    if (window.oobCode) {
+      await confirmPasswordReset(auth, window.oobCode, newPass);
+    } else {
+      const res = await fetch(AUTH_API + '/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: window.resetToken, uid: window.resetUid, newPassword: newPass })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Reset failed');
+    }
     show('card-reset-success');
   } catch(e) {
     alert('Error: ' + e.message);

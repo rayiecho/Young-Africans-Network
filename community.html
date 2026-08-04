@@ -44,9 +44,11 @@ window.onerror = function(msg, src, line, col, err) {
   return false;
 };
 </script>
+<script src="/assets/yan-api.js"></script>
+<script src="/assets/yan-google-signin.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut, onAuthStateChanged, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, signInWithCustomToken, sendEmailVerification, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, getDocs, deleteDoc, arrayUnion, arrayRemove, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";;
 
@@ -368,6 +370,21 @@ onAuthStateChanged(auth, async user => {
       console.error('Auth error:', e);
       showScreen('screen-landing');
     }
+  } else if (window.YanAPI && YanAPI.isLoggedIn() && !window._bridgeRetried) {
+    // A D1 session (localStorage, weeks-long) can outlive Firebase's own
+    // session-only persistence (e.g. the browser was fully restarted). Firebase has
+    // now finished checking its persisted session and found none, so silently
+    // re-mint a bridge token from the still-valid D1 session instead of dropping
+    // a real member back to the landing screen. window._bridgeRetried stops this
+    // from looping if the D1 session itself has actually expired.
+    window._bridgeRetried = true;
+    try {
+      const token = await YanAPI.getBridgeToken();
+      if (token) { await signInWithCustomToken(auth, token); return; }
+    } catch(e) { console.log('[YAN Auth] Bridge refresh failed:', e.message); }
+    currentUser = null;
+    currentUserData = null;
+    showScreen('screen-landing');
   } else {
     currentUser = null;
     currentUserData = null;
@@ -408,7 +425,10 @@ async function doRegister() {
       photoUrl = data.secure_url || '';
     }
     const refCode = localStorage.getItem('yan_referral');
-    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    const registerResult = await YanAPI.register({ name, email, password: pass, country, whatsapp, dob, role, department: dept, photoUrl });
+    // Bridge into a real Firebase Auth session (same uid) so every not-yet-migrated
+    // Firestore call below - and everywhere else in this file - keeps working.
+    const cred = await signInWithCustomToken(auth, registerResult.firebaseToken);
     await sendEmailVerification(cred.user, actionCodeSettings);
     await setDoc(doc(db, 'users', cred.user.uid), {
       ...sanitizeInputs({name, email, country, whatsapp, dob, role}), department: dept,
@@ -512,75 +532,47 @@ window.onboardingNext = () => { current++; if (current >= steps.length) { finish
   document.body.appendChild(modal);
 }
 
+// Holds { pendingToken, googleProfile } between doGoogleSignIn() finding a brand-new
+// Google identity and completeGoogleProfile() finishing their registration.
+let pendingGoogleSignup = null;
+
 async function doGoogleSignIn() {
   try {
-    const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
-    // Try popup first, fall back to redirect
-    try {
-      await signInWithPopup(auth, provider);
-    } catch(popupErr) {
-      if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/cancelled-popup-request' || popupErr.code === 'auth/popup-closed-by-user' || popupErr.message.includes('invalid')) {
-        await signInWithRedirect(auth, provider);
-      } else {
-        throw popupErr;
-      }
+    const idToken = await YanGoogleSignIn.requestGoogleIdToken();
+    const result = await YanAPI.googleSignIn(idToken);
+    if (result.needsProfileCompletion) {
+      pendingGoogleSignup = { pendingToken: result.pendingToken, googleProfile: result.googleProfile };
+      showGoogleCompleteProfile(result.googleProfile);
+      return;
     }
+    // Bridge into a real Firebase Auth session so every not-yet-migrated Firestore
+    // feature elsewhere in this file keeps working unchanged - onAuthStateChanged
+    // picks up from here exactly as it does for a password sign-in.
+    await signInWithCustomToken(auth, result.firebaseToken);
   } catch(e) {
     console.error('Google sign-in error:', e);
     showToast('Google sign-in failed: ' + e.message, 'error');
   }
 }
+window.doGoogleSignIn = doGoogleSignIn;
 
-async function handleGoogleRedirect() {
-  try {
-    const result = await getRedirectResult(auth);
-    if (!result) return;
-    const user = result.user;
-    // Check if user exists in Firestore
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
-    if (!userDoc.exists()) {
-      // New user - create profile
-      await setDoc(doc(db, 'users', user.uid), {
-        name: user.displayName || 'YAN Member',
-        email: user.email,
-        photo: user.photoURL || '',
-        role: 'member',
-        department: 'programs',
-        country: '',
-        bio: '',
-        isAdmin: false,
-        joinedAt: serverTimestamp(),
-        uid: user.uid
-      });
-      showToast('Welcome to YAN!  Please complete your profile.');
-    } else {
-      showToast('Welcome back! ');
-    }
-  } catch(e) {
-    console.error('Google redirect error:', e);
-    showToast('Google sign-in failed. Try again.', 'error');
-  }
-}
-
-function showGoogleCompleteProfile(user) {
+function showGoogleCompleteProfile(profile) {
   const nameEl = document.getElementById('gc-name');
   const emailEl = document.getElementById('gc-email');
   const photoEl = document.getElementById('gc-photo');
-  if (nameEl) nameEl.textContent = user.displayName || 'YAN Member';
-  if (emailEl) emailEl.textContent = user.email || '';
+  if (nameEl) nameEl.textContent = profile.name || 'YAN Member';
+  if (emailEl) emailEl.textContent = profile.email || '';
   if (photoEl) {
-    photoEl.innerHTML = user.photoURL
-      ? '<img src="' + user.photoURL + '" style="width:100%;height:100%;object-fit:cover;">'
-      : '<span style="font-size:1.6rem;color:var(--navy);">' + (user.displayName || '?')[0].toUpperCase() + '</span>';
+    photoEl.innerHTML = profile.photoUrl
+      ? '<img src="' + profile.photoUrl + '" style="width:100%;height:100%;object-fit:cover;">'
+      : '<span style="font-size:1.6rem;color:var(--navy);">' + (profile.name || '?')[0].toUpperCase() + '</span>';
   }
   showScreen('screen-google-complete');
 }
 window.showGoogleCompleteProfile = showGoogleCompleteProfile;
 
 async function completeGoogleProfile() {
-  const user = currentUser;
-  if (!user) { showToast('Session expired, please sign in again', 'error'); showScreen('screen-login'); return; }
+  if (!pendingGoogleSignup) { showToast('Session expired, please sign in again', 'error'); showScreen('screen-login'); return; }
   const agree = document.getElementById('gc-agree')?.checked;
   if (!agree) return showToast('Please agree to YAN Terms and Rules first', 'error');
   const country = document.getElementById('gc-country').value.trim();
@@ -592,28 +584,35 @@ async function completeGoogleProfile() {
   const btn = document.getElementById('gc-btn');
   btn.disabled = true; btn.textContent = 'Finishing up...';
   try {
+    const { googleProfile } = pendingGoogleSignup;
+    const result = await YanAPI.completeProfile({
+      pendingToken: pendingGoogleSignup.pendingToken, googleProfile, country, whatsapp, dob, department: dept, agree
+    });
+    await signInWithCustomToken(auth, result.firebaseToken);
+    // Mirror into Firestore too - everything else in this file still reads member
+    // profiles from Firestore until that gets migrated too.
+    const uid = result.user.id;
     const newUserData = {
-      ...sanitizeInputs({ name: user.displayName || 'YAN Member', country, whatsapp, dob, role: 'Member' }),
-      email: user.email, photoUrl: user.photoURL || '', department: dept,
+      ...sanitizeInputs({ name: googleProfile.name || 'YAN Member', country, whatsapp, dob, role: 'Member' }),
+      email: googleProfile.email, photoUrl: googleProfile.photoUrl || '', department: dept,
       bio: '', joinedAt: serverTimestamp(), createdAt: serverTimestamp(),
       isAdmin: false, isDeptHead: false, isExec: false, profileComplete: true
     };
-    await setDoc(doc(db, 'users', user.uid), newUserData);
-    await setDoc(doc(db, 'memberIds', user.uid.substring(0,8).toUpperCase()), {
+    await setDoc(doc(db, 'users', uid), newUserData);
+    await setDoc(doc(db, 'memberIds', uid.substring(0,8).toUpperCase()), {
       name: newUserData.name, role: 'Member', department: dept, country,
-      status: 'active', memberId: 'YAN-' + user.uid.substring(0,8).toUpperCase()
+      status: 'active', memberId: 'YAN-' + uid.substring(0,8).toUpperCase()
     });
-    currentUserData = newUserData;
-    localStorage.setItem('yan_user_' + user.uid, JSON.stringify(currentUserData));
+    await awardPoints(uid, 'account_created', 'Welcome to YAN! Account created', 10);
+    pendingGoogleSignup = null;
     showToast('Welcome to YAN! ');
-    await awardPoints(user.uid, 'account_created', 'Welcome to YAN! Account created', 10);
-    enterPlatform();
   } catch(e) {
     showToast('Error: ' + e.message, 'error');
   } finally {
     btn.disabled = false; btn.textContent = 'Complete Registration';
   }
 }
+window.completeGoogleProfile = completeGoogleProfile;
 window.completeGoogleProfile = completeGoogleProfile;
 
 async function doLogin() {
@@ -639,20 +638,13 @@ async function doLogin() {
   
   btn.disabled = true; btn.textContent = 'Signing in...';
   try {
-    console.log('[YAN Login] Calling signInWithEmailAndPassword...');
-    const result = await signInWithEmailAndPassword(auth, email, pass);
-    console.log('[YAN Login] Success:', result.user.uid);
+    console.log('[YAN Login] Calling YanAPI.login...');
+    const result = await YanAPI.login(email, pass);
+    await signInWithCustomToken(auth, result.firebaseToken);
+    console.log('[YAN Login] Success:', result.user.id);
   } catch(e) {
-    console.error('[YAN Login] Error code:', e.code, 'Message:', e.message);
-    if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
-      showToast('Invalid email or password. Please try again.', 'error');
-    } else if (e.code === 'auth/too-many-requests') {
-      showToast('Too many attempts. Please wait a few minutes and try again.', 'error');
-    } else if (e.code === 'auth/network-request-failed') {
-      showToast('Network error. Please check your internet connection.', 'error');
-    } else {
-      showToast('Login error: ' + e.message, 'error');
-    }
+    console.error('[YAN Login] Message:', e.message);
+    showToast(e.message || 'Login error, please try again.', 'error');
   } finally {
     btn.disabled = false; btn.textContent = 'Sign In';
   }
@@ -675,6 +667,7 @@ async function doLogout() {
   });
   currentUser = null;
   currentUserData = null;
+  await YanAPI.logout();
   await signOut(auth);
   showScreen('screen-landing');
 }
@@ -684,14 +677,12 @@ async function doForgotPassword() {
   if (!email) return showToast('Please enter your email address first','error');
   if (!isValidEmail(email)) return showToast('Please enter a valid email address','error');
   try {
-    await sendPasswordResetEmail(auth, email, actionCodeSettings);
+    // Goes through our own worker, not Firebase's sendPasswordResetEmail: login now
+    // checks the D1-stored password, so that's the one that needs to change.
+    await YanAPI.forgotPassword(email);
     showToast('Password reset email sent! Check your inbox and spam folder.');
   } catch(e) {
-    if (e.code === 'auth/user-not-found') {
-      showToast('No account found with that email address','error');
-    } else {
-      showToast('Error: ' + e.message, 'error');
-    }
+    showToast('Error: ' + e.message, 'error');
   }
 }
 

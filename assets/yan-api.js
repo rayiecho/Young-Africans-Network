@@ -52,10 +52,10 @@
     getCachedUser,
 
     // ---- auth ----
-    async register({ name, email, password, country, whatsapp, dob, role, department }) {
+    async register({ name, email, password, country, whatsapp, dob, role, department, photoUrl }) {
       const data = await request('/api/auth/register', {
         method: 'POST', auth: false,
-        body: { name, email, password, country, whatsapp, dob, role, department }
+        body: { name, email, password, country, whatsapp, dob, role, department, photoUrl }
       });
       return applySession(data);
     },
@@ -96,6 +96,15 @@
     async logout() {
       try { await request('/api/auth/logout', { method: 'POST' }); } catch (e) {}
       setToken(null); setCachedUser(null);
+    },
+
+    // Re-mints a Firebase custom token for the current D1 session, for pages that
+    // need to (re)establish a Firebase Auth session without asking for the password
+    // again - e.g. on load, when a D1 session exists but Firebase's own session
+    // (session-only persistence) was cleared by a browser restart.
+    async getBridgeToken() {
+      const data = await request('/api/auth/bridge', { method: 'POST' });
+      return data.firebaseToken;
     },
 
     async resendVerification() { return request('/api/auth/resend-verification', { method: 'POST' }); },

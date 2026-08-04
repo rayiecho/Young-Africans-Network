@@ -1,6 +1,6 @@
 import { hashPassword, verifyPasswordWithMigration, sha256Hex, randomToken, newId } from './crypto.js';
 import { verifyGoogleIdToken } from './google.js';
-import { mintFirebaseCustomToken } from './firebase-bridge.js';
+import { mintFirebaseCustomToken, markEmailVerified } from './firebase-bridge.js';
 import { verifyFirebaseScryptPassword } from './firebase-scrypt.js';
 
 function getServiceAccount(env) {
@@ -10,10 +10,13 @@ function getServiceAccount(env) {
 // Best-effort: if the bridge isn't configured yet, sessions still work, they just
 // won't get a Firebase custom token (community.html's Firestore calls would then
 // fail auth until this is set up - see FIREBASE_SERVICE_ACCOUNT secret).
-async function bridgeToken(env, uid) {
+async function bridgeToken(env, uid, { markVerified = false } = {}) {
   const sa = getServiceAccount(env);
   if (!sa) return null;
-  try { return await mintFirebaseCustomToken(sa, uid); } catch (e) { console.error('Bridge token failed:', e.message); return null; }
+  try {
+    if (markVerified) await markEmailVerified(sa, uid).catch(e => console.error('markEmailVerified failed:', e.message));
+    return await mintFirebaseCustomToken(sa, uid);
+  } catch (e) { console.error('Bridge token failed:', e.message); return null; }
 }
 
 function corsHeaders(origin, allowedOrigins) {
@@ -82,7 +85,7 @@ async function sendEmail(env, { to, subject, message }) {
 
 async function register(request, env, cors) {
   const body = await request.json();
-  const { name, email, password, country, whatsapp, dob, role, department } = body;
+  const { name, email, password, country, whatsapp, dob, role, department, photoUrl } = body;
   const nameParts = (name || '').trim().split(/\s+/).filter(Boolean);
   if (nameParts.length < 2) return json({ error: 'Please enter your full name (first and last name)' }, 400, cors);
   if (!/^[a-zA-Z\s]+$/.test(name)) return json({ error: 'Name must contain letters only' }, 400, cors);
@@ -100,10 +103,10 @@ async function register(request, env, cors) {
 
   await env.DB.batch([
     env.DB.prepare(
-      `INSERT INTO users (id,name,email,password_hash,role,department,country,whatsapp,dob,bio,
+      `INSERT INTO users (id,name,email,password_hash,photo_url,role,department,country,whatsapp,dob,bio,
         is_admin,is_dept_head,is_exec,email_verified,profile_complete,joined_at,created_at,updated_at)
-       VALUES (?,?,?,?,?,?,?,?,?,?,0,0,0,0,1,?,?,?)`
-    ).bind(userId, name.trim(), email.toLowerCase(), passwordHash, role || 'Member', department,
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,0,0,0,0,1,?,?,?)`
+    ).bind(userId, name.trim(), email.toLowerCase(), passwordHash, photoUrl || null, role || 'Member', department,
       country, whatsapp, dob, '', now, now, now),
     env.DB.prepare(`INSERT INTO auth_providers (id,user_id,provider,created_at) VALUES (?,?,?,?)`)
       .bind(newId(), userId, 'password', now),
@@ -114,17 +117,13 @@ async function register(request, env, cors) {
       .bind('YAN-' + userId.replace(/-/g, '').slice(0, 8).toUpperCase(), userId, name.trim(), role || 'Member', department, country)
   ]);
 
-  const verifyToken = randomToken(24);
-  const verifyHash = await sha256Hex(verifyToken);
-  await env.DB.prepare(
-    `INSERT INTO email_verification_tokens (id,user_id,token_hash,expires_at) VALUES (?,?,?,?)`
-  ).bind(newId(), userId, verifyHash, now + 24 * 3600 * 1000).run();
-
-  await sendEmail(env, {
-    to: email,
-    subject: 'Verify your YAN account',
-    message: `Welcome to Young Africans Network! Verify your email: https://youngafricansnetwork.org/auth-action.html?mode=verifyEmail&token=${verifyToken}&uid=${userId}`
-  });
+  // Verification email is intentionally not sent here: the caller (community.html)
+  // bridges into a real Firebase Auth session right after this and sends Firebase's
+  // own native verification email from there, since that's the flow auth-action.html
+  // already handles end-to-end. Sending a second, worker-issued one here would just
+  // confuse users with two emails (one of which auth-action.html can't act on for
+  // this mode). The /api/auth/resend-verification + /api/auth/verify-email routes
+  // stay available for a future fully-decoupled (no Firebase) client.
 
   const sessionToken = await createSession(env, userId, request);
   const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(userId).first();
@@ -209,7 +208,7 @@ async function googleSignIn(request, env, cors) {
   }
 
   const sessionToken = await createSession(env, user.id, request);
-  const firebaseToken = await bridgeToken(env, user.id);
+  const firebaseToken = await bridgeToken(env, user.id, { markVerified: true });
   return json({ token: sessionToken, user: publicUser(user), firebaseToken }, 200, cors);
 }
 
@@ -250,7 +249,7 @@ async function completeProfile(request, env, cors) {
 
   const sessionToken = await createSession(env, userId, request);
   const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(userId).first();
-  const firebaseToken = await bridgeToken(env, userId);
+  const firebaseToken = await bridgeToken(env, userId, { markVerified: true });
   return json({ token: sessionToken, user: publicUser(user), firebaseToken }, 201, cors);
 }
 
@@ -258,6 +257,18 @@ async function me(request, env, cors) {
   const user = await getSessionUser(request, env);
   if (!user) return json({ error: 'Not authenticated' }, 401, cors);
   return json({ user: publicUser(user) }, 200, cors);
+}
+
+// Re-mints a fresh Firebase custom token for an already-valid D1 session, without
+// needing the password again. Custom tokens expire after 1 hour, but a D1 session
+// can live for weeks - pages call this on load whenever they have a D1 session but
+// no active Firebase Auth session (e.g. after a browser restart cleared Firebase's
+// own session-only persistence) to silently re-bridge instead of forcing a re-login.
+async function bridge(request, env, cors) {
+  const user = await getSessionUser(request, env);
+  if (!user) return json({ error: 'Not authenticated' }, 401, cors);
+  const firebaseToken = await bridgeToken(env, user.id);
+  return json({ firebaseToken }, 200, cors);
 }
 
 async function logout(request, env, cors) {
@@ -364,7 +375,8 @@ export default {
         '/api/auth/verify-email': verifyEmail,
         '/api/auth/resend-verification': resendVerification,
         '/api/auth/forgot-password': forgotPassword,
-        '/api/auth/reset-password': resetPassword
+        '/api/auth/reset-password': resetPassword,
+        '/api/auth/bridge': bridge
       };
       if (path === '/api/auth/me' && request.method === 'GET') return await me(request, env, cors);
       if (routes[path] && request.method === 'POST') return await routes[path](request, env, cors);

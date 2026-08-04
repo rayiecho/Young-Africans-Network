@@ -36,6 +36,55 @@ async function getSigningKey(privateKeyPem, keyId) {
   return cachedKey;
 }
 
+let cachedAccessToken = null;
+let cachedAccessTokenExpiry = 0;
+
+// Standard "OAuth 2.0 for Server to Server Applications" JWT-bearer flow: sign a
+// short-lived assertion with the service account key, exchange it at Google's token
+// endpoint for a real access token scoped to the Identity Toolkit Admin API.
+async function getServiceAccountAccessToken(serviceAccount) {
+  if (cachedAccessToken && Date.now() < cachedAccessTokenExpiry - 60_000) return cachedAccessToken;
+
+  const now = Math.floor(Date.now() / 1000);
+  const header = { alg: 'RS256', typ: 'JWT' };
+  const payload = {
+    iss: serviceAccount.client_email,
+    scope: 'https://www.googleapis.com/auth/identitytoolkit',
+    aud: 'https://oauth2.googleapis.com/token',
+    iat: now,
+    exp: now + 3600
+  };
+  const assertion = `${base64UrlEncode(JSON.stringify(header))}.${base64UrlEncode(JSON.stringify(payload))}`;
+  const key = await getSigningKey(serviceAccount.private_key, serviceAccount.private_key_id);
+  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(assertion));
+  const jwt = `${assertion}.${base64UrlEncode(new Uint8Array(signature))}`;
+
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${encodeURIComponent(jwt)}`
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error('Token exchange failed: ' + JSON.stringify(data));
+
+  cachedAccessToken = data.access_token;
+  cachedAccessTokenExpiry = Date.now() + data.expires_in * 1000;
+  return cachedAccessToken;
+}
+
+// Google already verified this email at OAuth time - a Firebase user created fresh
+// via custom-token sign-in defaults to emailVerified:false, which would wrongly send
+// a Google sign-up through the (Firebase-native) email verification flow again.
+export async function markEmailVerified(serviceAccount, uid) {
+  const accessToken = await getServiceAccountAccessToken(serviceAccount);
+  const res = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + accessToken },
+    body: JSON.stringify({ localId: uid, emailVerified: true })
+  });
+  if (!res.ok) throw new Error('markEmailVerified failed: ' + (await res.text()));
+}
+
 // serviceAccount: parsed serviceAccount.json ({ client_email, private_key, private_key_id, ... })
 export async function mintFirebaseCustomToken(serviceAccount, uid, extraClaims) {
   const now = Math.floor(Date.now() / 1000);
