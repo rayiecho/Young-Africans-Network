@@ -40,6 +40,9 @@
   function applySession(data) {
     if (data.token) setToken(data.token);
     if (data.user) setCachedUser(data.user);
+    // data.firebaseToken (if present) is a Firebase custom token - the caller is
+    // responsible for calling signInWithCustomToken(auth, data.firebaseToken) to
+    // bridge into Firebase Auth for pages still using the Firestore SDK directly.
     return data;
   }
 

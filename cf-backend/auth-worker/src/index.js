@@ -1,5 +1,20 @@
-import { hashPassword, verifyPassword, sha256Hex, randomToken, newId } from './crypto.js';
+import { hashPassword, verifyPasswordWithMigration, sha256Hex, randomToken, newId } from './crypto.js';
 import { verifyGoogleIdToken } from './google.js';
+import { mintFirebaseCustomToken } from './firebase-bridge.js';
+import { verifyFirebaseScryptPassword } from './firebase-scrypt.js';
+
+function getServiceAccount(env) {
+  try { return JSON.parse(env.FIREBASE_SERVICE_ACCOUNT); } catch (e) { return null; }
+}
+
+// Best-effort: if the bridge isn't configured yet, sessions still work, they just
+// won't get a Firebase custom token (community.html's Firestore calls would then
+// fail auth until this is set up - see FIREBASE_SERVICE_ACCOUNT secret).
+async function bridgeToken(env, uid) {
+  const sa = getServiceAccount(env);
+  if (!sa) return null;
+  try { return await mintFirebaseCustomToken(sa, uid); } catch (e) { console.error('Bridge token failed:', e.message); return null; }
+}
 
 function corsHeaders(origin, allowedOrigins) {
   const allowed = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
@@ -113,7 +128,8 @@ async function register(request, env, cors) {
 
   const sessionToken = await createSession(env, userId, request);
   const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(userId).first();
-  return json({ token: sessionToken, user: publicUser(user) }, 201, cors);
+  const firebaseToken = await bridgeToken(env, userId);
+  return json({ token: sessionToken, user: publicUser(user), firebaseToken }, 201, cors);
 }
 
 async function login(request, env, cors) {
@@ -121,10 +137,30 @@ async function login(request, env, cors) {
   if (!email || !password) return json({ error: 'Enter email and password' }, 400, cors);
   const user = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(email.toLowerCase()).first();
   if (!user || !user.password_hash) return json({ error: 'Invalid email or password' }, 401, cors);
-  const ok = await verifyPassword(password, user.password_hash);
+
+  const { ok, isLegacy } = await verifyPasswordWithMigration(password, user.password_hash, (pwd, hashB64, saltB64) =>
+    verifyFirebaseScryptPassword(pwd, hashB64, saltB64, {
+      signerKey: env.FIREBASE_SIGNER_KEY,
+      saltSeparator: env.FIREBASE_SALT_SEPARATOR,
+      rounds: parseInt(env.FIREBASE_SCRYPT_ROUNDS, 10),
+      memoryCost: parseInt(env.FIREBASE_SCRYPT_MEMORY_COST, 10)
+    })
+  );
   if (!ok) return json({ error: 'Invalid email or password' }, 401, cors);
+
+  if (isLegacy) {
+    // Drain the migrated-Firebase population transparently: once we've seen the
+    // real password, re-hash it into our own format so this legacy path (and the
+    // signer-key secret it depends on) is only needed for accounts that haven't
+    // logged in since the migration.
+    const newHash = await hashPassword(password);
+    await env.DB.prepare('UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?')
+      .bind(newHash, Date.now(), user.id).run();
+  }
+
   const sessionToken = await createSession(env, user.id, request);
-  return json({ token: sessionToken, user: publicUser(user) }, 200, cors);
+  const firebaseToken = await bridgeToken(env, user.id);
+  return json({ token: sessionToken, user: publicUser(user), firebaseToken }, 200, cors);
 }
 
 async function googleSignIn(request, env, cors) {
@@ -173,7 +209,8 @@ async function googleSignIn(request, env, cors) {
   }
 
   const sessionToken = await createSession(env, user.id, request);
-  return json({ token: sessionToken, user: publicUser(user) }, 200, cors);
+  const firebaseToken = await bridgeToken(env, user.id);
+  return json({ token: sessionToken, user: publicUser(user), firebaseToken }, 200, cors);
 }
 
 async function completeProfile(request, env, cors) {
@@ -213,7 +250,8 @@ async function completeProfile(request, env, cors) {
 
   const sessionToken = await createSession(env, userId, request);
   const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(userId).first();
-  return json({ token: sessionToken, user: publicUser(user) }, 201, cors);
+  const firebaseToken = await bridgeToken(env, userId);
+  return json({ token: sessionToken, user: publicUser(user), firebaseToken }, 201, cors);
 }
 
 async function me(request, env, cors) {

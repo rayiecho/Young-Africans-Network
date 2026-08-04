@@ -24,11 +24,21 @@ export async function hashPassword(password, saltHex) {
   return `${bytesToHex(salt)}:${bytesToHex(new Uint8Array(bits))}`;
 }
 
-export async function verifyPassword(password, stored) {
-  if (!stored || !stored.includes(':')) return false;
+// stored is either our own "<saltHex>:<hashHex>" (PBKDF2) or a migrated Firebase
+// account stored as "fbscrypt$<saltB64>$<hashB64>" (see firebase-scrypt.js). Returns
+// { ok, isLegacy } so callers can transparently re-hash to PBKDF2 on a successful
+// legacy login, draining the legacy population over time.
+export async function verifyPasswordWithMigration(password, stored, verifyLegacy) {
+  if (!stored) return { ok: false, isLegacy: false };
+  if (stored.startsWith('fbscrypt$')) {
+    const [, saltB64, hashB64] = stored.split('$');
+    const ok = await verifyLegacy(password, hashB64, saltB64);
+    return { ok, isLegacy: true };
+  }
+  if (!stored.includes(':')) return { ok: false, isLegacy: false };
   const [saltHex] = stored.split(':');
   const computed = await hashPassword(password, saltHex);
-  return timingSafeEqual(computed, stored);
+  return { ok: timingSafeEqual(computed, stored), isLegacy: false };
 }
 
 function timingSafeEqual(a, b) {

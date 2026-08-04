@@ -10,3 +10,6 @@ seed_videos.py
 main
 .firebase/
 functions/
+cf-backend/migration/*.json
+cf-backend/migration/*.sql
+cf-backend/**/.dev.vars

@@ -1,6 +1,7 @@
 name = "yan-auth-worker"
 main = "src/index.js"
 compatibility_date = "2026-07-01"
+compatibility_flags = ["nodejs_compat"]
 
 [[d1_databases]]
 binding = "DB"
@@ -12,3 +13,9 @@ GOOGLE_CLIENT_ID = "224204618916-014ts9p8mj2vs9b0rtnq1b2o8gaetehk.apps.googleuse
 EMAIL_WORKER_URL = "https://yan-email-worker.youngafricansn.workers.dev"
 SESSION_TTL_SECONDS = "2592000"
 ALLOWED_ORIGINS = "https://youngafricansnetwork.org,https://young-africans-network.web.app,http://localhost:8080"
+# Firebase's legacy password-hash algorithm params (not secret on their own -
+# the signer key, which IS the sensitive part, is set separately via
+# `wrangler secret put FIREBASE_SIGNER_KEY`, never committed here).
+FIREBASE_SALT_SEPARATOR = "Bw=="
+FIREBASE_SCRYPT_ROUNDS = "8"
+FIREBASE_SCRYPT_MEMORY_COST = "14"
