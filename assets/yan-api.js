@@ -9,6 +9,7 @@
 (function () {
   const AUTH_BASE = 'https://yan-auth-worker.youngafricansn.workers.dev';
   const CONTENT_BASE = 'https://yan-content-worker.youngafricansn.workers.dev';
+  const OPS_BASE = 'https://yan-ops-worker.youngafricansn.workers.dev';
   const TOKEN_KEY = 'yan_session_token';
   const USER_CACHE_KEY = 'yan_session_user';
 
@@ -39,6 +40,7 @@
   }
   const request = (path, opts) => requestTo(AUTH_BASE, path, opts);
   const contentRequest = (path, opts) => requestTo(CONTENT_BASE, path, opts);
+  const opsRequest = (path, opts) => requestTo(OPS_BASE, path, opts);
 
   function applySession(data) {
     if (data.token) setToken(data.token);
@@ -145,6 +147,66 @@
     },
     async createReply(postId, content) {
       return contentRequest('/api/posts/' + postId + '/replies', { method: 'POST', body: { content } });
+    },
+
+    // ---- session coordination ----
+    async createSession({ sessionDate, department, topic, meetLink, assignedHeadId }) {
+      return opsRequest('/api/sessions', { method: 'POST', body: { sessionDate, department, topic, meetLink, assignedHeadId } });
+    },
+    async getSessions({ department, headId } = {}) {
+      const params = new URLSearchParams();
+      if (department) params.set('department', department);
+      if (headId) params.set('headId', headId);
+      const qs = params.toString();
+      const data = await opsRequest('/api/sessions' + (qs ? '?' + qs : ''));
+      return data.sessions;
+    },
+    async getSession(id) {
+      const data = await opsRequest('/api/sessions/' + id);
+      return data.session;
+    },
+    async confirmSession(id) { return opsRequest('/api/sessions/' + id + '/confirm', { method: 'POST' }); },
+    async markSessionPrepComplete(id) { return opsRequest('/api/sessions/' + id + '/prep-complete', { method: 'POST' }); },
+    async flagSessionNeedsHelp(id, note) {
+      return opsRequest('/api/sessions/' + id + '/needs-help', { method: 'POST', body: { note } });
+    },
+    async addSessionGuest(id, name, contact) {
+      return opsRequest('/api/sessions/' + id + '/guests', { method: 'POST', body: { name, contact } });
+    },
+    async confirmSessionGuest(id, guestId) {
+      return opsRequest('/api/sessions/' + id + '/guests/' + guestId + '/confirm', { method: 'POST' });
+    },
+    async addSessionRole(id, roleName) {
+      return opsRequest('/api/sessions/' + id + '/roles', { method: 'POST', body: { roleName } });
+    },
+    async claimSessionRole(id, roleId) {
+      return opsRequest('/api/sessions/' + id + '/roles/' + roleId + '/claim', { method: 'POST' });
+    },
+    async checkInSession(id) { return opsRequest('/api/sessions/' + id + '/checkin', { method: 'POST' }); },
+    async getSessionAttendance(id) {
+      const data = await opsRequest('/api/sessions/' + id + '/attendance');
+      return data.attendance;
+    },
+    async deleteSession(id) { return opsRequest('/api/sessions/' + id, { method: 'DELETE' }); },
+
+    // ---- volunteer room ----
+    async createVolunteerTask({ taskType, title, brief, rawFileUrl, dueDate, relatedSessionId }) {
+      return opsRequest('/api/volunteer-tasks', { method: 'POST', body: { taskType, title, brief, rawFileUrl, dueDate, relatedSessionId } });
+    },
+    async getVolunteerTasks({ status, mine } = {}) {
+      const params = new URLSearchParams();
+      if (status) params.set('status', status);
+      if (mine) params.set('mine', '1');
+      const qs = params.toString();
+      const data = await opsRequest('/api/volunteer-tasks' + (qs ? '?' + qs : ''));
+      return data.tasks;
+    },
+    async claimVolunteerTask(id) { return opsRequest('/api/volunteer-tasks/' + id + '/claim', { method: 'POST' }); },
+    async submitVolunteerTask(id, submittedFileUrl) {
+      return opsRequest('/api/volunteer-tasks/' + id + '/submit', { method: 'POST', body: { submittedFileUrl } });
+    },
+    async reviewVolunteerTask(id, approved, note) {
+      return opsRequest('/api/volunteer-tasks/' + id + '/review', { method: 'POST', body: { approved, note } });
     }
   };
 

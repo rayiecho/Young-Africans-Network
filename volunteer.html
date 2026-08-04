@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Volunteer Room | Young Africans Network</title>
+<link rel="icon" href="/images/logo.jpeg" type="image/jpeg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);min-height:100vh;}
+a{text-decoration:none;color:inherit;}
+h1,h2,h3{font-family:'Playfair Display',serif;font-weight:900;}
+
+nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 2rem;height:70px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.nav-logo{display:flex;align-items:center;gap:0.75rem;}
+.nav-logo img{height:42px;border-radius:50%;}
+.nav-logo-text{font-size:0.85rem;font-weight:700;}
+.nav-back{font-size:0.82rem;font-weight:600;color:var(--navy);}
+
+.wrap{max-width:900px;margin:0 auto;padding:2rem 1.25rem 4rem;}
+.page-title{font-size:1.8rem;margin-bottom:0.3rem;}
+.page-sub{color:var(--gray);font-size:0.88rem;margin-bottom:1.5rem;}
+
+.tabs{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.tab-btn{background:#fff;border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.55rem 1.2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.82rem;cursor:pointer;}
+.tab-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+.btn{border:none;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:700;cursor:pointer;font-size:0.82rem;padding:0.6rem 1.3rem;transition:opacity 0.15s;}
+.btn:hover{opacity:0.88;}
+.btn-primary{background:var(--navy);color:#fff;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-gold{background:var(--gold);color:var(--navy);}
+.btn-green{background:#27AE60;color:#fff;}
+.btn-outline{background:#fff;color:var(--navy);border:1.5px solid rgba(27,42,107,0.2);}
+.btn:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-sm{padding:0.4rem 0.9rem;font-size:0.74rem;}
+
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem;}
+
+.card{background:#fff;border-radius:18px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-bottom:1.25rem;}
+.task-tag{display:inline-block;background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.65rem;border-radius:50px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:0.5rem;}
+.task-title{font-size:1.05rem;font-weight:800;margin-bottom:0.3rem;}
+.task-brief{font-size:0.85rem;color:var(--gray);line-height:1.6;margin-bottom:0.5rem;}
+.task-meta{font-size:0.74rem;color:var(--gray);}
+
+.badge{display:inline-block;padding:0.25rem 0.75rem;border-radius:50px;font-size:0.68rem;font-weight:700;text-transform:uppercase;}
+.badge-open{background:rgba(107,114,128,0.12);color:var(--gray);}
+.badge-claimed{background:rgba(245,166,35,0.15);color:#b37800;}
+.badge-submitted{background:rgba(59,130,246,0.12);color:#3B82F6;}
+.badge-approved{background:rgba(39,174,96,0.12);color:#27AE60;}
+.badge-changes_requested{background:rgba(230,51,41,0.1);color:var(--red);}
+
+.actions-row{display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:0.85rem;}
+.empty{text-align:center;padding:3rem 1rem;color:var(--gray);}
+.loading{text-align:center;padding:2rem;color:var(--gray);font-size:0.85rem;}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(13,27,75,0.55);display:none;align-items:center;justify-content:center;padding:1rem;z-index:999;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:20px;padding:1.75rem;max-width:460px;width:100%;max-height:90vh;overflow-y:auto;}
+.modal h3{font-size:1.15rem;margin-bottom:1rem;}
+.form-group{margin-bottom:0.9rem;}
+.form-group label{display:block;font-size:0.78rem;font-weight:700;margin-bottom:0.35rem;}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.85rem;outline:none;}
+.form-group textarea{resize:vertical;min-height:70px;}
+.form-group small{display:block;color:var(--gray);font-size:0.72rem;margin-top:0.3rem;}
+.modal-actions{display:flex;gap:0.6rem;justify-content:flex-end;margin-top:1.25rem;}
+
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--navy);color:#fff;padding:0.8rem 1.5rem;border-radius:50px;font-size:0.85rem;opacity:0;transition:all 0.3s;z-index:9999;}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.toast.error{background:var(--red);}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="community.html" class="nav-logo">
+    <img src="images/logo.jpeg" alt="YAN">
+    <span class="nav-logo-text">Young Africans<br>Network</span>
+  </a>
+  <a href="community.html" class="nav-back">&larr; Back to Community</a>
+</nav>
+
+<div class="wrap">
+  <h1 class="page-title">Volunteer Room</h1>
+  <p class="page-sub">Posters, video edits, slides and more — claim a task, do the work, get recognised.</p>
+
+  <div class="toolbar">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="open" onclick="switchTab('open')">Open Tasks</button>
+      <button class="tab-btn" data-tab="mine" onclick="switchTab('mine')">My Tasks</button>
+      <button class="tab-btn" id="review-tab-btn" data-tab="review" onclick="switchTab('review')" style="display:none;">Review Queue</button>
+    </div>
+    <button class="btn btn-primary" id="new-task-btn" style="display:none;" onclick="openModal('new-task-modal')">+ New Task</button>
+  </div>
+
+  <div id="task-list"><div class="loading">Loading tasks...</div></div>
+</div>
+
+<!-- NEW TASK MODAL -->
+<div class="modal-overlay" id="new-task-modal">
+  <div class="modal">
+    <h3>Post a Task</h3>
+    <div class="form-group"><label>Type</label>
+      <select id="nt-type">
+        <option value="poster">Poster / Banner</option>
+        <option value="video_edit">Video Edit</option>
+        <option value="slides">Slides / Presentation</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Title</label><input type="text" id="nt-title" placeholder="e.g. Poster for Career Dev session"></div>
+    <div class="form-group"><label>Brief</label><textarea id="nt-brief" placeholder="What's needed - event, date, theme, required text..."></textarea></div>
+    <div class="form-group"><label>Raw file link (optional)</label><input type="text" id="nt-raw" placeholder="Link to raw video/photos/brief materials">
+      <small>Upload the raw file somewhere (Drive, Cloudinary, etc.) and paste the link here.</small>
+    </div>
+    <div class="form-group"><label>Due date (optional)</label><input type="date" id="nt-due"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('new-task-modal')">Cancel</button>
+      <button class="btn btn-primary" id="nt-submit" onclick="submitNewTask()">Post Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUBMIT DELIVERABLE MODAL -->
+<div class="modal-overlay" id="submit-modal">
+  <div class="modal">
+    <h3>Submit Your Work</h3>
+    <div class="form-group"><label>Finished file link</label><input type="text" id="sub-url" placeholder="Link to your finished poster/video/slides">
+      <small>Upload it somewhere shareable (Drive, Cloudinary, YouTube unlisted, etc.) and paste the link.</small>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('submit-modal')">Cancel</button>
+      <button class="btn btn-primary" id="sub-submit" onclick="submitDeliverable()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW MODAL -->
+<div class="modal-overlay" id="review-modal">
+  <div class="modal">
+    <h3>Review Submission</h3>
+    <p style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;">Deliverable: <a id="review-file-link" href="#" target="_blank" style="color:var(--navy);font-weight:700;"></a></p>
+    <div class="form-group"><label>Note (optional)</label><textarea id="review-note" placeholder="Feedback for the volunteer..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-red" onclick="submitReview(false)">Request Changes</button>
+      <button class="btn btn-green" onclick="submitReview(true)">Approve (+15 pts)</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/assets/yan-api.js"></script>
+<script>
+let currentUser = null;
+let activeTab = 'open';
+let activeTaskId = null;
+const TYPE_LABELS = { poster: 'Poster / Banner', video_edit: 'Video Edit', slides: 'Slides', other: 'Other' };
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type === 'error' ? ' error' : '');
+  setTimeout(() => t.className = 'toast', 3000);
+}
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = String(str == null ? '' : str);
+  return d.innerHTML;
+}
+function timeAgo(ts) {
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  return Math.floor(diff/86400) + 'd ago';
+}
+
+async function init() {
+  currentUser = await YanAPI.me();
+  if (!currentUser) { window.location.href = 'community.html'; return; }
+  if (currentUser.isAdmin || currentUser.isDeptHead) {
+    document.getElementById('new-task-btn').style.display = 'inline-block';
+    document.getElementById('review-tab-btn').style.display = 'inline-block';
+  }
+  await loadTasks();
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  loadTasks();
+}
+
+async function loadTasks() {
+  const list = document.getElementById('task-list');
+  list.innerHTML = '<div class="loading">Loading tasks...</div>';
+  try {
+    let tasks;
+    if (activeTab === 'open') tasks = await YanAPI.getVolunteerTasks({ status: 'open' });
+    else if (activeTab === 'mine') tasks = await YanAPI.getVolunteerTasks({ mine: true });
+    else tasks = await YanAPI.getVolunteerTasks({ status: 'submitted' });
+
+    if (!tasks.length) {
+      const emptyMsg = { open: 'No open tasks right now.', mine: "You haven't claimed any tasks yet.", review: 'Nothing waiting for review.' }[activeTab];
+      list.innerHTML = '<div class="empty">' + emptyMsg + '</div>';
+      return;
+    }
+    list.innerHTML = tasks.map(renderTaskCard).join('');
+  } catch(e) {
+    list.innerHTML = '<div class="empty">Could not load tasks: ' + (e.message||'') + '</div>';
+  }
+}
+
+function renderTaskCard(t) {
+  let actions = '';
+  if (activeTab === 'open') {
+    actions = `<button class="btn btn-primary btn-sm" onclick="claimTask('${t.id}')">Claim This Task</button>`;
+  } else if (activeTab === 'mine') {
+    if (t.status === 'claimed' || t.status === 'changes_requested') {
+      actions = `<button class="btn btn-primary btn-sm" onclick="openSubmitModal('${t.id}')">${t.status==='changes_requested'?'Resubmit':'Submit Deliverable'}</button>`;
+    }
+  } else if (activeTab === 'review') {
+    actions = `<button class="btn btn-outline btn-sm" onclick="openReviewModal('${t.id}','${escapeHtml(t.submittedFileUrl||'')}')">Review Submission</button>`;
+  }
+
+  return `
+  <div class="card">
+    <span class="task-tag">${TYPE_LABELS[t.taskType] || t.taskType}</span>
+    <span class="badge badge-${t.status}" style="float:right;">${t.status.replace('_',' ')}</span>
+    <div class="task-title">${escapeHtml(t.title)}</div>
+    ${t.brief ? `<div class="task-brief">${escapeHtml(t.brief)}</div>` : ''}
+    ${t.rawFileUrl ? `<a href="${escapeHtml(t.rawFileUrl)}" target="_blank" style="font-size:0.8rem;color:var(--navy);font-weight:700;">📎 Raw materials</a><br>` : ''}
+    ${t.submittedFileUrl ? `<a href="${escapeHtml(t.submittedFileUrl)}" target="_blank" style="font-size:0.8rem;color:var(--navy);font-weight:700;">✅ Submitted deliverable</a><br>` : ''}
+    ${t.reviewNote ? `<div style="background:var(--light);border-radius:10px;padding:0.6rem 0.85rem;margin-top:0.5rem;font-size:0.8rem;">Feedback: ${escapeHtml(t.reviewNote)}</div>` : ''}
+    <div class="task-meta">${t.claimedByName ? 'Claimed by ' + escapeHtml(t.claimedByName) + ' · ' : ''}${t.dueDate ? 'Due ' + t.dueDate + ' · ' : ''}Posted ${timeAgo(t.createdAt)}${t.pointsAwarded ? ' · +' + t.pointsAwarded + ' pts awarded' : ''}</div>
+    ${actions ? `<div class="actions-row">${actions}</div>` : ''}
+  </div>`;
+}
+
+async function submitNewTask() {
+  const taskType = document.getElementById('nt-type').value;
+  const title = document.getElementById('nt-title').value.trim();
+  const brief = document.getElementById('nt-brief').value.trim();
+  const rawFileUrl = document.getElementById('nt-raw').value.trim();
+  const dueDate = document.getElementById('nt-due').value;
+  if (!title) return showToast('Give the task a title', 'error');
+  const btn = document.getElementById('nt-submit');
+  btn.disabled = true;
+  try {
+    await YanAPI.createVolunteerTask({ taskType, title, brief, rawFileUrl, dueDate });
+    closeModal('new-task-modal');
+    ['nt-title','nt-brief','nt-raw','nt-due'].forEach(id => document.getElementById(id).value = '');
+    showToast('Task posted!');
+    if (activeTab === 'open') await loadTasks();
+  } catch(e) { showToast(e.message || 'Could not post task', 'error'); }
+  finally { btn.disabled = false; }
+}
+
+async function claimTask(id) {
+  try { await YanAPI.claimVolunteerTask(id); showToast('Task claimed — find it under "My Tasks"'); await loadTasks(); }
+  catch(e) { showToast(e.message, 'error'); }
+}
+
+function openSubmitModal(id) { activeTaskId = id; document.getElementById('sub-url').value = ''; openModal('submit-modal'); }
+async function submitDeliverable() {
+  const url = document.getElementById('sub-url').value.trim();
+  if (!url) return showToast('Paste a link to your finished work', 'error');
+  const btn = document.getElementById('sub-submit');
+  btn.disabled = true;
+  try {
+    await YanAPI.submitVolunteerTask(activeTaskId, url);
+    closeModal('submit-modal');
+    showToast('Submitted for review!');
+    await loadTasks();
+  } catch(e) { showToast(e.message, 'error'); }
+  finally { btn.disabled = false; }
+}
+
+function openReviewModal(id, fileUrl) {
+  activeTaskId = id;
+  const link = document.getElementById('review-file-link');
+  link.href = fileUrl; link.textContent = fileUrl || '(no link)';
+  document.getElementById('review-note').value = '';
+  openModal('review-modal');
+}
+async function submitReview(approved) {
+  const note = document.getElementById('review-note').value.trim();
+  try {
+    await YanAPI.reviewVolunteerTask(activeTaskId, approved, note);
+    closeModal('review-modal');
+    showToast(approved ? 'Approved — points awarded!' : 'Changes requested');
+    await loadTasks();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+init();
+</script>
+</body>
+</html>

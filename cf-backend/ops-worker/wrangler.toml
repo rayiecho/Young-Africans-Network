@@ -1,0 +1,11 @@
+name = "yan-ops-worker"
+main = "src/index.js"
+compatibility_date = "2026-07-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "yan-db"
+database_id = "b62aff2e-d188-4cdf-9f53-dd7bfddc02ee"
+
+[vars]
+ALLOWED_ORIGINS = "https://youngafricansnetwork.org,https://young-africans-network.web.app,http://localhost:8080"
