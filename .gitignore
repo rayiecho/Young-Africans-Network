@@ -13,3 +13,4 @@ functions/
 cf-backend/migration/*.json
 cf-backend/migration/*.sql
 cf-backend/**/.dev.vars
+firebase-debug.log

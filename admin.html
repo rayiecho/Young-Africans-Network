@@ -16,6 +16,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
+<script src="/assets/yan-api.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -227,6 +228,13 @@ window.doAdminLogin = async function() {
   if (btn) { btn.disabled = true; btn.textContent = 'Signing in...'; }
   try {
     await signInWithEmailAndPassword(auth, email, pass);
+    // Also establish a D1 session with the same credentials, best-effort - needed so
+    // sessions.html/volunteer.html (which check YanAPI's session, not Firebase's)
+    // recognize this admin when linked to from the sidebar. Admin.html itself still
+    // runs entirely on Firebase; this doesn't touch that.
+    if (window.YanAPI) {
+      YanAPI.login(email, pass).catch(e => console.log('D1 session login skipped:', e.message));
+    }
   } catch(e) {
     console.error('Admin login error:', e);
     showToast('Incorrect email or password.', 'error');
@@ -4897,6 +4905,12 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> User Health Check
       </button>
       <button class="nav-item" data-section="feedback" onclick="loadSection('feedback')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Session Feedback</button>
+      <a class="nav-item" href="sessions.html" target="_blank" style="text-decoration:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Session Coordination
+      </a>
+      <a class="nav-item" href="volunteer.html" target="_blank" style="text-decoration:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> Volunteer Room
+      </a>
       <button class="nav-item" data-section="sos" onclick="loadSection('sos')" style="color:#E63329;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> SOS Reports
       </button>
