@@ -7,6 +7,13 @@ binding = "DB"
 database_name = "yan-db"
 database_id = "b62aff2e-d188-4cdf-9f53-dd7bfddc02ee"
 
+# Direct Worker-to-Worker binding, not a public fetch() to its workers.dev URL - a
+# Worker fetching another Worker's public URL on the same account hits Cloudflare's
+# loop-prevention (error 1042) and fails silently from the caller's point of view.
+[[services]]
+binding = "AI_WORKER"
+service = "yan-ai-worker"
+
 [vars]
 EMAIL_WORKER_URL = "https://yan-email-worker.youngafricansn.workers.dev"
 ALLOWED_ORIGINS = "https://youngafricansnetwork.org,https://young-africans-network.web.app,http://localhost:8080"

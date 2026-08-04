@@ -8,6 +8,7 @@
 
 (function () {
   const AUTH_BASE = 'https://yan-auth-worker.youngafricansn.workers.dev';
+  const CONTENT_BASE = 'https://yan-content-worker.youngafricansn.workers.dev';
   const TOKEN_KEY = 'yan_session_token';
   const USER_CACHE_KEY = 'yan_session_user';
 
@@ -20,13 +21,13 @@
     user ? localStorage.setItem(USER_CACHE_KEY, JSON.stringify(user)) : localStorage.removeItem(USER_CACHE_KEY);
   }
 
-  async function request(path, { method = 'GET', body, auth = true } = {}) {
+  async function requestTo(base, path, { method = 'GET', body, auth = true } = {}) {
     const headers = { 'Content-Type': 'application/json' };
     if (auth) {
       const token = getToken();
       if (token) headers['Authorization'] = 'Bearer ' + token;
     }
-    const res = await fetch(AUTH_BASE + path, {
+    const res = await fetch(base + path, {
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined
@@ -36,6 +37,8 @@
     if (!res.ok) throw new Error(data.error || ('Request failed (' + res.status + ')'));
     return data;
   }
+  const request = (path, opts) => requestTo(AUTH_BASE, path, opts);
+  const contentRequest = (path, opts) => requestTo(CONTENT_BASE, path, opts);
 
   function applySession(data) {
     if (data.token) setToken(data.token);
@@ -116,6 +119,32 @@
     },
     async resetPassword(token, uid, newPassword) {
       return request('/api/auth/reset-password', { method: 'POST', auth: false, body: { token, uid, newPassword } });
+    },
+
+    // ---- feed ----
+    async getPosts({ department, limit } = {}) {
+      const params = new URLSearchParams();
+      if (department) params.set('department', department);
+      if (limit) params.set('limit', limit);
+      const qs = params.toString();
+      const data = await contentRequest('/api/posts' + (qs ? '?' + qs : ''));
+      return data.posts;
+    },
+    async createPost({ content, category, link, imageUrl, department }) {
+      return contentRequest('/api/posts', { method: 'POST', body: { content, category, link, imageUrl, department } });
+    },
+    async deletePost(postId) {
+      return contentRequest('/api/posts/' + postId, { method: 'DELETE' });
+    },
+    async toggleLike(postId) {
+      return contentRequest('/api/posts/' + postId + '/like', { method: 'POST' });
+    },
+    async getReplies(postId) {
+      const data = await contentRequest('/api/posts/' + postId + '/replies', { auth: false });
+      return data.replies;
+    },
+    async createReply(postId, content) {
+      return contentRequest('/api/posts/' + postId + '/replies', { method: 'POST', body: { content } });
     }
   };
 

@@ -1245,7 +1245,7 @@ window.shareQuote = function(quote) {
   }
 };
 
-function loadFeed() {
+async function loadFeed() {
   loadFeedMembers();
   const container = document.getElementById('feed-posts');
   container.innerHTML = '<div class="loading">Loading posts...</div>';
@@ -1256,21 +1256,26 @@ function loadFeed() {
     quoteEl.innerHTML = renderQuoteOfDay();
     container.parentElement.insertBefore(quoteEl, container);
   }
-  const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(30));
-  const unsub = onSnapshot(q, snap => {
-    if (snap.empty) { container.innerHTML = '<div class="empty-state">No posts yet. Be the first to post! </div>'; return; }
-    container.innerHTML = snap.docs.map(d => renderPost({ id: d.id, ...d.data() })).join('');
-  }, err => {
-    console.error('Feed error:', err);
-    container.innerHTML = '<div class="empty-state">Could not load posts. Please refresh.</div>';
-  });
-  unsubscribers.push(unsub);
+  // D1 has no onSnapshot equivalent - poll instead. 20s is frequent enough for a feed
+  // (unlike live chat, nobody needs sub-second freshness on other members' posts).
+  const refresh = async () => {
+    try {
+      const posts = await YanAPI.getPosts();
+      if (!posts.length) { container.innerHTML = '<div class="empty-state">No posts yet. Be the first to post! </div>'; return; }
+      container.innerHTML = posts.map(renderPost).join('');
+    } catch(e) {
+      console.error('Feed error:', e);
+      container.innerHTML = '<div class="empty-state">Could not load posts. Please refresh.</div>';
+    }
+  };
+  await refresh();
+  const intervalId = setInterval(refresh, 20000);
+  unsubscribers.push(() => clearInterval(intervalId));
 }
 
 function renderPost(post) {
   const canDelete = post.authorId === currentUser?.uid || currentUserData?.isAdmin;
-  const likesArr = Array.isArray(post.likes) ? post.likes : Object.keys(post.likes || {});
-  const liked = likesArr.includes(currentUser?.uid);
+  const liked = post.likedByMe;
   const isOnline = window._onlineUsers && window._onlineUsers[post.authorId];
   const avatarHtml = post.authorPhoto
     ? `<img src="${post.authorPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
@@ -1295,7 +1300,7 @@ function renderPost(post) {
     ${post.youtubeId ? `<div style="position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;margin-bottom:0.75rem;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" src="https://www.youtube.com/embed/${sanitize(post.youtubeId)}" allowfullscreen></iframe></div>` : post.link ? `<a href="${sanitize(post.link)}" target="_blank" class="post-link"> ${sanitize(post.link)}</a>` : ''}
     ${post.imageUrl ? `<img src="${sanitize(post.imageUrl)}" style="width:100%;max-height:400px;object-fit:cover;border-radius:12px;margin-bottom:0.75rem;cursor:pointer;" onclick="window.open('${sanitize(post.imageUrl)}','_blank')">` : ''}
     <div class="post-actions">
-      <button class="post-action ${liked?'liked':''}" onclick="toggleLike('${post.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="${liked?'currentColor':'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> ${Array.isArray(post.likes) ? post.likes.length : Object.keys(post.likes||{}).length}</button>
+      <button class="post-action ${liked?'liked':''}" onclick="toggleLike('${post.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="${liked?'currentColor':'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> ${post.likeCount || 0}</button>
       <button class="post-action" onclick="toggleReplies('${post.id}')"> Reply</button>
     </div>
     <div class="reply-box" id="reply-box-${post.id}" style="display:none;">
@@ -1343,110 +1348,79 @@ async function submitPost() {
   const link = document.getElementById('post-link').value.trim();
   if (!content) return showToast('Write something first','error');
 
-  // AI CONTENT MODERATION
   const btn = document.querySelector('.btn-post');
-  if (btn) { btn.disabled = true; btn.textContent = 'Checking...'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Posting...'; }
   try {
-    const modResult = await moderateContent(content);
-    if (modResult.flagged) {
-      showToast('Post blocked: ' + modResult.reason, 'error');
-      // Log to Firestore for admin review
-      await addDoc(collection(db, 'moderation_log'), {
-        content, authorId: currentUser.uid, authorName: currentUserData.name,
-        reason: modResult.reason, createdAt: serverTimestamp(), status: 'blocked'
-      });
-      if (btn) { btn.disabled = false; btn.textContent = 'Post '; }
-      return;
-    }
+    // Content moderation now runs server-side (in the worker, before the post is even
+    // written) rather than as a client-side check a caller could just skip by calling
+    // the API directly - the worker throws with the block reason on 422.
+    const imageUrl = window._postImageUrl || '';
+    await YanAPI.createPost({ content, category, link, imageUrl });
+    document.getElementById('post-input').value = '';
+    document.getElementById('post-link').value = '';
+    clearPostImage();
+    showToast('Post shared! ');
+    await awardPoints(currentUserData.uid, 'post_created', 'Posted in feed', 1);
+    loadFeed();
   } catch(e) {
-    // If moderation fails, allow post through
-    console.warn('Moderation check failed, allowing post:', e);
+    showToast(e.message || 'Could not post, please try again', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Post '; }
   }
-
-  const cleanContent = stripHTML(content).substring(0, 2000);
-  const cleanLink = link && isValidUrl(link) ? link : '';
-  const youtubeId = getYouTubeId(cleanLink);
-  const imageUrl = window._postImageUrl || '';
-  await addDoc(collection(db, 'posts'), {
-    content: cleanContent, category, link: cleanLink,
-    youtubeId: youtubeId || '', imageUrl: imageUrl,
-    authorId: currentUser.uid, authorName: currentUserData.name,
-    authorPhoto: currentUserData.photoUrl || '',
-    likes: [], createdAt: serverTimestamp()
-  });
-  document.getElementById('post-input').value = '';
-  document.getElementById('post-link').value = '';
-  clearPostImage();
-  if (btn) { btn.disabled = false; btn.textContent = 'Post '; }
-  showToast('Post shared! ');
-  await awardPoints(currentUserData.uid, 'post_created', 'Posted in feed', 1);
 }
-
-async function moderateContent(text) {
-  const response = await fetch('https://yan-ai-worker.youngafricansn.workers.dev', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 100,
-      messages: [{
-        role: 'user',
-        content: 'You are a content moderator for a pan-African youth community platform. Analyze this post and respond ONLY with valid JSON in this exact format: {"flagged": false, "reason": ""} or {"flagged": true, "reason": "brief reason"}. Flag content that contains: hate speech, racism, sexual content, violence, spam, scams, or harassment. Do NOT flag normal community discussions, scholarship info, career advice, or motivational content. Post to analyze: ' + text
-      }]
-    })
-  });
-  const data = await response.json();
-  const reply = data.content?.[0]?.text || '{"flagged":false,"reason":""}';
-  const clean = reply.replace(/```json|```/g, '').trim();
-  return JSON.parse(clean);
-}
-window.moderateContent = moderateContent;
 
 async function deletePost(postId) {
   if (!confirm('Delete this post?')) return;
-  await deleteDoc(doc(db, 'posts', postId));
-  showToast('Post deleted');
-}
-
-async function toggleLike(postId) {
-  const ref = doc(db, 'posts', postId);
-  const snap = await getDoc(ref);
-  const rawLikes = snap.data().likes;
-  // Handle both array and object/map formats
-  const likes = Array.isArray(rawLikes) ? rawLikes : Object.keys(rawLikes || {});
-  if (likes.includes(currentUser.uid)) {
-    await updateDoc(ref, { likes: arrayRemove(currentUser.uid) });
-  } else {
-    await updateDoc(ref, { likes: arrayUnion(currentUser.uid) });
+  try {
+    await YanAPI.deletePost(postId);
+    showToast('Post deleted');
+    loadFeed();
+  } catch(e) {
+    showToast(e.message || 'Could not delete post', 'error');
   }
 }
 
-function toggleReplies(postId) {
+async function toggleLike(postId) {
+  try {
+    const result = await YanAPI.toggleLike(postId);
+    const btn = event && event.currentTarget ? event.currentTarget.closest('.post-action') : null;
+    if (btn) {
+      btn.classList.toggle('liked', result.likedByMe);
+      const svg = btn.querySelector('svg');
+      if (svg) svg.setAttribute('fill', result.likedByMe ? 'currentColor' : 'none');
+      btn.lastChild.textContent = ' ' + result.likeCount;
+    }
+  } catch(e) { console.error('Like failed:', e); }
+}
+
+async function toggleReplies(postId) {
   const box = document.getElementById(`reply-box-${postId}`);
   box.style.display = box.style.display === 'none' ? 'flex' : 'none';
   const container = document.getElementById(`replies-${postId}`);
   if (container.dataset.loaded) return;
   container.dataset.loaded = '1';
-  const q = query(collection(db, 'posts', postId, 'replies'), orderBy('createdAt', 'asc'));
-  const unsub = onSnapshot(q, snap => {
-    container.innerHTML = snap.docs.map(d => `
+  await loadReplies(postId, container);
+}
+
+async function loadReplies(postId, container) {
+  try {
+    const replies = await YanAPI.getReplies(postId);
+    container.innerHTML = replies.map(r => `
       <div class="reply-item">
-        <strong>${sanitize(d.data().authorName)}</strong>
-        <span>${sanitize(d.data().content)}</span>
-        <small>${timeAgo(d.data().createdAt)}</small>
+        <strong>${sanitize(r.authorName)}</strong>
+        <span>${sanitize(r.content)}</span>
+        <small>${timeAgo(r.createdAt)}</small>
       </div>`).join('');
-  });
-  unsubscribers.push(unsub);
+  } catch(e) { console.error('Replies error:', e); }
 }
 
 async function submitReply(postId) {
   const input = document.getElementById(`reply-input-${postId}`);
   const content = input.value.trim();
   if (!content) return;
-  await addDoc(collection(db, 'posts', postId, 'replies'), {
-    content, authorId: currentUser.uid, authorName: currentUserData.name, createdAt: serverTimestamp()
-  });
+  await YanAPI.createReply(postId, content);
   input.value = '';
+  await loadReplies(postId, document.getElementById(`replies-${postId}`));
 }
 
 // DEPARTMENT
@@ -2591,17 +2565,16 @@ async function generateMagazine() {
   const month = new Date().toLocaleDateString('en-GB',{month:'long',year:'numeric'});
 
   // Fetch content
-  const [schSnap, storySnap, eventSnap, postSnap] = await Promise.all([
+  const [schSnap, storySnap, eventSnap, posts] = await Promise.all([
     getDocs(query(collection(db,'scholarships'),orderBy('createdAt','desc'),limit(5))),
     getDocs(query(collection(db,'successStories'),orderBy('createdAt','desc'),limit(3))),
     getDocs(query(collection(db,'events'),orderBy('createdAt','desc'),limit(3))),
-    getDocs(query(collection(db,'posts'),orderBy('createdAt','desc'),limit(5)))
+    YanAPI.getPosts({ limit: 5 })
   ]);
 
   const scholarships = schSnap.docs.map(d => d.data());
   const stories = storySnap.docs.map(d => d.data());
   const events = eventSnap.docs.map(d => d.data());
-  const posts = postSnap.docs.map(d => d.data());
 
   // Save to Firebase
   const editionRef = await addDoc(collection(db,'magazine'), {
@@ -4612,14 +4585,14 @@ window.headAddPartner = async function() {
 async function loadHeadOverview(c, dept) {
   c.innerHTML = '<div class="loading">Loading overview...</div>';
   try {
-    const [membersSnap, postsSnap] = await Promise.all([
+    const [membersSnap, posts] = await Promise.all([
       getDocs(query(collection(db,'users'), where('department','==',dept))),
-      getDocs(query(collection(db,'posts'), where('department','==',dept), orderBy('createdAt','desc'), limit(5)))
+      YanAPI.getPosts({ department: dept, limit: 5 })
     ]);
     const deptName = DEPARTMENTS.find(d=>d.id===dept)?.name || dept;
     let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
     html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--navy);">' + membersSnap.size + '</div><div style="font-size:0.75rem;color:var(--gray);">Department Members</div></div>';
-    html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + postsSnap.size + '</div><div style="font-size:0.75rem;color:var(--gray);">Recent Posts</div></div>';
+    html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);"><div style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + posts.length + '</div><div style="font-size:0.75rem;color:var(--gray);">Recent Posts</div></div>';
     html += '</div>';
     html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
     html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Quick Actions</h3>';
@@ -4656,7 +4629,7 @@ async function loadHeadMembers(c, dept) {
 async function loadHeadPosts(c, dept) {
   c.innerHTML = '<div class="loading">Loading...</div>';
   try {
-    const postsSnap = await getDocs(query(collection(db,'posts'), orderBy('createdAt','desc'), limit(30)));
+    const posts = await YanAPI.getPosts({ limit: 30 });
     let html = '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:1rem;">';
     html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Post to Community Feed</h3>';
     html += '<textarea id="head-post-content" rows="3" placeholder="Share something with the YAN community..." style="width:100%;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.85rem;outline:none;resize:none;box-sizing:border-box;margin-bottom:0.75rem;"></textarea>';
@@ -4664,12 +4637,11 @@ async function loadHeadPosts(c, dept) {
     html += '</div>';
     html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">';
     html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Moderate Recent Posts</h3>';
-    postsSnap.docs.forEach(d => {
-      const p = d.data();
+    posts.forEach(p => {
       html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:0.75rem 0;border-bottom:1px solid var(--light);gap:0.5rem;">';
       html += '<div style="flex:1;"><p style="font-size:0.82rem;font-weight:700;color:var(--navy);">' + sanitize(p.authorName||'') + '</p>';
       html += '<p style="font-size:0.78rem;color:var(--gray);">' + sanitize((p.content||'').substring(0,100)) + '...</p></div>';
-      html += '<button data-id="' + d.id + '" onclick="headDeletePost(this.dataset.id)" style="background:var(--red);color:#fff;border:none;padding:0.3rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;cursor:pointer;flex-shrink:0;">Delete</button>';
+      html += '<button data-id="' + p.id + '" onclick="headDeletePost(this.dataset.id)" style="background:var(--red);color:#fff;border:none;padding:0.3rem 0.75rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;cursor:pointer;flex-shrink:0;">Delete</button>';
       html += '</div>';
     });
     html += '</div>';
@@ -4763,19 +4735,19 @@ async function loadHeadNotify(c, dept) {
 window.headPostToFeed = async function() {
   const content = document.getElementById('head-post-content')?.value.trim();
   if (!content) return showToast('Write something first', 'error');
-  await addDoc(collection(db,'posts'), {
-    content, category: 'Announcement', authorId: currentUser.uid,
-    authorName: currentUserData.name, authorPhoto: currentUserData.photoUrl||'',
-    department: currentUserData.department, likes: [], createdAt: serverTimestamp()
-  });
-  document.getElementById('head-post-content').value = '';
-  showToast('Posted to community feed!');
-  await awardPoints(currentUserData.uid, 'post_created', 'Posted to feed', 1);
+  try {
+    await YanAPI.createPost({ content, category: 'Announcement', department: currentUserData.department });
+    document.getElementById('head-post-content').value = '';
+    showToast('Posted to community feed!');
+    await awardPoints(currentUserData.uid, 'post_created', 'Posted to feed', 1);
+  } catch(e) {
+    showToast(e.message || 'Could not post', 'error');
+  }
 };
 
 window.headDeletePost = async function(postId) {
   if (!confirm('Delete this post?')) return;
-  await deleteDoc(doc(db,'posts',postId));
+  await YanAPI.deletePost(postId);
   showToast('Post deleted');
   showHeadSection('posts');
 };
@@ -5624,9 +5596,8 @@ async function handleGlobalSearch(searchQuery) {
       });
 
       // Search posts
-      const postsSnap = await getDocs(query(collection(db, 'posts'), orderBy('createdAt','desc'), limit(50))).catch(()=>({docs:[]}));
-      postsSnap.docs.forEach(function(d) {
-        const p = d.data();
+      const posts = await YanAPI.getPosts({ limit: 50 }).catch(()=>[]);
+      posts.forEach(function(p) {
         if (p.content && p.content.toLowerCase().includes(q)) {
           results.push({
             type: 'post',
