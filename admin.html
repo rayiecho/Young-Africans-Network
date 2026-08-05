@@ -61,7 +61,7 @@ function tryLoad(attempts) {
 // ===== IDLE TIMEOUT =====
 let idleTimer = null;
 let idleCountdownInterval = null;
-const IDLE_LIMIT_MS = 30000;
+const IDLE_LIMIT_MS = 5 * 60 * 1000;
 
 function resetIdleTimer() {
   if (document.getElementById('idle-modal-overlay')) return;
