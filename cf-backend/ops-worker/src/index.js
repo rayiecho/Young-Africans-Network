@@ -381,7 +381,8 @@ function taskRow(row) {
     relatedSessionId: row.related_session_id, rawFileUrl: row.raw_file_url,
     status: row.status, claimedBy: row.claimed_by, claimedByName: row.claimed_by_name,
     submittedFileUrl: row.submitted_file_url, reviewNote: row.review_note,
-    dueDate: row.due_date, pointsAwarded: row.points_awarded, createdAt: row.created_at
+    dueDate: row.due_date, pointsAwarded: row.points_awarded, createdAt: row.created_at,
+    youtubeUrl: row.youtube_url
   };
 }
 
@@ -608,6 +609,16 @@ async function reviewTask(request, env, cors, id) {
   return json({ ok: true }, 200, cors);
 }
 
+async function recordYoutubePublish(request, env, cors, id) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  const { youtubeUrl } = await request.json();
+  if (!youtubeUrl) return json({ error: 'youtubeUrl required' }, 400, cors);
+  await env.DB.prepare('UPDATE volunteer_tasks SET youtube_url = ?, updated_at = ? WHERE id = ?')
+    .bind(youtubeUrl, Date.now(), id).run();
+  return json({ ok: true }, 200, cors);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -645,12 +656,13 @@ export default {
       if (path === '/api/volunteer-tasks' && request.method === 'POST') return await createTask(request, env, cors);
       if (path === '/api/volunteer-tasks' && request.method === 'GET') return await listTasks(request, env, cors, url);
 
-      const taskMatch = path.match(/^\/api\/volunteer-tasks\/([^/]+)(\/(claim|submit|review))?$/);
+      const taskMatch = path.match(/^\/api\/volunteer-tasks\/([^/]+)(\/(claim|submit|review|youtube))?$/);
       if (taskMatch) {
         const [, id, , sub] = taskMatch;
         if (sub === 'claim' && request.method === 'POST') return await claimTask(request, env, cors, id);
         if (sub === 'submit' && request.method === 'POST') return await submitTask(request, env, cors, id);
         if (sub === 'review' && request.method === 'POST') return await reviewTask(request, env, cors, id);
+        if (sub === 'youtube' && request.method === 'POST') return await recordYoutubePublish(request, env, cors, id);
       }
 
       if (path === '/api/volunteer-queue' && request.method === 'GET') return await getVolunteerQueueHandler(request, env, cors, url);

@@ -243,6 +243,9 @@
     },
     async reviewVolunteerTask(id, approved, note) {
       return opsRequest('/api/volunteer-tasks/' + id + '/review', { method: 'POST', body: { approved, note } });
+    },
+    async recordYoutubePublish(id, youtubeUrl) {
+      return opsRequest('/api/volunteer-tasks/' + id + '/youtube', { method: 'POST', body: { youtubeUrl } });
     }
   };
 

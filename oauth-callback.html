@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<title>Connecting...</title>
+</head>
+<body style="font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;color:#1B2A6B;">
+<p>Connecting...</p>
+<script>
+// Fixed OAuth redirect target for popup-based Google flows (YouTube publish, etc.) -
+// reads the token out of the URL fragment and relays it to whichever window opened this
+// popup, then closes itself. Needs to be registered as an Authorized redirect URI on the
+// Google OAuth client this is used with (same client already used for Google Sign-In).
+(function () {
+  var hash = window.location.hash.substring(1);
+  var params = new URLSearchParams(hash);
+  var accessToken = params.get('access_token');
+  var error = params.get('error');
+  if (window.opener) {
+    window.opener.postMessage({ source: 'yan-oauth-callback', accessToken: accessToken, error: error }, window.location.origin);
+  }
+  window.close();
+})();
+</script>
+</body>
+</html>

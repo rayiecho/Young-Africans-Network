@@ -18,6 +18,7 @@
 <!-- Firebase -->
 <script src="/assets/yan-api.js"></script>
 <script src="/assets/yan-upload.js"></script>
+<script src="/assets/yan-youtube.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -4416,6 +4417,7 @@ const VOL_TYPE_LABELS = { poster: 'Poster / Banner', video_edit: 'Video Edit', s
 const VOL_STATUS_COLORS = { open: '#6B7280', claimed: '#B37800', submitted: '#3B82F6', approved: '#27AE60', changes_requested: '#E63329' };
 
 function volunteerTaskCardAdmin(t, showReviewBtn) {
+  const canPublish = t.status === 'approved' && t.taskType === 'video_edit' && t.submittedFileUrl && !t.youtubeUrl;
   return `<div style="background:#fff;border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
       <div>
@@ -4423,14 +4425,35 @@ function volunteerTaskCardAdmin(t, showReviewBtn) {
         <div style="font-size:0.92rem;font-weight:800;color:var(--navy);margin-top:0.4rem;">${sanitize(t.title)}</div>
         ${t.claimedByName ? `<div style="font-size:0.78rem;color:var(--gray);">Claimed by ${sanitize(t.claimedByName)}</div>` : ''}
         ${t.submittedFileUrl ? `<a href="${sanitize(t.submittedFileUrl)}" target="_blank" style="font-size:0.78rem;color:var(--navy);font-weight:700;">View submitted deliverable →</a>` : ''}
+        ${t.youtubeUrl ? `<div><a href="${sanitize(t.youtubeUrl)}" target="_blank" style="font-size:0.78rem;color:#FF0000;font-weight:700;">▶ Live on YouTube →</a></div>` : ''}
       </div>
       <div style="display:flex;align-items:center;gap:0.6rem;">
         <span style="background:${VOL_STATUS_COLORS[t.status]}22;color:${VOL_STATUS_COLORS[t.status]};padding:0.25rem 0.75rem;border-radius:50px;font-size:0.68rem;font-weight:700;text-transform:uppercase;">${t.status.replace('_',' ')}</span>
         ${showReviewBtn ? `<button onclick="reviewVolunteerTaskAdmin('${t.id}','${encodeURIComponent(t.submittedFileUrl||'')}')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">Review</button>` : ''}
+        ${canPublish ? `<button id="yt-btn-${t.id}" onclick="publishTaskToYouTube('${t.id}','${encodeURIComponent(t.submittedFileUrl)}','${encodeURIComponent(t.title)}')" style="background:#FF0000;color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;cursor:pointer;">▶ Publish to YouTube</button>` : ''}
       </div>
     </div>
   </div>`;
 }
+
+window.publishTaskToYouTube = async function(taskId, urlEncoded, titleEncoded) {
+  const btn = document.getElementById('yt-btn-' + taskId);
+  const videoUrl = decodeURIComponent(urlEncoded);
+  const title = decodeURIComponent(titleEncoded);
+  const setStatus = (msg) => { if (btn) btn.textContent = msg; };
+  if (btn) btn.disabled = true;
+  try {
+    const ytUrl = await YanYouTube.publishVideoToYouTube(videoUrl, {
+      title, description: 'Published via YAN Volunteer Room\nyoungafricansnetwork.org'
+    }, setStatus);
+    await YanAPI.recordYoutubePublish(taskId, ytUrl);
+    showToast('Published to YouTube!');
+    await loadVolunteerAdminLists();
+  } catch(e) {
+    showToast('YouTube publish failed: ' + e.message, 'error');
+    if (btn) { btn.disabled = false; btn.textContent = '▶ Publish to YouTube'; }
+  }
+};
 
 async function loadVolunteerAdminLists() {
   const reviewList = document.getElementById('va-review-list');
