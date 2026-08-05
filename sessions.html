@@ -20,44 +20,61 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
 .nav-logo{display:flex;align-items:center;gap:0.75rem;}
 .nav-logo img{height:42px;border-radius:50%;}
 .nav-logo-text{font-size:0.85rem;font-weight:700;}
-.nav-back{font-size:0.82rem;font-weight:600;color:var(--navy);}
+.nav-back{font-size:0.82rem;font-weight:600;color:var(--navy);display:flex;align-items:center;gap:0.35rem;}
 
-.wrap{max-width:900px;margin:0 auto;padding:2rem 1.25rem 4rem;}
+.hero{background:linear-gradient(135deg,var(--navy) 0%,#2D3F9B 100%);padding:2.75rem 1.25rem 3.5rem;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-40%;right:-8%;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,0.18),transparent 70%);}
+.hero::after{content:'';position:absolute;bottom:-60%;left:-5%;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0.06),transparent 70%);}
+.hero-inner{max-width:900px;margin:0 auto;position:relative;z-index:1;}
+.hero-icon{width:52px;height:52px;border-radius:14px;background:rgba(245,166,35,0.15);border:1.5px solid rgba(245,166,35,0.35);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;}
+.hero .page-title{color:#fff;font-size:1.9rem;margin-bottom:0.4rem;}
+.hero .page-sub{color:rgba(255,255,255,0.68);font-size:0.9rem;margin-bottom:0;}
+
+.wrap{max-width:900px;margin:-2rem auto 0;padding:0 1.25rem 4rem;position:relative;z-index:2;}
 .page-title{font-size:1.8rem;margin-bottom:0.3rem;}
 .page-sub{color:var(--gray);font-size:0.88rem;margin-bottom:1.75rem;}
 
-.btn{border:none;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:700;cursor:pointer;font-size:0.82rem;padding:0.6rem 1.3rem;transition:opacity 0.15s;}
-.btn:hover{opacity:0.88;}
+.btn{border:none;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:700;cursor:pointer;font-size:0.82rem;padding:0.6rem 1.3rem;transition:all 0.15s;}
+.btn:hover{opacity:0.88;transform:translateY(-1px);}
 .btn-primary{background:var(--navy);color:#fff;}
 .btn-red{background:var(--red);color:#fff;}
 .btn-gold{background:var(--gold);color:var(--navy);}
 .btn-outline{background:#fff;color:var(--navy);border:1.5px solid rgba(27,42,107,0.2);}
-.btn:disabled{opacity:0.5;cursor:not-allowed;}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
 
 .toolbar{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;}
 
-.card{background:#fff;border-radius:18px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-bottom:1.25rem;}
+.card{background:#fff;border-radius:18px;padding:1.5rem;box-shadow:0 4px 20px rgba(27,42,107,0.07);margin-bottom:1.25rem;border-left:4px solid transparent;transition:box-shadow 0.15s;}
+.card:hover{box-shadow:0 6px 28px rgba(27,42,107,0.11);}
+.card.accent-awaiting{border-left-color:#9CA3AF;}
+.card.accent-confirmed{border-left-color:#27AE60;}
+.card.accent-needs_help{border-left-color:var(--red);}
+.card.accent-completed{border-left-color:var(--navy);}
+.card.accent-cancelled{border-left-color:#D1D5DB;}
 .session-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:0.75rem;}
 .session-date{font-size:0.72rem;font-weight:700;color:var(--gold);letter-spacing:0.05em;text-transform:uppercase;}
-.session-topic{font-size:1.1rem;font-weight:800;margin-top:0.2rem;}
-.session-dept{font-size:0.8rem;color:var(--gray);margin-top:0.15rem;}
+.session-topic{font-size:1.15rem;font-weight:800;margin-top:0.25rem;font-family:'Playfair Display',serif;}
+.session-dept{font-size:0.8rem;color:var(--gray);margin-top:0.2rem;}
 
-.badge{display:inline-block;padding:0.25rem 0.75rem;border-radius:50px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;}
+.badge{display:inline-flex;align-items:center;gap:0.3rem;padding:0.3rem 0.85rem;border-radius:50px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
 .badge-awaiting{background:rgba(107,114,128,0.12);color:var(--gray);}
 .badge-confirmed{background:rgba(39,174,96,0.12);color:#27AE60;}
 .badge-needs_help{background:rgba(230,51,41,0.1);color:var(--red);}
 .badge-completed{background:rgba(27,42,107,0.1);color:var(--navy);}
 .badge-cancelled{background:rgba(107,114,128,0.1);color:var(--gray);text-decoration:line-through;}
 
-.section-label{font-size:0.72rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:0.04em;margin:1rem 0 0.5rem;}
+.section-label{font-size:0.7rem;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:0.06em;margin:1.1rem 0 0.6rem;display:flex;align-items:center;gap:0.4rem;}
+.section-label::before{content:'';width:14px;height:2px;background:var(--gold);border-radius:2px;}
 .pill{display:inline-flex;align-items:center;gap:0.4rem;background:var(--light);border:1px solid rgba(27,42,107,0.1);border-radius:50px;padding:0.35rem 0.85rem;font-size:0.78rem;margin:0 0.4rem 0.4rem 0;}
 .pill.filled{background:rgba(39,174,96,0.08);border-color:rgba(39,174,96,0.25);}
 .pill button{background:none;border:none;color:var(--red);font-size:0.72rem;font-weight:700;cursor:pointer;margin-left:0.3rem;}
 
-.actions-row{display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:1rem;}
-.meet-link{display:inline-flex;align-items:center;gap:0.4rem;color:var(--navy);font-weight:700;font-size:0.82rem;margin-top:0.5rem;}
+.actions-row{display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:1.1rem;padding-top:1.1rem;border-top:1px solid rgba(27,42,107,0.06);}
+.meet-link{display:inline-flex;align-items:center;gap:0.4rem;color:var(--navy);font-weight:700;font-size:0.82rem;margin-top:0.6rem;background:var(--light);padding:0.5rem 0.9rem;border-radius:10px;}
 
-.empty{text-align:center;padding:3rem 1rem;color:var(--gray);}
+.empty{text-align:center;padding:3.5rem 1.5rem;color:var(--gray);background:#fff;border-radius:18px;box-shadow:0 2px 12px rgba(0,0,0,0.04);}
+.empty-icon{width:52px;height:52px;margin:0 auto 1rem;opacity:0.35;}
 
 .modal-overlay{position:fixed;inset:0;background:rgba(13,27,75,0.55);display:none;align-items:center;justify-content:center;padding:1rem;z-index:999;}
 .modal-overlay.open{display:flex;}
@@ -86,9 +103,16 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
   <a href="community.html" class="nav-back">&larr; Back to Community</a>
 </nav>
 
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+    <h1 class="page-title">Session Coordination</h1>
+    <p class="page-sub">Who's leading which session, and what they need to run it.</p>
+  </div>
+</div>
+
 <div class="wrap">
-  <h1 class="page-title">Session Coordination</h1>
-  <p class="page-sub">Who's leading which session, and what they need to run it. New sessions are scheduled from the admin dashboard.</p>
+  <p style="color:var(--gray);font-size:0.82rem;margin-bottom:1.5rem;">New sessions are scheduled from the admin dashboard.</p>
 
   <div id="sessions-list"><div class="loading">Loading sessions...</div></div>
 </div>
@@ -178,7 +202,7 @@ async function loadSessions() {
   try {
     const sessions = await YanAPI.getSessions();
     if (!sessions.length) {
-      list.innerHTML = '<div class="empty">No sessions scheduled yet.</div>';
+      list.innerHTML = '<div class="empty"><svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="#1B2A6B" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><p>No sessions scheduled yet.</p></div>';
       return;
     }
     // Grouped by month so the list stays readable as it grows.
@@ -213,7 +237,7 @@ function renderSessionCard(s) {
   }).join('') : '<span style="color:var(--gray);font-size:0.8rem;">None defined yet</span>';
 
   return `
-  <div class="card">
+  <div class="card accent-${s.status}">
     <div class="session-head">
       <div>
         <div class="session-date">${fmtDate(s.sessionDate)} · ${timeAgoOrIn(s.sessionDate)}</div>

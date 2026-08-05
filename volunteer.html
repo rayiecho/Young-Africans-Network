@@ -22,41 +22,57 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
 .nav-logo-text{font-size:0.85rem;font-weight:700;}
 .nav-back{font-size:0.82rem;font-weight:600;color:var(--navy);}
 
-.wrap{max-width:900px;margin:0 auto;padding:2rem 1.25rem 4rem;}
+.hero{background:linear-gradient(135deg,var(--navy) 0%,#2D3F9B 100%);padding:2.75rem 1.25rem 3.5rem;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-40%;right:-8%;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,0.18),transparent 70%);}
+.hero::after{content:'';position:absolute;bottom:-60%;left:-5%;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0.06),transparent 70%);}
+.hero-inner{max-width:900px;margin:0 auto;position:relative;z-index:1;}
+.hero-icon{width:52px;height:52px;border-radius:14px;background:rgba(245,166,35,0.15);border:1.5px solid rgba(245,166,35,0.35);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;}
+.hero .page-title{color:#fff;font-size:1.9rem;margin-bottom:0.4rem;}
+.hero .page-sub{color:rgba(255,255,255,0.68);font-size:0.9rem;margin-bottom:0;}
+
+.wrap{max-width:900px;margin:-2rem auto 0;padding:0 1.25rem 4rem;position:relative;z-index:2;}
 .page-title{font-size:1.8rem;margin-bottom:0.3rem;}
 .page-sub{color:var(--gray);font-size:0.88rem;margin-bottom:1.5rem;}
 
-.tabs{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;}
-.tab-btn{background:#fff;border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.55rem 1.2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.82rem;cursor:pointer;}
-.tab-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.tabs{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;background:#fff;padding:0.35rem;border-radius:50px;box-shadow:0 4px 20px rgba(27,42,107,0.07);width:fit-content;}
+.tab-btn{background:none;border:none;color:var(--navy);padding:0.55rem 1.2rem;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.82rem;cursor:pointer;transition:all 0.15s;}
+.tab-btn.active{background:var(--navy);color:#fff;}
 
-.btn{border:none;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:700;cursor:pointer;font-size:0.82rem;padding:0.6rem 1.3rem;transition:opacity 0.15s;}
-.btn:hover{opacity:0.88;}
+.btn{border:none;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:700;cursor:pointer;font-size:0.82rem;padding:0.6rem 1.3rem;transition:all 0.15s;}
+.btn:hover{opacity:0.88;transform:translateY(-1px);}
 .btn-primary{background:var(--navy);color:#fff;}
 .btn-red{background:var(--red);color:#fff;}
 .btn-gold{background:var(--gold);color:var(--navy);}
 .btn-green{background:#27AE60;color:#fff;}
 .btn-outline{background:#fff;color:var(--navy);border:1.5px solid rgba(27,42,107,0.2);}
-.btn:disabled{opacity:0.5;cursor:not-allowed;}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
 .btn-sm{padding:0.4rem 0.9rem;font-size:0.74rem;}
 
 .toolbar{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem;}
 
-.card{background:#fff;border-radius:18px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-bottom:1.25rem;}
+.card{background:#fff;border-radius:18px;padding:1.5rem;box-shadow:0 4px 20px rgba(27,42,107,0.07);margin-bottom:1.25rem;border-left:4px solid transparent;transition:box-shadow 0.15s;}
+.card:hover{box-shadow:0 6px 28px rgba(27,42,107,0.11);}
+.card.accent-open{border-left-color:#9CA3AF;}
+.card.accent-claimed{border-left-color:var(--gold);}
+.card.accent-submitted{border-left-color:#3B82F6;}
+.card.accent-approved{border-left-color:#27AE60;}
+.card.accent-changes_requested{border-left-color:var(--red);}
 .task-tag{display:inline-block;background:rgba(27,42,107,0.08);color:var(--navy);padding:0.2rem 0.65rem;border-radius:50px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:0.5rem;}
-.task-title{font-size:1.05rem;font-weight:800;margin-bottom:0.3rem;}
+.task-title{font-size:1.1rem;font-weight:800;margin-bottom:0.3rem;font-family:'Playfair Display',serif;}
 .task-brief{font-size:0.85rem;color:var(--gray);line-height:1.6;margin-bottom:0.5rem;}
 .task-meta{font-size:0.74rem;color:var(--gray);}
 
-.badge{display:inline-block;padding:0.25rem 0.75rem;border-radius:50px;font-size:0.68rem;font-weight:700;text-transform:uppercase;}
+.badge{display:inline-flex;align-items:center;gap:0.3rem;padding:0.3rem 0.85rem;border-radius:50px;font-size:0.68rem;font-weight:700;text-transform:uppercase;}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
 .badge-open{background:rgba(107,114,128,0.12);color:var(--gray);}
 .badge-claimed{background:rgba(245,166,35,0.15);color:#b37800;}
 .badge-submitted{background:rgba(59,130,246,0.12);color:#3B82F6;}
 .badge-approved{background:rgba(39,174,96,0.12);color:#27AE60;}
 .badge-changes_requested{background:rgba(230,51,41,0.1);color:var(--red);}
 
-.actions-row{display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:0.85rem;}
-.empty{text-align:center;padding:3rem 1rem;color:var(--gray);}
+.actions-row{display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(27,42,107,0.06);}
+.empty{text-align:center;padding:3.5rem 1.5rem;color:var(--gray);background:#fff;border-radius:18px;box-shadow:0 2px 12px rgba(0,0,0,0.04);}
+.empty-icon{width:52px;height:52px;margin:0 auto 1rem;opacity:0.35;}
 .loading{text-align:center;padding:2rem;color:var(--gray);font-size:0.85rem;}
 
 .modal-overlay{position:fixed;inset:0;background:rgba(13,27,75,0.55);display:none;align-items:center;justify-content:center;padding:1rem;z-index:999;}
@@ -85,10 +101,15 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
   <a href="community.html" class="nav-back">&larr; Back to Community</a>
 </nav>
 
-<div class="wrap">
-  <h1 class="page-title">Volunteer Room</h1>
-  <p class="page-sub">Posters, video edits, slides and more — claim a task, do the work, get recognised.</p>
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+    <h1 class="page-title">Volunteer Room</h1>
+    <p class="page-sub">Posters, video edits, slides and more — claim a task, do the work, get recognised.</p>
+  </div>
+</div>
 
+<div class="wrap">
   <div class="toolbar">
     <div class="tabs">
       <button class="tab-btn active" data-tab="open" onclick="switchTab('open')">Open Tasks</button>
@@ -223,7 +244,7 @@ async function loadTasks() {
 
     if (!tasks.length) {
       const emptyMsg = { open: 'No open tasks right now.', mine: "You haven't claimed any tasks yet.", review: 'Nothing waiting for review.' }[activeTab];
-      list.innerHTML = '<div class="empty">' + emptyMsg + '</div>';
+      list.innerHTML = '<div class="empty"><svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="#1B2A6B" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><p>' + emptyMsg + '</p></div>';
       return;
     }
     // Grouped by month so this stays browsable once there's a real history of tasks.
@@ -289,7 +310,7 @@ function renderTaskCard(t) {
   }
 
   return `
-  <div class="card">
+  <div class="card accent-${t.status}">
     <span class="task-tag">${TYPE_LABELS[t.taskType] || t.taskType}</span>
     <span class="badge badge-${t.status}" style="float:right;">${t.status.replace('_',' ')}</span>
     <div class="task-title">${escapeHtml(t.title)}</div>
