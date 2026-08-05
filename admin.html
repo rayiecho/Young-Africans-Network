@@ -4244,11 +4244,25 @@ window.loadSessionsAdmin = async function(c) {
         <input type="text" id="sa-meet" placeholder="https://meet.google.com/..." style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
       <button onclick="submitSessionAdmin()" id="sa-submit" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Post Session</button>
     </div>
+    <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Department Heads</h3>
+    <div id="sa-heads" style="margin-bottom:1.5rem;"></div>
     <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Upcoming Sessions</h3>
     <div id="sa-list"></div>
   </div>`;
   await loadSessionsAdminList();
+  await loadHeadsAdminList();
 };
+
+async function loadHeadsAdminList() {
+  const el = document.getElementById('sa-heads');
+  if (!el) return;
+  try {
+    const heads = await YanAPI.getHeads();
+    el.innerHTML = heads.length
+      ? heads.map(h => `<span style="display:inline-block;background:rgba(27,42,107,0.06);border-radius:50px;padding:0.35rem 0.9rem;font-size:0.8rem;margin:0 0.4rem 0.4rem 0;">${sanitize(SESSION_DEPT_NAMES[h.department]||h.department)}: <strong>${sanitize(h.name)}</strong></span>`).join('')
+      : '<p style="color:var(--gray);font-size:0.85rem;">No department heads assigned yet.</p>';
+  } catch(e) { el.innerHTML = ''; }
+}
 
 async function loadSessionsAdminList() {
   const list = document.getElementById('sa-list');
@@ -4380,9 +4394,17 @@ async function loadVolunteerAdminLists() {
     reviewList.innerHTML = submitted.length
       ? submitted.map(t => volunteerTaskCardAdmin(t, true)).join('')
       : '<p style="color:var(--gray);font-size:0.85rem;">Nothing waiting for review.</p>';
-    allList.innerHTML = all.length
-      ? all.map(t => volunteerTaskCardAdmin(t, t.status === 'submitted')).join('')
-      : '<p style="color:var(--gray);font-size:0.85rem;">No tasks posted yet.</p>';
+    if (!all.length) {
+      allList.innerHTML = '<p style="color:var(--gray);font-size:0.85rem;">No tasks posted yet.</p>';
+    } else {
+      const groups = {};
+      all.forEach(t => { const k = new Date(t.createdAt).toISOString().slice(0,7); (groups[k]=groups[k]||[]).push(t); });
+      allList.innerHTML = Object.keys(groups).sort().reverse().map(k => {
+        const label = new Date(k+'-01T00:00:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+        return '<h4 style="font-size:0.78rem;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:0.04em;margin:1rem 0 0.5rem;">'+label+'</h4>'
+          + groups[k].map(t => volunteerTaskCardAdmin(t, t.status === 'submitted')).join('');
+      }).join('');
+    }
     if (queueList) {
       queueList.innerHTML = queue.length
         ? queue.map((v,i) => `<span style="display:inline-block;background:rgba(27,42,107,0.06);border-radius:50px;padding:0.3rem 0.85rem;font-size:0.8rem;margin:0 0.4rem 0.4rem 0;">#${i+1} ${sanitize(v.name)}</span>`).join('')

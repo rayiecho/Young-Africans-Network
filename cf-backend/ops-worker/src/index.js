@@ -16,6 +16,85 @@ function json(data, status, headers) {
 }
 function newId() { return crypto.randomUUID(); }
 
+// ---- Firestore bridge: the existing feedback.html "which months can you volunteer"
+// answers (sessionFeedback.volunteerMonths) are the real, already-in-use monthly
+// volunteer list - not something to duplicate with a brand new D1 table. Queried
+// live via Firestore's REST API rather than migrated, since feedback.html itself
+// still writes there unchanged.
+function pemToArrayBuffer(pem) {
+  const b64 = pem.replace(/-----BEGIN PRIVATE KEY-----/, '').replace(/-----END PRIVATE KEY-----/, '').replace(/\s+/g, '');
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+function base64UrlEncode(bytesOrString) {
+  const bytes = typeof bytesOrString === 'string' ? new TextEncoder().encode(bytesOrString) : bytesOrString;
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+let cachedFirestoreToken = null;
+let cachedFirestoreTokenExpiry = 0;
+
+async function getFirestoreAccessToken(env) {
+  if (cachedFirestoreToken && Date.now() < cachedFirestoreTokenExpiry - 60_000) return cachedFirestoreToken;
+  const sa = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT);
+  const now = Math.floor(Date.now() / 1000);
+  const header = { alg: 'RS256', typ: 'JWT' };
+  const payload = {
+    iss: sa.client_email, scope: 'https://www.googleapis.com/auth/datastore',
+    aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600
+  };
+  const assertion = `${base64UrlEncode(JSON.stringify(header))}.${base64UrlEncode(JSON.stringify(payload))}`;
+  const key = await crypto.subtle.importKey('pkcs8', pemToArrayBuffer(sa.private_key), { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']);
+  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(assertion));
+  const jwt = `${assertion}.${base64UrlEncode(new Uint8Array(signature))}`;
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${encodeURIComponent(jwt)}`
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error('Firestore token exchange failed: ' + JSON.stringify(data));
+  cachedFirestoreToken = data.access_token;
+  cachedFirestoreTokenExpiry = Date.now() + data.expires_in * 1000;
+  return cachedFirestoreToken;
+}
+
+async function getFirestoreVolunteersForMonth(env, monthAbbrev) {
+  const accessToken = await getFirestoreAccessToken(env);
+  const res = await fetch(
+    `https://firestore.googleapis.com/v1/projects/young-africans-network/databases/(default)/documents:runQuery`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + accessToken },
+      body: JSON.stringify({
+        structuredQuery: {
+          from: [{ collectionId: 'sessionFeedback' }],
+          where: { fieldFilter: { field: { fieldPath: 'volunteerMonths' }, op: 'ARRAY_CONTAINS', value: { stringValue: monthAbbrev } } }
+        }
+      })
+    }
+  );
+  if (!res.ok) throw new Error('Firestore query failed: ' + (await res.text()));
+  const rows = await res.json();
+  const seen = new Set();
+  const people = [];
+  for (const row of rows) {
+    const fields = row.document?.fields;
+    if (!fields) continue;
+    const email = fields.email?.stringValue || '';
+    if (!email || seen.has(email)) continue;
+    seen.add(email);
+    people.push({
+      name: fields.name?.stringValue || 'Anonymous',
+      email, role: fields.role?.stringValue || '', country: fields.country?.stringValue || ''
+    });
+  }
+  return people;
+}
+
 async function sendEmail(env, { to, subject, message }) {
   try {
     await fetch(env.EMAIL_WORKER_URL, {
@@ -209,12 +288,17 @@ async function flagNeedsHelp(request, env, cors, id) {
     emailSubject: 'New Volunteer Room task: ' + session.topic
   });
 
-  const queue = await getVolunteerQueue(env);
-  await Promise.all(queue.slice(0, 3).map(v => notifyUser(env, v.userId, {
-    title: 'New Volunteer Room task: ' + session.topic,
-    message: `A new ${taskType.replace('_',' ')} task is open: "Help needed: ${session.topic}". First come, first served.`,
-    emailSubject: 'YAN Volunteer Room: Help needed for ' + session.topic
-  })));
+  const monthNow = MONTH_ABBREVS[new Date().getMonth()];
+  const available = await getOrderedVolunteerAvailability(env, monthNow);
+  await Promise.all(available.slice(0, 3).map(v => v.userId
+    ? notifyUser(env, v.userId, {
+        title: 'New Volunteer Room task: ' + session.topic,
+        message: `A new ${taskType.replace('_',' ')} task is open: "Help needed: ${session.topic}". First come, first served.`,
+        emailSubject: 'YAN Volunteer Room: Help needed for ' + session.topic
+      })
+    : sendEmail(env, { to: v.email, subject: 'YAN Volunteer Room: Help needed for ' + session.topic,
+        message: `A new ${taskType.replace('_',' ')} task is open: "Help needed: ${session.topic}". First come, first served.` })
+  ));
 
   return json({ ok: true, volunteerTaskId: taskId }, 200, cors);
 }
@@ -316,13 +400,17 @@ async function createTask(request, env, cors) {
 
   // Notify whoever's first in the rotation queue - not everyone, so it stays useful
   // whether there are 3 volunteers or 30 (avoids a stampede/spam on every task).
-  const queue = await getVolunteerQueue(env);
-  const firstInLine = queue.slice(0, 3);
-  await Promise.all(firstInLine.map(v => notifyUser(env, v.userId, {
-    title: 'New Volunteer Room task: ' + body.title,
-    message: `A new ${body.taskType.replace('_',' ')} task is open: "${body.title}". First come, first served.`,
-    emailSubject: 'YAN Volunteer Room: ' + body.title
-  })));
+  const monthNow = MONTH_ABBREVS[new Date().getMonth()];
+  const available = await getOrderedVolunteerAvailability(env, monthNow);
+  await Promise.all(available.slice(0, 3).map(v => v.userId
+    ? notifyUser(env, v.userId, {
+        title: 'New Volunteer Room task: ' + body.title,
+        message: `A new ${body.taskType.replace('_',' ')} task is open: "${body.title}". First come, first served.`,
+        emailSubject: 'YAN Volunteer Room: ' + body.title
+      })
+    : sendEmail(env, { to: v.email, subject: 'YAN Volunteer Room: ' + body.title,
+        message: `A new ${body.taskType.replace('_',' ')} task is open: "${body.title}". First come, first served.` })
+  ));
 
   return json({ id }, 201, cors);
 }
@@ -376,22 +464,26 @@ async function getVolunteerQueue(env) {
   return results.map(r => ({ userId: r.id, name: r.name, photoUrl: r.photo_url, lastClaimedAt: r.last_claimed_at }));
 }
 
-async function getVolunteerQueueHandler(request, env, cors) {
+// Kept as the client-facing "queue" endpoint for compatibility, but now backed by the
+// real feedback.html monthly availability list (see getOrderedVolunteerAvailability),
+// not the old D1-only claim history - that was the actual bug: a brand new queue that
+// ignored the volunteer list you already had.
+async function getVolunteerQueueHandler(request, env, cors, url) {
   const { error } = await requireUser(request, env, cors);
   if (error) return error;
-  return json({ queue: await getVolunteerQueue(env) }, 200, cors);
+  const month = url.searchParams.get('month') || MONTH_ABBREVS[new Date().getMonth()];
+  return json({ month, queue: await getOrderedVolunteerAvailability(env, month) }, 200, cors);
 }
 
-// Admin can message everyone currently in the rotation directly, e.g. to rally people
-// when a task's been open a while.
 async function emailVolunteerQueue(request, env, cors) {
   const { error } = await requireAdmin(request, env, cors);
   if (error) return error;
   const body = await request.json();
   if (!body.subject || !body.message) return json({ error: 'Subject and message required' }, 400, cors);
-  const queue = await getVolunteerQueue(env);
-  await Promise.all(queue.map(v => notifyUser(env, v.userId, { title: body.subject, message: body.message, emailSubject: body.subject })));
-  return json({ ok: true, sentTo: queue.length }, 200, cors);
+  const month = body.month || MONTH_ABBREVS[new Date().getMonth()];
+  const people = await getOrderedVolunteerAvailability(env, month);
+  await Promise.all(people.map(p => sendEmail(env, { to: p.email, subject: body.subject, message: body.message })));
+  return json({ ok: true, sentTo: people.length }, 200, cors);
 }
 
 async function getHeadsHandler(request, env, cors) {
@@ -402,6 +494,35 @@ async function getHeadsHandler(request, env, cors) {
   ).all();
   return json({ heads: results.map(h => ({ userId: h.id, name: h.name, email: h.email, department: h.department })) }, 200, cors);
 }
+
+const MONTH_ABBREVS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// The real volunteer pool for a month = feedback.html's existing "which months can you
+// volunteer" answers (Firestore). The rotation order on top of that pool = D1's
+// last_claimed_at (never-claimed, or longest since claiming, first) - people not yet
+// matched to a D1 account sort first too (nothing to move them down yet).
+async function getOrderedVolunteerAvailability(env, month) {
+  const people = await getFirestoreVolunteersForMonth(env, month);
+  if (!people.length) return [];
+  const emails = people.map(p => p.email.toLowerCase());
+  const placeholders = emails.map(() => '?').join(',');
+  const { results } = await env.DB.prepare(`SELECT id, email FROM users WHERE email IN (${placeholders})`).bind(...emails).all();
+  const emailToUserId = Object.fromEntries(results.map(r => [r.email.toLowerCase(), r.id]));
+  const userIds = results.map(r => r.id);
+  let lastClaimedByUser = {};
+  if (userIds.length) {
+    const qp = userIds.map(() => '?').join(',');
+    const q = await env.DB.prepare(`SELECT user_id, last_claimed_at FROM volunteer_queue WHERE user_id IN (${qp})`).bind(...userIds).all();
+    lastClaimedByUser = Object.fromEntries(q.results.map(r => [r.user_id, r.last_claimed_at]));
+  }
+  const merged = people.map(p => {
+    const userId = emailToUserId[p.email.toLowerCase()] || null;
+    return { ...p, userId, lastClaimedAt: userId ? (lastClaimedByUser[userId] || 0) : 0 };
+  });
+  merged.sort((a, b) => a.lastClaimedAt - b.lastClaimedAt);
+  return merged;
+}
+
 
 async function submitTask(request, env, cors, id) {
   const { error, user } = await requireUser(request, env, cors);
@@ -485,7 +606,7 @@ export default {
         if (sub === 'review' && request.method === 'POST') return await reviewTask(request, env, cors, id);
       }
 
-      if (path === '/api/volunteer-queue' && request.method === 'GET') return await getVolunteerQueueHandler(request, env, cors);
+      if (path === '/api/volunteer-queue' && request.method === 'GET') return await getVolunteerQueueHandler(request, env, cors, url);
       if (path === '/api/volunteer-queue/email' && request.method === 'POST') return await emailVolunteerQueue(request, env, cors);
       if (path === '/api/heads' && request.method === 'GET') return await getHeadsHandler(request, env, cors);
 
