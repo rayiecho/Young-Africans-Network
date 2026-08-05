@@ -88,44 +88,9 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
 
 <div class="wrap">
   <h1 class="page-title">Session Coordination</h1>
-  <p class="page-sub">Who's leading which session, and what they need to run it.</p>
-
-  <div class="toolbar">
-    <div id="filter-bar"></div>
-    <button class="btn btn-primary" id="new-session-btn" style="display:none;" onclick="openNewSessionModal()">+ New Session</button>
-  </div>
+  <p class="page-sub">Who's leading which session, and what they need to run it. New sessions are scheduled from the admin dashboard.</p>
 
   <div id="sessions-list"><div class="loading">Loading sessions...</div></div>
-
-  <h2 class="page-title" style="font-size:1.2rem;margin-top:2.5rem;">Department Heads</h2>
-  <p class="page-sub">Already-assigned heads new sessions auto-notify.</p>
-  <div id="heads-list"></div>
-</div>
-
-<!-- NEW SESSION MODAL -->
-<div class="modal-overlay" id="new-session-modal">
-  <div class="modal">
-    <h3>Schedule a Session</h3>
-    <div class="form-group"><label>Date</label><input type="date" id="ns-date"></div>
-    <div class="form-group"><label>Department</label>
-      <select id="ns-dept">
-        <option value="programs">Programs & Training</option>
-        <option value="scholarships">Scholarships & Global Opportunities</option>
-        <option value="career">Career Development & Public Speaking</option>
-        <option value="community">Community Impact & Volunteering</option>
-        <option value="mental">Mental Health & Wellbeing</option>
-        <option value="communications">Communications & Media</option>
-        <option value="finance">Finance & Administration</option>
-        <option value="partnerships">Partnership & External Relations</option>
-      </select>
-    </div>
-    <div class="form-group"><label>Topic</label><input type="text" id="ns-topic" placeholder="e.g. Intro to Public Speaking"></div>
-    <div class="form-group"><label>Google Meet Link (optional)</label><input type="text" id="ns-meet" placeholder="https://meet.google.com/..."></div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('new-session-modal')">Cancel</button>
-      <button class="btn btn-primary" id="ns-submit" onclick="submitNewSession()">Create Session</button>
-    </div>
-  </div>
 </div>
 
 <!-- NEEDS HELP MODAL -->
@@ -205,12 +170,7 @@ function timeAgoOrIn(iso) {
 async function init() {
   currentUser = await YanAPI.me();
   if (!currentUser) { window.location.href = 'community.html'; return; }
-  if (currentUser.isAdmin) {
-    document.getElementById('new-session-btn').style.display = 'inline-block';
-    document.getElementById('ns-dept').value = 'programs';
-  }
   await loadSessions();
-  await loadHeadsList();
 }
 
 async function loadSessions() {
@@ -218,7 +178,7 @@ async function loadSessions() {
   try {
     const sessions = await YanAPI.getSessions();
     if (!sessions.length) {
-      list.innerHTML = '<div class="empty">No sessions scheduled yet.' + (currentUser.isAdmin ? ' Click "+ New Session" to get started.' : '') + '</div>';
+      list.innerHTML = '<div class="empty">No sessions scheduled yet.</div>';
       return;
     }
     // Grouped by month so the list stays readable as it grows.
@@ -235,17 +195,6 @@ async function loadSessions() {
   } catch(e) {
     list.innerHTML = '<div class="empty">Could not load sessions: ' + (e.message||'') + '</div>';
   }
-}
-
-async function loadHeadsList() {
-  const el = document.getElementById('heads-list');
-  if (!el) return;
-  try {
-    const heads = await YanAPI.getHeads();
-    el.innerHTML = heads.length
-      ? '<div class="card">' + heads.map(h => `<span class="pill">${escapeHtml(DEPT_NAMES[h.department]||h.department)}: <strong>${escapeHtml(h.name)}</strong></span>`).join('') + '</div>'
-      : '<p style="color:var(--gray);font-size:0.85rem;">No department heads assigned yet.</p>';
-  } catch(e) { el.innerHTML = ''; }
 }
 
 function renderSessionCard(s) {
@@ -299,26 +248,6 @@ function escapeHtml(str) {
   const d = document.createElement('div');
   d.textContent = String(str == null ? '' : str);
   return d.innerHTML;
-}
-
-function openNewSessionModal() { openModal('new-session-modal'); }
-async function submitNewSession() {
-  const sessionDate = document.getElementById('ns-date').value;
-  const department = document.getElementById('ns-dept').value;
-  const topic = document.getElementById('ns-topic').value.trim();
-  const meetLink = document.getElementById('ns-meet').value.trim();
-  if (!sessionDate || !topic) return showToast('Date and topic are required', 'error');
-  const btn = document.getElementById('ns-submit');
-  btn.disabled = true;
-  try {
-    await YanAPI.createSession({ sessionDate, department, topic, meetLink });
-    closeModal('new-session-modal');
-    document.getElementById('ns-topic').value = '';
-    document.getElementById('ns-meet').value = '';
-    showToast('Session scheduled!');
-    await loadSessions();
-  } catch(e) { showToast(e.message || 'Could not create session', 'error'); }
-  finally { btn.disabled = false; }
 }
 
 async function confirmSession(id) {

@@ -486,6 +486,22 @@ async function emailVolunteerQueue(request, env, cors) {
   return json({ ok: true, sentTo: people.length }, 200, cors);
 }
 
+// Raw-body upload straight to R2 (not the Cloudinary preset used elsewhere in the site,
+// which has a hard 10MB cap - real Google Meet recordings and edited videos routinely
+// exceed that). The client sends the file as the request body directly (not
+// multipart/form-data), so this streams straight through to R2 without ever buffering
+// the whole file in the Worker's memory - the only ceiling is Cloudflare's own request
+// body size limit, not anything this code imposes.
+async function uploadMedia(request, env, cors, url) {
+  const { error, user } = await requireUser(request, env, cors);
+  if (error) return error;
+  const filename = decodeURIComponent(url.searchParams.get('filename') || 'file');
+  const contentType = request.headers.get('Content-Type') || 'application/octet-stream';
+  const key = `${user.id}/${Date.now()}-${filename.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+  await env.MEDIA.put(key, request.body, { httpMetadata: { contentType } });
+  return json({ url: env.MEDIA_PUBLIC_BASE + '/' + key }, 201, cors);
+}
+
 async function getHeadsHandler(request, env, cors) {
   const { error } = await requireUser(request, env, cors);
   if (error) return error;
@@ -493,6 +509,37 @@ async function getHeadsHandler(request, env, cors) {
     `SELECT id, name, email, department FROM users WHERE is_dept_head = 1 ORDER BY department ASC`
   ).all();
   return json({ heads: results.map(h => ({ userId: h.id, name: h.name, email: h.email, department: h.department })) }, 200, cors);
+}
+
+async function assignHead(request, env, cors) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  const { userId, department } = await request.json();
+  if (!userId || !department) return json({ error: 'userId and department required' }, 400, cors);
+  const user = await env.DB.prepare('SELECT id FROM users WHERE id = ?').bind(userId).first();
+  if (!user) return json({ error: 'User not found' }, 404, cors);
+  await env.DB.prepare('UPDATE users SET is_dept_head = 1, department = ?, updated_at = ? WHERE id = ?')
+    .bind(department, Date.now(), userId).run();
+  return json({ ok: true }, 200, cors);
+}
+
+async function removeHead(request, env, cors, userId) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  await env.DB.prepare('UPDATE users SET is_dept_head = 0, updated_at = ? WHERE id = ?').bind(Date.now(), userId).run();
+  return json({ ok: true }, 200, cors);
+}
+
+async function searchUsers(request, env, cors, url) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  const q = (url.searchParams.get('q') || '').trim();
+  if (q.length < 2) return json({ users: [] }, 200, cors);
+  const like = '%' + q + '%';
+  const { results } = await env.DB.prepare(
+    `SELECT id, name, email, department FROM users WHERE name LIKE ? OR email LIKE ? LIMIT 15`
+  ).bind(like, like).all();
+  return json({ users: results.map(u => ({ userId: u.id, name: u.name, email: u.email, department: u.department })) }, 200, cors);
 }
 
 const MONTH_ABBREVS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -608,7 +655,12 @@ export default {
 
       if (path === '/api/volunteer-queue' && request.method === 'GET') return await getVolunteerQueueHandler(request, env, cors, url);
       if (path === '/api/volunteer-queue/email' && request.method === 'POST') return await emailVolunteerQueue(request, env, cors);
+      if (path === '/api/upload' && request.method === 'POST') return await uploadMedia(request, env, cors, url);
       if (path === '/api/heads' && request.method === 'GET') return await getHeadsHandler(request, env, cors);
+      if (path === '/api/heads' && request.method === 'POST') return await assignHead(request, env, cors);
+      const headRemoveMatch = path.match(/^\/api\/heads\/([^/]+)$/);
+      if (headRemoveMatch && request.method === 'DELETE') return await removeHead(request, env, cors, headRemoveMatch[1]);
+      if (path === '/api/users/search' && request.method === 'GET') return await searchUsers(request, env, cors, url);
 
       return json({ error: 'Not found' }, 404, cors);
     } catch (e) {

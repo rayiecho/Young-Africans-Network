@@ -17,6 +17,7 @@
 
 <!-- Firebase -->
 <script src="/assets/yan-api.js"></script>
+<script src="/assets/yan-upload.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -4245,6 +4246,15 @@ window.loadSessionsAdmin = async function(c) {
       <button onclick="submitSessionAdmin()" id="sa-submit" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Post Session</button>
     </div>
     <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Department Heads</h3>
+    <div style="background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-bottom:1.5rem;">
+      <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:0.75rem;">
+        <input type="text" id="head-search" placeholder="Search member by name or email..." oninput="searchHeadCandidate(this.value)" style="flex:1;min-width:220px;padding:0.6rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;">
+        <select id="head-search-dept" style="padding:0.6rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;">
+          ${Object.entries(SESSION_DEPT_NAMES).map(([id,name])=>`<option value="${id}">${name}</option>`).join('')}
+        </select>
+      </div>
+      <div id="head-search-results" style="margin-bottom:0.5rem;"></div>
+    </div>
     <div id="sa-heads" style="margin-bottom:1.5rem;"></div>
     <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Upcoming Sessions</h3>
     <div id="sa-list"></div>
@@ -4253,13 +4263,55 @@ window.loadSessionsAdmin = async function(c) {
   await loadHeadsAdminList();
 };
 
+let headSearchDebounce = null;
+window.searchHeadCandidate = function(q) {
+  clearTimeout(headSearchDebounce);
+  const results = document.getElementById('head-search-results');
+  if (q.trim().length < 2) { results.innerHTML = ''; return; }
+  headSearchDebounce = setTimeout(async () => {
+    try {
+      const users = await YanAPI.searchUsers(q.trim());
+      results.innerHTML = users.length
+        ? users.map(u => `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid var(--light);">
+            <div><span style="font-size:0.85rem;font-weight:700;color:var(--navy);">${sanitize(u.name)}</span> <span style="font-size:0.76rem;color:var(--gray);">${sanitize(u.email)}</span></div>
+            <button onclick="makeHead('${u.userId}')" style="background:var(--navy);color:#fff;border:none;padding:0.35rem 0.9rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;">Make Head</button>
+          </div>`).join('')
+        : '<p style="color:var(--gray);font-size:0.8rem;">No matches.</p>';
+    } catch(e) { results.innerHTML = ''; }
+  }, 300);
+};
+
+window.makeHead = async function(userId) {
+  const department = document.getElementById('head-search-dept').value;
+  try {
+    await YanAPI.assignHead(userId, department);
+    document.getElementById('head-search').value = '';
+    document.getElementById('head-search-results').innerHTML = '';
+    showToast('Department head assigned!');
+    await loadHeadsAdminList();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+window.removeHeadAdmin = async function(userId, name) {
+  if (!confirm('Remove ' + name + ' as department head?')) return;
+  try { await YanAPI.removeHead(userId); showToast('Removed'); await loadHeadsAdminList(); }
+  catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
 async function loadHeadsAdminList() {
   const el = document.getElementById('sa-heads');
   if (!el) return;
   try {
     const heads = await YanAPI.getHeads();
     el.innerHTML = heads.length
-      ? heads.map(h => `<span style="display:inline-block;background:rgba(27,42,107,0.06);border-radius:50px;padding:0.35rem 0.9rem;font-size:0.8rem;margin:0 0.4rem 0.4rem 0;">${sanitize(SESSION_DEPT_NAMES[h.department]||h.department)}: <strong>${sanitize(h.name)}</strong></span>`).join('')
+      ? '<div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.05);">' + heads.map((h,i) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1.1rem;${i<heads.length-1?'border-bottom:1px solid rgba(27,42,107,0.08);':''}">
+          <div>
+            <div style="font-size:0.85rem;font-weight:700;color:var(--navy);">${sanitize(h.name)} <span style="font-weight:400;color:var(--gray);">— ${sanitize(SESSION_DEPT_NAMES[h.department]||h.department)}</span></div>
+            <div style="font-size:0.75rem;color:var(--gray);">${sanitize(h.email)}</div>
+          </div>
+          <button onclick="removeHeadAdmin('${h.userId}','${sanitize(h.name)}')" style="background:none;border:1px solid rgba(230,51,41,0.3);color:var(--red);padding:0.35rem 0.9rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;">Remove</button>
+        </div>`).join('') + '</div>'
       : '<p style="color:var(--gray);font-size:0.85rem;">No department heads assigned yet.</p>';
   } catch(e) { el.innerHTML = ''; }
 }
@@ -4342,7 +4394,7 @@ window.loadVolunteerAdmin = async function(c) {
     <div id="va-review-list" style="margin-bottom:1.5rem;"></div>
     <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Volunteer Queue</h3>
     <div id="va-queue" style="margin-bottom:1rem;"></div>
-    <button onclick="emailVolunteerQueueAdmin()" style="background:none;border:1.5px solid rgba(27,42,107,0.2);color:var(--navy);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;margin-bottom:1.5rem;">Email Everyone in the Queue</button>
+    <button onclick="emailVolunteerQueueAdmin()" style="background:none;border:1.5px solid rgba(27,42,107,0.2);color:var(--navy);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;margin-bottom:1.5rem;">Message Everyone on This List</button>
     <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">All Tasks</h3>
     <div id="va-list"></div>
   </div>`;
@@ -4407,8 +4459,15 @@ async function loadVolunteerAdminLists() {
     }
     if (queueList) {
       queueList.innerHTML = queue.length
-        ? queue.map((v,i) => `<span style="display:inline-block;background:rgba(27,42,107,0.06);border-radius:50px;padding:0.3rem 0.85rem;font-size:0.8rem;margin:0 0.4rem 0.4rem 0;">#${i+1} ${sanitize(v.name)}</span>`).join('')
-        : '<p style="color:var(--gray);font-size:0.85rem;">Nobody in the queue yet.</p>';
+        ? '<div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.05);">' + queue.map((v,i) => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1.1rem;${i<queue.length-1?'border-bottom:1px solid rgba(27,42,107,0.08);':''}">
+            <div>
+              <div style="font-size:0.85rem;font-weight:700;color:var(--navy);">#${i+1} ${sanitize(v.name)}</div>
+              <div style="font-size:0.75rem;color:var(--gray);">${sanitize(v.email)}</div>
+            </div>
+            <a href="mailto:${encodeURIComponent(v.email)}" style="background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.35rem 0.9rem;border-radius:50px;font-size:0.72rem;font-weight:700;text-decoration:none;">Message</a>
+          </div>`).join('') + '</div>'
+        : '<p style="color:var(--gray);font-size:0.85rem;">Nobody available this month yet.</p>';
     }
   } catch(e) {
     reviewList.innerHTML = allList.innerHTML = '<p style="color:var(--red);font-size:0.85rem;">Error: ' + e.message + '</p>';
@@ -4419,16 +4478,10 @@ window.uploadFileToAdmin = async function(fileInputId, urlFieldId, statusId) {
   const file = document.getElementById(fileInputId).files[0];
   const status = document.getElementById(statusId);
   if (!file) return;
-  status.textContent = '⏳ Uploading...';
-  const isVideo = file.type.startsWith('video/');
-  const fd = new FormData();
-  fd.append('file', file);
-  fd.append('upload_preset', CLOUDINARY_PRESET);
+  status.textContent = '⏳ Uploading ' + file.name + '...';
   try {
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/${isVideo?'video':'image'}/upload`, { method: 'POST', body: fd });
-    const data = await res.json();
-    if (!data.secure_url) throw new Error(data.error?.message || 'Upload failed');
-    document.getElementById(urlFieldId).value = data.secure_url;
+    const url = await YanUpload.uploadFile(file);
+    document.getElementById(urlFieldId).value = url;
     status.textContent = '✅ Uploaded: ' + file.name;
   } catch(e) { status.textContent = '❌ Upload failed: ' + e.message; }
 };

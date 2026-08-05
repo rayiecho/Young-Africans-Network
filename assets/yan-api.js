@@ -207,6 +207,16 @@
       const data = await opsRequest('/api/heads');
       return data.heads;
     },
+    async assignHead(userId, department) {
+      return opsRequest('/api/heads', { method: 'POST', body: { userId, department } });
+    },
+    async removeHead(userId) {
+      return opsRequest('/api/heads/' + userId, { method: 'DELETE' });
+    },
+    async searchUsers(q) {
+      const data = await opsRequest('/api/users/search?q=' + encodeURIComponent(q));
+      return data.users;
+    },
     async getVolunteerQueue() {
       const data = await opsRequest('/api/volunteer-queue');
       return data.queue;

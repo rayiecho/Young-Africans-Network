@@ -95,7 +95,6 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
       <button class="tab-btn" data-tab="mine" onclick="switchTab('mine')">My Tasks</button>
       <button class="tab-btn" id="review-tab-btn" data-tab="review" onclick="switchTab('review')" style="display:none;">Review Queue</button>
     </div>
-    <button class="btn btn-primary" id="new-task-btn" style="display:none;" onclick="openModal('new-task-modal')">+ New Task</button>
   </div>
 
   <div id="task-list"><div class="loading">Loading tasks...</div></div>
@@ -103,13 +102,13 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
   <h2 class="page-title" style="font-size:1.2rem;margin-top:2.5rem;">Volunteer Queue</h2>
   <p class="page-sub">Fair rotation — whoever's waited longest gets notified first when a task posts. Claiming moves you to the back of the line.</p>
   <div id="queue-list" style="margin-bottom:1rem;"></div>
-  <button class="btn btn-outline" id="email-queue-btn" style="display:none;" onclick="openModal('email-queue-modal')">Email Everyone in the Queue</button>
+  <button class="btn btn-outline" id="email-queue-btn" style="display:none;" onclick="openModal('email-queue-modal')">Message Everyone on This List</button>
 </div>
 
 <!-- EMAIL QUEUE MODAL -->
 <div class="modal-overlay" id="email-queue-modal">
   <div class="modal">
-    <h3>Email the Volunteer Queue</h3>
+    <h3>Message everyone available this month</h3>
     <div class="form-group"><label>Subject</label><input type="text" id="eq-subject"></div>
     <div class="form-group"><label>Message</label><textarea id="eq-message"></textarea></div>
     <div class="modal-actions">
@@ -119,32 +118,6 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
   </div>
 </div>
 
-<!-- NEW TASK MODAL -->
-<div class="modal-overlay" id="new-task-modal">
-  <div class="modal">
-    <h3>Post a Task</h3>
-    <div class="form-group"><label>Type</label>
-      <select id="nt-type">
-        <option value="poster">Poster / Banner</option>
-        <option value="video_edit">Video Edit</option>
-        <option value="slides">Slides / Presentation</option>
-        <option value="other">Other</option>
-      </select>
-    </div>
-    <div class="form-group"><label>Title</label><input type="text" id="nt-title" placeholder="e.g. Poster for Career Dev session"></div>
-    <div class="form-group"><label>Brief</label><textarea id="nt-brief" placeholder="What's needed - event, date, theme, required text..."></textarea></div>
-    <div class="form-group"><label>Raw file (optional)</label>
-      <input type="file" id="nt-raw-file" accept="image/*,video/*" onchange="uploadFileTo('nt-raw-file','nt-raw-url','nt-raw-status')">
-      <input type="hidden" id="nt-raw-url">
-      <small id="nt-raw-status" style="color:var(--gray);"></small>
-    </div>
-    <div class="form-group"><label>Due date (optional)</label><input type="date" id="nt-due"></div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('new-task-modal')">Cancel</button>
-      <button class="btn btn-primary" id="nt-submit" onclick="submitNewTask()">Post Task</button>
-    </div>
-  </div>
-</div>
 
 <!-- SUBMIT DELIVERABLE MODAL -->
 <div class="modal-overlay" id="submit-modal">
@@ -178,28 +151,21 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
 <div class="toast" id="toast"></div>
 
 <script src="/assets/yan-api.js"></script>
+<script src="/assets/yan-upload.js"></script>
 <script>
 let currentUser = null;
 let activeTab = 'open';
 let activeTaskId = null;
 const TYPE_LABELS = { poster: 'Poster / Banner', video_edit: 'Video Edit', slides: 'Slides', other: 'Other' };
-const CLOUDINARY_CLOUD = 'deigiiyq5';
-const CLOUDINARY_PRESET = 'yan_Profiles';
 
 async function uploadFileTo(fileInputId, urlFieldId, statusId) {
   const file = document.getElementById(fileInputId).files[0];
   const status = document.getElementById(statusId);
   if (!file) return;
-  status.textContent = '⏳ Uploading...';
-  const isVideo = file.type.startsWith('video/');
-  const fd = new FormData();
-  fd.append('file', file);
-  fd.append('upload_preset', CLOUDINARY_PRESET);
+  status.textContent = '⏳ Uploading ' + file.name + '...';
   try {
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/${isVideo?'video':'image'}/upload`, { method: 'POST', body: fd });
-    const data = await res.json();
-    if (!data.secure_url) throw new Error(data.error?.message || 'Upload failed');
-    document.getElementById(urlFieldId).value = data.secure_url;
+    const url = await YanUpload.uploadFile(file);
+    document.getElementById(urlFieldId).value = url;
     status.textContent = '✅ Uploaded: ' + file.name;
   } catch(e) {
     status.textContent = '❌ Upload failed: ' + e.message;
@@ -231,7 +197,6 @@ async function init() {
   currentUser = await YanAPI.me();
   if (!currentUser) { window.location.href = 'community.html'; return; }
   if (currentUser.isAdmin) {
-    document.getElementById('new-task-btn').style.display = 'inline-block';
     document.getElementById('email-queue-btn').style.display = 'inline-block';
   }
   if (currentUser.isAdmin || currentUser.isDeptHead) {
@@ -283,8 +248,15 @@ async function loadQueue() {
   try {
     const queue = await YanAPI.getVolunteerQueue();
     el.innerHTML = queue.length
-      ? '<div class="card">' + queue.map((v,i) => `<span class="pill">#${i+1} ${escapeHtml(v.name)}</span>`).join('') + '</div>'
-      : '<p style="color:var(--gray);font-size:0.85rem;">Nobody in the queue yet — it fills up as people claim their first task.</p>';
+      ? '<div class="card" style="padding:0;">' + queue.map((v,i) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.85rem 1.25rem;${i<queue.length-1?'border-bottom:1px solid rgba(27,42,107,0.08);':''}">
+          <div>
+            <div style="font-size:0.88rem;font-weight:700;color:var(--navy);">#${i+1} ${escapeHtml(v.name)}</div>
+            <div style="font-size:0.78rem;color:var(--gray);">${escapeHtml(v.email)}</div>
+          </div>
+          <a href="mailto:${encodeURIComponent(v.email)}" style="background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.4rem 1rem;border-radius:50px;font-size:0.76rem;font-weight:700;text-decoration:none;flex-shrink:0;">Message</a>
+        </div>`).join('') + '</div>'
+      : '<p style="color:var(--gray);font-size:0.85rem;">Nobody available this month yet — this comes from the "which months can you volunteer" answers in session feedback.</p>';
   } catch(e) { el.innerHTML = ''; }
 }
 
@@ -328,26 +300,6 @@ function renderTaskCard(t) {
     <div class="task-meta">${t.claimedByName ? 'Claimed by ' + escapeHtml(t.claimedByName) + ' · ' : ''}${t.dueDate ? 'Due ' + t.dueDate + ' · ' : ''}Posted ${timeAgo(t.createdAt)}${t.pointsAwarded ? ' · +' + t.pointsAwarded + ' pts awarded' : ''}</div>
     ${actions ? `<div class="actions-row">${actions}</div>` : ''}
   </div>`;
-}
-
-async function submitNewTask() {
-  const taskType = document.getElementById('nt-type').value;
-  const title = document.getElementById('nt-title').value.trim();
-  const brief = document.getElementById('nt-brief').value.trim();
-  const rawFileUrl = document.getElementById('nt-raw-url').value.trim();
-  const dueDate = document.getElementById('nt-due').value;
-  if (!title) return showToast('Give the task a title', 'error');
-  const btn = document.getElementById('nt-submit');
-  btn.disabled = true;
-  try {
-    await YanAPI.createVolunteerTask({ taskType, title, brief, rawFileUrl, dueDate });
-    closeModal('new-task-modal');
-    ['nt-title','nt-brief','nt-raw-url','nt-due'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('nt-raw-status').textContent = '';
-    showToast('Task posted!');
-    if (activeTab === 'open') await loadTasks();
-  } catch(e) { showToast(e.message || 'Could not post task', 'error'); }
-  finally { btn.disabled = false; }
 }
 
 async function claimTask(id) {
