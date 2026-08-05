@@ -1104,7 +1104,7 @@ window.loadSection = async function(section, customContainer) {
     newsletters: ' Newsletter Manager',
     analytics: ' Analytics Dashboard',
     assignments: ' Assignment Reviews',
-    programs: ' Programs Manager', notifications: ' Notification Center', finance: ' Finance Manager', recommendations: ' Recommendation Letters', errors: '🚨 System Errors', sessionsadmin: ' Session Coordination', volunteeradmin: ' Volunteer Room' 
+    programs: ' Programs Manager', notifications: ' Notification Center', finance: ' Finance Manager', recommendations: ' Recommendation Letters', errors: '🚨 System Errors', sessionsadmin: ' Session Coordination', volunteeradmin: ' Volunteer Room', attendance: ' Attendance Register'
   }[section] || section;
   const container = customContainer || document.getElementById('content-area');
   if (!customContainer) container.innerHTML = '<div class="loading">Loading...</div>';
@@ -1153,7 +1153,7 @@ window.loadSection = async function(section, customContainer) {
     notifications:(c)=>window.loadNotificationCenter(c),finance:(c)=>window.loadFinance(c),
     recommendations:(c)=>window.loadRecommendations(c),
     errors:(c)=>window.loadSystemErrors(c),mentors:(c)=>window.loadMentorApplications(c),
-    opportunities:(c)=>window.loadOpportunitiesManager(c),lab:(c)=>window.loadLabListings(c),redemptions:(c)=>window.loadRedemptions(c),healthcheck:(c)=>window.loadHealthCheck(c),sos:(c)=>window.loadSOSReports(c),feedback:(c)=>window.loadSessionFeedback(c),sessionsadmin:(c)=>window.loadSessionsAdmin(c),volunteeradmin:(c)=>window.loadVolunteerAdmin(c)
+    opportunities:(c)=>window.loadOpportunitiesManager(c),lab:(c)=>window.loadLabListings(c),redemptions:(c)=>window.loadRedemptions(c),healthcheck:(c)=>window.loadHealthCheck(c),sos:(c)=>window.loadSOSReports(c),feedback:(c)=>window.loadSessionFeedback(c),sessionsadmin:(c)=>window.loadSessionsAdmin(c),volunteeradmin:(c)=>window.loadVolunteerAdmin(c),attendance:(c)=>window.loadAttendanceRegister(c)
   };
   if (fns[section]) {
     try {
@@ -4282,6 +4282,47 @@ window.searchHeadCandidate = function(q) {
   }, 300);
 };
 
+let activeMessagePersonEmail = null;
+window.openMessagePersonModal = function(name, emailEncoded) {
+  activeMessagePersonEmail = decodeURIComponent(emailEncoded);
+  if (document.getElementById('message-person-overlay')) document.getElementById('message-person-overlay').remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'message-person-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  overlay.innerHTML = `<div style="background:#fff;border-radius:20px;padding:1.75rem;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);font-family:Poppins,sans-serif;">
+    <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:1rem;">Message ${sanitize(name)}</h3>
+    <div style="margin-bottom:0.85rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Subject</label>
+      <input type="text" id="mp-subject" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+    <div style="margin-bottom:1.25rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Message</label>
+      <textarea id="mp-message" rows="5" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;resize:vertical;"></textarea></div>
+    <div style="display:flex;gap:0.6rem;justify-content:flex-end;">
+      <button onclick="closeMessagePersonModal()" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.4rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Cancel</button>
+      <button id="mp-submit" onclick="submitMessagePerson()" style="background:var(--navy);color:#fff;border:none;padding:0.65rem 1.4rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Send</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+};
+
+window.closeMessagePersonModal = function() {
+  const overlay = document.getElementById('message-person-overlay');
+  if (overlay) overlay.remove();
+  activeMessagePersonEmail = null;
+};
+
+window.submitMessagePerson = async function() {
+  const subject = document.getElementById('mp-subject').value.trim();
+  const message = document.getElementById('mp-message').value.trim();
+  if (!subject || !message) return showToast('Subject and message are required', 'error');
+  const btn = document.getElementById('mp-submit');
+  btn.disabled = true;
+  try {
+    await YanAPI.messagePerson(activeMessagePersonEmail, subject, message);
+    closeMessagePersonModal();
+    showToast('Message sent!');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  finally { if (document.getElementById('mp-submit')) btn.disabled = false; }
+};
+
 window.makeHead = async function(userId) {
   const department = document.getElementById('head-search-dept').value;
   try {
@@ -4311,7 +4352,10 @@ async function loadHeadsAdminList() {
             <div style="font-size:0.85rem;font-weight:700;color:var(--navy);">${sanitize(h.name)} <span style="font-weight:400;color:var(--gray);">— ${sanitize(SESSION_DEPT_NAMES[h.department]||h.department)}</span></div>
             <div style="font-size:0.75rem;color:var(--gray);">${sanitize(h.email)}</div>
           </div>
-          <button onclick="removeHeadAdmin('${h.userId}','${sanitize(h.name)}')" style="background:none;border:1px solid rgba(230,51,41,0.3);color:var(--red);padding:0.35rem 0.9rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;">Remove</button>
+          <div style="display:flex;gap:0.5rem;">
+            <button onclick="openMessagePersonModal('${sanitize(h.name)}','${encodeURIComponent(h.email)}')" style="background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.35rem 0.9rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;">Message</button>
+            <button onclick="removeHeadAdmin('${h.userId}','${sanitize(h.name)}')" style="background:none;border:1px solid rgba(230,51,41,0.3);color:var(--red);padding:0.35rem 0.9rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;">Remove</button>
+          </div>
         </div>`).join('') + '</div>'
       : '<p style="color:var(--gray);font-size:0.85rem;">No department heads assigned yet.</p>';
   } catch(e) { el.innerHTML = ''; }
@@ -4362,6 +4406,101 @@ window.deleteSessionAdmin = async function(id) {
   if (!confirm('Delete this session?')) return;
   try { await YanAPI.deleteSession(id); showToast('Session deleted'); await loadSessionsAdminList(); }
   catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+// ===== ATTENDANCE REGISTER =====
+window.loadAttendanceRegister = async function(c) {
+  c.innerHTML = `<div style="max-width:1100px;margin:0 auto;">
+    <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">Attendance Register</h2>
+    <p style="color:var(--gray);font-size:0.85rem;margin-bottom:1.5rem;">Real check-in records across every Wed/Sat session - see who's actually showing up.</p>
+    <div style="background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-bottom:1.5rem;display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end;">
+      <div><label style="font-size:0.75rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Department</label>
+        <select id="ar-dept" onchange="loadAttendanceRegisterData()" style="padding:0.6rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;">
+          <option value="">All Departments</option>
+          ${Object.entries(SESSION_DEPT_NAMES).map(([id,name])=>`<option value="${id}">${name}</option>`).join('')}
+        </select></div>
+      <div><label style="font-size:0.75rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">From</label>
+        <input type="date" id="ar-from" onchange="loadAttendanceRegisterData()" style="padding:0.6rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>
+      <div><label style="font-size:0.75rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">To</label>
+        <input type="date" id="ar-to" onchange="loadAttendanceRegisterData()" style="padding:0.6rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;"></div>
+      <button onclick="document.getElementById('ar-dept').value='';document.getElementById('ar-from').value='';document.getElementById('ar-to').value='';loadAttendanceRegisterData();" style="background:var(--light);color:var(--navy);border:none;padding:0.6rem 1.1rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;">Reset</button>
+    </div>
+    <div id="ar-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;margin-bottom:1.5rem;"></div>
+    <div id="ar-grid" style="background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.05);overflow-x:auto;padding:0.25rem;"></div>
+  </div>`;
+  await loadAttendanceRegisterData();
+};
+
+window.loadAttendanceRegisterData = async function() {
+  const grid = document.getElementById('ar-grid');
+  const summary = document.getElementById('ar-summary');
+  if (!grid) return;
+  grid.innerHTML = '<div class="loading" style="padding:2rem;">Loading register...</div>';
+  const department = document.getElementById('ar-dept').value;
+  const from = document.getElementById('ar-from').value;
+  const to = document.getElementById('ar-to').value;
+  try {
+    const { sessions, members } = await YanAPI.getAttendanceRegister({ department, from, to });
+    if (!sessions.length) {
+      grid.innerHTML = '<p style="color:var(--gray);font-size:0.85rem;padding:1.5rem;">No sessions in this range yet.</p>';
+      summary.innerHTML = '';
+      return;
+    }
+    const avgRate = members.length ? Math.round(members.reduce((a,m)=>a+m.rate,0) / members.length) : 0;
+    const perfect = members.filter(m => m.totalSessions > 0 && m.rate === 100).length;
+    const zero = members.filter(m => m.totalSessions > 0 && m.attendedCount === 0).length;
+    summary.innerHTML = [
+      ['Sessions in range', sessions.length, 'var(--navy)'],
+      ['Members tracked', members.length, 'var(--navy)'],
+      ['Average attendance', avgRate + '%', 'var(--gold)'],
+      ['Never attended', zero, 'var(--red)']
+    ].map(([label,val,color]) => `
+      <div style="background:#fff;border-radius:14px;padding:1rem 1.1rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);border-left:4px solid ${color};">
+        <div style="font-size:1.4rem;font-weight:900;color:${color};font-family:'Playfair Display',serif;">${val}</div>
+        <div style="font-size:0.72rem;color:var(--gray);font-weight:600;">${label}</div>
+      </div>`).join('');
+
+    const dayLabel = (iso) => {
+      const d = new Date(iso + 'T00:00:00');
+      return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+    };
+    grid.innerHTML = `<table style="border-collapse:collapse;width:100%;font-family:Poppins,sans-serif;">
+      <thead><tr>
+        <th style="position:sticky;left:0;background:#fff;text-align:left;padding:0.65rem 0.9rem;font-size:0.75rem;color:var(--navy);border-bottom:2px solid rgba(27,42,107,0.1);white-space:nowrap;">Member</th>
+        ${sessions.map(s => `<th title="${sanitize(s.topic)}" style="padding:0.5rem 0.5rem;font-size:0.65rem;color:var(--gray);border-bottom:2px solid rgba(27,42,107,0.1);text-align:center;white-space:nowrap;">${dayLabel(s.date)}<br>${s.date.slice(5)}</th>`).join('')}
+        <th style="padding:0.5rem 0.75rem;font-size:0.7rem;color:var(--navy);border-bottom:2px solid rgba(27,42,107,0.1);text-align:center;">Rate</th>
+      </tr></thead>
+      <tbody>
+        ${members.map((m,mi) => `
+          <tr style="${mi%2?'background:rgba(27,42,107,0.02);':''}">
+            <td style="position:sticky;left:0;background:${mi%2?'#fbfbfd':'#fff'};padding:0.55rem 0.9rem;white-space:nowrap;">
+              <div style="font-size:0.8rem;font-weight:700;color:var(--navy);">${sanitize(m.name)}</div>
+              <div style="font-size:0.68rem;color:var(--gray);">${sanitize(m.email)}</div>
+            </td>
+            ${sessions.map((s,si) => `
+              <td style="text-align:center;padding:0.4rem;cursor:pointer;" onclick="toggleAttendanceCell('${s.id}','${m.userId}',${m.attended[si]})" title="Click to ${m.attended[si]?'unmark':'mark'} attendance">
+                ${m.attended[si]
+                  ? '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:rgba(39,174,96,0.15);color:var(--green);font-weight:900;font-size:0.75rem;">✓</span>'
+                  : '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:rgba(107,114,128,0.08);color:var(--gray);font-size:0.7rem;">—</span>'}
+              </td>`).join('')}
+            <td style="text-align:center;padding:0.5rem 0.75rem;">
+              <span style="font-size:0.72rem;font-weight:800;color:${m.rate>=75?'var(--green)':m.rate>=40?'var(--gold)':'var(--red)'};">${m.rate}%</span>
+              <div style="font-size:0.62rem;color:var(--gray);">${m.attendedCount}/${m.totalSessions}</div>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+  } catch(e) {
+    grid.innerHTML = '<p style="color:var(--red);font-size:0.85rem;padding:1.5rem;">Error loading register: ' + e.message + '</p>';
+  }
+};
+
+window.toggleAttendanceCell = async function(sessionId, userId, currentlyPresent) {
+  try {
+    if (currentlyPresent) await YanAPI.unmarkSessionAttendance(sessionId, userId);
+    else await YanAPI.markSessionAttendance(sessionId, userId);
+    await loadAttendanceRegisterData();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
 };
 
 window.loadVolunteerAdmin = async function(c) {
@@ -4488,7 +4627,7 @@ async function loadVolunteerAdminLists() {
               <div style="font-size:0.85rem;font-weight:700;color:var(--navy);">#${i+1} ${sanitize(v.name)}</div>
               <div style="font-size:0.75rem;color:var(--gray);">${sanitize(v.email)}</div>
             </div>
-            <a href="mailto:${encodeURIComponent(v.email)}" style="background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.35rem 0.9rem;border-radius:50px;font-size:0.72rem;font-weight:700;text-decoration:none;">Message</a>
+            <button onclick="openMessagePersonModal('${sanitize(v.name)}','${encodeURIComponent(v.email)}')" style="background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.35rem 0.9rem;border-radius:50px;font-size:0.72rem;font-weight:700;font-family:Poppins,sans-serif;cursor:pointer;">Message</button>
           </div>`).join('') + '</div>'
         : '<p style="color:var(--gray);font-size:0.85rem;">Nobody available this month yet.</p>';
     }
@@ -5231,6 +5370,9 @@ body{font-family:'Poppins',sans-serif;background:var(--light);color:var(--navy);
       </button>
       <button class="nav-item" data-section="volunteeradmin" onclick="loadSection('volunteeradmin')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> Volunteer Room
+      </button>
+      <button class="nav-item" data-section="attendance" onclick="loadSection('attendance')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Attendance Register
       </button>
       <button class="nav-item" data-section="sos" onclick="loadSection('sos')" style="color:#E63329;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> SOS Reports

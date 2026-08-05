@@ -121,7 +121,7 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
   <div id="task-list"><div class="loading">Loading tasks...</div></div>
 
   <h2 class="page-title" style="font-size:1.2rem;margin-top:2.5rem;">Volunteer Queue</h2>
-  <p class="page-sub">Fair rotation — whoever's waited longest gets notified first when a task posts. Claiming moves you to the back of the line.</p>
+  <p class="page-sub">We are commited to giving equal chances to all Young Africans, to showcase skills and Build outstanding public image</p>
   <div id="queue-list" style="margin-bottom:1rem;"></div>
   <button class="btn btn-outline" id="email-queue-btn" style="display:none;" onclick="openModal('email-queue-modal')">Message Everyone on This List</button>
 </div>
@@ -135,6 +135,19 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('email-queue-modal')">Cancel</button>
       <button class="btn btn-primary" id="eq-submit" onclick="submitEmailQueue()">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGE ONE PERSON MODAL -->
+<div class="modal-overlay" id="message-person-modal">
+  <div class="modal">
+    <h3>Message <span id="mp-name"></span></h3>
+    <div class="form-group"><label>Subject</label><input type="text" id="mp-subject"></div>
+    <div class="form-group"><label>Message</label><textarea id="mp-message"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('message-person-modal')">Cancel</button>
+      <button class="btn btn-primary" id="mp-submit" onclick="submitMessagePerson()">Send</button>
     </div>
   </div>
 </div>
@@ -275,7 +288,7 @@ async function loadQueue() {
             <div style="font-size:0.88rem;font-weight:700;color:var(--navy);">#${i+1} ${escapeHtml(v.name)}</div>
             <div style="font-size:0.78rem;color:var(--gray);">${escapeHtml(v.email)}</div>
           </div>
-          <a href="mailto:${encodeURIComponent(v.email)}" style="background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.4rem 1rem;border-radius:50px;font-size:0.76rem;font-weight:700;text-decoration:none;flex-shrink:0;">Message</a>
+          <button onclick="openMessagePersonModal('${escapeHtml(v.name)}','${encodeURIComponent(v.email)}')" style="background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.4rem 1rem;border-radius:50px;font-size:0.76rem;font-weight:700;cursor:pointer;flex-shrink:0;">Message</button>
         </div>`).join('') + '</div>'
       : '<p style="color:var(--gray);font-size:0.85rem;">Nobody available this month yet — this comes from the "which months can you volunteer" answers in session feedback.</p>';
   } catch(e) { el.innerHTML = ''; }
@@ -293,6 +306,28 @@ async function submitEmailQueue() {
     document.getElementById('eq-subject').value = '';
     document.getElementById('eq-message').value = '';
     showToast('Sent to ' + res.sentTo + ' volunteers');
+  } catch(e) { showToast(e.message, 'error'); }
+  finally { btn.disabled = false; }
+}
+
+let activeMessageEmail = null;
+function openMessagePersonModal(name, emailEncoded) {
+  activeMessageEmail = decodeURIComponent(emailEncoded);
+  document.getElementById('mp-name').textContent = name;
+  document.getElementById('mp-subject').value = '';
+  document.getElementById('mp-message').value = '';
+  openModal('message-person-modal');
+}
+async function submitMessagePerson() {
+  const subject = document.getElementById('mp-subject').value.trim();
+  const message = document.getElementById('mp-message').value.trim();
+  if (!subject || !message) return showToast('Subject and message required', 'error');
+  const btn = document.getElementById('mp-submit');
+  btn.disabled = true;
+  try {
+    await YanAPI.messagePerson(activeMessageEmail, subject, message);
+    closeModal('message-person-modal');
+    showToast('Message sent!');
   } catch(e) { showToast(e.message, 'error'); }
   finally { btn.disabled = false; }
 }

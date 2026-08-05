@@ -203,6 +203,20 @@
       return data.attendance;
     },
     async deleteSession(id) { return opsRequest('/api/sessions/' + id, { method: 'DELETE' }); },
+    async markSessionAttendance(id, userId) {
+      return opsRequest('/api/sessions/' + id + '/attendance/mark', { method: 'POST', body: { userId } });
+    },
+    async unmarkSessionAttendance(id, userId) {
+      return opsRequest('/api/sessions/' + id + '/attendance/' + userId, { method: 'DELETE' });
+    },
+    async getAttendanceRegister({ department, from, to } = {}) {
+      const params = new URLSearchParams();
+      if (department) params.set('department', department);
+      if (from) params.set('from', from);
+      if (to) params.set('to', to);
+      const qs = params.toString();
+      return opsRequest('/api/attendance-register' + (qs ? '?' + qs : ''));
+    },
     async getHeads() {
       const data = await opsRequest('/api/heads');
       return data.heads;
@@ -223,6 +237,9 @@
     },
     async emailVolunteerQueue(subject, message) {
       return opsRequest('/api/volunteer-queue/email', { method: 'POST', body: { subject, message } });
+    },
+    async messagePerson(email, subject, message) {
+      return opsRequest('/api/message', { method: 'POST', body: { email, subject, message } });
     },
 
     // ---- volunteer room ----

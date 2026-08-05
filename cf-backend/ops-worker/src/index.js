@@ -365,6 +365,83 @@ async function getAttendance(request, env, cors, id) {
   return json({ attendance: results.map(r => ({ userId: r.user_id, name: r.name, checkedInAt: r.checked_in_at, markedBy: r.marked_by })) }, 200, cors);
 }
 
+// Lets an admin/head add someone to the register who attended (e.g. in person, or
+// joined the Meet under a name that didn't self-check-in) without needing that
+// member to have used the self-check-in button themselves.
+async function markAttendance(request, env, cors, id) {
+  const { error, user } = await requireAdminOrHead(request, env, cors);
+  if (error) return error;
+  const body = await request.json();
+  if (!body.userId) return json({ error: 'userId is required' }, 400, cors);
+  await env.DB.prepare(
+    `INSERT INTO session_attendance (session_id,user_id,checked_in_at,marked_by) VALUES (?,?,?,?)
+     ON CONFLICT(session_id,user_id) DO NOTHING`
+  ).bind(id, body.userId, Date.now(), user.id).run();
+  return json({ ok: true }, 200, cors);
+}
+
+async function unmarkAttendance(request, env, cors, id, userId) {
+  const { error } = await requireAdminOrHead(request, env, cors);
+  if (error) return error;
+  await env.DB.prepare('DELETE FROM session_attendance WHERE session_id = ? AND user_id = ?').bind(id, userId).run();
+  return json({ ok: true }, 200, cors);
+}
+
+// The register: every session in range as a column, every member as a row, so
+// admins/heads can see who's actually showing up (and who isn't) across the Wed/Sat
+// cadence - not just per-session counts, which is all the session detail view gives.
+async function getAttendanceRegister(request, env, cors, url) {
+  const { error } = await requireAdminOrHead(request, env, cors);
+  if (error) return error;
+  const department = url.searchParams.get('department') || null;
+  const from = url.searchParams.get('from') || null;
+  const to = url.searchParams.get('to') || null;
+
+  let sessionSql = 'SELECT id, session_date, department, topic FROM dept_sessions WHERE 1=1';
+  const sessionBinds = [];
+  if (department) { sessionSql += ' AND department = ?'; sessionBinds.push(department); }
+  if (from) { sessionSql += ' AND session_date >= ?'; sessionBinds.push(from); }
+  if (to) { sessionSql += ' AND session_date <= ?'; sessionBinds.push(to); }
+  sessionSql += ' ORDER BY session_date ASC';
+  const { results: sessions } = await env.DB.prepare(sessionSql).bind(...sessionBinds).all();
+
+  let memberSql = 'SELECT id, name, email, department FROM users WHERE is_admin = 0';
+  const memberBinds = [];
+  if (department) { memberSql += ' AND department = ?'; memberBinds.push(department); }
+  memberSql += ' ORDER BY name ASC';
+  const { results: members } = await env.DB.prepare(memberSql).bind(...memberBinds).all();
+
+  let attendance = [];
+  if (sessions.length) {
+    const placeholders = sessions.map(() => '?').join(',');
+    const { results } = await env.DB.prepare(
+      `SELECT session_id, user_id, checked_in_at FROM session_attendance WHERE session_id IN (${placeholders})`
+    ).bind(...sessions.map(s => s.id)).all();
+    attendance = results;
+  }
+  const attendedSet = new Set(attendance.map(a => a.session_id + '|' + a.user_id));
+  const lastAttendedByUser = {};
+  for (const a of attendance) {
+    if (!lastAttendedByUser[a.user_id] || a.checked_in_at > lastAttendedByUser[a.user_id]) lastAttendedByUser[a.user_id] = a.checked_in_at;
+  }
+
+  const memberRows = members.map(m => {
+    const attended = sessions.map(s => attendedSet.has(s.id + '|' + m.id));
+    const attendedCount = attended.filter(Boolean).length;
+    return {
+      userId: m.id, name: m.name, email: m.email, department: m.department,
+      attended, attendedCount, totalSessions: sessions.length,
+      rate: sessions.length ? Math.round((attendedCount / sessions.length) * 100) : 0,
+      lastAttendedAt: lastAttendedByUser[m.id] || null
+    };
+  });
+
+  return json({
+    sessions: sessions.map(s => ({ id: s.id, date: s.session_date, department: s.department, topic: s.topic })),
+    members: memberRows
+  }, 200, cors);
+}
+
 async function deleteSession(request, env, cors, id) {
   const { error, user } = await requireUser(request, env, cors);
   if (error) return error;
@@ -485,6 +562,18 @@ async function emailVolunteerQueue(request, env, cors) {
   const people = await getOrderedVolunteerAvailability(env, month);
   await Promise.all(people.map(p => sendEmail(env, { to: p.email, subject: body.subject, message: body.message })));
   return json({ ok: true, sentTo: people.length }, 200, cors);
+}
+
+// Compose-in-place messaging to a single person (volunteer or head) - no mailto:, sent
+// server-side the same way the newsletter feature already works, not handed off to
+// whatever mail client happens to be configured locally.
+async function messageOnePerson(request, env, cors) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  const body = await request.json();
+  if (!body.email || !body.subject || !body.message) return json({ error: 'email, subject and message are required' }, 400, cors);
+  await sendEmail(env, { to: body.email, subject: body.subject, message: body.message });
+  return json({ ok: true }, 200, cors);
 }
 
 // Raw-body upload straight to R2 (not the Cloudinary preset used elsewhere in the site,
@@ -644,6 +733,7 @@ export default {
         if (sub === 'guests' && request.method === 'POST') return await addGuest(request, env, cors, id);
         if (sub === 'checkin' && request.method === 'POST') return await checkIn(request, env, cors, id);
         if (sub === 'attendance' && request.method === 'GET') return await getAttendance(request, env, cors, id);
+        if (sub === 'attendance/mark' && request.method === 'POST') return await markAttendance(request, env, cors, id);
         if (sub === 'roles' && request.method === 'POST') return await addRole(request, env, cors, id);
 
         const guestConfirmMatch = sub && sub.match(/^guests\/([^/]+)\/confirm$/);
@@ -651,7 +741,12 @@ export default {
 
         const roleClaimMatch = sub && sub.match(/^roles\/([^/]+)\/claim$/);
         if (roleClaimMatch && request.method === 'POST') return await claimRole(request, env, cors, id, roleClaimMatch[1]);
+
+        const attendanceUnmarkMatch = sub && sub.match(/^attendance\/([^/]+)$/);
+        if (attendanceUnmarkMatch && attendanceUnmarkMatch[1] !== 'mark' && request.method === 'DELETE') return await unmarkAttendance(request, env, cors, id, attendanceUnmarkMatch[1]);
       }
+
+      if (path === '/api/attendance-register' && request.method === 'GET') return await getAttendanceRegister(request, env, cors, url);
 
       if (path === '/api/volunteer-tasks' && request.method === 'POST') return await createTask(request, env, cors);
       if (path === '/api/volunteer-tasks' && request.method === 'GET') return await listTasks(request, env, cors, url);
@@ -667,6 +762,7 @@ export default {
 
       if (path === '/api/volunteer-queue' && request.method === 'GET') return await getVolunteerQueueHandler(request, env, cors, url);
       if (path === '/api/volunteer-queue/email' && request.method === 'POST') return await emailVolunteerQueue(request, env, cors);
+      if (path === '/api/message' && request.method === 'POST') return await messageOnePerson(request, env, cors);
       if (path === '/api/upload' && request.method === 'POST') return await uploadMedia(request, env, cors, url);
       if (path === '/api/heads' && request.method === 'GET') return await getHeadsHandler(request, env, cors);
       if (path === '/api/heads' && request.method === 'POST') return await assignHead(request, env, cors);
