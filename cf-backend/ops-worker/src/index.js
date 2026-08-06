@@ -567,7 +567,8 @@ async function getVolunteerQueue(env) {
 // not the old D1-only claim history - that was the actual bug: a brand new queue that
 // ignored the volunteer list you already had.
 async function getVolunteerQueueHandler(request, env, cors, url) {
-  const { error } = await requireUser(request, env, cors);
+  // Admin-only: this now surfaces the curated roster (names + emails), not a public list.
+  const { error } = await requireAdmin(request, env, cors);
   if (error) return error;
   const month = url.searchParams.get('month') || MONTH_ABBREVS[new Date().getMonth()];
   return json({ month, queue: await getOrderedVolunteerAvailability(env, month) }, 200, cors);
@@ -707,30 +708,62 @@ async function searchUsers(request, env, cors, url) {
 
 const MONTH_ABBREVS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-// The real volunteer pool for a month = feedback.html's existing "which months can you
-// volunteer" answers (Firestore). The rotation order on top of that pool = D1's
-// last_claimed_at (never-claimed, or longest since claiming, first) - people not yet
-// matched to a D1 account sort first too (nothing to move them down yet).
+// The volunteer pool for a month = admin's curated volunteer_roster, not the raw
+// feedback.html signup data directly - admin explicitly adds people from that signup
+// list onto the roster (and can remove them), so this only ever reflects who admin
+// actually confirmed for that month. The rotation order on top of that pool = D1's
+// last_claimed_at (never-claimed, or longest since claiming, first).
 async function getOrderedVolunteerAvailability(env, month) {
-  const people = await getFirestoreVolunteersForMonth(env, month);
-  if (!people.length) return [];
-  const emails = people.map(p => p.email.toLowerCase());
-  const placeholders = emails.map(() => '?').join(',');
-  const { results } = await env.DB.prepare(`SELECT id, email FROM users WHERE email IN (${placeholders})`).bind(...emails).all();
-  const emailToUserId = Object.fromEntries(results.map(r => [r.email.toLowerCase(), r.id]));
-  const userIds = results.map(r => r.id);
+  const { results: roster } = await env.DB.prepare('SELECT * FROM volunteer_roster WHERE month = ?').bind(month).all();
+  if (!roster.length) return [];
+  const userIds = roster.filter(r => r.user_id).map(r => r.user_id);
   let lastClaimedByUser = {};
   if (userIds.length) {
     const qp = userIds.map(() => '?').join(',');
     const q = await env.DB.prepare(`SELECT user_id, last_claimed_at FROM volunteer_queue WHERE user_id IN (${qp})`).bind(...userIds).all();
     lastClaimedByUser = Object.fromEntries(q.results.map(r => [r.user_id, r.last_claimed_at]));
   }
-  const merged = people.map(p => {
-    const userId = emailToUserId[p.email.toLowerCase()] || null;
-    return { ...p, userId, lastClaimedAt: userId ? (lastClaimedByUser[userId] || 0) : 0 };
-  });
+  const merged = roster.map(r => ({
+    id: r.id, name: r.name, email: r.email, userId: r.user_id || null,
+    lastClaimedAt: r.user_id ? (lastClaimedByUser[r.user_id] || 0) : 0
+  }));
   merged.sort((a, b) => a.lastClaimedAt - b.lastClaimedAt);
   return merged;
+}
+
+// Candidates to add to the roster = feedback.html's "which months can you volunteer"
+// signups (Firestore) for that month, minus whoever's already on the roster.
+async function getVolunteerCandidates(request, env, cors, url) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  const month = url.searchParams.get('month') || MONTH_ABBREVS[new Date().getMonth()];
+  const [people, roster] = await Promise.all([
+    getFirestoreVolunteersForMonth(env, month),
+    env.DB.prepare('SELECT email FROM volunteer_roster WHERE month = ?').bind(month).all()
+  ]);
+  const onRoster = new Set(roster.results.map(r => r.email.toLowerCase()));
+  return json({ month, candidates: people.filter(p => !onRoster.has(p.email.toLowerCase())) }, 200, cors);
+}
+
+async function addToVolunteerRoster(request, env, cors) {
+  const { error, user } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  const body = await request.json();
+  const { month, email, name } = body;
+  if (!month || !email || !name) return json({ error: 'month, email and name are required' }, 400, cors);
+  const matched = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(email.toLowerCase()).first();
+  await env.DB.prepare(
+    `INSERT INTO volunteer_roster (id,month,user_id,email,name,added_by,added_at) VALUES (?,?,?,?,?,?,?)
+     ON CONFLICT(month,email) DO NOTHING`
+  ).bind(newId(), month, matched?.id || null, email.toLowerCase(), name, user.id, Date.now()).run();
+  return json({ ok: true }, 201, cors);
+}
+
+async function removeFromVolunteerRoster(request, env, cors, id) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  await env.DB.prepare('DELETE FROM volunteer_roster WHERE id = ?').bind(id).run();
+  return json({ ok: true }, 200, cors);
 }
 
 
@@ -863,6 +896,10 @@ export default {
       }
 
       if (path === '/api/volunteer-queue' && request.method === 'GET') return await getVolunteerQueueHandler(request, env, cors, url);
+      if (path === '/api/volunteer-candidates' && request.method === 'GET') return await getVolunteerCandidates(request, env, cors, url);
+      if (path === '/api/volunteer-roster' && request.method === 'POST') return await addToVolunteerRoster(request, env, cors);
+      const rosterMatch = path.match(/^\/api\/volunteer-roster\/([^/]+)$/);
+      if (rosterMatch && request.method === 'DELETE') return await removeFromVolunteerRoster(request, env, cors, rosterMatch[1]);
       if (path === '/api/volunteer-queue/email' && request.method === 'POST') return await emailVolunteerQueue(request, env, cors);
       if (path === '/api/message' && request.method === 'POST') return await messageOnePerson(request, env, cors);
       if (path === '/api/upload' && request.method === 'POST') return await uploadMedia(request, env, cors, url);

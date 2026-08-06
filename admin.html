@@ -4566,22 +4566,114 @@ window.loadVolunteerAdmin = async function(c) {
     </div>
     <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Submissions Awaiting Review</h3>
     <div id="va-review-list" style="margin-bottom:1.5rem;"></div>
-    <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Volunteer Queue</h3>
-    <div id="va-queue" style="margin-bottom:1rem;"></div>
-    <button onclick="emailVolunteerQueueAdmin()" style="background:none;border:1.5px solid rgba(27,42,107,0.2);color:var(--navy);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;margin-bottom:1.5rem;">Message Everyone on This List</button>
+
+    <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Volunteer Roster</h3>
+    <div style="background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-bottom:1.5rem;">
+      <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;margin-bottom:0.5rem;">
+        <label style="font-size:0.78rem;font-weight:700;color:var(--navy);">Month</label>
+        <select id="vr-month" onchange="onVolunteerRosterMonthChange()" style="padding:0.5rem 0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;"></select>
+        <button onclick="loadVolunteerCandidatesAdmin()" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1.1rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">Who Signed Up</button>
+        <button onclick="toggleVolunteerRosterAdmin()" style="background:none;border:1.5px solid rgba(27,42,107,0.2);color:var(--navy);padding:0.5rem 1.1rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">See Volunteers</button>
+      </div>
+      <div id="vr-candidates" style="margin-top:0.75rem;"></div>
+      <div id="vr-roster-wrap" style="display:none;margin-top:0.75rem;">
+        <div id="vr-roster"></div>
+        <button onclick="emailVolunteerQueueAdmin()" style="background:none;border:1.5px solid rgba(27,42,107,0.2);color:var(--navy);padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;margin-top:0.75rem;">Message Everyone on This List</button>
+      </div>
+    </div>
+
     <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">All Tasks</h3>
     <div id="va-list"></div>
   </div>`;
+  initVolunteerRosterMonth();
   await loadVolunteerAdminLists();
 };
 
+const VR_MONTH_ABBREVS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function initVolunteerRosterMonth() {
+  const sel = document.getElementById('vr-month');
+  if (!sel) return;
+  const current = VR_MONTH_ABBREVS[new Date().getMonth()];
+  sel.innerHTML = VR_MONTH_ABBREVS.map(m => `<option value="${m}" ${m===current?'selected':''}>${m}</option>`).join('');
+}
+
+window.onVolunteerRosterMonthChange = function() {
+  document.getElementById('vr-candidates').innerHTML = '';
+  document.getElementById('vr-roster-wrap').style.display = 'none';
+  document.getElementById('vr-roster').innerHTML = '';
+};
+
+window.loadVolunteerCandidatesAdmin = async function() {
+  const month = document.getElementById('vr-month').value;
+  const el = document.getElementById('vr-candidates');
+  el.innerHTML = '<p style="color:var(--gray);font-size:0.82rem;">Loading...</p>';
+  try {
+    const candidates = await YanAPI.getVolunteerCandidates(month);
+    el.innerHTML = candidates.length
+      ? '<div style="background:var(--light);border-radius:14px;">' + candidates.map((c,i) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.65rem 1rem;${i<candidates.length-1?'border-bottom:1px solid rgba(27,42,107,0.08);':''}">
+          <div>
+            <div style="font-size:0.84rem;font-weight:700;color:var(--navy);">${sanitize(c.name)}</div>
+            <div style="font-size:0.73rem;color:var(--gray);">${sanitize(c.email)}</div>
+          </div>
+          <button onclick="addVolunteerToRosterAdmin('${sanitize(c.name)}','${encodeURIComponent(c.email)}')" style="background:var(--navy);color:#fff;border:none;padding:0.35rem 0.9rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;">Add</button>
+        </div>`).join('') + '</div>'
+      : '<p style="color:var(--gray);font-size:0.82rem;">Everyone who signed up for ' + month + ' is already on the roster.</p>';
+  } catch(e) { el.innerHTML = '<p style="color:var(--red);font-size:0.82rem;">Error: ' + e.message + '</p>'; }
+};
+
+window.addVolunteerToRosterAdmin = async function(name, emailEncoded) {
+  const month = document.getElementById('vr-month').value;
+  try {
+    await YanAPI.addVolunteerToRoster(month, decodeURIComponent(emailEncoded), name);
+    showToast(name + ' added to the ' + month + ' roster');
+    await loadVolunteerCandidatesAdmin();
+    if (document.getElementById('vr-roster-wrap').style.display !== 'none') await loadVolunteerRosterAdmin();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+window.toggleVolunteerRosterAdmin = async function() {
+  const wrap = document.getElementById('vr-roster-wrap');
+  const opening = wrap.style.display === 'none';
+  wrap.style.display = opening ? 'block' : 'none';
+  if (opening) await loadVolunteerRosterAdmin();
+};
+
+async function loadVolunteerRosterAdmin() {
+  const month = document.getElementById('vr-month').value;
+  const el = document.getElementById('vr-roster');
+  el.innerHTML = '<p style="color:var(--gray);font-size:0.82rem;">Loading...</p>';
+  try {
+    const roster = await YanAPI.getVolunteerQueue(month);
+    el.innerHTML = roster.length
+      ? '<div style="background:#fff;border:1px solid rgba(27,42,107,0.08);border-radius:14px;">' + roster.map((v,i) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1.1rem;${i<roster.length-1?'border-bottom:1px solid rgba(27,42,107,0.08);':''}">
+          <div>
+            <div style="font-size:0.85rem;font-weight:700;color:var(--navy);">#${i+1} ${sanitize(v.name)}</div>
+            <div style="font-size:0.75rem;color:var(--gray);">${sanitize(v.email)}</div>
+          </div>
+          <div style="display:flex;gap:0.5rem;">
+            <button onclick="openMessagePersonModal('${sanitize(v.name)}','${encodeURIComponent(v.email)}')" style="background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.35rem 0.9rem;border-radius:50px;font-size:0.72rem;font-weight:700;font-family:Poppins,sans-serif;cursor:pointer;">Message</button>
+            <button onclick="removeVolunteerFromRosterAdmin('${v.id}')" style="background:none;border:1px solid rgba(230,51,41,0.3);color:var(--red);padding:0.35rem 0.9rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;">Remove</button>
+          </div>
+        </div>`).join('') + '</div>'
+      : '<p style="color:var(--gray);font-size:0.85rem;">Nobody on the roster for ' + month + ' yet - use "Who Signed Up" to add from that month\'s signups.</p>';
+  } catch(e) { el.innerHTML = '<p style="color:var(--red);font-size:0.85rem;">Error: ' + e.message + '</p>'; }
+}
+
+window.removeVolunteerFromRosterAdmin = async function(id) {
+  try { await YanAPI.removeVolunteerFromRoster(id); showToast('Removed'); await loadVolunteerRosterAdmin(); }
+  catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
 window.emailVolunteerQueueAdmin = async function() {
+  const month = document.getElementById('vr-month').value;
   const subject = prompt('Email subject:');
   if (!subject) return;
   const message = prompt('Message:');
   if (!message) return;
   try {
-    const res = await YanAPI.emailVolunteerQueue(subject, message);
+    const res = await YanAPI.emailVolunteerQueue(subject, message, month);
     showToast('Sent to ' + res.sentTo + ' volunteers');
   } catch(e) { showToast('Error: ' + e.message, 'error'); }
 };
@@ -4638,13 +4730,11 @@ window.publishTaskToYouTube = async function(taskId, urlEncoded, titleEncoded) {
 async function loadVolunteerAdminLists() {
   const reviewList = document.getElementById('va-review-list');
   const allList = document.getElementById('va-list');
-  const queueList = document.getElementById('va-queue');
   if (!reviewList || !allList) return;
   try {
-    const [submitted, all, queue] = await Promise.all([
+    const [submitted, all] = await Promise.all([
       YanAPI.getVolunteerTasks({ status: 'submitted' }),
-      YanAPI.getVolunteerTasks({}),
-      YanAPI.getVolunteerQueue()
+      YanAPI.getVolunteerTasks({})
     ]);
     reviewList.innerHTML = submitted.length
       ? submitted.map(t => volunteerTaskCardAdmin(t, true)).join('')
@@ -4659,18 +4749,6 @@ async function loadVolunteerAdminLists() {
         return '<h4 style="font-size:0.78rem;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:0.04em;margin:1rem 0 0.5rem;">'+label+'</h4>'
           + groups[k].map(t => volunteerTaskCardAdmin(t, t.status === 'submitted')).join('');
       }).join('');
-    }
-    if (queueList) {
-      queueList.innerHTML = queue.length
-        ? '<div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.05);">' + queue.map((v,i) => `
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1.1rem;${i<queue.length-1?'border-bottom:1px solid rgba(27,42,107,0.08);':''}">
-            <div>
-              <div style="font-size:0.85rem;font-weight:700;color:var(--navy);">#${i+1} ${sanitize(v.name)}</div>
-              <div style="font-size:0.75rem;color:var(--gray);">${sanitize(v.email)}</div>
-            </div>
-            <button onclick="openMessagePersonModal('${sanitize(v.name)}','${encodeURIComponent(v.email)}')" style="background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.35rem 0.9rem;border-radius:50px;font-size:0.72rem;font-weight:700;font-family:Poppins,sans-serif;cursor:pointer;">Message</button>
-          </div>`).join('') + '</div>'
-        : '<p style="color:var(--gray);font-size:0.85rem;">Nobody available this month yet.</p>';
     }
   } catch(e) {
     reviewList.innerHTML = allList.innerHTML = '<p style="color:var(--red);font-size:0.85rem;">Error: ' + e.message + '</p>';

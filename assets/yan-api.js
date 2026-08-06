@@ -231,15 +231,25 @@
       const data = await opsRequest('/api/users/search?q=' + encodeURIComponent(q));
       return data.users;
     },
-    async getVolunteerQueue() {
-      const data = await opsRequest('/api/volunteer-queue');
+    async getVolunteerQueue(month) {
+      const data = await opsRequest('/api/volunteer-queue' + (month ? '?month=' + encodeURIComponent(month) : ''));
       return data.queue;
     },
-    async emailVolunteerQueue(subject, message) {
-      return opsRequest('/api/volunteer-queue/email', { method: 'POST', body: { subject, message } });
+    async emailVolunteerQueue(subject, message, month) {
+      return opsRequest('/api/volunteer-queue/email', { method: 'POST', body: { subject, message, month } });
     },
     async messagePerson(email, subject, message) {
       return opsRequest('/api/message', { method: 'POST', body: { email, subject, message } });
+    },
+    async getVolunteerCandidates(month) {
+      const data = await opsRequest('/api/volunteer-candidates' + (month ? '?month=' + encodeURIComponent(month) : ''));
+      return data.candidates;
+    },
+    async addVolunteerToRoster(month, email, name) {
+      return opsRequest('/api/volunteer-roster', { method: 'POST', body: { month, email, name } });
+    },
+    async removeVolunteerFromRoster(id) {
+      return opsRequest('/api/volunteer-roster/' + id, { method: 'DELETE' });
     },
 
     // ---- volunteer room ----
