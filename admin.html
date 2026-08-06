@@ -16,9 +16,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
-<script src="/assets/yan-api.js?v=1786044081"></script>
-<script src="/assets/yan-upload.js?v=1786044081"></script>
-<script src="/assets/yan-youtube.js?v=1786044081"></script>
+<script src="/assets/yan-api.js?v=1786045683"></script>
+<script src="/assets/yan-upload.js?v=1786045683"></script>
+<script src="/assets/yan-youtube.js?v=1786045683"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -4559,7 +4559,7 @@ window.loadVolunteerAdmin = async function(c) {
       <div style="margin-bottom:1rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Brief</label>
         <textarea id="va-brief" rows="3" placeholder="What's needed - event, date, theme, required text..." style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;resize:vertical;"></textarea></div>
       <div style="margin-bottom:1.25rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Raw file (optional)</label>
-        <input type="file" accept="image/*,video/*" id="va-raw-file" onchange="onFileChosenForRename('va-raw-file','va-raw-filename','va-raw-rename-wrap')" style="width:100%;padding:0.5rem 0;font-family:Poppins,sans-serif;font-size:0.85rem;">
+        <input type="file" id="va-raw-file" onchange="onFileChosenForRename('va-raw-file','va-raw-filename','va-raw-rename-wrap')" style="width:100%;padding:0.5rem 0;font-family:Poppins,sans-serif;font-size:0.85rem;">
         <div id="va-raw-rename-wrap" style="display:none;margin-top:0.5rem;">
           <input type="text" id="va-raw-filename" style="width:100%;padding:0.5rem 0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;box-sizing:border-box;margin-bottom:0.4rem;">
           <button type="button" onclick="startRenameUploadAdmin('va-raw-file','va-raw-filename','va-raw-url','va-raw-status')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;">Upload</button>
