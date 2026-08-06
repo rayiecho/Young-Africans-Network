@@ -22,12 +22,14 @@
   const OPS_BASE = 'https://yan-ops-worker.youngafricansn.workers.dev';
   const SIMPLE_UPLOAD_MAX = 15 * 1024 * 1024; // below this, one plain request beats multipart overhead
   const CHUNK_SIZE = 10 * 1024 * 1024;         // R2 requires >=5MiB per part (except the last)
-  // Higher concurrency = more of the connection's real bandwidth actually gets used,
-  // especially on higher-latency links where a single connection can't saturate the
-  // pipe. Was capped lower while uploads still had the silent-hang bug; now that every
-  // request has a real timeout + retry, pushing more parts in parallel is safe.
-  const MAX_CONCURRENT_PARTS = 6;
-  const REQUEST_TIMEOUT_MS = 120000;           // per attempt - generous for a slow mobile chunk upload
+  // Tried 6 concurrent parts to use more bandwidth - on a constrained connection this
+  // backfires badly: 6 chunks splitting limited upload bandwidth 6 ways can each become
+  // too slow to finish within the timeout, so they time out together instead of any of
+  // them actually completing (confirmed live: progress stuck at 1% for the full timeout
+  // window, not slowly climbing - a real stall, not just "slow"). 2 is a safer default -
+  // real speedup only helps if it doesn't first have to actually finish.
+  const MAX_CONCURRENT_PARTS = 2;
+  const REQUEST_TIMEOUT_MS = 180000;           // per attempt - generous for a slow/weak connection
   const MAX_RETRIES = 3;
 
   function authHeaders() {
