@@ -54,6 +54,7 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
 .card:hover{box-shadow:0 6px 28px rgba(27,42,107,0.11);}
 .card.accent-open{border-left-color:#9CA3AF;}
 .card.accent-claimed{border-left-color:var(--gold);}
+.card.accent-submitted_uploading{border-left-color:var(--gold);}
 .card.accent-submitted{border-left-color:#3B82F6;}
 .card.accent-approved{border-left-color:#27AE60;}
 .card.accent-changes_requested{border-left-color:var(--red);}
@@ -66,6 +67,7 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
 .badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
 .badge-open{background:rgba(107,114,128,0.12);color:var(--gray);}
 .badge-claimed{background:rgba(245,166,35,0.15);color:#b37800;}
+.badge-submitted_uploading{background:rgba(245,166,35,0.15);color:#b37800;}
 .badge-submitted{background:rgba(59,130,246,0.12);color:#3B82F6;}
 .badge-approved{background:rgba(39,174,96,0.12);color:#27AE60;}
 .badge-changes_requested{background:rgba(230,51,41,0.1);color:var(--red);}
@@ -130,10 +132,8 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
       <div id="sub-rename-wrap" style="display:none;margin-top:0.5rem;">
         <label style="font-size:0.74rem;">File name</label>
         <input type="text" id="sub-filename">
-        <button type="button" class="btn btn-primary btn-sm" style="margin-top:0.5rem;" onclick="startRenameUpload('sub-file','sub-filename','sub-url','sub-status')">Upload</button>
+        <small style="color:var(--gray);display:block;margin-top:0.3rem;">Submitting starts the upload in the background - no need to wait for it.</small>
       </div>
-      <input type="hidden" id="sub-url">
-      <small id="sub-status" style="color:var(--gray);"></small>
     </div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('submit-modal')">Cancel</button>
@@ -157,8 +157,8 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
 
 <div class="toast" id="toast"></div>
 
-<script src="/assets/yan-api.js?v=1786047676"></script>
-<script src="/assets/yan-upload.js?v=1786047676"></script>
+<script src="/assets/yan-api.js?v=1786049861"></script>
+<script src="/assets/yan-upload.js?v=1786049861"></script>
 <script>
 let currentUser = null;
 let activeTab = 'open';
@@ -173,19 +173,27 @@ function onFileChosenForRename(fileInputId, nameInputId, wrapId) {
   wrap.style.display = 'block';
 }
 
-async function startRenameUpload(fileInputId, nameInputId, urlFieldId, statusId) {
-  const file = document.getElementById(fileInputId).files[0];
-  if (!file) return;
-  const filename = document.getElementById(nameInputId).value.trim() || file.name;
-  const status = document.getElementById(statusId);
-  status.textContent = '⏳ Uploading ' + filename + '... 0%';
-  try {
-    const url = await YanUpload.uploadFile(file, (pct) => { status.textContent = '⏳ Uploading ' + filename + '... ' + pct + '%'; }, filename);
-    document.getElementById(urlFieldId).value = url;
-    status.textContent = '✅ Uploaded: ' + filename;
-  } catch(e) {
-    status.textContent = '❌ Upload failed: ' + e.message;
-  }
+// Tracks deliverable uploads still running in the background after "Submit" has
+// already been clicked, keyed by task id - renderTaskCard() shows live progress on
+// that card across re-renders without blocking the Submit button on the upload
+// finishing (see submitTask() phase 1/2 in ops-worker).
+window.__pendingSubmitUploads = window.__pendingSubmitUploads || {};
+
+function startBackgroundSubmitUpload(taskId, file, filename) {
+  window.__pendingSubmitUploads[taskId] = { pct: 0 };
+  YanUpload.uploadFile(file, (pct) => {
+    if (window.__pendingSubmitUploads[taskId]) window.__pendingSubmitUploads[taskId].pct = pct;
+    const el = document.getElementById('submit-upload-status-' + taskId);
+    if (el) el.textContent = '⏳ Uploading your submission... ' + pct + '%';
+  }, filename).then(async (url) => {
+    await YanAPI.submitVolunteerTask(taskId, url);
+    delete window.__pendingSubmitUploads[taskId];
+    if (activeTab === 'mine') await loadTasks();
+  }).catch((e) => {
+    window.__pendingSubmitUploads[taskId] = { pct: 0, error: e.message };
+    const el = document.getElementById('submit-upload-status-' + taskId);
+    if (el) el.textContent = '❌ Submission upload failed: ' + e.message;
+  });
 }
 
 function showToast(msg, type) {
@@ -261,11 +269,16 @@ function renderTaskCard(t) {
   } else if (activeTab === 'mine') {
     if (t.status === 'claimed' || t.status === 'changes_requested') {
       actions = `<button class="btn btn-primary btn-sm" onclick="openSubmitModal('${t.id}')">${t.status==='changes_requested'?'Resubmit':'Submit Deliverable'}</button>`;
+    } else if (t.status === 'submitted_uploading' && !window.__pendingSubmitUploads[t.id]) {
+      // Uploading flag is set but nothing's running in this tab (e.g. page was reloaded
+      // mid-upload) - let them pick the file again rather than get stuck.
+      actions = `<button class="btn btn-primary btn-sm" onclick="openSubmitModal('${t.id}')">Resume Submission</button>`;
     }
   } else if (activeTab === 'review') {
     actions = `<button class="btn btn-outline btn-sm" onclick="openReviewModal('${t.id}','${escapeHtml(t.submittedFileUrl||'')}')">Review Submission</button>`;
   }
 
+  const pending = window.__pendingSubmitUploads[t.id];
   return `
   <div class="card accent-${t.status}">
     <span class="task-tag">${TYPE_LABELS[t.taskType] || t.taskType}</span>
@@ -274,6 +287,7 @@ function renderTaskCard(t) {
     ${t.brief ? `<div class="task-brief">${escapeHtml(t.brief)}</div>` : ''}
     ${t.rawFileUrl ? `<a href="${escapeHtml(t.rawFileUrl)}" target="_blank" style="display:inline-flex;align-items:center;gap:0.4rem;background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.45rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;margin:0.4rem 0;">⬇ Access Files and Instructions here</a><br>` : ''}
     ${t.submittedFileUrl ? `<a href="${escapeHtml(t.submittedFileUrl)}" target="_blank" style="font-size:0.8rem;color:var(--navy);font-weight:700;">✅ Submitted deliverable</a><br>` : ''}
+    <div id="submit-upload-status-${t.id}" style="font-size:0.78rem;color:${pending&&pending.error?'var(--red)':'var(--gray)'};">${pending ? (pending.error ? '❌ Submission upload failed: '+escapeHtml(pending.error) : '⏳ Uploading your submission... '+pending.pct+'%') : ''}</div>
     ${t.reviewNote ? `<div style="background:var(--light);border-radius:10px;padding:0.6rem 0.85rem;margin-top:0.5rem;font-size:0.8rem;">Feedback: ${escapeHtml(t.reviewNote)}</div>` : ''}
     <div class="task-meta">${t.claimedByName ? 'Claimed by ' + escapeHtml(t.claimedByName) + ' · ' : ''}${t.dueDate ? 'Due ' + t.dueDate + ' · ' : ''}Posted ${timeAgo(t.createdAt)}${t.pointsAwarded ? ' · +' + t.pointsAwarded + ' pts awarded' : ''}</div>
     ${actions ? `<div class="actions-row">${actions}</div>` : ''}
@@ -290,22 +304,24 @@ async function claimTask(id) {
 
 function openSubmitModal(id) {
   activeTaskId = id;
-  document.getElementById('sub-url').value = '';
-  document.getElementById('sub-status').textContent = '';
   document.getElementById('sub-file').value = '';
   document.getElementById('sub-rename-wrap').style.display = 'none';
   openModal('submit-modal');
 }
 async function submitDeliverable() {
-  const url = document.getElementById('sub-url').value.trim();
-  if (!url) return showToast('Upload your finished file first', 'error');
+  const fileInput = document.getElementById('sub-file');
+  const file = fileInput.files[0];
+  if (!file) return showToast('Choose your finished file first', 'error');
+  const filename = document.getElementById('sub-filename').value.trim() || file.name;
+  const taskId = activeTaskId;
   const btn = document.getElementById('sub-submit');
   btn.disabled = true;
   try {
-    await YanAPI.submitVolunteerTask(activeTaskId, url);
+    await YanAPI.submitVolunteerTask(taskId); // phase 1: mark submitted-but-uploading immediately
     closeModal('submit-modal');
-    showToast('Submitted for review!');
+    showToast('Submitted! Your file is uploading in the background.');
     await loadTasks();
+    startBackgroundSubmitUpload(taskId, file, filename);
   } catch(e) { showToast(e.message, 'error'); }
   finally { btn.disabled = false; }
 }

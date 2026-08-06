@@ -16,9 +16,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
-<script src="/assets/yan-api.js?v=1786047676"></script>
-<script src="/assets/yan-upload.js?v=1786047676"></script>
-<script src="/assets/yan-youtube.js?v=1786047676"></script>
+<script src="/assets/yan-api.js?v=1786049861"></script>
+<script src="/assets/yan-upload.js?v=1786049861"></script>
+<script src="/assets/yan-youtube.js?v=1786049861"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -4561,11 +4561,10 @@ window.loadVolunteerAdmin = async function(c) {
       <div style="margin-bottom:1.25rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Raw file (optional)</label>
         <input type="file" id="va-raw-file" onchange="onFileChosenForRename('va-raw-file','va-raw-filename','va-raw-rename-wrap')" style="width:100%;padding:0.5rem 0;font-family:Poppins,sans-serif;font-size:0.85rem;">
         <div id="va-raw-rename-wrap" style="display:none;margin-top:0.5rem;">
-          <input type="text" id="va-raw-filename" style="width:100%;padding:0.5rem 0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;box-sizing:border-box;margin-bottom:0.4rem;">
-          <button type="button" onclick="startRenameUploadAdmin('va-raw-file','va-raw-filename','va-raw-url','va-raw-status')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;">Upload</button>
+          <input type="text" id="va-raw-filename" style="width:100%;padding:0.5rem 0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;box-sizing:border-box;">
+          <small style="color:var(--gray);">Posting the task starts this upload in the background - no need to wait for it.</small>
         </div>
-        <input type="hidden" id="va-raw-url">
-        <small id="va-raw-status" style="color:var(--gray);"></small></div>
+      </div>
       <button onclick="submitVolunteerTaskAdmin()" id="va-submit" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Post Task</button>
     </div>
     <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">Submissions Awaiting Review</h3>
@@ -4683,18 +4682,21 @@ window.emailVolunteerQueueAdmin = async function() {
 };
 
 const VOL_TYPE_LABELS = { poster: 'Poster / Banner', video_edit: 'Video Edit', slides: 'Slides', other: 'Other' };
-const VOL_STATUS_COLORS = { open: '#6B7280', claimed: '#B37800', submitted: '#3B82F6', approved: '#27AE60', changes_requested: '#E63329' };
+const VOL_STATUS_COLORS = { open: '#6B7280', claimed: '#B37800', submitted_uploading: '#B37800', submitted: '#3B82F6', approved: '#27AE60', changes_requested: '#E63329' };
 
 function volunteerTaskCardAdmin(t, showReviewBtn) {
   const canPublish = t.status === 'approved' && t.taskType === 'video_edit' && t.submittedFileUrl && !t.youtubeUrl;
+  const pending = window.__pendingUploads[t.id];
   return `<div style="background:#fff;border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
       <div>
         <span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.15rem 0.6rem;border-radius:50px;font-size:0.65rem;font-weight:700;text-transform:uppercase;">${VOL_TYPE_LABELS[t.taskType]||t.taskType}</span>
         <div style="font-size:0.92rem;font-weight:800;color:var(--navy);margin-top:0.4rem;">${sanitize(t.title)}</div>
         ${t.claimedByName ? `<div style="font-size:0.78rem;color:var(--gray);">Claimed by ${sanitize(t.claimedByName)}</div>` : ''}
+        ${t.status === 'submitted_uploading' ? `<div style="font-size:0.78rem;color:var(--gray);">⏳ Volunteer's submission is uploading...</div>` : ''}
         ${t.submittedFileUrl ? `<a href="${sanitize(t.submittedFileUrl)}" target="_blank" style="font-size:0.78rem;color:var(--navy);font-weight:700;">View submitted deliverable →</a>` : ''}
         ${t.youtubeUrl ? `<div><a href="${sanitize(t.youtubeUrl)}" target="_blank" style="font-size:0.78rem;color:#FF0000;font-weight:700;">▶ Live on YouTube →</a></div>` : ''}
+        <div id="raw-upload-status-${t.id}" style="font-size:0.78rem;color:${pending&&pending.error?'var(--red)':'var(--gray)'};">${pending ? (pending.error ? '❌ Raw file upload failed: '+sanitize(pending.error) : '⏳ Uploading raw materials... '+pending.pct+'%') : ''}</div>
       </div>
       <div style="display:flex;align-items:center;gap:0.6rem;">
         <span style="background:${VOL_STATUS_COLORS[t.status]}22;color:${VOL_STATUS_COLORS[t.status]};padding:0.25rem 0.75rem;border-radius:50px;font-size:0.68rem;font-weight:700;text-transform:uppercase;">${t.status.replace('_',' ')}</span>
@@ -4767,39 +4769,50 @@ window.onFileChosenForRename = function(fileInputId, nameInputId, wrapId) {
   wrap.style.display = 'block';
 };
 
-window.startRenameUploadAdmin = async function(fileInputId, nameInputId, urlFieldId, statusId) {
-  const file = document.getElementById(fileInputId).files[0];
-  if (!file) return;
-  const filename = document.getElementById(nameInputId).value.trim() || file.name;
-  const status = document.getElementById(statusId);
-  status.textContent = '⏳ Uploading ' + filename + '... 0%';
-  try {
-    const url = await YanUpload.uploadFile(file, (pct) => { status.textContent = '⏳ Uploading ' + filename + '... ' + pct + '%'; }, filename);
-    document.getElementById(urlFieldId).value = url;
-    status.textContent = '✅ Uploaded: ' + filename;
-  } catch(e) { status.textContent = '❌ Upload failed: ' + e.message; }
-};
+// Tracks raw-file uploads that are still running in the background after a task has
+// already been posted, keyed by task id - lets volunteerTaskCardAdmin() show live
+// progress on that specific card across re-renders without blocking "Post Task" on
+// the upload finishing.
+window.__pendingUploads = window.__pendingUploads || {};
+
+function startBackgroundRawUpload(taskId, file, filename) {
+  window.__pendingUploads[taskId] = { pct: 0 };
+  YanUpload.uploadFile(file, (pct) => {
+    if (window.__pendingUploads[taskId]) window.__pendingUploads[taskId].pct = pct;
+    const el = document.getElementById('raw-upload-status-' + taskId);
+    if (el) el.textContent = '⏳ Uploading raw materials... ' + pct + '%';
+  }, filename).then(async (url) => {
+    await YanAPI.attachRawFile(taskId, url);
+    delete window.__pendingUploads[taskId];
+    await loadVolunteerAdminLists();
+  }).catch((e) => {
+    window.__pendingUploads[taskId] = { pct: 0, error: e.message };
+    const el = document.getElementById('raw-upload-status-' + taskId);
+    if (el) el.textContent = '❌ Raw file upload failed: ' + e.message;
+  });
+}
 
 window.submitVolunteerTaskAdmin = async function() {
   const taskType = document.getElementById('va-type').value;
   const title = document.getElementById('va-title').value.trim();
   const brief = document.getElementById('va-brief').value.trim();
-  const rawFileUrl = document.getElementById('va-raw-url').value.trim();
   const dueDate = document.getElementById('va-due').value;
+  const fileInput = document.getElementById('va-raw-file');
+  const file = fileInput.files[0] || null;
+  const filename = file ? (document.getElementById('va-raw-filename').value.trim() || file.name) : null;
   if (!title) return showToast('Give the task a title', 'error');
   const btn = document.getElementById('va-submit');
   btn.disabled = true; btn.textContent = 'Posting...';
   try {
-    await YanAPI.createVolunteerTask({ taskType, title, brief, rawFileUrl, dueDate });
+    const { id } = await YanAPI.createVolunteerTask({ taskType, title, brief, rawFileUrl: null, dueDate });
     document.getElementById('va-title').value = '';
     document.getElementById('va-brief').value = '';
-    document.getElementById('va-raw-url').value = '';
-    document.getElementById('va-raw-status').textContent = '';
-    document.getElementById('va-raw-file').value = '';
-    document.getElementById('va-raw-rename-wrap').style.display = 'none';
     document.getElementById('va-due').value = '';
-    showToast('Task posted to the Volunteer Room!');
+    fileInput.value = '';
+    document.getElementById('va-raw-rename-wrap').style.display = 'none';
+    showToast(file ? 'Task posted! Raw file is uploading in the background.' : 'Task posted to the Volunteer Room!');
     await loadVolunteerAdminLists();
+    if (file) startBackgroundRawUpload(id, file, filename);
   } catch(e) { showToast('Error: ' + e.message, 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Post Task'; }
 };

@@ -267,7 +267,12 @@
     async claimVolunteerTask(id) { return opsRequest('/api/volunteer-tasks/' + id + '/claim', { method: 'POST' }); },
     async deleteVolunteerTask(id) { return opsRequest('/api/volunteer-tasks/' + id, { method: 'DELETE' }); },
     async submitVolunteerTask(id, submittedFileUrl) {
-      return opsRequest('/api/volunteer-tasks/' + id + '/submit', { method: 'POST', body: { submittedFileUrl } });
+      // submittedFileUrl omitted = phase 1 (mark submitted-but-uploading, don't notify yet);
+      // present = phase 2 (finalize + notify) - see submitTask() in ops-worker.
+      return opsRequest('/api/volunteer-tasks/' + id + '/submit', { method: 'POST', body: submittedFileUrl ? { submittedFileUrl } : {} });
+    },
+    async attachRawFile(id, rawFileUrl) {
+      return opsRequest('/api/volunteer-tasks/' + id + '/raw-file', { method: 'POST', body: { rawFileUrl } });
     },
     async reviewVolunteerTask(id, approved, note) {
       return opsRequest('/api/volunteer-tasks/' + id + '/review', { method: 'POST', body: { approved, note } });

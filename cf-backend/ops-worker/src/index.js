@@ -813,23 +813,52 @@ async function removeFromVolunteerRoster(request, env, cors, id) {
 }
 
 
+// Two-phase so the "Submit" button never blocks on a large file finishing its upload:
+// phase 1 (no submittedFileUrl) fires the instant the user clicks Submit, marking the
+// task as submitted-but-uploading so it's visibly claimed and can't be double-submitted,
+// without anything for a head to review yet. Phase 2 (submittedFileUrl present) is
+// called once the background upload actually finishes, finalizes the real status, and
+// is the only point that notifies the head - there's nothing to review before then.
 async function submitTask(request, env, cors, id) {
   const { error, user } = await requireUser(request, env, cors);
   if (error) return error;
   const task = await env.DB.prepare('SELECT * FROM volunteer_tasks WHERE id = ?').bind(id).first();
   if (!task) return json({ error: 'Not found' }, 404, cors);
   if (task.claimed_by !== user.id) return json({ error: 'Only the person who claimed this can submit it' }, 403, cors);
-  const body = await request.json();
-  if (!body.submittedFileUrl) return json({ error: 'submittedFileUrl required' }, 400, cors);
+  const body = await request.json().catch(() => ({}));
+  const now = Date.now();
+
+  if (!body.submittedFileUrl) {
+    await env.DB.prepare(`UPDATE volunteer_tasks SET status = 'submitted_uploading', updated_at = ? WHERE id = ?`)
+      .bind(now, id).run();
+    return json({ ok: true, uploading: true }, 200, cors);
+  }
+
+  const alreadyNotified = task.status === 'submitted' && !!task.submitted_file_url;
   await env.DB.prepare(`UPDATE volunteer_tasks SET status = 'submitted', submitted_file_url = ?, updated_at = ? WHERE id = ?`)
-    .bind(body.submittedFileUrl, Date.now(), id).run();
-  if (task.created_by) {
+    .bind(body.submittedFileUrl, now, id).run();
+  if (task.created_by && !alreadyNotified) {
     await notifyUser(env, task.created_by, {
       title: `Submission ready for review: ${task.title}`,
       message: `${user.name} submitted the deliverable for "${task.title}". Open the Volunteer Room to review it: https://youngafricansnetwork.org/volunteer.html`,
       emailSubject: 'YAN Volunteer Room: submission ready for review'
     });
   }
+  return json({ ok: true }, 200, cors);
+}
+
+// Lets a raw file be attached to a task after the task already exists - so admin can hit
+// "Post Task" immediately and the (possibly large) raw file finishes uploading in the
+// background rather than blocking the post.
+async function attachRawFile(request, env, cors, id) {
+  const { error, user } = await requireUser(request, env, cors);
+  if (error) return error;
+  const task = await env.DB.prepare('SELECT created_by FROM volunteer_tasks WHERE id = ?').bind(id).first();
+  if (!task) return json({ error: 'Not found' }, 404, cors);
+  if (task.created_by !== user.id && !user.is_admin) return json({ error: 'Not allowed' }, 403, cors);
+  const { rawFileUrl } = await request.json();
+  if (!rawFileUrl) return json({ error: 'rawFileUrl required' }, 400, cors);
+  await env.DB.prepare('UPDATE volunteer_tasks SET raw_file_url = ?, updated_at = ? WHERE id = ?').bind(rawFileUrl, Date.now(), id).run();
   return json({ ok: true }, 200, cors);
 }
 
@@ -932,7 +961,7 @@ export default {
       if (path === '/api/volunteer-tasks' && request.method === 'POST') return await createTask(request, env, cors);
       if (path === '/api/volunteer-tasks' && request.method === 'GET') return await listTasks(request, env, cors, url);
 
-      const taskMatch = path.match(/^\/api\/volunteer-tasks\/([^/]+)(\/(claim|submit|review|youtube))?$/);
+      const taskMatch = path.match(/^\/api\/volunteer-tasks\/([^/]+)(\/(claim|submit|review|youtube|raw-file))?$/);
       if (taskMatch) {
         const [, id, , sub] = taskMatch;
         if (!sub && request.method === 'DELETE') return await deleteTask(request, env, cors, id);
@@ -940,6 +969,7 @@ export default {
         if (sub === 'submit' && request.method === 'POST') return await submitTask(request, env, cors, id);
         if (sub === 'review' && request.method === 'POST') return await reviewTask(request, env, cors, id);
         if (sub === 'youtube' && request.method === 'POST') return await recordYoutubePublish(request, env, cors, id);
+        if (sub === 'raw-file' && request.method === 'POST') return await attachRawFile(request, env, cors, id);
       }
 
       if (path === '/api/volunteer-queue' && request.method === 'GET') return await getVolunteerQueueHandler(request, env, cors, url);
