@@ -352,6 +352,41 @@ async function claimRole(request, env, cors, id, roleId) {
   return json({ filledBy: nowFilled }, 200, cors);
 }
 
+// feedback.html has no login (anonymous form, free-text email) so this is intentionally
+// public - it only ever flips an attendance flag for an email that both matches a real
+// D1 member AND a session that actually happened on that date/department, so the blast
+// radius of abuse is limited to attendance-count noise, not real data exposure.
+// "Correct date and day" comes for free: attendance is tied to the matched session_id,
+// and dept_sessions.session_date is that session's real date - not a separately typed one.
+const FEEDBACK_DEPT_MAP = {
+  'Programs': 'programs', 'Scholarships': 'scholarships', 'Career': 'career',
+  'Community': 'community', 'Mental Health': 'mental', 'Communications': 'communications',
+  'Partnerships': 'partnerships', 'Finance': 'finance'
+};
+async function markAttendanceFromFeedback(request, env, cors) {
+  const body = await request.json();
+  const email = (body.email || '').trim().toLowerCase();
+  const sessionDate = body.sessionDate;
+  if (!email || !sessionDate) return json({ error: 'email and sessionDate are required' }, 400, cors);
+  const department = FEEDBACK_DEPT_MAP[body.sessionDepartment] || null;
+
+  const user = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(email).first();
+  if (!user) return json({ ok: true, matched: false }, 200, cors);
+
+  let sessionQuery = 'SELECT id FROM dept_sessions WHERE session_date = ?';
+  const binds = [sessionDate];
+  if (department) { sessionQuery += ' AND department = ?'; binds.push(department); }
+  sessionQuery += ' ORDER BY created_at DESC'; // most-recently-scheduled wins if more than one matches
+  const session = await env.DB.prepare(sessionQuery).bind(...binds).first();
+  if (!session) return json({ ok: true, matched: false }, 200, cors);
+
+  await env.DB.prepare(
+    `INSERT INTO session_attendance (session_id,user_id,checked_in_at,marked_by) VALUES (?,?,?,'feedback')
+     ON CONFLICT(session_id,user_id) DO NOTHING`
+  ).bind(session.id, user.id, Date.now()).run();
+  return json({ ok: true, matched: true }, 200, cors);
+}
+
 async function checkIn(request, env, cors, id) {
   const { error, user } = await requireUser(request, env, cors);
   if (error) return error;
@@ -881,6 +916,7 @@ export default {
       }
 
       if (path === '/api/attendance-register' && request.method === 'GET') return await getAttendanceRegister(request, env, cors, url);
+      if (path === '/api/attendance-from-feedback' && request.method === 'POST') return await markAttendanceFromFeedback(request, env, cors);
 
       if (path === '/api/volunteer-tasks' && request.method === 'POST') return await createTask(request, env, cors);
       if (path === '/api/volunteer-tasks' && request.method === 'GET') return await listTasks(request, env, cors, url);

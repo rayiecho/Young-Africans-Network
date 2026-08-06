@@ -34,10 +34,10 @@
     return data.secure_url;
   }
 
-  async function uploadSimple(file, onProgress) {
+  async function uploadSimple(file, onProgress, filename) {
     const headers = authHeaders();
     headers['Content-Type'] = file.type || 'application/octet-stream';
-    const res = await fetch(OPS_BASE + '/api/upload?filename=' + encodeURIComponent(file.name), {
+    const res = await fetch(OPS_BASE + '/api/upload?filename=' + encodeURIComponent(filename || file.name), {
       method: 'POST', headers, body: file
     });
     const data = await res.json();
@@ -46,10 +46,10 @@
     return data.url;
   }
 
-  async function uploadMultipart(file, onProgress) {
+  async function uploadMultipart(file, onProgress, filename) {
     const headers = authHeaders();
     const initRes = await fetch(
-      OPS_BASE + '/api/upload/init?filename=' + encodeURIComponent(file.name) + '&contentType=' + encodeURIComponent(file.type || 'application/octet-stream'),
+      OPS_BASE + '/api/upload/init?filename=' + encodeURIComponent(filename || file.name) + '&contentType=' + encodeURIComponent(file.type || 'application/octet-stream'),
       { method: 'POST', headers }
     );
     const init = await initRes.json();
@@ -105,9 +105,12 @@
   }
 
   window.YanUpload = {
-    async uploadFile(file, onProgress) {
+    // filename is optional - lets the caller offer a rename before upload instead of
+    // keeping whatever name the OS/recorder gave the file (e.g. a Google Meet recording's
+    // auto-generated name).
+    async uploadFile(file, onProgress, filename) {
       if (file.type.startsWith('image/')) return uploadImage(file);
-      return file.size > SIMPLE_UPLOAD_MAX ? uploadMultipart(file, onProgress) : uploadSimple(file, onProgress);
+      return file.size > SIMPLE_UPLOAD_MAX ? uploadMultipart(file, onProgress, filename) : uploadSimple(file, onProgress, filename);
     }
   };
 })();

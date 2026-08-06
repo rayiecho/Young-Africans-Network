@@ -16,9 +16,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
-<script src="/assets/yan-api.js?v=1785945640"></script>
-<script src="/assets/yan-upload.js?v=1785945640"></script>
-<script src="/assets/yan-youtube.js?v=1785945640"></script>
+<script src="/assets/yan-api.js?v=1786013508"></script>
+<script src="/assets/yan-upload.js?v=1786013508"></script>
+<script src="/assets/yan-youtube.js?v=1786013508"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -4559,7 +4559,11 @@ window.loadVolunteerAdmin = async function(c) {
       <div style="margin-bottom:1rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Brief</label>
         <textarea id="va-brief" rows="3" placeholder="What's needed - event, date, theme, required text..." style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;resize:vertical;"></textarea></div>
       <div style="margin-bottom:1.25rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Raw file (optional)</label>
-        <input type="file" accept="image/*,video/*" id="va-raw-file" onchange="uploadFileToAdmin('va-raw-file','va-raw-url','va-raw-status')" style="width:100%;padding:0.5rem 0;font-family:Poppins,sans-serif;font-size:0.85rem;">
+        <input type="file" accept="image/*,video/*" id="va-raw-file" onchange="onFileChosenForRename('va-raw-file','va-raw-filename','va-raw-rename-wrap')" style="width:100%;padding:0.5rem 0;font-family:Poppins,sans-serif;font-size:0.85rem;">
+        <div id="va-raw-rename-wrap" style="display:none;margin-top:0.5rem;">
+          <input type="text" id="va-raw-filename" style="width:100%;padding:0.5rem 0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;box-sizing:border-box;margin-bottom:0.4rem;">
+          <button type="button" onclick="startRenameUploadAdmin('va-raw-file','va-raw-filename','va-raw-url','va-raw-status')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;">Upload</button>
+        </div>
         <input type="hidden" id="va-raw-url">
         <small id="va-raw-status" style="color:var(--gray);"></small></div>
       <button onclick="submitVolunteerTaskAdmin()" id="va-submit" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Post Task</button>
@@ -4755,15 +4759,24 @@ async function loadVolunteerAdminLists() {
   }
 }
 
-window.uploadFileToAdmin = async function(fileInputId, urlFieldId, statusId) {
+window.onFileChosenForRename = function(fileInputId, nameInputId, wrapId) {
   const file = document.getElementById(fileInputId).files[0];
-  const status = document.getElementById(statusId);
+  const wrap = document.getElementById(wrapId);
+  if (!file) { wrap.style.display = 'none'; return; }
+  document.getElementById(nameInputId).value = file.name;
+  wrap.style.display = 'block';
+};
+
+window.startRenameUploadAdmin = async function(fileInputId, nameInputId, urlFieldId, statusId) {
+  const file = document.getElementById(fileInputId).files[0];
   if (!file) return;
-  status.textContent = '⏳ Uploading ' + file.name + '... 0%';
+  const filename = document.getElementById(nameInputId).value.trim() || file.name;
+  const status = document.getElementById(statusId);
+  status.textContent = '⏳ Uploading ' + filename + '... 0%';
   try {
-    const url = await YanUpload.uploadFile(file, (pct) => { status.textContent = '⏳ Uploading ' + file.name + '... ' + pct + '%'; });
+    const url = await YanUpload.uploadFile(file, (pct) => { status.textContent = '⏳ Uploading ' + filename + '... ' + pct + '%'; }, filename);
     document.getElementById(urlFieldId).value = url;
-    status.textContent = '✅ Uploaded: ' + file.name;
+    status.textContent = '✅ Uploaded: ' + filename;
   } catch(e) { status.textContent = '❌ Upload failed: ' + e.message; }
 };
 
@@ -4782,6 +4795,8 @@ window.submitVolunteerTaskAdmin = async function() {
     document.getElementById('va-brief').value = '';
     document.getElementById('va-raw-url').value = '';
     document.getElementById('va-raw-status').textContent = '';
+    document.getElementById('va-raw-file').value = '';
+    document.getElementById('va-raw-rename-wrap').style.display = 'none';
     document.getElementById('va-due').value = '';
     showToast('Task posted to the Volunteer Room!');
     await loadVolunteerAdminLists();

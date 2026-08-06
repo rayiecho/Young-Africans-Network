@@ -492,6 +492,15 @@ async function submitFeedback() {
       submittedAt: serverTimestamp()
     });
 
+    // Best-effort: mark attendance in the Session Coordination register if this email
+    // matches a real member and this date/department matches a real scheduled session -
+    // never blocks or fails the feedback submission itself.
+    fetch('https://yan-ops-worker.youngafricansn.workers.dev/api/attendance-from-feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: state.email.trim(), sessionDate: state.sessionDate, sessionDepartment: state.sessionDepartment })
+    }).catch(() => {});
+
     document.getElementById('feedback-form').style.display = 'none';
     document.getElementById('progress-track').style.display = 'none';
     document.getElementById('success-wrap').style.display = 'block';

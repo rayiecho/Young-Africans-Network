@@ -126,7 +126,12 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
   <div class="modal">
     <h3>Submit Your Work</h3>
     <div class="form-group"><label>Finished file</label>
-      <input type="file" id="sub-file" accept="image/*,video/*" onchange="uploadFileTo('sub-file','sub-url','sub-status')">
+      <input type="file" id="sub-file" accept="image/*,video/*" onchange="onFileChosenForRename('sub-file','sub-filename','sub-rename-wrap')">
+      <div id="sub-rename-wrap" style="display:none;margin-top:0.5rem;">
+        <label style="font-size:0.74rem;">File name</label>
+        <input type="text" id="sub-filename">
+        <button type="button" class="btn btn-primary btn-sm" style="margin-top:0.5rem;" onclick="startRenameUpload('sub-file','sub-filename','sub-url','sub-status')">Upload</button>
+      </div>
       <input type="hidden" id="sub-url">
       <small id="sub-status" style="color:var(--gray);"></small>
     </div>
@@ -152,23 +157,32 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
 
 <div class="toast" id="toast"></div>
 
-<script src="/assets/yan-api.js?v=1785945640"></script>
-<script src="/assets/yan-upload.js?v=1785945640"></script>
+<script src="/assets/yan-api.js?v=1786013508"></script>
+<script src="/assets/yan-upload.js?v=1786013508"></script>
 <script>
 let currentUser = null;
 let activeTab = 'open';
 let activeTaskId = null;
 const TYPE_LABELS = { poster: 'Poster / Banner', video_edit: 'Video Edit', slides: 'Slides', other: 'Other' };
 
-async function uploadFileTo(fileInputId, urlFieldId, statusId) {
+function onFileChosenForRename(fileInputId, nameInputId, wrapId) {
   const file = document.getElementById(fileInputId).files[0];
-  const status = document.getElementById(statusId);
+  const wrap = document.getElementById(wrapId);
+  if (!file) { wrap.style.display = 'none'; return; }
+  document.getElementById(nameInputId).value = file.name;
+  wrap.style.display = 'block';
+}
+
+async function startRenameUpload(fileInputId, nameInputId, urlFieldId, statusId) {
+  const file = document.getElementById(fileInputId).files[0];
   if (!file) return;
-  status.textContent = '⏳ Uploading ' + file.name + '... 0%';
+  const filename = document.getElementById(nameInputId).value.trim() || file.name;
+  const status = document.getElementById(statusId);
+  status.textContent = '⏳ Uploading ' + filename + '... 0%';
   try {
-    const url = await YanUpload.uploadFile(file, (pct) => { status.textContent = '⏳ Uploading ' + file.name + '... ' + pct + '%'; });
+    const url = await YanUpload.uploadFile(file, (pct) => { status.textContent = '⏳ Uploading ' + filename + '... ' + pct + '%'; }, filename);
     document.getElementById(urlFieldId).value = url;
-    status.textContent = '✅ Uploaded: ' + file.name;
+    status.textContent = '✅ Uploaded: ' + filename;
   } catch(e) {
     status.textContent = '❌ Upload failed: ' + e.message;
   }
@@ -274,7 +288,14 @@ async function claimTask(id) {
   } catch(e) { showToast(e.message, 'error'); }
 }
 
-function openSubmitModal(id) { activeTaskId = id; document.getElementById('sub-url').value = ''; document.getElementById('sub-status').textContent = ''; openModal('submit-modal'); }
+function openSubmitModal(id) {
+  activeTaskId = id;
+  document.getElementById('sub-url').value = '';
+  document.getElementById('sub-status').textContent = '';
+  document.getElementById('sub-file').value = '';
+  document.getElementById('sub-rename-wrap').style.display = 'none';
+  openModal('submit-modal');
+}
 async function submitDeliverable() {
   const url = document.getElementById('sub-url').value.trim();
   if (!url) return showToast('Upload your finished file first', 'error');
