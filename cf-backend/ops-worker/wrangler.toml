@@ -11,6 +11,13 @@ database_id = "b62aff2e-d188-4cdf-9f53-dd7bfddc02ee"
 binding = "MEDIA"
 bucket_name = "yan-media"
 
+# A Worker fetching another Worker's public workers.dev URL directly gets blocked by
+# Cloudflare's loop-prevention (error 1042) - same issue already fixed in content-worker
+# for AI_WORKER. Service bindings route in-account instead of over the public edge.
+[[services]]
+binding = "EMAIL_WORKER"
+service = "yan-email-worker"
+
 [vars]
 ALLOWED_ORIGINS = "https://youngafricansnetwork.org,https://young-africans-network.web.app,http://localhost:8080"
 EMAIL_WORKER_URL = "https://yan-email-worker.youngafricansn.workers.dev"

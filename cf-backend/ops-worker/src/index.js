@@ -97,10 +97,12 @@ async function getFirestoreVolunteersForMonth(env, monthAbbrev) {
 
 async function sendEmail(env, { to, name, subject, message }) {
   try {
-    // yan-email-worker expects to_email/name/type, not the {to,subject,message} shape
-    // used everywhere else in this file - mismatched field names here silently dropped
-    // every email this worker tried to send (caught by this same try/catch).
-    const res = await fetch(env.EMAIL_WORKER_URL, {
+    // Two separate bugs stacked here: (1) yan-email-worker expects to_email/name/type,
+    // not the {to,subject,message} shape used elsewhere in this file: (2) fetching its
+    // public workers.dev URL directly from inside another Worker on the same account
+    // hits Cloudflare's loop-prevention (error 1042) and never even reaches it - a
+    // service binding routes in-account instead, same fix already used for AI_WORKER.
+    const res = await env.EMAIL_WORKER.fetch('https://yan-email-worker.youngafricansn.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ to_email: to, name: name || '', subject, message, type: 'general' })
@@ -294,14 +296,15 @@ async function flagNeedsHelp(request, env, cors, id) {
 
   const monthNow = MONTH_ABBREVS[new Date().getMonth()];
   const available = await getOrderedVolunteerAvailability(env, monthNow);
-  await Promise.all(available.slice(0, 3).map(v => v.userId
+  const grabUrl = 'https://youngafricansnetwork.org/volunteer.html';
+  const helpTaskMessage = `A new ${taskType.replace('_',' ')} task is open: "Help needed: ${session.topic}". Click here to grab and serve: ${grabUrl}`;
+  await Promise.all(available.map(v => v.userId
     ? notifyUser(env, v.userId, {
         title: 'New Volunteer Room task: ' + session.topic,
-        message: `A new ${taskType.replace('_',' ')} task is open: "Help needed: ${session.topic}". First come, first served.`,
+        message: helpTaskMessage,
         emailSubject: 'YAN Volunteer Room: Help needed for ' + session.topic
       })
-    : sendEmail(env, { to: v.email, subject: 'YAN Volunteer Room: Help needed for ' + session.topic,
-        message: `A new ${taskType.replace('_',' ')} task is open: "Help needed: ${session.topic}". First come, first served.` })
+    : sendEmail(env, { to: v.email, name: v.name, subject: 'YAN Volunteer Room: Help needed for ' + session.topic, message: helpTaskMessage })
   ));
 
   return json({ ok: true, volunteerTaskId: taskId }, 200, cors);
@@ -537,6 +540,13 @@ async function claimTask(request, env, cors, id) {
     env.DB.prepare(`INSERT INTO volunteer_queue (user_id, last_claimed_at) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET last_claimed_at = ?`)
       .bind(user.id, now, now)
   ]);
+  if (task.created_by) {
+    await notifyUser(env, task.created_by, {
+      title: `${user.name} accepted "${task.title}"`,
+      message: `${user.name} has accepted to work on "${task.title}". You'll be notified again once it's submitted.`,
+      emailSubject: 'YAN Volunteer Room: task claimed'
+    });
+  }
   return json({ ok: true }, 200, cors);
 }
 
@@ -734,6 +744,13 @@ async function submitTask(request, env, cors, id) {
   if (!body.submittedFileUrl) return json({ error: 'submittedFileUrl required' }, 400, cors);
   await env.DB.prepare(`UPDATE volunteer_tasks SET status = 'submitted', submitted_file_url = ?, updated_at = ? WHERE id = ?`)
     .bind(body.submittedFileUrl, Date.now(), id).run();
+  if (task.created_by) {
+    await notifyUser(env, task.created_by, {
+      title: `Submission ready for review: ${task.title}`,
+      message: `${user.name} submitted the deliverable for "${task.title}". Open the Volunteer Room to review it: https://youngafricansnetwork.org/volunteer.html`,
+      emailSubject: 'YAN Volunteer Room: submission ready for review'
+    });
+  }
   return json({ ok: true }, 200, cors);
 }
 
@@ -754,9 +771,23 @@ async function reviewTask(request, env, cors, id) {
       env.DB.prepare(`INSERT INTO member_points (user_id, points) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET points = points + ?`)
         .bind(task.claimed_by, points, points)
     ]);
+    if (task.claimed_by) {
+      await notifyUser(env, task.claimed_by, {
+        title: `Approved: ${task.title}`,
+        message: `Your submission for "${task.title}" was approved - +15 points awarded!${body.note ? ' Feedback: ' + body.note : ''}`,
+        emailSubject: 'YAN Volunteer Room: your submission was approved'
+      });
+    }
   } else {
     await env.DB.prepare(`UPDATE volunteer_tasks SET status = 'changes_requested', review_note = ?, updated_at = ? WHERE id = ?`)
       .bind(body.note || '', now, id).run();
+    if (task.claimed_by) {
+      await notifyUser(env, task.claimed_by, {
+        title: `Changes requested: ${task.title}`,
+        message: `Changes were requested on your submission for "${task.title}".${body.note ? ' Feedback: ' + body.note : ''} Open the Volunteer Room to resubmit: https://youngafricansnetwork.org/volunteer.html`,
+        emailSubject: 'YAN Volunteer Room: changes requested'
+      });
+    }
   }
   return json({ ok: true }, 200, cors);
 }

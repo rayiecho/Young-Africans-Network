@@ -162,6 +162,17 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
   </div>
 </div>
 
+<!-- ATTENDANCE MODAL -->
+<div class="modal-overlay" id="attendance-modal">
+  <div class="modal">
+    <h3 id="att-title">Attendance</h3>
+    <div id="att-list" style="max-height:50vh;overflow-y:auto;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('attendance-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="/assets/yan-api.js?v=1785945640"></script>
@@ -323,7 +334,7 @@ async function confirmGuest(sessionId, guestId) {
   catch(e) { showToast(e.message, 'error'); }
 }
 async function claimRole(sessionId, roleId) {
-  try { await YanAPI.claimSessionRole(sessionId, roleId); await loadSessions(); }
+  try { await YanAPI.claimSessionRole(sessionId, roleId); showToast('Updated!'); await loadSessions(); }
   catch(e) { showToast(e.message, 'error'); }
 }
 async function checkIn(sessionId) {
@@ -331,11 +342,17 @@ async function checkIn(sessionId) {
   catch(e) { showToast(e.message, 'error'); }
 }
 async function viewAttendance(sessionId, topic) {
+  document.getElementById('att-title').textContent = 'Attendance — ' + topic;
+  document.getElementById('att-list').innerHTML = '<div class="loading">Loading...</div>';
+  openModal('attendance-modal');
   try {
     const attendance = await YanAPI.getSessionAttendance(sessionId);
-    if (!attendance.length) return alert('No one has checked in for "' + topic + '" yet.');
-    alert('Attendance for "' + topic + '":\n\n' + attendance.map(a => '• ' + a.name).join('\n'));
-  } catch(e) { showToast(e.message, 'error'); }
+    document.getElementById('att-list').innerHTML = attendance.length
+      ? attendance.map(a => `<div style="padding:0.6rem 0;border-bottom:1px solid rgba(27,42,107,0.08);font-size:0.88rem;">${escapeHtml(a.name)}</div>`).join('')
+      : '<p style="color:var(--gray);font-size:0.85rem;padding:0.5rem 0;">No one has checked in yet.</p>';
+  } catch(e) {
+    document.getElementById('att-list').innerHTML = '<p style="color:var(--red);font-size:0.85rem;">' + escapeHtml(e.message) + '</p>';
+  }
 }
 async function deleteSession(id) {
   if (!confirm('Delete this session? This cannot be undone.')) return;
