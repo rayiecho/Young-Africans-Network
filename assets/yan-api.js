@@ -253,8 +253,8 @@
     },
 
     // ---- volunteer room ----
-    async createVolunteerTask({ taskType, title, brief, rawFileUrl, dueDate, relatedSessionId }) {
-      return opsRequest('/api/volunteer-tasks', { method: 'POST', body: { taskType, title, brief, rawFileUrl, dueDate, relatedSessionId } });
+    async createVolunteerTask({ taskType, title, brief, rawFileUrl, dueDate, relatedSessionId, hasRawFile }) {
+      return opsRequest('/api/volunteer-tasks', { method: 'POST', body: { taskType, title, brief, rawFileUrl, dueDate, relatedSessionId, hasRawFile } });
     },
     async getVolunteerTasks({ status, mine } = {}) {
       const params = new URLSearchParams();

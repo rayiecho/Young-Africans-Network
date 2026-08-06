@@ -509,11 +509,29 @@ function taskRow(row) {
   };
 }
 
+// Notify everyone who signed up to volunteer this month, not just the front of the
+// rotation queue - the queue order only decides fairness once people are competing
+// for the same task, it shouldn't decide who even finds out a task exists.
+async function notifyVolunteersOfNewTask(env, { taskType, title }) {
+  const monthNow = MONTH_ABBREVS[new Date().getMonth()];
+  const available = await getOrderedVolunteerAvailability(env, monthNow);
+  const grabUrl = 'https://youngafricansnetwork.org/volunteer.html';
+  const taskMessage = `There's a new ${taskType.replace('_',' ')} task open: "${title}". Click here to grab and serve: ${grabUrl}`;
+  await Promise.all(available.map(v => v.userId
+    ? notifyUser(env, v.userId, {
+        title: 'New Volunteer Room task: ' + title,
+        message: taskMessage,
+        emailSubject: 'YAN Volunteer Room: ' + title
+      })
+    : sendEmail(env, { to: v.email, name: v.name, subject: 'YAN Volunteer Room: ' + title, message: taskMessage })
+  ));
+}
+
 async function createTask(request, env, cors) {
   const { error, user } = await requireAdmin(request, env, cors);
   if (error) return error;
   const body = await request.json();
-  if (!body.title || !body.taskType) return json({ error: 'Title and task type are required' }, 400, cors);
+  if (!body.title || !body.taskType) return json({ error: 'Title and type are required' }, 400, cors);
   const id = newId();
   const now = Date.now();
   await env.DB.prepare(
@@ -522,21 +540,13 @@ async function createTask(request, env, cors) {
   ).bind(id, body.taskType, body.title, body.brief || null, body.relatedSessionId || null,
     body.rawFileUrl || null, body.dueDate || null, user.id, now, now).run();
 
-  // Notify everyone who signed up to volunteer this month, not just the front of the
-  // rotation queue - the queue order only decides fairness once people are competing
-  // for the same task, it shouldn't decide who even finds out a task exists.
-  const monthNow = MONTH_ABBREVS[new Date().getMonth()];
-  const available = await getOrderedVolunteerAvailability(env, monthNow);
-  const grabUrl = 'https://youngafricansnetwork.org/volunteer.html';
-  const taskMessage = `There's a new ${body.taskType.replace('_',' ')} task open: "${body.title}". Click here to grab and serve: ${grabUrl}`;
-  await Promise.all(available.map(v => v.userId
-    ? notifyUser(env, v.userId, {
-        title: 'New Volunteer Room task: ' + body.title,
-        message: taskMessage,
-        emailSubject: 'YAN Volunteer Room: ' + body.title
-      })
-    : sendEmail(env, { to: v.email, name: v.name, subject: 'YAN Volunteer Room: ' + body.title, message: taskMessage })
-  ));
+  // If a raw file is on its way (uploading in the background, attached later via
+  // attachRawFile), hold off telling volunteers - notifying now would send people to
+  // claim a task whose materials aren't there yet. attachRawFile() sends this instead
+  // once the file actually lands. Only fire immediately for tasks that never had one.
+  if (!body.hasRawFile) {
+    await notifyVolunteersOfNewTask(env, { taskType: body.taskType, title: body.title });
+  }
 
   return json({ id }, 201, cors);
 }
@@ -853,12 +863,17 @@ async function submitTask(request, env, cors, id) {
 async function attachRawFile(request, env, cors, id) {
   const { error, user } = await requireUser(request, env, cors);
   if (error) return error;
-  const task = await env.DB.prepare('SELECT created_by FROM volunteer_tasks WHERE id = ?').bind(id).first();
+  const task = await env.DB.prepare('SELECT created_by, task_type, title, raw_file_url FROM volunteer_tasks WHERE id = ?').bind(id).first();
   if (!task) return json({ error: 'Not found' }, 404, cors);
   if (task.created_by !== user.id && !user.is_admin) return json({ error: 'Not allowed' }, 403, cors);
   const { rawFileUrl } = await request.json();
   if (!rawFileUrl) return json({ error: 'rawFileUrl required' }, 400, cors);
   await env.DB.prepare('UPDATE volunteer_tasks SET raw_file_url = ?, updated_at = ? WHERE id = ?').bind(rawFileUrl, Date.now(), id).run();
+  // The task's creation notification was deliberately held back for exactly this
+  // moment (see createTask) - the material is only actually ready to work on now.
+  if (!task.raw_file_url) {
+    await notifyVolunteersOfNewTask(env, { taskType: task.task_type, title: task.title });
+  }
   return json({ ok: true }, 200, cors);
 }
 
