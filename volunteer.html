@@ -157,8 +157,8 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
 
 <div class="toast" id="toast"></div>
 
-<script src="/assets/yan-api.js?v=1786040986"></script>
-<script src="/assets/yan-upload.js?v=1786040986"></script>
+<script src="/assets/yan-api.js?v=1786044081"></script>
+<script src="/assets/yan-upload.js?v=1786044081"></script>
 <script>
 let currentUser = null;
 let activeTab = 'open';
@@ -272,7 +272,7 @@ function renderTaskCard(t) {
     <span class="badge badge-${t.status}" style="float:right;">${t.status.replace('_',' ')}</span>
     <div class="task-title">${escapeHtml(t.title)}</div>
     ${t.brief ? `<div class="task-brief">${escapeHtml(t.brief)}</div>` : ''}
-    ${t.rawFileUrl ? `<a href="${escapeHtml(t.rawFileUrl)}" target="_blank" style="font-size:0.8rem;color:var(--navy);font-weight:700;">📎 Raw materials</a><br>` : ''}
+    ${t.rawFileUrl ? `<a href="${escapeHtml(t.rawFileUrl)}" target="_blank" style="display:inline-flex;align-items:center;gap:0.4rem;background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.45rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;margin:0.4rem 0;">⬇ Access Files and Instructions here</a><br>` : ''}
     ${t.submittedFileUrl ? `<a href="${escapeHtml(t.submittedFileUrl)}" target="_blank" style="font-size:0.8rem;color:var(--navy);font-weight:700;">✅ Submitted deliverable</a><br>` : ''}
     ${t.reviewNote ? `<div style="background:var(--light);border-radius:10px;padding:0.6rem 0.85rem;margin-top:0.5rem;font-size:0.8rem;">Feedback: ${escapeHtml(t.reviewNote)}</div>` : ''}
     <div class="task-meta">${t.claimedByName ? 'Claimed by ' + escapeHtml(t.claimedByName) + ' · ' : ''}${t.dueDate ? 'Due ' + t.dueDate + ' · ' : ''}Posted ${timeAgo(t.createdAt)}${t.pointsAwarded ? ' · +' + t.pointsAwarded + ' pts awarded' : ''}</div>

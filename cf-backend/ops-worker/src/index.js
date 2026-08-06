@@ -638,13 +638,24 @@ async function messageOnePerson(request, env, cors) {
 // multipart/form-data), so this streams straight through to R2 without ever buffering
 // the whole file in the Worker's memory - the only ceiling is Cloudflare's own request
 // body size limit, not anything this code imposes.
+// Forces a real download instead of the browser trying to play/render the file inline -
+// necessary because the <a download> attribute is ignored by browsers for cross-origin
+// links (this R2 URL is a different origin than the site), and fetching a multi-GB file
+// into memory first just to trigger a blob download isn't viable. Setting this at upload
+// time makes R2 itself send the header, so it works at any file size, streamed straight
+// from R2 to disk.
+function contentDispositionFor(filename) {
+  const safe = filename.replace(/[\r\n"]/g, '_');
+  return `attachment; filename="${safe}"`;
+}
+
 async function uploadMedia(request, env, cors, url) {
   const { error, user } = await requireUser(request, env, cors);
   if (error) return error;
   const filename = decodeURIComponent(url.searchParams.get('filename') || 'file');
   const contentType = request.headers.get('Content-Type') || 'application/octet-stream';
   const key = `${user.id}/${Date.now()}-${filename.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-  await env.MEDIA.put(key, request.body, { httpMetadata: { contentType } });
+  await env.MEDIA.put(key, request.body, { httpMetadata: { contentType, contentDisposition: contentDispositionFor(filename) } });
   return json({ url: env.MEDIA_PUBLIC_BASE + '/' + key }, 201, cors);
 }
 
@@ -664,7 +675,7 @@ async function initMultipartUpload(request, env, cors, url) {
   const filename = decodeURIComponent(url.searchParams.get('filename') || 'file');
   const contentType = url.searchParams.get('contentType') || 'application/octet-stream';
   const key = mediaKey(user.id, filename);
-  const upload = await env.MEDIA.createMultipartUpload(key, { httpMetadata: { contentType } });
+  const upload = await env.MEDIA.createMultipartUpload(key, { httpMetadata: { contentType, contentDisposition: contentDispositionFor(filename) } });
   return json({ key: upload.key, uploadId: upload.uploadId }, 201, cors);
 }
 
