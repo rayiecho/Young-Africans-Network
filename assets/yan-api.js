@@ -255,6 +255,7 @@
       return data.tasks;
     },
     async claimVolunteerTask(id) { return opsRequest('/api/volunteer-tasks/' + id + '/claim', { method: 'POST' }); },
+    async deleteVolunteerTask(id) { return opsRequest('/api/volunteer-tasks/' + id, { method: 'DELETE' }); },
     async submitVolunteerTask(id, submittedFileUrl) {
       return opsRequest('/api/volunteer-tasks/' + id + '/submit', { method: 'POST', body: { submittedFileUrl } });
     },

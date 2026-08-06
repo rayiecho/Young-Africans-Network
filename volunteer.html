@@ -184,8 +184,8 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
 
 <div class="toast" id="toast"></div>
 
-<script src="/assets/yan-api.js"></script>
-<script src="/assets/yan-upload.js"></script>
+<script src="/assets/yan-api.js?v=1785945640"></script>
+<script src="/assets/yan-upload.js?v=1785945640"></script>
 <script>
 let currentUser = null;
 let activeTab = 'open';
@@ -196,9 +196,9 @@ async function uploadFileTo(fileInputId, urlFieldId, statusId) {
   const file = document.getElementById(fileInputId).files[0];
   const status = document.getElementById(statusId);
   if (!file) return;
-  status.textContent = '⏳ Uploading ' + file.name + '...';
+  status.textContent = '⏳ Uploading ' + file.name + '... 0%';
   try {
-    const url = await YanUpload.uploadFile(file);
+    const url = await YanUpload.uploadFile(file, (pct) => { status.textContent = '⏳ Uploading ' + file.name + '... ' + pct + '%'; });
     document.getElementById(urlFieldId).value = url;
     status.textContent = '✅ Uploaded: ' + file.name;
   } catch(e) {

@@ -6,7 +6,7 @@ function corsHeaders(origin, allowedOrigins) {
   const allowed = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
   return {
     'Access-Control-Allow-Origin': allowed,
-    'Access-Control-Allow-Methods': 'GET,POST,DELETE,OPTIONS',
+    'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type,Authorization',
     'Vary': 'Origin'
   };
@@ -95,13 +95,17 @@ async function getFirestoreVolunteersForMonth(env, monthAbbrev) {
   return people;
 }
 
-async function sendEmail(env, { to, subject, message }) {
+async function sendEmail(env, { to, name, subject, message }) {
   try {
-    await fetch(env.EMAIL_WORKER_URL, {
+    // yan-email-worker expects to_email/name/type, not the {to,subject,message} shape
+    // used everywhere else in this file - mismatched field names here silently dropped
+    // every email this worker tried to send (caught by this same try/catch).
+    const res = await fetch(env.EMAIL_WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ to, subject, message })
+      body: JSON.stringify({ to_email: to, name: name || '', subject, message, type: 'general' })
     });
+    if (!res.ok) console.error('Email send failed:', res.status, await res.text());
   } catch (e) { console.error('Email send failed:', e.message); }
 }
 
@@ -113,18 +117,18 @@ async function notifyUser(env, userId, { title, message, emailSubject }) {
   await env.DB.prepare(
     `INSERT INTO notifications (id,user_id,title,message,type,posted_by,created_at) VALUES (?,?,?,?,?,?,?)`
   ).bind(newId(), userId, title, message, 'popup_task', 'YAN System', Date.now()).run();
-  const user = await env.DB.prepare('SELECT email FROM users WHERE id = ?').bind(userId).first();
-  if (user?.email) await sendEmail(env, { to: user.email, subject: emailSubject || title, message });
+  const user = await env.DB.prepare('SELECT email, name FROM users WHERE id = ?').bind(userId).first();
+  if (user?.email) await sendEmail(env, { to: user.email, name: user.name, subject: emailSubject || title, message });
 }
 
 async function notifyAdmins(env, { title, message, emailSubject }) {
-  const admins = await env.DB.prepare('SELECT id, email FROM users WHERE is_admin = 1').all();
+  const admins = await env.DB.prepare('SELECT id, email, name FROM users WHERE is_admin = 1').all();
   const now = Date.now();
   await Promise.all(admins.results.map(a => env.DB.prepare(
     `INSERT INTO notifications (id,user_id,title,message,type,posted_by,created_at) VALUES (?,?,?,?,?,?,?)`
   ).bind(newId(), a.id, title, message, 'popup_task', 'YAN System', now).run()));
   await Promise.all(admins.results.filter(a => a.email).map(a =>
-    sendEmail(env, { to: a.email, subject: emailSubject || title, message })
+    sendEmail(env, { to: a.email, name: a.name, subject: emailSubject || title, message })
   ));
 }
 
@@ -207,7 +211,7 @@ async function createSessionHandler(request, env, cors) {
   if (assignedHeadId) {
     await notifyUser(env, assignedHeadId, {
       title: 'Your department is leading a session',
-      message: `${department} is leading the ${sessionDate} session: "${topic}". Please confirm and prepare.`,
+      message: `Your department is hosting "${topic}" on ${sessionDate}. Please confirm and prepare: https://youngafricansnetwork.org/sessions.html`,
       emailSubject: 'YAN: your department is leading a session on ' + sessionDate
     });
   }
@@ -446,6 +450,10 @@ async function deleteSession(request, env, cors, id) {
   const { error, user } = await requireUser(request, env, cors);
   if (error) return error;
   if (!user.is_admin) return json({ error: 'Admin only' }, 403, cors);
+  // Volunteer tasks created from a "needs help" flag reference this session but aren't
+  // owned by it (the task and any points/submissions on it should survive) - unlink
+  // rather than cascade-delete, otherwise the FK blocks deletion entirely.
+  await env.DB.prepare('UPDATE volunteer_tasks SET related_session_id = NULL WHERE related_session_id = ?').bind(id).run();
   await env.DB.prepare('DELETE FROM dept_sessions WHERE id = ?').bind(id).run();
   return json({ ok: true }, 200, cors);
 }
@@ -476,18 +484,20 @@ async function createTask(request, env, cors) {
   ).bind(id, body.taskType, body.title, body.brief || null, body.relatedSessionId || null,
     body.rawFileUrl || null, body.dueDate || null, user.id, now, now).run();
 
-  // Notify whoever's first in the rotation queue - not everyone, so it stays useful
-  // whether there are 3 volunteers or 30 (avoids a stampede/spam on every task).
+  // Notify everyone who signed up to volunteer this month, not just the front of the
+  // rotation queue - the queue order only decides fairness once people are competing
+  // for the same task, it shouldn't decide who even finds out a task exists.
   const monthNow = MONTH_ABBREVS[new Date().getMonth()];
   const available = await getOrderedVolunteerAvailability(env, monthNow);
-  await Promise.all(available.slice(0, 3).map(v => v.userId
+  const grabUrl = 'https://youngafricansnetwork.org/volunteer.html';
+  const taskMessage = `There's a new ${body.taskType.replace('_',' ')} task open: "${body.title}". Click here to grab and serve: ${grabUrl}`;
+  await Promise.all(available.map(v => v.userId
     ? notifyUser(env, v.userId, {
         title: 'New Volunteer Room task: ' + body.title,
-        message: `A new ${body.taskType.replace('_',' ')} task is open: "${body.title}". First come, first served.`,
+        message: taskMessage,
         emailSubject: 'YAN Volunteer Room: ' + body.title
       })
-    : sendEmail(env, { to: v.email, subject: 'YAN Volunteer Room: ' + body.title,
-        message: `A new ${body.taskType.replace('_',' ')} task is open: "${body.title}". First come, first served.` })
+    : sendEmail(env, { to: v.email, name: v.name, subject: 'YAN Volunteer Room: ' + body.title, message: taskMessage })
   ));
 
   return json({ id }, 201, cors);
@@ -590,6 +600,59 @@ async function uploadMedia(request, env, cors, url) {
   const key = `${user.id}/${Date.now()}-${filename.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
   await env.MEDIA.put(key, request.body, { httpMetadata: { contentType } });
   return json({ url: env.MEDIA_PUBLIC_BASE + '/' + key }, 201, cors);
+}
+
+function mediaKey(userId, filename) {
+  return `${userId}/${Date.now()}-${filename.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+}
+
+// Large video uploads (Google Meet recordings, edited hour-long videos - routinely
+// multiple GB) can't go through uploadMedia() above: a single request streamed straight
+// to a Worker still has to fit under Cloudflare's platform request-size ceiling, which
+// is nowhere near "several GB". Splitting the file into small chunks client-side means
+// every individual HTTP request stays tiny regardless of total file size - only R2's
+// own multipart limits apply (5GiB/part, 10,000 parts => tens of TB in practice).
+async function initMultipartUpload(request, env, cors, url) {
+  const { error, user } = await requireUser(request, env, cors);
+  if (error) return error;
+  const filename = decodeURIComponent(url.searchParams.get('filename') || 'file');
+  const contentType = url.searchParams.get('contentType') || 'application/octet-stream';
+  const key = mediaKey(user.id, filename);
+  const upload = await env.MEDIA.createMultipartUpload(key, { httpMetadata: { contentType } });
+  return json({ key: upload.key, uploadId: upload.uploadId }, 201, cors);
+}
+
+async function uploadMultipartPart(request, env, cors, url) {
+  const { error } = await requireUser(request, env, cors);
+  if (error) return error;
+  const key = url.searchParams.get('key');
+  const uploadId = url.searchParams.get('uploadId');
+  const partNumber = parseInt(url.searchParams.get('partNumber'), 10);
+  if (!key || !uploadId || !partNumber) return json({ error: 'key, uploadId and partNumber are required' }, 400, cors);
+  const upload = env.MEDIA.resumeMultipartUpload(key, uploadId);
+  const part = await upload.uploadPart(partNumber, request.body);
+  return json({ partNumber, etag: part.etag }, 200, cors);
+}
+
+async function completeMultipartUpload(request, env, cors) {
+  const { error } = await requireUser(request, env, cors);
+  if (error) return error;
+  const body = await request.json();
+  const { key, uploadId, parts } = body;
+  if (!key || !uploadId || !Array.isArray(parts) || !parts.length) return json({ error: 'key, uploadId and parts are required' }, 400, cors);
+  const upload = env.MEDIA.resumeMultipartUpload(key, uploadId);
+  await upload.complete(parts);
+  return json({ url: env.MEDIA_PUBLIC_BASE + '/' + key }, 201, cors);
+}
+
+async function abortMultipartUpload(request, env, cors) {
+  const { error } = await requireUser(request, env, cors);
+  if (error) return error;
+  const { key, uploadId } = await request.json();
+  if (!key || !uploadId) return json({ error: 'key and uploadId are required' }, 400, cors);
+  const upload = env.MEDIA.resumeMultipartUpload(key, uploadId);
+  await upload.abort().catch(() => {});
+  return json({ ok: true }, 200, cors);
 }
 
 async function getHeadsHandler(request, env, cors) {
@@ -698,6 +761,13 @@ async function reviewTask(request, env, cors, id) {
   return json({ ok: true }, 200, cors);
 }
 
+async function deleteTask(request, env, cors, id) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  await env.DB.prepare('DELETE FROM volunteer_tasks WHERE id = ?').bind(id).run();
+  return json({ ok: true }, 200, cors);
+}
+
 async function recordYoutubePublish(request, env, cors, id) {
   const { error } = await requireAdmin(request, env, cors);
   if (error) return error;
@@ -754,6 +824,7 @@ export default {
       const taskMatch = path.match(/^\/api\/volunteer-tasks\/([^/]+)(\/(claim|submit|review|youtube))?$/);
       if (taskMatch) {
         const [, id, , sub] = taskMatch;
+        if (!sub && request.method === 'DELETE') return await deleteTask(request, env, cors, id);
         if (sub === 'claim' && request.method === 'POST') return await claimTask(request, env, cors, id);
         if (sub === 'submit' && request.method === 'POST') return await submitTask(request, env, cors, id);
         if (sub === 'review' && request.method === 'POST') return await reviewTask(request, env, cors, id);
@@ -764,6 +835,10 @@ export default {
       if (path === '/api/volunteer-queue/email' && request.method === 'POST') return await emailVolunteerQueue(request, env, cors);
       if (path === '/api/message' && request.method === 'POST') return await messageOnePerson(request, env, cors);
       if (path === '/api/upload' && request.method === 'POST') return await uploadMedia(request, env, cors, url);
+      if (path === '/api/upload/init' && request.method === 'POST') return await initMultipartUpload(request, env, cors, url);
+      if (path === '/api/upload/part' && request.method === 'PUT') return await uploadMultipartPart(request, env, cors, url);
+      if (path === '/api/upload/complete' && request.method === 'POST') return await completeMultipartUpload(request, env, cors);
+      if (path === '/api/upload/abort' && request.method === 'POST') return await abortMultipartUpload(request, env, cors);
       if (path === '/api/heads' && request.method === 'GET') return await getHeadsHandler(request, env, cors);
       if (path === '/api/heads' && request.method === 'POST') return await assignHead(request, env, cors);
       const headRemoveMatch = path.match(/^\/api\/heads\/([^/]+)$/);
