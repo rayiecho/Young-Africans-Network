@@ -231,6 +231,10 @@
       const data = await opsRequest('/api/users/search?q=' + encodeURIComponent(q));
       return data.users;
     },
+    async checkRegisteredEmails(emails) {
+      const data = await opsRequest('/api/users/check-emails', { method: 'POST', body: { emails } });
+      return data.registered;
+    },
     async getVolunteerQueue(month) {
       const data = await opsRequest('/api/volunteer-queue' + (month ? '?month=' + encodeURIComponent(month) : ''));
       return data.queue;

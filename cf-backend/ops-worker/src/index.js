@@ -762,6 +762,27 @@ async function searchUsers(request, env, cors, url) {
   return json({ users: results.map(u => ({ userId: u.id, name: u.name, email: u.email, department: u.department })) }, 200, cors);
 }
 
+// Lets admin cross-reference an external list (e.g. Firestore join-request submissions,
+// which don't automatically become D1 accounts) against who's actually registered, so
+// "hasn't joined yet" can be computed live instead of tracked as separate state -
+// someone registering just makes them stop showing up here on the next check.
+async function checkRegisteredEmails(request, env, cors) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  const { emails } = await request.json();
+  if (!Array.isArray(emails) || !emails.length) return json({ registered: [] }, 200, cors);
+  const lower = [...new Set(emails.map(e => (e || '').toLowerCase().trim()).filter(Boolean))];
+  const registered = [];
+  const BATCH = 100; // stay well under D1/SQLite's bound-parameter ceiling
+  for (let i = 0; i < lower.length; i += BATCH) {
+    const batch = lower.slice(i, i + BATCH);
+    const placeholders = batch.map(() => '?').join(',');
+    const { results } = await env.DB.prepare(`SELECT email FROM users WHERE email IN (${placeholders})`).bind(...batch).all();
+    registered.push(...results.map(r => r.email.toLowerCase()));
+  }
+  return json({ registered }, 200, cors);
+}
+
 const MONTH_ABBREVS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 // The volunteer pool for a month = admin's curated volunteer_roster, not the raw
@@ -1004,6 +1025,7 @@ export default {
       const headRemoveMatch = path.match(/^\/api\/heads\/([^/]+)$/);
       if (headRemoveMatch && request.method === 'DELETE') return await removeHead(request, env, cors, headRemoveMatch[1]);
       if (path === '/api/users/search' && request.method === 'GET') return await searchUsers(request, env, cors, url);
+      if (path === '/api/users/check-emails' && request.method === 'POST') return await checkRegisteredEmails(request, env, cors);
 
       return json({ error: 'Not found' }, 404, cors);
     } catch (e) {
