@@ -65,13 +65,16 @@
     }
   }
 
-  async function uploadImage(file) {
+  async function uploadImage(file, onProgress) {
     const fd = new FormData();
     fd.append('file', file);
     fd.append('upload_preset', CLOUDINARY_PRESET);
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: fd });
-    const data = await res.json();
+    const data = await withRetry(() => xhrRequest('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+      body: fd,
+      onProgress: (loaded) => { if (onProgress) onProgress(Math.min(99, Math.floor((loaded / file.size) * 100))); }
+    }));
     if (!data.secure_url) throw new Error(data.error?.message || 'Upload failed');
+    if (onProgress) onProgress(100);
     return data.secure_url;
   }
 
@@ -148,7 +151,7 @@
     // keeping whatever name the OS/recorder gave the file (e.g. a Google Meet recording's
     // auto-generated name).
     async uploadFile(file, onProgress, filename) {
-      if (file.type.startsWith('image/')) return uploadImage(file);
+      if (file.type.startsWith('image/')) return uploadImage(file, onProgress);
       return file.size > SIMPLE_UPLOAD_MAX ? uploadMultipart(file, onProgress, filename) : uploadSimple(file, onProgress, filename);
     }
   };
