@@ -16,9 +16,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
-<script src="/assets/yan-api.js?v=1786113572"></script>
-<script src="/assets/yan-upload.js?v=1786113572"></script>
-<script src="/assets/yan-youtube.js?v=1786113572"></script>
+<script src="/assets/yan-api.js?v=1786117439"></script>
+<script src="/assets/yan-upload.js?v=1786117439"></script>
+<script src="/assets/yan-youtube.js?v=1786117439"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -1036,6 +1036,8 @@ async function loadNewslettersAdmin(c) {
       + '<div id="nl-search-results" style="max-height:200px;overflow-y:auto;border:1.5px solid rgba(27,42,107,0.1);border-radius:10px;"></div>'
       + '<div id="nl-selected-members" style="margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.4rem;"></div>'
       + '</div></div>'
+      + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Also send to external emails (optional)</label>'
+      + '<textarea id="nl-external-emails" rows="2" placeholder="Comma or newline separated - for people not registered on the platform" oninput="updateRecipientCount()" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;box-sizing:border-box;"></textarea></div>'
       + '<div style="background:rgba(27,42,107,0.04);border-radius:10px;padding:0.75rem;margin-bottom:1rem;font-size:0.82rem;color:var(--navy);">Will send to: <strong id="nl-recipient-count">' + allUsers.length + ' members</strong></div>'
       + '<div style="display:flex;gap:0.75rem;flex-wrap:wrap;">'
       + '<button onclick="sendNewsletter()" style="background:var(--red);color:#fff;border:none;padding:0.85rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Send Newsletter</button>'
@@ -5887,11 +5889,17 @@ window.setNewsletterTarget = function(target) {
   if (sd) sd.style.display = target === 'specific' ? 'block' : 'none';
   window.updateRecipientCount();
 };
+window.parseExternalEmails = function() {
+  const raw = (document.getElementById('nl-external-emails') || {}).value || '';
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return [...new Set(raw.split(/[,\n]/).map(s => s.trim()).filter(s => emailRe.test(s)))];
+};
 window.updateRecipientCount = function() {
   const users = window._nlAllUsers || [];
   let count = window._nlTarget === 'all' ? users.length : window._nlTarget === 'specific' ? (window._nlSelectedUIDs||[]).length : users.filter(function(u){return u.department===window._nlTarget;}).length;
+  const externalCount = window.parseExternalEmails().length;
   const el = document.getElementById('nl-recipient-count');
-  if (el) el.textContent = count + ' member' + (count!==1?'s':'');
+  if (el) el.textContent = count + ' member' + (count!==1?'s':'') + (externalCount ? ' + ' + externalCount + ' external' : '');
 };
 window.sanitizeNl = function(str) { return String(str||'').replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c])); };
 window.searchNewsletterMembers = function(query) {
@@ -5950,7 +5958,17 @@ window.sendNewsletter = async function() {
   if (window._nlTarget === 'all') recipients = allUsers;
   else if (window._nlTarget === 'specific') recipients = allUsers.filter(function(u){ return (window._nlSelectedUIDs||[]).includes(u.id); });
   else recipients = allUsers.filter(function(u){ return u.department === window._nlTarget; });
+
+  // External emails - people who filled the join form, event contacts, etc. who aren't
+  // registered members - additive to whichever member target is selected above, not a
+  // replacement for it.
+  const externalEmails = window.parseExternalEmails();
+  recipients = recipients.concat(externalEmails.map(email => ({ id: null, name: '', email })));
+
   if (recipients.length === 0) return showToast('No recipients selected', 'error');
+  if (message.includes('{{RSVP_LINK}}') && recipients.some(u => !u.id)) {
+    return showToast('The confirmation link only works for registered members - remove external emails or the {{RSVP_LINK}} tag', 'error');
+  }
 
   let sent = 0, failed = 0;
   showToast('Starting email broadcast...', 'info');
