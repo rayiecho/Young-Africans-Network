@@ -170,7 +170,11 @@ async function login(request, env, cors) {
   // Always passed, not just on first registration: self-heals any account whose
   // Firebase record ended up email-less from before this was fixed - harmless no-op
   // once it's already correct (falls back to an update that changes nothing).
-  const firebaseToken = await bridgeToken(env, user.id, { newAccountEmail: user.email });
+  // markVerified must reflect D1's actual email_verified state, not be omitted - omitting
+  // it defaults to false, and createFirebaseUser's DUPLICATE_LOCAL_ID fallback path
+  // (every existing user hits this, every login) explicitly writes emailVerified:false
+  // to Firebase every time, silently un-verifying already-verified accounts on each login.
+  const firebaseToken = await bridgeToken(env, user.id, { markVerified: !!user.email_verified, newAccountEmail: user.email });
   return json({ token: sessionToken, user: publicUser(user), firebaseToken }, 200, cors);
 }
 
@@ -279,7 +283,10 @@ async function me(request, env, cors) {
 async function bridge(request, env, cors) {
   const user = await getSessionUser(request, env);
   if (!user) return json({ error: 'Not authenticated' }, 401, cors);
-  const firebaseToken = await bridgeToken(env, user.id, { newAccountEmail: user.email });
+  // Same fix as login(): markVerified must reflect D1's real state, not default to
+  // false - this runs on effectively every page load, so the bug here was silently
+  // un-verifying real users' Firebase accounts on a routine basis, not just at login.
+  const firebaseToken = await bridgeToken(env, user.id, { markVerified: !!user.email_verified, newAccountEmail: user.email });
   return json({ firebaseToken }, 200, cors);
 }
 

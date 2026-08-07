@@ -16,9 +16,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
-<script src="/assets/yan-api.js?v=1786117439"></script>
-<script src="/assets/yan-upload.js?v=1786117439"></script>
-<script src="/assets/yan-youtube.js?v=1786117439"></script>
+<script src="/assets/yan-api.js?v=1786120002"></script>
+<script src="/assets/yan-upload.js?v=1786120002"></script>
+<script src="/assets/yan-youtube.js?v=1786120002"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -1269,6 +1269,7 @@ window.switchGroupTab = function(groupId, tabId) {
     redemptions: window.loadRedemptions,
     recommendations: window.loadRecommendations,
     capstone: window.loadCapstoneReviews,
+    referrals: window.loadReferralProgress,
   };
   const fn = tabFnMap[tabId] || window['load' + tabId.charAt(0).toUpperCase() + tabId.slice(1)];
   if (typeof fn === 'function') fn(container);
@@ -6231,6 +6232,7 @@ window.switchGroupTab = function(groupId, tabId) {
     redemptions: window.loadRedemptions,
     recommendations: window.loadRecommendations,
     capstone: window.loadCapstoneReviews,
+    referrals: window.loadReferralProgress,
   };
   const fn = tabFnMap[tabId] || window['load' + tabId.charAt(0).toUpperCase() + tabId.slice(1)];
   if (typeof fn === 'function') fn(container);
