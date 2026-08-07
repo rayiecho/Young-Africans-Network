@@ -14,4 +14,5 @@ cf-backend/migration/*.json
 cf-backend/migration/*.sql
 cf-backend/**/.dev.vars
 cf-backend/**/.wrangler/
+.wrangler/
 firebase-debug.log

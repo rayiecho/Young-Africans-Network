@@ -390,6 +390,33 @@ async function submitContact(request, env, cors) {
   return json({ ok: true }, 201, cors);
 }
 
+// Replaces the floating WhatsApp button's wa.me redirect - visitors weren't being taken
+// to WhatsApp at all wanted, they just wanted their message to reach YAN. No WhatsApp
+// Business API involved (that needs an account/verification only the org can set up) -
+// this just emails every admin with the message and the visitor's own number to call/
+// message back on, same delivery mechanism already used for join/contact submissions.
+async function submitQuickMessage(request, env, cors) {
+  const body = await request.json();
+  const phone = (body.phone || '').trim();
+  const message = (body.message || '').trim();
+  const name = (body.name || '').trim();
+  if (!phone || !message) return json({ error: 'Phone number and message are required' }, 400, cors);
+
+  const now = Date.now();
+  await env.DB.prepare(
+    'INSERT INTO contact_submissions (id,name,email,data_json,source,status,created_at) VALUES (?,?,?,?,?,?,?)'
+  ).bind(newId(), name || 'WhatsApp widget', '', JSON.stringify({ phone, message, name }), 'whatsapp-widget', 'unread', now).run();
+
+  const { results: admins } = await env.DB.prepare('SELECT email, name FROM users WHERE is_admin = 1').all();
+  await Promise.all(admins.map(a => sendEmail(env, {
+    to: a.email, name: a.name,
+    subject: 'New WhatsApp widget message' + (name ? ' from ' + name : ''),
+    message: `${name ? name + ' (' + phone + ')' : phone} sent a message via the site's WhatsApp button:\n\n"${message}"\n\nReply to them on WhatsApp: https://wa.me/${phone.replace(/[^0-9]/g, '')}`
+  })));
+
+  return json({ ok: true }, 201, cors);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -407,6 +434,7 @@ export default {
       if (path === '/api/stories' && request.method === 'GET') return await getStories(env, cors);
       if (path === '/api/join' && request.method === 'POST') return await submitJoin(request, env, cors);
       if (path === '/api/contact' && request.method === 'POST') return await submitContact(request, env, cors);
+      if (path === '/api/quick-message' && request.method === 'POST') return await submitQuickMessage(request, env, cors);
 
       if (path === '/api/notifications' && request.method === 'GET') return await getNotifications(request, env, cors, url);
       if (path === '/api/notifications' && request.method === 'POST') return await createNotification(request, env, cors);
