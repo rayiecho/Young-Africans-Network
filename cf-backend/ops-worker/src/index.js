@@ -327,10 +327,15 @@ async function requireSessionAccess(request, env, cors, sessionId) {
 }
 
 async function confirmSession(request, env, cors, id) {
-  const { error, session } = await requireSessionAccess(request, env, cors, id);
+  const { error, session, user } = await requireSessionAccess(request, env, cors, id);
   if (error) return error;
   const status = session.needs_assistance ? 'needs_help' : 'confirmed';
   await env.DB.prepare('UPDATE dept_sessions SET status = ?, updated_at = ? WHERE id = ?').bind(status, Date.now(), id).run();
+  await notifyAdmins(env, {
+    title: `${user.name} confirmed: ${session.topic}`,
+    message: `${user.name} has confirmed they're running "${session.topic}" (${session.department}) on ${session.session_date}.`,
+    emailSubject: 'YAN: session confirmed - ' + session.topic
+  });
   return json({ ok: true }, 200, cors);
 }
 
