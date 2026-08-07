@@ -175,7 +175,7 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
 
 <div class="toast" id="toast"></div>
 
-<script src="/assets/yan-api.js?v=1786054067"></script>
+<script src="/assets/yan-api.js?v=1786109596"></script>
 <script>
 let currentUser = null;
 let activeSessionForModal = null;
@@ -258,6 +258,7 @@ function renderSessionCard(s) {
       <span class="badge badge-${s.status}">${s.status.replace('_',' ')}</span>
     </div>
     ${s.meetLink ? `<a class="meet-link" href="${escapeHtml(s.meetLink)}" target="_blank">🔗 Join Google Meet</a>` : ''}
+    ${s.briefing ? `<div style="background:var(--light);border-radius:10px;padding:0.75rem;margin-top:0.75rem;font-size:0.82rem;color:var(--navy);"><strong>Briefing:</strong> ${escapeHtml(s.briefing)}</div>` : ''}
     ${s.needsAssistance ? `<div style="background:rgba(230,51,41,0.06);border-radius:10px;padding:0.75rem;margin-top:0.75rem;font-size:0.82rem;color:var(--red);"><strong>Needs help:</strong> ${escapeHtml(s.assistanceNote||'')}</div>` : ''}
 
     <div class="section-label">Guest Speakers</div>

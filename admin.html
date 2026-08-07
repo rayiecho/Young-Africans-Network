@@ -16,9 +16,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
-<script src="/assets/yan-api.js?v=1786108711"></script>
-<script src="/assets/yan-upload.js?v=1786108711"></script>
-<script src="/assets/yan-youtube.js?v=1786108711"></script>
+<script src="/assets/yan-api.js?v=1786109596"></script>
+<script src="/assets/yan-upload.js?v=1786109596"></script>
+<script src="/assets/yan-youtube.js?v=1786109596"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -4304,9 +4304,12 @@ window.loadSessionsAdmin = async function(c) {
       </div>
       <div style="margin-bottom:1rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Topic</label>
         <input type="text" id="sa-topic" placeholder="e.g. Intro to Public Speaking" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+      <div style="margin-bottom:1rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Briefing (optional - notes for the head running it)</label>
+        <textarea id="sa-briefing" rows="3" placeholder="What this session should cover, materials needed, anything the head should know..." style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;resize:vertical;"></textarea></div>
       <div style="margin-bottom:1.25rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Google Meet Link (optional)</label>
         <input type="text" id="sa-meet" placeholder="https://meet.google.com/..." style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
       <button onclick="submitSessionAdmin()" id="sa-submit" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Post Session</button>
+      <button onclick="cancelEditSession()" id="sa-cancel-edit" style="display:none;background:none;border:none;color:var(--gray);padding:0.75rem 1rem;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Cancel Edit</button>
     </div>
     <h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Department Heads</h3>
     <div style="background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-bottom:1.5rem;">
@@ -4479,6 +4482,7 @@ async function loadSessionsAdminList() {
   if (!list) return;
   try {
     const sessions = await YanAPI.getSessions();
+    window._saSessions = sessions;
     if (!sessions.length) { list.innerHTML = '<p style="color:var(--gray);font-size:0.85rem;">No sessions scheduled yet.</p>'; return; }
     const badgeColors = {awaiting_confirmation:'#6B7280',confirmed:'#27AE60',needs_help:'#E63329',completed:'#1B2A6B',cancelled:'#6B7280'};
     list.innerHTML = sessions.map(s => `
@@ -4487,32 +4491,67 @@ async function loadSessionsAdminList() {
           <div style="font-size:0.7rem;font-weight:700;color:var(--gold);text-transform:uppercase;">${s.sessionDate}</div>
           <div style="font-size:0.95rem;font-weight:800;color:var(--navy);">${sanitize(s.topic)}</div>
           <div style="font-size:0.78rem;color:var(--gray);">${SESSION_DEPT_NAMES[s.department]||s.department}${s.assignedHeadName?' · Led by '+sanitize(s.assignedHeadName):' · No head assigned yet'}</div>
+          ${s.briefing ? `<div style="font-size:0.78rem;color:var(--gray);margin-top:0.35rem;background:var(--light);border-radius:8px;padding:0.5rem 0.75rem;">${sanitize(s.briefing)}</div>` : ''}
           ${s.needsAssistance ? `<div style="font-size:0.78rem;color:#E63329;margin-top:0.35rem;"><strong>Needs help:</strong> ${sanitize(s.assistanceNote||'')}</div>` : ''}
         </div>
         <div style="display:flex;align-items:center;gap:0.6rem;">
           <span style="background:${badgeColors[s.status]}22;color:${badgeColors[s.status]};padding:0.25rem 0.75rem;border-radius:50px;font-size:0.68rem;font-weight:700;text-transform:uppercase;">${s.status.replace('_',' ')}</span>
+          <button onclick="editSessionAdmin('${s.id}')" style="background:none;border:none;color:var(--navy);cursor:pointer;font-size:0.78rem;font-weight:700;">Edit</button>
           <button onclick="deleteSessionAdmin('${s.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.78rem;font-weight:700;">Delete</button>
         </div>
       </div>`).join('');
   } catch(e) { list.innerHTML = '<p style="color:var(--red);font-size:0.85rem;">Error loading sessions: ' + e.message + '</p>'; }
 }
 
+window.editSessionAdmin = function(id) {
+  const s = (window._saSessions || []).find(x => x.id === id);
+  if (!s) return;
+  window._saEditingId = id;
+  document.getElementById('sa-date').value = s.sessionDate;
+  document.getElementById('sa-dept').value = s.department;
+  document.getElementById('sa-topic').value = s.topic;
+  document.getElementById('sa-briefing').value = s.briefing || '';
+  document.getElementById('sa-meet').value = s.meetLink || '';
+  document.getElementById('sa-submit').textContent = 'Save Changes';
+  document.getElementById('sa-cancel-edit').style.display = 'inline-block';
+  document.getElementById('sa-date').scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+
+window.cancelEditSession = function() {
+  window._saEditingId = null;
+  document.getElementById('sa-date').value = '';
+  document.getElementById('sa-topic').value = '';
+  document.getElementById('sa-briefing').value = '';
+  document.getElementById('sa-meet').value = '';
+  document.getElementById('sa-submit').textContent = 'Post Session';
+  document.getElementById('sa-cancel-edit').style.display = 'none';
+};
+
 window.submitSessionAdmin = async function() {
   const sessionDate = document.getElementById('sa-date').value;
   const department = document.getElementById('sa-dept').value;
   const topic = document.getElementById('sa-topic').value.trim();
+  const briefing = document.getElementById('sa-briefing').value.trim();
   const meetLink = document.getElementById('sa-meet').value.trim();
   if (!sessionDate || !topic) return showToast('Date and topic are required', 'error');
   const btn = document.getElementById('sa-submit');
-  btn.disabled = true; btn.textContent = 'Posting...';
+  const editingId = window._saEditingId;
+  btn.disabled = true; btn.textContent = editingId ? 'Saving...' : 'Posting...';
   try {
-    await YanAPI.createSession({ sessionDate, department, topic, meetLink });
-    document.getElementById('sa-topic').value = '';
-    document.getElementById('sa-meet').value = '';
-    showToast('Session posted! The department head has been notified.');
+    if (editingId) {
+      await YanAPI.updateSession(editingId, { sessionDate, department, topic, meetLink, briefing });
+      showToast('Session updated!');
+      window.cancelEditSession();
+    } else {
+      await YanAPI.createSession({ sessionDate, department, topic, meetLink, briefing });
+      document.getElementById('sa-topic').value = '';
+      document.getElementById('sa-briefing').value = '';
+      document.getElementById('sa-meet').value = '';
+      showToast('Session posted! The department head has been notified.');
+    }
     await loadSessionsAdminList();
   } catch(e) { showToast('Error: ' + e.message, 'error'); }
-  finally { btn.disabled = false; btn.textContent = 'Post Session'; }
+  finally { btn.disabled = false; btn.textContent = editingId ? 'Save Changes' : 'Post Session'; }
 };
 
 window.deleteSessionAdmin = async function(id) {

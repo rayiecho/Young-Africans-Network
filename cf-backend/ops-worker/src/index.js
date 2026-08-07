@@ -181,7 +181,7 @@ async function hydrateSession(env, row) {
   ]);
   return {
     id: row.id, sessionDate: row.session_date, department: row.department, topic: row.topic,
-    meetLink: row.meet_link, assignedHeadId: row.assigned_head_id, assignedHeadName: row.head_name,
+    meetLink: row.meet_link, briefing: row.briefing, assignedHeadId: row.assigned_head_id, assignedHeadName: row.head_name,
     status: row.status, prepComplete: !!row.prep_complete, needsAssistance: !!row.needs_assistance,
     assistanceNote: row.assistance_note, createdAt: row.created_at,
     guests: guests.results.map(g => ({ id: g.id, name: g.name, contact: g.contact, confirmed: !!g.confirmed })),
@@ -194,7 +194,7 @@ async function createSessionHandler(request, env, cors) {
   const { error, user } = await requireAdmin(request, env, cors);
   if (error) return error;
   const body = await request.json();
-  const { sessionDate, department, topic, meetLink } = body;
+  const { sessionDate, department, topic, meetLink, briefing } = body;
   if (!sessionDate || !department || !topic) return json({ error: 'Date, department and topic are required' }, 400, cors);
 
   let assignedHeadId = body.assignedHeadId || null;
@@ -206,9 +206,9 @@ async function createSessionHandler(request, env, cors) {
   const id = newId();
   const now = Date.now();
   await env.DB.prepare(
-    `INSERT INTO dept_sessions (id,session_date,department,topic,meet_link,assigned_head_id,status,created_by,created_at,updated_at)
-     VALUES (?,?,?,?,?,?, 'awaiting_confirmation', ?,?,?)`
-  ).bind(id, sessionDate, department, topic, meetLink || null, assignedHeadId, user.id, now, now).run();
+    `INSERT INTO dept_sessions (id,session_date,department,topic,meet_link,briefing,assigned_head_id,status,created_by,created_at,updated_at)
+     VALUES (?,?,?,?,?,?,?, 'awaiting_confirmation', ?,?,?)`
+  ).bind(id, sessionDate, department, topic, meetLink || null, briefing || null, assignedHeadId, user.id, now, now).run();
 
   if (assignedHeadId) {
     await notifyUser(env, assignedHeadId, {
@@ -219,6 +219,24 @@ async function createSessionHandler(request, env, cors) {
   }
 
   return json({ id }, 201, cors);
+}
+
+// Lets admin keep a session's date/topic/briefing/meet link up to date as a plan
+// evolves, rather than only ever creating it once - session-rsvp.html and sessions.html
+// both look this up live by id, so an edit here is immediately reflected everywhere,
+// including links already sent out.
+async function updateSessionHandler(request, env, cors, id) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  const existing = await env.DB.prepare('SELECT id FROM dept_sessions WHERE id = ?').bind(id).first();
+  if (!existing) return json({ error: 'Not found' }, 404, cors);
+  const body = await request.json();
+  const { sessionDate, department, topic, meetLink, briefing } = body;
+  if (!sessionDate || !department || !topic) return json({ error: 'Date, department and topic are required' }, 400, cors);
+  await env.DB.prepare(
+    `UPDATE dept_sessions SET session_date = ?, department = ?, topic = ?, meet_link = ?, briefing = ?, updated_at = ? WHERE id = ?`
+  ).bind(sessionDate, department, topic, meetLink || null, briefing || null, Date.now(), id).run();
+  return json({ ok: true }, 200, cors);
 }
 
 async function listSessions(request, env, cors, url) {
@@ -1059,6 +1077,7 @@ export default {
         const [, id, , sub] = sessionMatch;
         if (!sub && request.method === 'GET') return await getSessionDetail(env, cors, id);
         if (!sub && request.method === 'DELETE') return await deleteSession(request, env, cors, id);
+        if (!sub && request.method === 'PUT') return await updateSessionHandler(request, env, cors, id);
         if (sub === 'confirm' && request.method === 'POST') return await confirmSession(request, env, cors, id);
         if (sub === 'prep-complete' && request.method === 'POST') return await markPrepComplete(request, env, cors, id);
         if (sub === 'needs-help' && request.method === 'POST') return await flagNeedsHelp(request, env, cors, id);

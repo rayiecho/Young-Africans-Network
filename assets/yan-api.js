@@ -165,8 +165,11 @@
     async deleteNotification(id) { return contentRequest('/api/notifications/' + id, { method: 'DELETE' }); },
 
     // ---- session coordination ----
-    async createSession({ sessionDate, department, topic, meetLink, assignedHeadId }) {
-      return opsRequest('/api/sessions', { method: 'POST', body: { sessionDate, department, topic, meetLink, assignedHeadId } });
+    async createSession({ sessionDate, department, topic, meetLink, briefing, assignedHeadId }) {
+      return opsRequest('/api/sessions', { method: 'POST', body: { sessionDate, department, topic, meetLink, briefing, assignedHeadId } });
+    },
+    async updateSession(id, { sessionDate, department, topic, meetLink, briefing }) {
+      return opsRequest('/api/sessions/' + id, { method: 'PUT', body: { sessionDate, department, topic, meetLink, briefing } });
     },
     async getSessions({ department, headId } = {}) {
       const params = new URLSearchParams();
