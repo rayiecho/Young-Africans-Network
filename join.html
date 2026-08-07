@@ -559,6 +559,8 @@ form.addEventListener('submit', async function(e) {
   try {
     const formObj = {};
     data.forEach((v,k) => formObj[k] = v);
+    const ref = new URLSearchParams(window.location.search).get('ref');
+    if (ref) formObj.referredBy = ref;
     const res = await fetch('https://yan-content-worker.youngafricansn.workers.dev/api/join', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
