@@ -133,6 +133,7 @@ body{font-family:Poppins,sans-serif;background:var(--light);min-height:100vh;ove
   <p>Young Africans Network · youngafricansnetwork.org · info@youngafricansnetwork.org</p>
 </div>
 
+<script src="/assets/yan-api.js?v=1786089720"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -163,6 +164,11 @@ const state = {
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const STAR_LABELS = ['','Poor','Fair','Good','Very Good','Excellent!'];
 const DEPARTMENTS = ['Programs','Scholarships','Career','Community','Mental Health','Communications','Partnerships','Finance'];
+const FEEDBACK_DEPT_MAP = {
+  'Programs': 'programs', 'Scholarships': 'scholarships', 'Career': 'career',
+  'Community': 'community', 'Mental Health': 'mental', 'Communications': 'communications',
+  'Partnerships': 'partnerships', 'Finance': 'finance'
+};
 
 const steps = [
   {
@@ -204,7 +210,7 @@ const steps = [
           ${DEPARTMENTS.map(r=>`<div class="pill-opt ${state.sessionDepartment===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
         </div></div>
         <div class="form-group"><label>Session Date</label>
-        <input type="date" id="f-date" value="${state.sessionDate}"></div>
+        <div id="f-date-wrap"><input type="date" id="f-date" value="${state.sessionDate}"></div></div>
         <div class="form-group"><label>Session Format</label>
         <div class="pill-options" id="format-options">
           ${['Online (Zoom/Meet)','In-Person','Hybrid'].map(r=>`<div class="pill-opt ${state.format===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
@@ -222,6 +228,10 @@ const steps = [
       document.getElementById('f-session').oninput = e => { state.session = e.target.value; updateNavState(); };
       document.getElementById('f-date').onchange = e => state.sessionDate = e.target.value;
       bindPills('sessionDept-options','sessionDepartment');
+      document.querySelectorAll('#sessionDept-options .pill-opt').forEach(el => {
+        el.addEventListener('click', () => loadRealSessionDates(el.dataset.val));
+      });
+      if (state.sessionDepartment) loadRealSessionDates(state.sessionDepartment);
       bindPills('format-options','format');
       bindPills('attendance-options','attendance');
       bindPills('heardFrom-options','heardFrom');
@@ -384,6 +394,32 @@ const steps = [
 ];
 
 let current = 0;
+
+// Real dates instead of a free date-picker - members were mistyping/misremembering
+// which Wednesday or Saturday they actually attended, which broke the attendance
+// bridge to session_attendance (it matches on exact date + department).
+async function loadRealSessionDates(deptLabel) {
+  const wrap = document.getElementById('f-date-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '<p style="font-size:0.8rem;color:var(--gray);">Loading sessions...</p>';
+  const deptCode = FEEDBACK_DEPT_MAP[deptLabel];
+  try {
+    const sessions = deptCode && window.YanAPI ? await YanAPI.getSessions({ department: deptCode }) : [];
+    if (sessions.length) {
+      wrap.innerHTML = `<select id="f-date">
+        <option value="">Select the session date...</option>
+        ${sessions.map(s => `<option value="${s.sessionDate}" ${state.sessionDate===s.sessionDate?'selected':''}>${s.sessionDate} — ${s.topic}</option>`).join('')}
+      </select>`;
+      document.getElementById('f-date').onchange = e => { state.sessionDate = e.target.value; updateNavState(); };
+    } else {
+      wrap.innerHTML = `<input type="date" id="f-date" value="${state.sessionDate}">`;
+      document.getElementById('f-date').onchange = e => state.sessionDate = e.target.value;
+    }
+  } catch(e) {
+    wrap.innerHTML = `<input type="date" id="f-date" value="${state.sessionDate}">`;
+    document.getElementById('f-date').onchange = e => state.sessionDate = e.target.value;
+  }
+}
 
 function bindPills(containerId, stateKey) {
   document.querySelectorAll(`#${containerId} .pill-opt`).forEach(el => {

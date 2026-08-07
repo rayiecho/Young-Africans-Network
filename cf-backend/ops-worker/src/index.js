@@ -244,6 +244,60 @@ async function getSessionDetail(env, cors, id) {
   return json({ session: await hydrateSession(env, row) }, 200, cors);
 }
 
+// Public (no login) - the RSVP link is personal to whoever it was emailed to (?u=userId
+// in the URL), not something the recipient has to identify themselves for by typing
+// anything. The link itself is the identity; the page just needs to greet them by name
+// and show the session's *current* date/topic (live lookup, so an admin editing the
+// date after the invite was already sent is reflected here, not baked into the email).
+async function getRsvpInfo(env, cors, sessionId, userId) {
+  const [session, user] = await Promise.all([
+    env.DB.prepare('SELECT * FROM dept_sessions WHERE id = ?').bind(sessionId).first(),
+    env.DB.prepare('SELECT id, name FROM users WHERE id = ?').bind(userId).first()
+  ]);
+  if (!session || !user) return json({ error: 'Invalid link' }, 404, cors);
+  const existing = await env.DB.prepare('SELECT attending FROM session_rsvps WHERE session_id = ? AND user_id = ?').bind(sessionId, userId).first();
+  return json({
+    topic: session.topic, sessionDate: session.session_date, department: session.department,
+    memberName: user.name, alreadyResponded: existing ? !!existing.attending : null
+  }, 200, cors);
+}
+
+async function submitRsvp(request, env, cors, sessionId) {
+  const { userId, attending } = await request.json();
+  if (!userId || typeof attending !== 'boolean') return json({ error: 'userId and attending are required' }, 400, cors);
+  const [session, user] = await Promise.all([
+    env.DB.prepare('SELECT id FROM dept_sessions WHERE id = ?').bind(sessionId).first(),
+    env.DB.prepare('SELECT id FROM users WHERE id = ?').bind(userId).first()
+  ]);
+  if (!session || !user) return json({ error: 'Invalid link' }, 404, cors);
+  await env.DB.prepare(
+    `INSERT INTO session_rsvps (id,session_id,user_id,attending,responded_at) VALUES (?,?,?,?,?)
+     ON CONFLICT(session_id,user_id) DO UPDATE SET attending = excluded.attending, responded_at = excluded.responded_at`
+  ).bind(newId(), sessionId, userId, attending ? 1 : 0, Date.now()).run();
+  return json({ ok: true }, 200, cors);
+}
+
+// Admin roster view: every member, cross-referenced with whether/how they responded to
+// this specific session's RSVP - "rows and columns", not just a list of who said yes.
+async function getRsvpRoster(request, env, cors, sessionId) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  const session = await env.DB.prepare('SELECT * FROM dept_sessions WHERE id = ?').bind(sessionId).first();
+  if (!session) return json({ error: 'Not found' }, 404, cors);
+  const { results } = await env.DB.prepare(
+    `SELECT u.id as user_id, u.name, u.email, u.department, r.attending, r.responded_at
+     FROM users u LEFT JOIN session_rsvps r ON r.user_id = u.id AND r.session_id = ?
+     ORDER BY u.name ASC`
+  ).bind(sessionId).all();
+  return json({
+    session: { id: session.id, topic: session.topic, sessionDate: session.session_date, department: session.department },
+    roster: results.map(r => ({
+      userId: r.user_id, name: r.name, email: r.email, department: r.department,
+      attending: r.attending === null ? null : !!r.attending, respondedAt: r.responded_at
+    }))
+  }, 200, cors);
+}
+
 async function requireSessionAccess(request, env, cors, sessionId) {
   const { error, user } = await requireUser(request, env, cors);
   if (error) return { error };
@@ -766,6 +820,39 @@ async function searchUsers(request, env, cors, url) {
 // which don't automatically become D1 accounts) against who's actually registered, so
 // "hasn't joined yet" can be computed live instead of tracked as separate state -
 // someone registering just makes them stop showing up here on the next check.
+function toFirestoreFields(obj) {
+  const fields = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (v === null || v === undefined) continue;
+    if (v instanceof Date) fields[k] = { timestampValue: v.toISOString() };
+    else if (typeof v === 'number') fields[k] = { doubleValue: v };
+    else fields[k] = { stringValue: String(v) };
+  }
+  return fields;
+}
+
+// content-worker writes join-request submissions to D1 (join_requests) as the system
+// of record, but admin.html's existing approval queue reads Firestore's joinRequests
+// collection directly and wasn't rebuilt for D1 - mirroring here (best-effort, called
+// via service binding right after the D1 insert) keeps new submissions visible in the
+// admin UI that already exists, instead of requiring that UI to be rebuilt right now.
+async function mirrorJoinRequestToFirestore(request, env, cors) {
+  const body = await request.json();
+  try {
+    const accessToken = await getFirestoreAccessToken(env);
+    const res = await fetch(
+      `https://firestore.googleapis.com/v1/projects/young-africans-network/databases/(default)/documents/joinRequests`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + accessToken },
+        body: JSON.stringify({ fields: toFirestoreFields({ ...body, status: 'pending', submittedAt: new Date() }) })
+      }
+    );
+    if (!res.ok) console.error('Firestore mirror failed:', await res.text());
+  } catch (e) { console.error('Firestore mirror failed:', e.message); }
+  return json({ ok: true }, 200, cors);
+}
+
 async function checkRegisteredEmails(request, env, cors) {
   const { error } = await requireAdmin(request, env, cors);
   if (error) return error;
@@ -980,6 +1067,9 @@ export default {
         if (sub === 'attendance' && request.method === 'GET') return await getAttendance(request, env, cors, id);
         if (sub === 'attendance/mark' && request.method === 'POST') return await markAttendance(request, env, cors, id);
         if (sub === 'roles' && request.method === 'POST') return await addRole(request, env, cors, id);
+        if (sub === 'rsvp' && request.method === 'GET') return await getRsvpInfo(env, cors, id, url.searchParams.get('u'));
+        if (sub === 'rsvp' && request.method === 'POST') return await submitRsvp(request, env, cors, id);
+        if (sub === 'rsvp-roster' && request.method === 'GET') return await getRsvpRoster(request, env, cors, id);
 
         const guestConfirmMatch = sub && sub.match(/^guests\/([^/]+)\/confirm$/);
         if (guestConfirmMatch && request.method === 'POST') return await confirmGuest(request, env, cors, id, guestConfirmMatch[1]);
@@ -1026,6 +1116,7 @@ export default {
       if (headRemoveMatch && request.method === 'DELETE') return await removeHead(request, env, cors, headRemoveMatch[1]);
       if (path === '/api/users/search' && request.method === 'GET') return await searchUsers(request, env, cors, url);
       if (path === '/api/users/check-emails' && request.method === 'POST') return await checkRegisteredEmails(request, env, cors);
+      if (path === '/api/internal/mirror-join-request' && request.method === 'POST') return await mirrorJoinRequestToFirestore(request, env, cors);
 
       return json({ error: 'Not found' }, 404, cors);
     } catch (e) {
@@ -1037,6 +1128,26 @@ export default {
   // Daily cron: reminds an assigned head at 5/3/1 days before their session if they
   // still haven't confirmed, without spamming - each tier only fires once.
   async scheduled(event, env, ctx) {
+    // 6-hours-before-7pm-CAT head alert: sessions always run 7pm CAT (UTC+2) = 17:00 UTC,
+    // so this fires at 11:00 UTC same day - a separate cron tier from the 5/3/1-day
+    // confirmation reminders below, checked first so it doesn't fall through to those.
+    if (event.cron === '0 11 * * *') {
+      const today = new Date().toISOString().slice(0, 10);
+      const { results } = await env.DB.prepare(
+        `SELECT * FROM dept_sessions WHERE session_date = ? AND assigned_head_id IS NOT NULL AND attendance_alert_sent = 0 AND status != 'cancelled'`
+      ).bind(today).all();
+      for (const s of results) {
+        const count = await env.DB.prepare('SELECT COUNT(*) as c FROM session_rsvps WHERE session_id = ? AND attending = 1').bind(s.id).first();
+        await notifyUser(env, s.assigned_head_id, {
+          title: `${count.c} member${count.c === 1 ? '' : 's'} attending tonight's session`,
+          message: `${count.c} member${count.c === 1 ? '' : 's'} are attending the session you are hosting: "${s.topic}" at 7pm CAT tonight. Young Africans Network wishes you the very best.`,
+          emailSubject: `YAN: ${count.c} member${count.c === 1 ? '' : 's'} attending your session tonight`
+        });
+        await env.DB.prepare('UPDATE dept_sessions SET attendance_alert_sent = 1 WHERE id = ?').bind(s.id).run();
+      }
+      return;
+    }
+
     const now = Date.now();
     const { results } = await env.DB.prepare(
       `SELECT * FROM dept_sessions WHERE status = 'awaiting_confirmation' AND assigned_head_id IS NOT NULL`

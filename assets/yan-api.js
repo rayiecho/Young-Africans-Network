@@ -217,6 +217,17 @@
       const qs = params.toString();
       return opsRequest('/api/attendance-register' + (qs ? '?' + qs : ''));
     },
+    // No login - the link itself (session id + userId) is the identity, so these are
+    // unauthenticated on purpose (session-rsvp.html has no sign-in flow).
+    async getRsvpInfo(sessionId, userId) {
+      return opsRequest('/api/sessions/' + sessionId + '/rsvp?u=' + encodeURIComponent(userId), { auth: false });
+    },
+    async submitRsvp(sessionId, userId, attending) {
+      return opsRequest('/api/sessions/' + sessionId + '/rsvp', { method: 'POST', auth: false, body: { userId, attending } });
+    },
+    async getRsvpRoster(sessionId) {
+      return opsRequest('/api/sessions/' + sessionId + '/rsvp-roster');
+    },
     async getHeads() {
       const data = await opsRequest('/api/heads');
       return data.heads;

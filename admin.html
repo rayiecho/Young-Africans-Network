@@ -16,9 +16,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
-<script src="/assets/yan-api.js?v=1786054067"></script>
-<script src="/assets/yan-upload.js?v=1786054067"></script>
-<script src="/assets/yan-youtube.js?v=1786054067"></script>
+<script src="/assets/yan-api.js?v=1786108711"></script>
+<script src="/assets/yan-upload.js?v=1786108711"></script>
+<script src="/assets/yan-youtube.js?v=1786108711"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -824,14 +824,16 @@ async function loadPartnershipsAdmin(c) {
 
 async function loadNewslettersAdmin(c) {
   try {
-    const [snap, usersSnap] = await Promise.all([
+    const [snap, usersSnap, rsvpSessions] = await Promise.all([
       getDocs(collection(db, 'newsletters')).catch(() => ({docs:[], empty:true, size:0})),
-      getDocs(collection(db, 'users'))
+      getDocs(collection(db, 'users')),
+      (window.YanAPI ? YanAPI.getSessions().catch(() => []) : Promise.resolve([]))
     ]);
     const allUsers = usersSnap.docs.map(d => Object.assign({id: d.id}, d.data()));
     window._nlAllUsers = allUsers;
     window._nlTarget = 'all';
     window._nlSelectedUIDs = [];
+    window._nlRsvpSessions = rsvpSessions;
 
     const depts = ['programs','scholarships','career','community','mental','communications','partnerships','finance'];
     const deptNames = {programs:'Programs',scholarships:'Scholarships',career:'Career',community:'Community',mental:'Mental Health',communications:'Communications',partnerships:'Partnerships',finance:'Finance'};
@@ -882,6 +884,17 @@ async function loadNewslettersAdmin(c) {
       + '<input id="nl-subject" type="text" placeholder="Newsletter subject..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>'
       + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Message *</label>'
       + '<textarea id="nl-message" rows="8" placeholder="Write your newsletter content here..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;box-sizing:border-box;"></textarea></div>'
+      + '<div style="margin-bottom:1rem;background:var(--light);border-radius:10px;padding:0.85rem 1rem;">'
+      + '<label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Attach a session attendance-confirmation link (optional)</label>'
+      + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">'
+      + '<select id="nl-rsvp-session" style="flex:1;min-width:200px;padding:0.5rem 0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.8rem;">'
+      + '<option value="">Select a session...</option>'
+      + rsvpSessions.map(s => '<option value="' + s.id + '">' + s.sessionDate + ' — ' + sanitize(s.topic) + '</option>').join('')
+      + '</select>'
+      + '<button type="button" onclick="insertRsvpLinkTag()" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1rem;border-radius:8px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;white-space:nowrap;">Insert Link</button>'
+      + '</div>'
+      + '<p style="font-size:0.7rem;color:var(--gray);margin-top:0.4rem;">Each recipient gets their own personal confirmation link automatically - they just tap Attending / Not Attending, no login needed.</p>'
+      + '</div>'
       + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Send To</label>'
       + '<div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.75rem;">'
       + '<button id="nl-btn-all" class="nl-target-btn" onclick="setNewsletterTarget(\'all\')" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;cursor:pointer;margin:0.2rem;">All Members (' + allUsers.length + ')</button>'
@@ -5052,6 +5065,7 @@ function renderFeedbackShell(c) {
   html += '<button class="fb-tab" data-tab="bysession" onclick="switchFeedbackTab(\'bysession\')" style="background:none;border:none;padding:0.75rem 1.25rem;font-family:Poppins,sans-serif;font-size:0.85rem;font-weight:700;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;">By Session</button>';
   html += '<button class="fb-tab" data-tab="volunteers" onclick="switchFeedbackTab(\'volunteers\')" style="background:none;border:none;padding:0.75rem 1.25rem;font-family:Poppins,sans-serif;font-size:0.85rem;font-weight:700;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;">Volunteer Finder</button>';
   html += '<button class="fb-tab" data-tab="responses" onclick="switchFeedbackTab(\'responses\')" style="background:none;border:none;padding:0.75rem 1.25rem;font-family:Poppins,sans-serif;font-size:0.85rem;font-weight:700;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;">All Responses</button>';
+  html += '<button class="fb-tab" data-tab="rsvp" onclick="switchFeedbackTab(\'rsvp\')" style="background:none;border:none;padding:0.75rem 1.25rem;font-family:Poppins,sans-serif;font-size:0.85rem;font-weight:700;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;">Attendance RSVP</button>';
   html += '</div>';
 
   html += '<div id="fb-tab-content"></div>';
@@ -5069,6 +5083,58 @@ window.switchFeedbackTab = function(tab) {
   if (tab === 'bysession') renderFeedbackBySession();
   if (tab === 'volunteers') renderVolunteerFinder();
   if (tab === 'responses') renderFeedbackResponses();
+  if (tab === 'rsvp') renderAttendanceRsvp();
+};
+
+async function renderAttendanceRsvp() {
+  const target = document.getElementById('fb-tab-content');
+  target.innerHTML = '<div class="loading">Loading sessions...</div>';
+  try {
+    const sessions = await YanAPI.getSessions();
+    if (!sessions.length) { target.innerHTML = '<p style="color:var(--gray);font-size:0.85rem;padding:1rem;">No sessions scheduled yet.</p>'; return; }
+    target.innerHTML = `
+      <div style="margin-bottom:1rem;">
+        <select id="rsvp-session-select" onchange="loadRsvpRosterAdmin(this.value)" style="width:100%;max-width:420px;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;">
+          <option value="">Select a session...</option>
+          ${sessions.map(s => `<option value="${s.id}">${s.sessionDate} — ${sanitize(s.topic)}</option>`).join('')}
+        </select>
+      </div>
+      <div id="rsvp-roster-view"></div>
+    `;
+  } catch(e) { target.innerHTML = '<p style="color:var(--red);font-size:0.85rem;">Error: ' + e.message + '</p>'; }
+}
+
+window.loadRsvpRosterAdmin = async function(sessionId) {
+  const view = document.getElementById('rsvp-roster-view');
+  if (!sessionId) { view.innerHTML = ''; return; }
+  view.innerHTML = '<div class="loading">Loading roster...</div>';
+  try {
+    const data = await YanAPI.getRsvpRoster(sessionId);
+    const attending = data.roster.filter(r => r.attending === true).length;
+    const notAttending = data.roster.filter(r => r.attending === false).length;
+    const noResponse = data.roster.filter(r => r.attending === null).length;
+    view.innerHTML = `
+      <div style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <div style="background:rgba(39,174,96,0.08);color:#27AE60;padding:0.5rem 1rem;border-radius:10px;font-size:0.82rem;font-weight:700;">✓ Attending: ${attending}</div>
+        <div style="background:rgba(230,51,41,0.08);color:var(--red);padding:0.5rem 1rem;border-radius:10px;font-size:0.82rem;font-weight:700;">✗ Not attending: ${notAttending}</div>
+        <div style="background:rgba(107,114,128,0.08);color:var(--gray);padding:0.5rem 1rem;border-radius:10px;font-size:0.82rem;font-weight:700;">No response: ${noResponse}</div>
+      </div>
+      <div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.05);overflow:hidden;">
+        <div style="display:grid;grid-template-columns:2fr 2fr 1.2fr;padding:0.75rem 1.1rem;background:var(--light);font-size:0.72rem;font-weight:800;color:var(--navy);text-transform:uppercase;">
+          <div>Name</div><div>Email</div><div>Status</div>
+        </div>
+        ${data.roster.map((r,i) => {
+          const statusLabel = r.attending === true ? '✓ Attending' : r.attending === false ? '✗ Not attending' : '— No response';
+          const statusColor = r.attending === true ? '#27AE60' : r.attending === false ? 'var(--red)' : 'var(--gray)';
+          return `<div style="display:grid;grid-template-columns:2fr 2fr 1.2fr;padding:0.65rem 1.1rem;${i < data.roster.length-1 ? 'border-bottom:1px solid rgba(27,42,107,0.06);' : ''}font-size:0.82rem;">
+            <div style="color:var(--navy);font-weight:600;">${sanitize(r.name)}</div>
+            <div style="color:var(--gray);">${sanitize(r.email)}</div>
+            <div style="color:${statusColor};font-weight:700;">${statusLabel}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+  } catch(e) { view.innerHTML = '<p style="color:var(--red);font-size:0.85rem;">Error: ' + e.message + '</p>'; }
 };
 
 function fbStats(docs) {
@@ -5688,10 +5754,26 @@ window.addNewsletterMember = function(uid, nameEnc, emailEnc) {
   if (res) res.innerHTML = '';
   window.updateRecipientCount();
 };
+window.insertRsvpLinkTag = function() {
+  const sel = document.getElementById('nl-rsvp-session');
+  if (!sel.value) return showToast('Select a session first', 'error');
+  const ta = document.getElementById('nl-message');
+  const insert = ' {{RSVP_LINK}} ';
+  const pos = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
+  ta.value = ta.value.slice(0, pos) + insert + ta.value.slice(pos);
+  ta.focus();
+  showToast('Link tag inserted - each recipient will get their own personal link');
+};
+
 window.sendNewsletter = async function() {
   const subject = document.getElementById('nl-subject').value.trim();
   const message = document.getElementById('nl-message').value.trim();
   if (!subject || !message) return showToast('Please enter both subject and message', 'error');
+
+  const rsvpSessionId = (document.getElementById('nl-rsvp-session') || {}).value || '';
+  if (message.includes('{{RSVP_LINK}}') && !rsvpSessionId) {
+    return showToast('Select which session the confirmation link is for', 'error');
+  }
 
   const allUsers = window._nlAllUsers || [];
   let recipients = [];
@@ -5705,6 +5787,9 @@ window.sendNewsletter = async function() {
 
   for (const user of recipients) {
     if (!user.email) continue;
+    const personalMessage = rsvpSessionId
+      ? message.replace(/\{\{RSVP_LINK\}\}/g, 'https://youngafricansnetwork.org/session-rsvp.html?session=' + encodeURIComponent(rsvpSessionId) + '&u=' + encodeURIComponent(user.id))
+      : message;
     try {
       let response = await fetch('https://yan-email-worker.youngafricansn.workers.dev', {
         method: 'POST',
@@ -5713,7 +5798,7 @@ window.sendNewsletter = async function() {
           to_email: user.email,
           name: user.name || 'Member',
           subject: subject,
-          message: message,
+          message: personalMessage,
           type: 'general'
         })
       });
@@ -9264,6 +9349,7 @@ function renderFeedbackShell(c) {
   html += '<button class="fb-tab" data-tab="bysession" onclick="switchFeedbackTab(\'bysession\')" style="background:none;border:none;padding:0.75rem 1.25rem;font-family:Poppins,sans-serif;font-size:0.85rem;font-weight:700;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;">By Session</button>';
   html += '<button class="fb-tab" data-tab="volunteers" onclick="switchFeedbackTab(\'volunteers\')" style="background:none;border:none;padding:0.75rem 1.25rem;font-family:Poppins,sans-serif;font-size:0.85rem;font-weight:700;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;">Volunteer Finder</button>';
   html += '<button class="fb-tab" data-tab="responses" onclick="switchFeedbackTab(\'responses\')" style="background:none;border:none;padding:0.75rem 1.25rem;font-family:Poppins,sans-serif;font-size:0.85rem;font-weight:700;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;">All Responses</button>';
+  html += '<button class="fb-tab" data-tab="rsvp" onclick="switchFeedbackTab(\'rsvp\')" style="background:none;border:none;padding:0.75rem 1.25rem;font-family:Poppins,sans-serif;font-size:0.85rem;font-weight:700;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;">Attendance RSVP</button>';
   html += '</div>';
 
   html += '<div id="fb-tab-content"></div>';
@@ -9281,6 +9367,58 @@ window.switchFeedbackTab = function(tab) {
   if (tab === 'bysession') renderFeedbackBySession();
   if (tab === 'volunteers') renderVolunteerFinder();
   if (tab === 'responses') renderFeedbackResponses();
+  if (tab === 'rsvp') renderAttendanceRsvp();
+};
+
+async function renderAttendanceRsvp() {
+  const target = document.getElementById('fb-tab-content');
+  target.innerHTML = '<div class="loading">Loading sessions...</div>';
+  try {
+    const sessions = await YanAPI.getSessions();
+    if (!sessions.length) { target.innerHTML = '<p style="color:var(--gray);font-size:0.85rem;padding:1rem;">No sessions scheduled yet.</p>'; return; }
+    target.innerHTML = `
+      <div style="margin-bottom:1rem;">
+        <select id="rsvp-session-select" onchange="loadRsvpRosterAdmin(this.value)" style="width:100%;max-width:420px;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;">
+          <option value="">Select a session...</option>
+          ${sessions.map(s => `<option value="${s.id}">${s.sessionDate} — ${sanitize(s.topic)}</option>`).join('')}
+        </select>
+      </div>
+      <div id="rsvp-roster-view"></div>
+    `;
+  } catch(e) { target.innerHTML = '<p style="color:var(--red);font-size:0.85rem;">Error: ' + e.message + '</p>'; }
+}
+
+window.loadRsvpRosterAdmin = async function(sessionId) {
+  const view = document.getElementById('rsvp-roster-view');
+  if (!sessionId) { view.innerHTML = ''; return; }
+  view.innerHTML = '<div class="loading">Loading roster...</div>';
+  try {
+    const data = await YanAPI.getRsvpRoster(sessionId);
+    const attending = data.roster.filter(r => r.attending === true).length;
+    const notAttending = data.roster.filter(r => r.attending === false).length;
+    const noResponse = data.roster.filter(r => r.attending === null).length;
+    view.innerHTML = `
+      <div style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <div style="background:rgba(39,174,96,0.08);color:#27AE60;padding:0.5rem 1rem;border-radius:10px;font-size:0.82rem;font-weight:700;">✓ Attending: ${attending}</div>
+        <div style="background:rgba(230,51,41,0.08);color:var(--red);padding:0.5rem 1rem;border-radius:10px;font-size:0.82rem;font-weight:700;">✗ Not attending: ${notAttending}</div>
+        <div style="background:rgba(107,114,128,0.08);color:var(--gray);padding:0.5rem 1rem;border-radius:10px;font-size:0.82rem;font-weight:700;">No response: ${noResponse}</div>
+      </div>
+      <div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.05);overflow:hidden;">
+        <div style="display:grid;grid-template-columns:2fr 2fr 1.2fr;padding:0.75rem 1.1rem;background:var(--light);font-size:0.72rem;font-weight:800;color:var(--navy);text-transform:uppercase;">
+          <div>Name</div><div>Email</div><div>Status</div>
+        </div>
+        ${data.roster.map((r,i) => {
+          const statusLabel = r.attending === true ? '✓ Attending' : r.attending === false ? '✗ Not attending' : '— No response';
+          const statusColor = r.attending === true ? '#27AE60' : r.attending === false ? 'var(--red)' : 'var(--gray)';
+          return `<div style="display:grid;grid-template-columns:2fr 2fr 1.2fr;padding:0.65rem 1.1rem;${i < data.roster.length-1 ? 'border-bottom:1px solid rgba(27,42,107,0.06);' : ''}font-size:0.82rem;">
+            <div style="color:var(--navy);font-weight:600;">${sanitize(r.name)}</div>
+            <div style="color:var(--gray);">${sanitize(r.email)}</div>
+            <div style="color:${statusColor};font-weight:700;">${statusLabel}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+  } catch(e) { view.innerHTML = '<p style="color:var(--red);font-size:0.85rem;">Error: ' + e.message + '</p>'; }
 };
 
 function fbStats(docs) {

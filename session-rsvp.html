@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Confirm Attendance | Young Africans Network</title>
+<link rel="icon" href="/images/logo.jpeg" type="image/jpeg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--green:#27AE60;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,var(--navy) 0%,#2D3F9B 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.25rem;}
+h1,h2{font-family:'Playfair Display',serif;font-weight:900;}
+.card{background:#fff;border-radius:22px;padding:2.25rem 1.75rem;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.25);text-align:center;}
+.logo{width:56px;height:56px;border-radius:50%;margin:0 auto 1rem;}
+.loading{color:var(--gray);font-size:0.9rem;padding:2rem 0;}
+.greeting{color:var(--navy);font-size:1.3rem;margin-bottom:0.5rem;}
+.dept{color:var(--gold);font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;}
+.topic{color:var(--navy);font-size:1.15rem;font-weight:800;margin-bottom:0.3rem;}
+.date{color:var(--gray);font-size:0.88rem;margin-bottom:1.75rem;}
+.btn{display:block;width:100%;border:none;border-radius:50px;font-family:'Poppins',sans-serif;font-weight:700;cursor:pointer;font-size:0.92rem;padding:0.9rem 1.3rem;margin-bottom:0.75rem;transition:all 0.15s;}
+.btn:hover{opacity:0.88;transform:translateY(-1px);}
+.btn-yes{background:var(--green);color:#fff;}
+.btn-no{background:var(--light);color:var(--navy);border:1.5px solid rgba(27,42,107,0.15);}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.result{padding:1.5rem 0;}
+.result-icon{font-size:2.5rem;margin-bottom:0.75rem;}
+.result-text{color:var(--navy);font-size:1.05rem;font-weight:700;margin-bottom:0.4rem;}
+.result-sub{color:var(--gray);font-size:0.85rem;}
+.error{color:var(--red);font-size:0.9rem;padding:2rem 0;}
+.already{background:var(--light);border-radius:12px;padding:0.75rem 1rem;font-size:0.8rem;color:var(--gray);margin-bottom:1.25rem;}
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <img src="images/logo.jpeg" alt="YAN" class="logo">
+  <div class="loading" id="loading">Loading...</div>
+</div>
+
+<script src="/assets/yan-api.js?v=1786089720"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const sessionId = params.get('session');
+const userId = params.get('u');
+const card = document.getElementById('card');
+
+function render(html) {
+  card.innerHTML = '<img src="images/logo.jpeg" alt="YAN" class="logo">' + html;
+}
+
+async function init() {
+  if (!sessionId || !userId) {
+    render('<p class="error">This link isn\'t valid. Please use the link from your email.</p>');
+    return;
+  }
+  try {
+    const info = await YanAPI.getRsvpInfo(sessionId, userId);
+    renderConfirmScreen(info);
+  } catch (e) {
+    render('<p class="error">This link isn\'t valid or has expired.</p>');
+  }
+}
+
+function fmtDate(iso) {
+  try { return new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
+  catch(e) { return iso; }
+}
+
+const DEPT_NAMES = {programs:'Programs & Training',scholarships:'Scholarships & Global Opportunities',career:'Career Development & Public Speaking',community:'Community Impact & Volunteering',mental:'Mental Health & Wellbeing',communications:'Communications & Media',finance:'Finance & Administration',partnerships:'Partnership & External Relations'};
+
+function renderConfirmScreen(info) {
+  const alreadyNote = info.alreadyResponded !== null
+    ? `<div class="already">You previously said you ${info.alreadyResponded ? "are attending" : "can't make it"}. Tap below to change your response.</div>`
+    : '';
+  render(`
+    <div class="greeting">Hi ${escapeHtml(info.memberName)},</div>
+    <div class="dept">${DEPT_NAMES[info.department] || info.department}</div>
+    <div class="topic">${escapeHtml(info.topic)}</div>
+    <div class="date">${fmtDate(info.sessionDate)}</div>
+    ${alreadyNote}
+    <button class="btn btn-yes" id="btn-yes" onclick="respond(true)">✅ I'll be there</button>
+    <button class="btn btn-no" id="btn-no" onclick="respond(false)">❌ Can't make it</button>
+  `);
+}
+
+async function respond(attending) {
+  document.getElementById('btn-yes').disabled = true;
+  document.getElementById('btn-no').disabled = true;
+  try {
+    await YanAPI.submitRsvp(sessionId, userId, attending);
+    render(`
+      <div class="result">
+        <div class="result-icon">${attending ? '🎉' : '👋'}</div>
+        <div class="result-text">${attending ? "You're confirmed!" : 'Thanks for letting us know'}</div>
+        <div class="result-sub">${attending ? 'See you at the session — Young Africans Network wishes you the very best.' : "We'll catch you at the next one."}</div>
+      </div>
+    `);
+  } catch (e) {
+    render('<p class="error">Could not save your response. Please try the link again.</p>');
+  }
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = String(str == null ? '' : str);
+  return d.innerHTML;
+}
+
+init();
+</script>
+</body>
+</html>

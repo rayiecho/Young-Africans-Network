@@ -23,6 +23,8 @@ ALLOWED_ORIGINS = "https://youngafricansnetwork.org,https://young-africans-netwo
 EMAIL_WORKER_URL = "https://yan-email-worker.youngafricansn.workers.dev"
 MEDIA_PUBLIC_BASE = "https://pub-ea09c47ee0244611b2fc866c45f7d66b.r2.dev"
 
-# Daily at 08:00 UTC - checks for sessions 5/3/1 days out that still aren't confirmed.
+# 08:00 UTC - checks for sessions 5/3/1 days out that still aren't confirmed.
+# 11:00 UTC - 6 hours before the fixed 7pm CAT session start, alerts the head with the
+# confirmed attendance count.
 [triggers]
-crons = ["0 8 * * *"]
+crons = ["0 8 * * *", "0 11 * * *"]

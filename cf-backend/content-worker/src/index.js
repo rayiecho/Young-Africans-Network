@@ -45,13 +45,18 @@ async function requireUser(request, env, cors) {
   return { user };
 }
 
-async function sendEmail(env, { to, subject, message }) {
+async function sendEmail(env, { to, name, subject, message }) {
   try {
-    await fetch(env.EMAIL_WORKER_URL, {
+    // Same two bugs already found and fixed in ops-worker: (1) the email worker expects
+    // to_email/name/type, not {to,subject,message}; (2) fetching its public workers.dev
+    // URL directly from another Worker on the same account hits Cloudflare's
+    // loop-prevention (error 1042) and never actually reaches it - needs a service binding.
+    const res = await env.EMAIL_WORKER.fetch('https://yan-email-worker.youngafricansn.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ to, subject, message })
+      body: JSON.stringify({ to_email: to, name: name || '', subject, message, type: 'general' })
     });
+    if (!res.ok) console.error('Email send failed:', res.status, await res.text());
   } catch (e) { console.error('Email send failed:', e.message); }
 }
 
@@ -329,7 +334,11 @@ async function deleteNotificationHandler(request, env, cors, id) {
 
 async function submitJoin(request, env, cors) {
   const formObj = await request.json();
-  const name = formObj.name || formObj['full-name'] || '';
+  // join.html actually submits first_name/last_name as separate fields, not a combined
+  // name/full-name - this was silently rejecting every real submission (400, surfaced
+  // to the applicant as a generic "Error - Try Again").
+  const name = formObj.name || formObj['full-name']
+    || [formObj.first_name, formObj.last_name].filter(Boolean).join(' ').trim() || '';
   const email = formObj.email || '';
   if (!name || !email || !isValidEmail(email)) return json({ error: 'Name and a valid email are required' }, 400, cors);
 
@@ -338,8 +347,19 @@ async function submitJoin(request, env, cors) {
     'INSERT INTO join_requests (id,name,email,data_json,source,status,created_at) VALUES (?,?,?,?,?,?,?)'
   ).bind(newId(), name, email, JSON.stringify(formObj), 'join.html', 'pending', now).run();
 
+  // Best-effort mirror into Firestore's joinRequests collection - admin.html's existing
+  // approval queue reads that, not the D1 table above, and wasn't rebuilt for D1 yet.
+  // Awaited (not fire-and-forget): an un-awaited fetch can get killed mid-flight once
+  // the response is returned, since Workers don't keep running after that without
+  // ctx.waitUntil() - confirmed missing live, the mirrored doc never actually landed.
+  try {
+    await env.OPS_WORKER.fetch('https://yan-ops-worker.youngafricansn.workers.dev/api/internal/mirror-join-request', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formObj)
+    });
+  } catch (e) { console.error('Join request mirror failed:', e.message); }
+
   await sendEmail(env, {
-    to: email,
+    to: email, name,
     subject: 'Application Received — Young Africans Network',
     message: 'Thank you for applying to join the Young Africans Network! We have received your application and our team will review it within 48 hours. We are excited about your interest in being part of our pan-African community.\n\nWarm regards,\nYAN Administration Office\nyoungafricansnetwork.org'
   });
@@ -349,7 +369,10 @@ async function submitJoin(request, env, cors) {
 
 async function submitContact(request, env, cors) {
   const formObj = await request.json();
-  const name = formObj.name || '';
+  // contact.html submits firstName/lastName separately, not a combined name - same class
+  // of bug as join.html, silently rejecting every real submission.
+  const name = formObj.name
+    || [formObj.firstName, formObj.lastName].filter(Boolean).join(' ').trim() || '';
   const email = formObj.email || '';
   if (!name || !email || !isValidEmail(email)) return json({ error: 'Name and a valid email are required' }, 400, cors);
 
@@ -359,7 +382,7 @@ async function submitContact(request, env, cors) {
   ).bind(newId(), name, email, JSON.stringify(formObj), 'contact.html', 'unread', now).run();
 
   await sendEmail(env, {
-    to: email,
+    to: email, name,
     subject: 'Message Received — Young Africans Network',
     message: 'Thank you for reaching out to the Young Africans Network! We have received your message and our team will get back to you within 48 hours.\n\nWarm regards,\nYAN Administration Office\nyoungafricansnetwork.org'
   });
