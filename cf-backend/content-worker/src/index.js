@@ -72,6 +72,16 @@ async function getEvents(env, cors) {
   })), 200, cors);
 }
 
+async function getPartners(env, cors) {
+  const { results } = await env.DB.prepare(
+    'SELECT * FROM partners WHERE active = 1 ORDER BY display_order ASC, created_at ASC'
+  ).all();
+  return json(results.map(p => ({
+    id: p.id, name: p.name, logoUrl: p.logo_url, tagline: p.tagline, description: p.description,
+    offerings: p.offerings ? JSON.parse(p.offerings) : [], websiteUrl: p.website_url
+  })), 200, cors);
+}
+
 async function getGallery(env, cors) {
   const { results } = await env.DB.prepare(
     'SELECT * FROM gallery ORDER BY created_at DESC'
@@ -459,6 +469,7 @@ export default {
     try {
       const path = url.pathname;
       if (path === '/api/events' && request.method === 'GET') return await getEvents(env, cors);
+      if (path === '/api/partners' && request.method === 'GET') return await getPartners(env, cors);
       if (path === '/api/gallery' && request.method === 'GET') return await getGallery(env, cors);
       if (path === '/api/team' && request.method === 'GET') return await getTeam(env, cors);
       if (path === '/api/stories' && request.method === 'GET') return await getStories(env, cors);

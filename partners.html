@@ -5,18 +5,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="index, follow">
-<meta name="description" content="Young Africans Network (YAN) partners with Star9 Freelancer Ltd to equip members with digital skills, freelancing training and remote work opportunities.">
-<meta name="keywords" content="YAN Partners, Star9 Freelancer, YAN Partnerships, African Youth Freelancing, Remote Work Training">
+<meta name="description" content="Young Africans Network (YAN) partners with mission-aligned organizations to widen the doors open to our members - digital skills, remote work, and more.">
+<meta name="keywords" content="YAN Partners, YAN Partnerships, African Youth, Remote Work Training">
 <meta name="author" content="Young Africans Network">
 <meta property="og:title" content="Our Partners | Young Africans Network">
-<meta property="og:description" content="YAN partners with Star9 Freelancer Ltd to equip members with digital skills, freelancing training and remote work opportunities.">
+<meta property="og:description" content="YAN partners with mission-aligned organizations to widen the doors open to our members.">
 <meta property="og:url" content="https://youngafricansnetwork.org/partners.html">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://youngafricansnetwork.org/images/logo.jpeg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@YoungAfricanNet">
 <meta name="twitter:title" content="Our Partners | Young Africans Network">
-<meta name="twitter:description" content="YAN partners with Star9 Freelancer Ltd to equip members with digital skills and remote work opportunities.">
+<meta name="twitter:description" content="YAN partners with mission-aligned organizations to widen the doors open to our members.">
 <meta name="twitter:image" content="https://youngafricansnetwork.org/images/logo.jpeg">
 <link rel="canonical" href="https://youngafricansnetwork.org/partners.html">
 <link rel="icon" href="/images/logo.jpeg" type="image/jpeg">
@@ -26,7 +26,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <title>Our Partners | Young Africans Network</title>
 <style>
-:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;}
+:root{--navy:#1B2A6B;--red:#E63329;--gold:#F5A623;--white:#FFFFFF;--light:#F8F9FF;--gray:#6B7280;--dark:#0D1B4B;--green:#27AE60;}
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 body{font-family:'Poppins',sans-serif;background:var(--white);color:var(--navy);overflow-x:hidden;}
@@ -50,6 +50,12 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 3
 .nav-btn{background:var(--navy);color:#fff;padding:0.7rem 1.5rem;border-radius:50px;text-decoration:none;font-weight:700;font-size:0.85rem;}
 .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;}
 .hamburger span{width:26px;height:3px;background:var(--navy);border-radius:2px;}
+.mobile-menu{display:none;position:fixed;inset:0;background:#fff;z-index:1000;padding:5rem 2rem 2rem;overflow-y:auto;}
+.mobile-menu.open{display:block;}
+.mobile-menu ul{list-style:none;}
+.mobile-menu li{border-bottom:1px solid var(--light);}
+.mobile-menu a{display:block;padding:1rem 0;text-decoration:none;color:var(--navy);font-weight:600;}
+.mobile-close{position:absolute;top:1.5rem;right:1.5rem;background:none;border:none;font-size:1.75rem;cursor:pointer;color:var(--navy);}
 footer{background:var(--navy);padding:3rem 2rem;border-top:1px solid rgba(255,255,255,0.1);}
 .footer-bottom{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
 .footer-copy{font-size:0.78rem;color:rgba(255,255,255,0.5);}
@@ -57,35 +63,58 @@ footer{background:var(--navy);padding:3rem 2rem;border-top:1px solid rgba(255,25
 .footer-links-row{display:flex;gap:1.5rem;flex-wrap:wrap;}
 .footer-links-row a{font-size:0.78rem;color:rgba(255,255,255,0.6);text-decoration:none;transition:color 0.2s;}
 .footer-links-row a:hover{color:var(--gold);}
-.p-hero{padding:5rem 2rem 3rem;text-align:center;background:linear-gradient(180deg,var(--light) 0%,#fff 100%);}
-.p-hero .tag{font-size:0.78rem;color:var(--red);text-transform:uppercase;letter-spacing:0.12em;font-weight:700;margin-bottom:0.75rem;}
-.p-hero h1{font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:900;color:var(--navy);margin-bottom:1rem;}
-.p-hero p{max-width:680px;margin:0 auto;color:var(--gray);font-size:1rem;line-height:1.7;}
-.partner-card{max-width:1000px;margin:0 auto;padding:3rem 2rem;display:grid;grid-template-columns:280px 1fr;gap:3rem;align-items:center;}
-.partner-card img{width:100%;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.08);background:#fff;padding:1.5rem;}
-.partner-card h2{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:900;color:var(--navy);margin-bottom:1rem;}
-.partner-card p{color:var(--gray);font-size:0.95rem;line-height:1.75;margin-bottom:1rem;}
-.what-they-offer{max-width:1000px;margin:1rem auto 4rem;padding:0 2rem;}
-.what-they-offer h3{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--navy);margin-bottom:1.5rem;text-align:center;}
-.offer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
-.offer-item{background:var(--light);border-radius:16px;padding:1.75rem;text-align:center;}
-.offer-item .ico{font-size:1.8rem;margin-bottom:0.75rem;}
-.offer-item h4{font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;}
-.offer-item p{font-size:0.82rem;color:var(--gray);line-height:1.6;}
-.p-cta{text-align:center;padding:3rem 2rem 5rem;}
-.p-cta a{display:inline-block;background:var(--navy);color:#fff;padding:0.9rem 2.25rem;border-radius:50px;text-decoration:none;font-weight:700;font-size:0.9rem;margin:0 0.5rem;}
-.p-cta a.outline{background:transparent;border:1.5px solid var(--navy);color:var(--navy);}
+
+.p-hero{background:linear-gradient(135deg,var(--navy) 0%,#2D3F9B 100%);padding:6rem 2rem 5rem;text-align:center;position:relative;overflow:hidden;}
+.p-hero::before{content:'';position:absolute;top:-30%;right:-6%;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,0.18),transparent 70%);}
+.p-hero::after{content:'';position:absolute;bottom:-40%;left:-8%;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0.07),transparent 70%);}
+.p-hero-inner{position:relative;z-index:1;max-width:720px;margin:0 auto;}
+.p-hero .tag{display:inline-block;background:rgba(245,166,35,0.15);color:var(--gold);padding:0.4rem 1.1rem;border-radius:50px;font-size:0.76rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.25rem;border:1px solid rgba(245,166,35,0.3);}
+.p-hero h1{font-family:'Playfair Display',serif;font-size:2.75rem;font-weight:900;color:#fff;margin-bottom:1rem;}
+.p-hero p{color:rgba(255,255,255,0.75);font-size:1.02rem;line-height:1.7;}
+
+.p-wrap{max-width:1080px;margin:0 auto;padding:4rem 2rem;}
+.partner-block{display:grid;grid-template-columns:260px 1fr;gap:2.75rem;align-items:center;margin-bottom:4rem;padding-bottom:4rem;border-bottom:1px solid rgba(27,42,107,0.08);}
+.partner-block:last-of-type{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.partner-block.reverse{direction:rtl;}
+.partner-block.reverse>*{direction:ltr;}
+.partner-logo-wrap{background:var(--light);border-radius:20px;padding:2rem;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(27,42,107,0.06);}
+.partner-logo-wrap img{width:100%;max-width:180px;border-radius:10px;}
+.partner-name{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--navy);margin-bottom:0.35rem;}
+.partner-tagline{color:var(--gold);font-size:0.85rem;font-weight:700;margin-bottom:1rem;}
+.partner-desc{color:var(--gray);font-size:0.95rem;line-height:1.75;margin-bottom:1.5rem;}
+.partner-site{display:inline-flex;align-items:center;gap:0.4rem;color:var(--navy);font-weight:700;font-size:0.85rem;text-decoration:none;}
+.offer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:1rem;}
+.offer-item{background:var(--light);border-radius:16px;padding:1.5rem 1.25rem;text-align:center;transition:transform 0.2s;}
+.offer-item:hover{transform:translateY(-3px);}
+.offer-item .ico{font-size:1.6rem;margin-bottom:0.6rem;}
+.offer-item h4{font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.4rem;}
+.offer-item p{font-size:0.78rem;color:var(--gray);line-height:1.6;}
+
+.p-empty{text-align:center;padding:4rem 2rem;color:var(--gray);}
+.p-empty .ico{font-size:2.5rem;margin-bottom:1rem;}
+.p-loading{text-align:center;padding:4rem 2rem;color:var(--gray);font-size:0.9rem;}
+
+.p-cta{background:var(--light);text-align:center;padding:4rem 2rem;}
+.p-cta h2{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:900;color:var(--navy);margin-bottom:0.75rem;}
+.p-cta p{color:var(--gray);font-size:0.92rem;margin-bottom:1.75rem;max-width:520px;margin-left:auto;margin-right:auto;}
+.p-cta-btns a{display:inline-block;background:var(--navy);color:#fff;padding:0.9rem 2.25rem;border-radius:50px;text-decoration:none;font-weight:700;font-size:0.9rem;margin:0 0.5rem;transition:transform 0.15s;}
+.p-cta-btns a:hover{transform:translateY(-2px);}
+.p-cta-btns a.outline{background:transparent;border:1.5px solid var(--navy);color:var(--navy);}
+
+@media(max-width:900px){
+  .partner-block, .partner-block.reverse{grid-template-columns:1fr;direction:ltr;text-align:center;}
+  .partner-logo-wrap{max-width:220px;margin:0 auto;}
+  .offer-grid{grid-template-columns:1fr;}
+}
 @media(max-width:1024px){
   nav{padding:1rem 1.5rem;}
   .nav-links{display:none;}
   .hamburger{display:flex;}
-  .partner-card{grid-template-columns:1fr;text-align:center;}
-  .partner-card img{max-width:220px;margin:0 auto;}
-  .offer-grid{grid-template-columns:1fr;}
   footer{padding:2rem 1.25rem;}
   .footer-bottom{flex-direction:column;text-align:center;gap:1rem;}
   .footer-links-row{justify-content:center;}
-  .p-hero h1{font-size:1.9rem;}
+  .p-hero h1{font-size:2rem;}
+  .p-hero{padding:5rem 1.25rem 3.5rem;}
 }
 </style>
 </head>
@@ -129,53 +158,47 @@ footer{background:var(--navy);padding:3rem 2rem;border-top:1px solid rgba(255,25
   </button>
 </nav>
 
-<section class="p-hero">
-  <p class="tag">Strategic Partnership</p>
-  <h1>Our Partners</h1>
-  <p>YAN works with mission-aligned organizations to widen the doors open to our members. Meet the partners helping us deliver on that promise.</p>
-</section>
-
-<div class="partner-card">
-  <img src="images/FREELANCE.jpeg" alt="Star9 Freelancer Ltd">
-  <div>
-    <h2>Star9 Freelancer Ltd</h2>
-    <p>Star9 Freelancer Ltd is a freelancing and digital skills training company empowering African youth and women with in-demand skills, remote work opportunities, and pathways to study and work abroad &mdash; freelancing with heart and skill.</p>
-    <p>Through this partnership, Star9 delivers hands-on digital skills and freelancing training directly to YAN members, at no cost to members, with Star9 covering the training investment.</p>
-  </div>
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" id="mobileClose">×</button>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="Journey_Stories.html">Journey Stories</a></li>
+    <li><a href="programs.html">Programs</a></li>
+    <li><a href="events.html">Events</a></li>
+    <li><a href="team.html">Team</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+    <li><a href="community.html">Community</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="partners.html">Partners</a></li>
+    <li><a href="join.html">Join YAN</a></li>
+  </ul>
 </div>
 
-<div class="what-they-offer">
-  <h3>What This Partnership Brings YAN Members</h3>
-  <div class="offer-grid">
-    <div class="offer-item">
-      <div class="ico">💻</div>
-      <h4>Digital Skills Training</h4>
-      <p>Practical, guided training in in-demand freelance skills &mdash; from the basics to advanced techniques.</p>
-    </div>
-    <div class="offer-item">
-      <div class="ico">🌍</div>
-      <h4>Remote Work Access</h4>
-      <p>Pathways into real remote work opportunities with international clients.</p>
-    </div>
-    <div class="offer-item">
-      <div class="ico">🎓</div>
-      <h4>Study &amp; Work Abroad Support</h4>
-      <p>Guidance and access to study-abroad and work-abroad opportunities for qualifying members.</p>
-    </div>
+<section class="p-hero">
+  <div class="p-hero-inner">
+    <p class="tag">Strategic Partnerships</p>
+    <h1>Our Partners</h1>
+    <p>YAN works with mission-aligned organizations to widen the doors open to our members. Meet the partners helping us deliver on that promise.</p>
   </div>
+</section>
+
+<div class="p-wrap" id="partners-wrap">
+  <div class="p-loading">Loading partners...</div>
 </div>
 
 <div class="p-cta">
-  <a href="join.html">Join YAN Today</a>
-  <a href="contact.html" class="outline">Partner With Us</a>
+  <h2>Want to partner with YAN?</h2>
+  <p>We're always open to working with organizations that share our mission of building opportunity for African youth.</p>
+  <div class="p-cta-btns">
+    <a href="join.html">Join YAN Today</a>
+    <a href="contact.html" class="outline">Partner With Us</a>
+  </div>
 </div>
 
 <footer>
   <div style="max-width:1200px;margin:0 auto 2rem;text-align:center;">
-    <p style="font-size:0.7rem;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.85rem;font-weight:600;">In Partnership With</p>
-    <a href="partners.html" style="display:inline-block;">
-      <img src="images/FREELANCE.jpeg" alt="Star9 Freelancer - YAN Partner" style="height:44px;width:auto;border-radius:8px;background:#fff;padding:6px 14px;">
-    </a>
+    <a href="partners.html" style="color:var(--gold);font-size:0.8rem;font-weight:700;text-decoration:none;">🤝 Proudly partnered with organizations advancing African youth — See Our Partners →</a>
   </div>
   <div class="footer-bottom">
     <p class="footer-copy">© 2026 Young Africans Network. All Rights Reserved. | Website by <a href="https://rayiecho.github.io" target="_blank">Regan Ayiecho</a></p>
@@ -192,9 +215,56 @@ footer{background:var(--navy);padding:3rem 2rem;border-top:1px solid rgba(255,25
 </footer>
 <script>
 const hamburger = document.getElementById('hamburger');
-if (hamburger) {
-  hamburger.addEventListener('click', () => { hamburger.classList.toggle('open'); });
+const mobileMenu = document.getElementById('mobileMenu');
+const mobileClose = document.getElementById('mobileClose');
+if (hamburger) hamburger.addEventListener('click', () => mobileMenu.classList.add('open'));
+if (mobileClose) mobileClose.addEventListener('click', () => mobileMenu.classList.remove('open'));
+
+const CONTENT_API = 'https://yan-content-worker.youngafricansn.workers.dev';
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = String(str == null ? '' : str);
+  return d.innerHTML;
 }
+
+function renderPartner(p, index) {
+  const offeringsHtml = (p.offerings || []).map(o => `
+    <div class="offer-item">
+      <div class="ico">${escapeHtml(o.icon || '✨')}</div>
+      <h4>${escapeHtml(o.title)}</h4>
+      <p>${escapeHtml(o.description || '')}</p>
+    </div>`).join('');
+  return `
+  <div class="partner-block${index % 2 === 1 ? ' reverse' : ''}">
+    <div class="partner-logo-wrap">
+      ${p.logoUrl ? `<img src="${escapeHtml(p.logoUrl)}" alt="${escapeHtml(p.name)}">` : `<div style="font-family:'Playfair Display',serif;font-weight:900;font-size:1.5rem;color:var(--navy);">${escapeHtml(p.name)}</div>`}
+    </div>
+    <div>
+      <div class="partner-name">${escapeHtml(p.name)}</div>
+      ${p.tagline ? `<div class="partner-tagline">${escapeHtml(p.tagline)}</div>` : ''}
+      ${p.description ? `<p class="partner-desc">${escapeHtml(p.description)}</p>` : ''}
+      ${p.websiteUrl ? `<a class="partner-site" href="${escapeHtml(p.websiteUrl)}" target="_blank" rel="noopener">Visit their site →</a>` : ''}
+      ${offeringsHtml ? `<div class="offer-grid">${offeringsHtml}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+async function loadPartners() {
+  const wrap = document.getElementById('partners-wrap');
+  try {
+    const res = await fetch(CONTENT_API + '/api/partners');
+    const partners = await res.json();
+    if (!Array.isArray(partners) || !partners.length) {
+      wrap.innerHTML = `<div class="p-empty"><div class="ico">🤝</div><p>New partnerships are in the works — check back soon.</p></div>`;
+      return;
+    }
+    wrap.innerHTML = partners.map(renderPartner).join('');
+  } catch (e) {
+    wrap.innerHTML = `<div class="p-empty"><div class="ico">🤝</div><p>Could not load partners right now — please refresh.</p></div>`;
+  }
+}
+loadPartners();
 </script>
 </body>
 </html>

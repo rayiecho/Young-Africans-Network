@@ -16,9 +16,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
-<script src="/assets/yan-api.js?v=1786372842"></script>
-<script src="/assets/yan-upload.js?v=1786372842"></script>
-<script src="/assets/yan-youtube.js?v=1786372842"></script>
+<script src="/assets/yan-api.js?v=1786381493"></script>
+<script src="/assets/yan-upload.js?v=1786381493"></script>
+<script src="/assets/yan-youtube.js?v=1786381493"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -919,17 +919,43 @@ window.rejectRecLetter = rejectRecLetter;
 
 
 async function loadPartnershipsAdmin(c) {
+  window._partnersContainer = c;
   try {
-    const [partnersSnap, proposalsSnap, oppsSnap] = await Promise.all([
-      getDocs(collection(db, 'yanPartners')),
+    const [partners, proposalsSnap, oppsSnap] = await Promise.all([
+      YanAPI.getPartnersAdmin().catch(() => []),
       getDocs(query(collection(db, 'partnershipProposals'), where('status', '==', 'pending'))),
       getDocs(collection(db, 'partnershipOpportunities'))
     ]);
+    window._partnersAdmin = partners;
+    const activeCount = partners.filter(p => p.active).length;
     let html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;">'
-      + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Active Partners</p><p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + partnersSnap.size + '</p></div>'
+      + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Active Partners</p><p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + activeCount + '</p></div>'
       + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Pending Proposals</p><p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--red);">' + proposalsSnap.size + '</p></div>'
       + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Opportunities</p><p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--navy);">' + oppsSnap.size + '</p></div>'
       + '</div>';
+
+    html += '<div class="section-card" style="margin-bottom:1.5rem;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">'
+      + '<h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);">Manage Partners <span style="color:var(--gray);font-weight:400;">(shown on partners.html)</span></h4>'
+      + '<button class="btn-sm btn-navy" onclick="openPartnerModal()">+ Add Partner</button>'
+      + '</div>';
+    if (!partners.length) {
+      html += '<p style="color:var(--gray);font-size:0.85rem;">No partners yet.</p>';
+    } else {
+      partners.forEach(p => {
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;border-bottom:1px solid var(--light);gap:0.75rem;flex-wrap:wrap;">'
+          + '<div style="display:flex;align-items:center;gap:0.75rem;">'
+          + (p.logoUrl ? '<img src="' + sanitize(p.logoUrl) + '" style="width:40px;height:40px;object-fit:contain;border-radius:8px;background:var(--light);padding:4px;">' : '')
+          + '<div><strong style="font-size:0.88rem;color:var(--navy);">' + sanitize(p.name) + '</strong>' + (!p.active ? ' <span style="color:var(--gray);font-size:0.72rem;">(hidden)</span>' : '')
+          + '<p style="font-size:0.75rem;color:var(--gray);">' + sanitize(p.tagline||'') + '</p></div></div>'
+          + '<div style="display:flex;gap:0.5rem;">'
+          + '<button class="btn-sm btn-outline" onclick=\'openPartnerModal(' + JSON.stringify(p).replace(/'/g,"&#39;") + ')\'>Edit</button>'
+          + '<button class="btn-sm btn-red" onclick="deletePartnerAdmin(\'' + p.id + '\',\'' + sanitize(p.name) + '\')">Delete</button>'
+          + '</div></div>';
+      });
+    }
+    html += '</div>';
+
     html += '<div class="section-card"><h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;">Pending Proposals</h4>';
     if (proposalsSnap.empty) {
       html += '<p style="color:var(--gray);font-size:0.85rem;">No pending proposals.</p>';
@@ -951,6 +977,94 @@ async function loadPartnershipsAdmin(c) {
     c.innerHTML = '<p style="color:var(--gray);">Error loading partnerships: ' + e.message + '</p>';
   }
 }
+
+window.deletePartnerAdmin = async function(id, name) {
+  if (!confirm('Delete partner "' + name + '"? This removes them from the public partners page.')) return;
+  try { await YanAPI.deletePartner(id); showToast('Partner deleted'); await loadPartnershipsAdmin(window._partnersContainer); }
+  catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+// Offerings are entered as one per line, "icon|Title|Description" - simpler and more
+// robust to build than a dynamic multi-row form for what's a rarely-edited field.
+function parseOfferingsText(text) {
+  return text.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+    const [icon, title, ...rest] = line.split('|').map(s => s.trim());
+    return { icon: icon || '✨', title: title || '', description: rest.join('|') || '' };
+  }).filter(o => o.title);
+}
+function offeringsToText(offerings) {
+  return (offerings || []).map(o => [o.icon, o.title, o.description].join('|')).join('\n');
+}
+
+window.openPartnerModal = function(partner) {
+  window._editingPartnerId = partner ? partner.id : null;
+  if (document.getElementById('partner-modal-overlay')) document.getElementById('partner-modal-overlay').remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'partner-modal-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;';
+  overlay.innerHTML = `<div style="background:#fff;border-radius:20px;padding:1.75rem;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);font-family:Poppins,sans-serif;">
+    <h3 style="font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--navy);margin-bottom:1rem;">${partner ? 'Edit' : 'Add'} Partner</h3>
+    <div style="margin-bottom:0.85rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Name *</label>
+      <input type="text" id="pm-name" value="${partner ? sanitize(partner.name) : ''}" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+    <div style="margin-bottom:0.85rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Logo</label>
+      <input type="file" accept="image/*" id="pm-logo-file" onchange="uploadPartnerLogo()">
+      <input type="hidden" id="pm-logo-url" value="${partner ? sanitize(partner.logoUrl||'') : ''}">
+      <small id="pm-logo-status" style="color:var(--gray);display:block;margin-top:0.3rem;">${partner && partner.logoUrl ? 'Current: ' + partner.logoUrl : ''}</small></div>
+    <div style="margin-bottom:0.85rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Tagline</label>
+      <input type="text" id="pm-tagline" value="${partner ? sanitize(partner.tagline||'') : ''}" placeholder="Short one-liner" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+    <div style="margin-bottom:0.85rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Description</label>
+      <textarea id="pm-description" rows="3" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;resize:vertical;">${partner ? sanitize(partner.description||'') : ''}</textarea></div>
+    <div style="margin-bottom:0.85rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">What they offer (one per line: icon|Title|Description)</label>
+      <textarea id="pm-offerings" rows="4" placeholder="💻|Digital Skills Training|Practical training in freelance skills" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;box-sizing:border-box;resize:vertical;">${partner ? offeringsToText(partner.offerings) : ''}</textarea></div>
+    <div style="margin-bottom:0.85rem;"><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Website URL (optional)</label>
+      <input type="text" id="pm-website" value="${partner ? sanitize(partner.websiteUrl||'') : ''}" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
+    <div style="margin-bottom:1.25rem;display:flex;align-items:center;gap:0.5rem;">
+      <input type="checkbox" id="pm-active" ${!partner || partner.active ? 'checked' : ''} style="width:16px;height:16px;">
+      <label for="pm-active" style="font-size:0.82rem;color:var(--navy);">Visible on the public partners page</label>
+    </div>
+    <div style="display:flex;gap:0.6rem;justify-content:flex-end;">
+      <button onclick="document.getElementById('partner-modal-overlay').remove()" style="background:var(--light);color:var(--navy);border:none;padding:0.65rem 1.4rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Cancel</button>
+      <button id="pm-submit" onclick="submitPartnerModal()" style="background:var(--navy);color:#fff;border:none;padding:0.65rem 1.4rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;">Save</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+};
+
+window.uploadPartnerLogo = async function() {
+  const file = document.getElementById('pm-logo-file').files[0];
+  if (!file) return;
+  const status = document.getElementById('pm-logo-status');
+  status.style.color = 'var(--gray)';
+  status.textContent = '⏳ Uploading... 0%';
+  try {
+    const url = await YanUpload.uploadFile(file, (pct) => { status.textContent = '⏳ Uploading... ' + pct + '%'; });
+    document.getElementById('pm-logo-url').value = url;
+    status.textContent = '✅ Uploaded';
+  } catch(e) { status.style.color = 'var(--red)'; status.textContent = '❌ Upload failed: ' + e.message; }
+};
+
+window.submitPartnerModal = async function() {
+  const name = document.getElementById('pm-name').value.trim();
+  if (!name) return showToast('Name is required', 'error');
+  const partner = {
+    name,
+    logoUrl: document.getElementById('pm-logo-url').value.trim() || null,
+    tagline: document.getElementById('pm-tagline').value.trim(),
+    description: document.getElementById('pm-description').value.trim(),
+    offerings: parseOfferingsText(document.getElementById('pm-offerings').value),
+    websiteUrl: document.getElementById('pm-website').value.trim() || null,
+    active: document.getElementById('pm-active').checked
+  };
+  const btn = document.getElementById('pm-submit');
+  btn.disabled = true;
+  try {
+    if (window._editingPartnerId) await YanAPI.updatePartner(window._editingPartnerId, partner);
+    else await YanAPI.createPartner(partner);
+    document.getElementById('partner-modal-overlay').remove();
+    showToast('Partner saved!');
+    await loadPartnershipsAdmin(window._partnersContainer);
+  } catch(e) { showToast('Error: ' + e.message, 'error'); btn.disabled = false; }
+};
 
 async function loadNewslettersAdmin(c) {
   try {

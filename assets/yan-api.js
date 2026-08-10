@@ -274,6 +274,15 @@
       return opsRequest('/api/volunteer-roster/' + id, { method: 'DELETE' });
     },
 
+    // ---- partners ----
+    async getPartnersAdmin() {
+      const data = await opsRequest('/api/partners');
+      return data.partners;
+    },
+    async createPartner(partner) { return opsRequest('/api/partners', { method: 'POST', body: partner }); },
+    async updatePartner(id, partner) { return opsRequest('/api/partners/' + id, { method: 'PUT', body: partner }); },
+    async deletePartner(id) { return opsRequest('/api/partners/' + id, { method: 'DELETE' }); },
+
     // ---- volunteer room ----
     async createVolunteerTask({ taskType, title, brief, rawFileUrl, dueDate, relatedSessionId, hasRawFile }) {
       return opsRequest('/api/volunteer-tasks', { method: 'POST', body: { taskType, title, brief, rawFileUrl, dueDate, relatedSessionId, hasRawFile } });

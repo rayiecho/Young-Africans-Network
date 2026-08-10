@@ -911,6 +911,58 @@ async function mirrorJoinRequestToFirestore(request, env, cors) {
   return json({ ok: true }, 200, cors);
 }
 
+// Real admin CRUD for the public partners.html list (content-worker serves the public
+// read side of the same `partners` table) - previously there was no way to add a
+// partner at all, so the page was hardcoded to one.
+async function listPartnersAdmin(request, env, cors) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  const { results } = await env.DB.prepare('SELECT * FROM partners ORDER BY display_order ASC, created_at ASC').all();
+  return json({ partners: results.map(p => ({
+    id: p.id, name: p.name, logoUrl: p.logo_url, tagline: p.tagline, description: p.description,
+    offerings: p.offerings ? JSON.parse(p.offerings) : [], websiteUrl: p.website_url,
+    displayOrder: p.display_order, active: !!p.active
+  })) }, 200, cors);
+}
+
+async function createPartner(request, env, cors) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  const body = await request.json();
+  if (!body.name) return json({ error: 'Name is required' }, 400, cors);
+  const id = newId();
+  const now = Date.now();
+  await env.DB.prepare(
+    `INSERT INTO partners (id,name,logo_url,tagline,description,offerings,website_url,display_order,active,created_at,updated_at)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?)`
+  ).bind(id, body.name, body.logoUrl || null, body.tagline || null, body.description || null,
+    JSON.stringify(body.offerings || []), body.websiteUrl || null, body.displayOrder || 0,
+    body.active === false ? 0 : 1, now, now).run();
+  return json({ id }, 201, cors);
+}
+
+async function updatePartner(request, env, cors, id) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  const existing = await env.DB.prepare('SELECT id FROM partners WHERE id = ?').bind(id).first();
+  if (!existing) return json({ error: 'Not found' }, 404, cors);
+  const body = await request.json();
+  if (!body.name) return json({ error: 'Name is required' }, 400, cors);
+  await env.DB.prepare(
+    `UPDATE partners SET name=?, logo_url=?, tagline=?, description=?, offerings=?, website_url=?, display_order=?, active=?, updated_at=? WHERE id=?`
+  ).bind(body.name, body.logoUrl || null, body.tagline || null, body.description || null,
+    JSON.stringify(body.offerings || []), body.websiteUrl || null, body.displayOrder || 0,
+    body.active === false ? 0 : 1, Date.now(), id).run();
+  return json({ ok: true }, 200, cors);
+}
+
+async function deletePartner(request, env, cors, id) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  await env.DB.prepare('DELETE FROM partners WHERE id = ?').bind(id).run();
+  return json({ ok: true }, 200, cors);
+}
+
 async function checkRegisteredEmails(request, env, cors) {
   const { error } = await requireAdmin(request, env, cors);
   if (error) return error;
@@ -1179,6 +1231,11 @@ export default {
       if (headRemoveMatch && request.method === 'DELETE') return await removeHead(request, env, cors, headRemoveMatch[1]);
       if (path === '/api/users/search' && request.method === 'GET') return await searchUsers(request, env, cors, url);
       if (path === '/api/users/check-emails' && request.method === 'POST') return await checkRegisteredEmails(request, env, cors);
+      if (path === '/api/partners' && request.method === 'GET') return await listPartnersAdmin(request, env, cors);
+      if (path === '/api/partners' && request.method === 'POST') return await createPartner(request, env, cors);
+      const partnerMatch = path.match(/^\/api\/partners\/([^/]+)$/);
+      if (partnerMatch && request.method === 'PUT') return await updatePartner(request, env, cors, partnerMatch[1]);
+      if (partnerMatch && request.method === 'DELETE') return await deletePartner(request, env, cors, partnerMatch[1]);
       if (path === '/api/internal/mirror-join-request' && request.method === 'POST') return await mirrorJoinRequestToFirestore(request, env, cors);
 
       return json({ error: 'Not found' }, 404, cors);
