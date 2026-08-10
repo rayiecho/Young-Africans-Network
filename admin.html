@@ -16,9 +16,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
-<script src="/assets/yan-api.js?v=1786381493"></script>
-<script src="/assets/yan-upload.js?v=1786381493"></script>
-<script src="/assets/yan-youtube.js?v=1786381493"></script>
+<script src="/assets/yan-api.js?v=1786390252"></script>
+<script src="/assets/yan-upload.js?v=1786390252"></script>
+<script src="/assets/yan-youtube.js?v=1786390252"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -4920,10 +4920,13 @@ window.loadVolunteerAdmin = async function(c) {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
         <div><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Type</label>
           <select id="va-type" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;">
-            <option value="poster">Poster / Banner</option>
-            <option value="video_edit">Video Edit</option>
-            <option value="slides">Slides / Presentation</option>
-            <option value="other">Other</option>
+            <option value="video_recording">Video Recording</option>
+            <option value="video_edit">Video Editing</option>
+            <option value="session_moderation">Session Moderation</option>
+            <option value="assisting_speaker">Assisting Speaker</option>
+            <option value="slides">Slides Design</option>
+            <option value="poster">Poster Design</option>
+            <option value="whatsapp_coordination">WhatsApp Session Coordination</option>
           </select></div>
         <div><label style="font-size:0.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.35rem;">Due date (optional)</label>
           <input type="date" id="va-due" style="width:100%;padding:0.65rem 0.85rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;box-sizing:border-box;"></div>
@@ -5067,7 +5070,7 @@ window.emailVolunteerQueueAdmin = async function() {
   } catch(e) { showToast('Error: ' + e.message, 'error'); }
 };
 
-const VOL_TYPE_LABELS = { poster: 'Poster / Banner', video_edit: 'Video Edit', slides: 'Slides', other: 'Other' };
+const VOL_TYPE_LABELS = { video_recording: 'Video Recording', video_edit: 'Video Editing', session_moderation: 'Session Moderation', assisting_speaker: 'Assisting Speaker', slides: 'Slides Design', poster: 'Poster Design', whatsapp_coordination: 'WhatsApp Session Coordination' };
 const VOL_STATUS_COLORS = { open: '#6B7280', claimed: '#B37800', submitted_uploading: '#B37800', submitted: '#3B82F6', approved: '#27AE60', changes_requested: '#E63329' };
 
 function volunteerTaskCardAdmin(t, showReviewBtn) {

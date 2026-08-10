@@ -373,7 +373,8 @@ async function flagNeedsHelp(request, env, cors, id) {
   if (error) return error;
   const body = await request.json();
   const note = (body.note || '').trim();
-  const taskType = ['poster','video_edit','slides','other'].includes(body.taskType) ? body.taskType : 'other';
+  const VALID_TASK_TYPES = ['video_recording','video_edit','session_moderation','assisting_speaker','slides','poster','whatsapp_coordination'];
+  const taskType = VALID_TASK_TYPES.includes(body.taskType) ? body.taskType : 'poster';
   const now = Date.now();
   await env.DB.prepare(
     `UPDATE dept_sessions SET needs_assistance = 1, assistance_note = ?, status = 'needs_help', updated_at = ? WHERE id = ?`

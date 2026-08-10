@@ -157,13 +157,13 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
 
 <div class="toast" id="toast"></div>
 
-<script src="/assets/yan-api.js?v=1786370299"></script>
-<script src="/assets/yan-upload.js?v=1786370299"></script>
+<script src="/assets/yan-api.js?v=1786390252"></script>
+<script src="/assets/yan-upload.js?v=1786390252"></script>
 <script>
 let currentUser = null;
 let activeTab = 'open';
 let activeTaskId = null;
-const TYPE_LABELS = { poster: 'Poster / Banner', video_edit: 'Video Edit', slides: 'Slides', other: 'Other' };
+const TYPE_LABELS = { video_recording: 'Video Recording', video_edit: 'Video Editing', session_moderation: 'Session Moderation', assisting_speaker: 'Assisting Speaker', slides: 'Slides Design', poster: 'Poster Design', whatsapp_coordination: 'WhatsApp Session Coordination' };
 
 function onFileChosenForRename(fileInputId, nameInputId, wrapId) {
   const file = document.getElementById(fileInputId).files[0];
