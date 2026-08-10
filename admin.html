@@ -16,9 +16,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
-<script src="/assets/yan-api.js?v=1786368764"></script>
-<script src="/assets/yan-upload.js?v=1786368764"></script>
-<script src="/assets/yan-youtube.js?v=1786368764"></script>
+<script src="/assets/yan-api.js?v=1786370299"></script>
+<script src="/assets/yan-upload.js?v=1786370299"></script>
+<script src="/assets/yan-youtube.js?v=1786370299"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -4962,6 +4962,10 @@ function volunteerTaskCardAdmin(t, showReviewBtn) {
         ${t.submittedFileUrl ? `<a href="${sanitize(t.submittedFileUrl)}" target="_blank" style="font-size:0.78rem;color:var(--navy);font-weight:700;">View submitted deliverable →</a>` : ''}
         ${t.youtubeUrl ? `<div><a href="${sanitize(t.youtubeUrl)}" target="_blank" style="font-size:0.78rem;color:#FF0000;font-weight:700;">▶ Live on YouTube →</a></div>` : ''}
         <div id="raw-upload-status-${t.id}" style="font-size:0.78rem;color:${pending&&pending.error?'var(--red)':'var(--gray)'};">${pending ? (pending.error ? '❌ Raw file upload failed: '+sanitize(pending.error) : '⏳ Uploading raw materials... '+pending.pct+'%') : ''}</div>
+        ${!t.rawFileUrl && !pending ? `<div style="margin-top:0.4rem;">
+          <input type="file" accept="image/*,video/*" id="raw-attach-${t.id}" onchange="attachRawFileAdmin('${t.id}')" style="font-size:0.72rem;">
+          <span style="font-size:0.7rem;color:var(--gray);"> ${t.status === 'open' ? '(no raw file yet - attach or re-upload one)' : ''}</span>
+        </div>` : ''}
       </div>
       <div style="display:flex;align-items:center;gap:0.6rem;">
         <span style="background:${VOL_STATUS_COLORS[t.status]}22;color:${VOL_STATUS_COLORS[t.status]};padding:0.25rem 0.75rem;border-radius:50px;font-size:0.68rem;font-weight:700;text-transform:uppercase;">${t.status.replace('_',' ')}</span>
@@ -5040,6 +5044,17 @@ window.onFileChosenForRename = function(fileInputId, nameInputId, wrapId) {
 // the upload finishing.
 window.__pendingUploads = window.__pendingUploads || {};
 
+// A background upload only runs as long as this tab stays open - closing or reloading
+// mid-upload silently abandons it (confirmed: exactly this happened to a real task -
+// posted, showed up on the Volunteer Room, video never arrived, no notification ever
+// fired since that only sends once the upload actually completes). This at least stops
+// it from happening silently going forward.
+window.addEventListener('beforeunload', function(e) {
+  const uploading = Object.values(window.__pendingUploads || {}).some(u => !u.error)
+    || Object.values(window.__pendingSubmitUploads || {}).some(u => !u.error);
+  if (uploading) { e.preventDefault(); e.returnValue = ''; }
+});
+
 function startBackgroundRawUpload(taskId, file, filename) {
   window.__pendingUploads[taskId] = { pct: 0 };
   YanUpload.uploadFile(file, (pct) => {
@@ -5056,6 +5071,17 @@ function startBackgroundRawUpload(taskId, file, filename) {
     if (el) el.textContent = '❌ Raw file upload failed: ' + e.message;
   });
 }
+
+// Lets admin attach (or retry) a raw file on a task that's already posted - recovers
+// tasks left with no file if the original background upload was abandoned (tab closed/
+// reloaded mid-upload - see the beforeunload guard below, added after exactly this
+// happened to a real task).
+window.attachRawFileAdmin = function(taskId) {
+  const file = document.getElementById('raw-attach-' + taskId).files[0];
+  if (!file) return;
+  startBackgroundRawUpload(taskId, file, file.name);
+  loadVolunteerAdminLists();
+};
 
 window.submitVolunteerTaskAdmin = async function() {
   const taskType = document.getElementById('va-type').value;

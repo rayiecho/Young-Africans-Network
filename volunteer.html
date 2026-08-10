@@ -157,8 +157,8 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
 
 <div class="toast" id="toast"></div>
 
-<script src="/assets/yan-api.js?v=1786368764"></script>
-<script src="/assets/yan-upload.js?v=1786368764"></script>
+<script src="/assets/yan-api.js?v=1786370299"></script>
+<script src="/assets/yan-upload.js?v=1786370299"></script>
 <script>
 let currentUser = null;
 let activeTab = 'open';
@@ -178,6 +178,15 @@ function onFileChosenForRename(fileInputId, nameInputId, wrapId) {
 // that card across re-renders without blocking the Submit button on the upload
 // finishing (see submitTask() phase 1/2 in ops-worker).
 window.__pendingSubmitUploads = window.__pendingSubmitUploads || {};
+
+// A background upload only runs as long as this tab stays open - closing or reloading
+// mid-upload silently abandons it, leaving the task stuck showing "uploading" forever
+// with no file and no notification ever sent (that only fires once the upload actually
+// completes). This at least stops it from happening silently going forward.
+window.addEventListener('beforeunload', function(e) {
+  const uploading = Object.values(window.__pendingSubmitUploads || {}).some(u => !u.error);
+  if (uploading) { e.preventDefault(); e.returnValue = ''; }
+});
 
 function startBackgroundSubmitUpload(taskId, file, filename) {
   window.__pendingSubmitUploads[taskId] = { pct: 0 };

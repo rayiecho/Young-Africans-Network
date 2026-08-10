@@ -133,7 +133,7 @@ body{font-family:Poppins,sans-serif;background:var(--light);min-height:100vh;ove
   <p>Young Africans Network · youngafricansnetwork.org · info@youngafricansnetwork.org</p>
 </div>
 
-<script src="/assets/yan-api.js?v=1786368764"></script>
+<script src="/assets/yan-api.js?v=1786370299"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -422,7 +422,15 @@ async function loadRealSessionDates(deptLabel) {
   wrap.innerHTML = '<p style="font-size:0.8rem;color:var(--gray);">Loading sessions...</p>';
   const deptCode = FEEDBACK_DEPT_MAP[deptLabel];
   try {
-    const sessions = deptCode && window.YanAPI ? await YanAPI.getSessions({ department: deptCode }) : [];
+    const allSessions = deptCode && window.YanAPI ? await YanAPI.getSessions({ department: deptCode }) : [];
+    // Recent enough to still be selecting feedback for it, not so far back the list gets
+    // cluttered with sessions from a year ago - plus sessions already scheduled up to 3
+    // months ahead, so a session shows up here as soon as it's scheduled.
+    const now = Date.now();
+    const from = now - 60 * 86400000, to = now + 90 * 86400000;
+    const sessions = allSessions
+      .filter(s => { const t = new Date(s.sessionDate + 'T00:00:00').getTime(); return t >= from && t <= to; })
+      .sort((a, b) => b.sessionDate.localeCompare(a.sessionDate));
     if (sessions.length) {
       wrap.innerHTML = `<select id="f-date">
         <option value="">Select the session date...</option>
