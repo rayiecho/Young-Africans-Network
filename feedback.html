@@ -133,7 +133,7 @@ body{font-family:Poppins,sans-serif;background:var(--light);min-height:100vh;ove
   <p>Young Africans Network · youngafricansnetwork.org · info@youngafricansnetwork.org</p>
 </div>
 
-<script src="/assets/yan-api.js?v=1786370299"></script>
+<script src="/assets/yan-api.js?v=1786371187"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -204,14 +204,12 @@ const steps = [
     key:'session', label:'Step 2 of 6', title:'About the Session', sub:'Help us understand which session you attended and how.',
     render: () => `
       <div class="card">
-        <div class="form-group"><label>Department / Session Name <span style="color:var(--red);">*</span></label>
-        <input type="text" id="f-session" placeholder="e.g. Tech Hub Monthly Meeting" value="${state.session}"></div>
-        <div class="form-group"><label>Which department led this session?</label>
+        <div class="form-group"><label>Which department led the session? <span style="color:var(--red);">*</span></label>
         <div class="pill-options" id="sessionDept-options">
           ${DEPARTMENTS.map(r=>`<div class="pill-opt ${state.sessionDepartment===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
         </div></div>
-        <div class="form-group"><label>Session Date</label>
-        <div id="f-date-wrap"><input type="date" id="f-date" value="${state.sessionDate}"></div></div>
+        <div class="form-group"><label>Session</label>
+        <div id="f-date-wrap">${state.sessionDepartment ? '' : '<p style="font-size:0.8rem;color:var(--gray);">Select a department above first.</p>'}</div></div>
         <div class="form-group"><label>Session Format</label>
         <div class="pill-options" id="format-options">
           ${['Online (Zoom/Meet)','In-Person','Hybrid'].map(r=>`<div class="pill-opt ${state.format===r?'selected':''}" data-val="${r}">${r}</div>`).join('')}
@@ -226,8 +224,6 @@ const steps = [
         </div></div>
       </div>`,
     bind: () => {
-      document.getElementById('f-session').oninput = e => { state.session = e.target.value; updateNavState(); };
-      document.getElementById('f-date').onchange = e => state.sessionDate = e.target.value;
       bindPills('sessionDept-options','sessionDepartment');
       document.querySelectorAll('#sessionDept-options .pill-opt').forEach(el => {
         el.addEventListener('click', () => loadRealSessionDates(el.dataset.val));
@@ -237,7 +233,7 @@ const steps = [
       bindPills('attendance-options','attendance');
       bindPills('heardFrom-options','heardFrom');
     },
-    valid: () => state.session.trim().length > 1
+    valid: () => state.session.trim().length > 1 && !!state.sessionDate
   },
   {
     key:'volunteer', label:'Step 3 of 6', title:'Volunteering', sub:'Tell us about your involvement and interest in volunteering for YAN.',
@@ -423,28 +419,35 @@ async function loadRealSessionDates(deptLabel) {
   const deptCode = FEEDBACK_DEPT_MAP[deptLabel];
   try {
     const allSessions = deptCode && window.YanAPI ? await YanAPI.getSessions({ department: deptCode }) : [];
-    // Recent enough to still be selecting feedback for it, not so far back the list gets
-    // cluttered with sessions from a year ago - plus sessions already scheduled up to 3
-    // months ahead, so a session shows up here as soon as it's scheduled.
-    const now = Date.now();
-    const from = now - 60 * 86400000, to = now + 90 * 86400000;
-    const sessions = allSessions
-      .filter(s => { const t = new Date(s.sessionDate + 'T00:00:00').getTime(); return t >= from && t <= to; })
-      .sort((a, b) => b.sessionDate.localeCompare(a.sessionDate));
-    if (sessions.length) {
-      wrap.innerHTML = `<select id="f-date">
-        <option value="">Select the session date...</option>
-        ${sessions.map(s => `<option value="${s.sessionDate}" ${state.sessionDate===s.sessionDate?'selected':''}>${s.sessionDate} — ${s.topic}</option>`).join('')}
-      </select>`;
-      document.getElementById('f-date').onchange = e => { state.sessionDate = e.target.value; updateNavState(); };
+    // Feedback is only ever about the session that just happened - not a list to search
+    // through. The most recent session whose date has already arrived is the only valid
+    // pick; once the next one happens, this one is replaced automatically. Sessions still
+    // in the future aren't selectable since nothing happened yet to give feedback on.
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const happened = allSessions.filter(s => s.sessionDate <= todayStr).sort((a, b) => b.sessionDate.localeCompare(a.sessionDate));
+    const current = happened[0];
+    if (current) {
+      state.sessionDate = current.sessionDate;
+      state.session = current.topic;
+      wrap.innerHTML = `<div style="background:var(--light);border-radius:12px;padding:0.85rem 1rem;border:1.5px solid rgba(27,42,107,0.13);">
+        <div style="font-size:0.68rem;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">This is the session you're giving feedback for</div>
+        <div style="font-size:0.92rem;font-weight:800;color:var(--navy);margin-top:0.3rem;">${escapeHtmlF(current.topic)}</div>
+        <div style="font-size:0.78rem;color:var(--gray);margin-top:0.1rem;">${current.sessionDate}</div>
+      </div>`;
     } else {
-      wrap.innerHTML = `<input type="date" id="f-date" value="${state.sessionDate}">`;
-      document.getElementById('f-date').onchange = e => state.sessionDate = e.target.value;
+      state.sessionDate = ''; state.session = '';
+      wrap.innerHTML = `<p style="font-size:0.8rem;color:var(--red);">No completed session found yet for this department.</p>`;
     }
   } catch(e) {
-    wrap.innerHTML = `<input type="date" id="f-date" value="${state.sessionDate}">`;
-    document.getElementById('f-date').onchange = e => state.sessionDate = e.target.value;
+    state.sessionDate = ''; state.session = '';
+    wrap.innerHTML = `<p style="font-size:0.8rem;color:var(--red);">Could not load sessions - please try again.</p>`;
   }
+  updateNavState();
+}
+function escapeHtmlF(str) {
+  const d = document.createElement('div');
+  d.textContent = String(str == null ? '' : str);
+  return d.innerHTML;
 }
 
 function bindPills(containerId, stateKey) {
