@@ -390,11 +390,43 @@ async function submitContact(request, env, cors) {
   return json({ ok: true }, 201, cors);
 }
 
-// Replaces the floating WhatsApp button's wa.me redirect - visitors weren't being taken
-// to WhatsApp at all wanted, they just wanted their message to reach YAN. No WhatsApp
-// Business API involved (that needs an account/verification only the org can set up) -
-// this just emails every admin with the message and the visitor's own number to call/
-// message back on, same delivery mechanism already used for join/contact submissions.
+// WhatsApp Cloud API expects the "to" number in international format with no leading
+// "+", spaces, or dashes - member-entered numbers are stored loosely (see isValidPhone
+// in auth-worker), so normalize before sending rather than trusting the raw value.
+function normalizeWhatsAppNumber(raw) {
+  return (raw || '').replace(/[^0-9]/g, '');
+}
+
+async function sendWhatsAppTemplate(env, toNumber, templateName, params) {
+  const to = normalizeWhatsAppNumber(toNumber);
+  if (!to) return { ok: false, error: 'No phone number' };
+  try {
+    const res = await fetch(`https://graph.facebook.com/v26.0/${env.WHATSAPP_PHONE_NUMBER_ID}/messages`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + env.WHATSAPP_ACCESS_TOKEN, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to,
+        type: 'template',
+        template: {
+          name: templateName,
+          language: { code: 'en_US' },
+          components: [{ type: 'body', parameters: params.map(text => ({ type: 'text', text })) }]
+        }
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) { console.error('WhatsApp send failed:', to, JSON.stringify(data)); return { ok: false, error: data }; }
+    return { ok: true };
+  } catch (e) { console.error('WhatsApp send failed:', to, e.message); return { ok: false, error: e.message }; }
+}
+
+// Replaces the floating WhatsApp button's wa.me redirect - visitors type their message
+// and number in-page instead of being taken to WhatsApp themselves. The message is sent
+// via the real WhatsApp Business Cloud API straight into every admin's WhatsApp (their
+// numbers pulled live from D1, not hardcoded) using the yan_website_inquiry template -
+// business-initiated messages need an approved template since admins haven't opened a
+// session by messaging first.
 async function submitQuickMessage(request, env, cors) {
   const body = await request.json();
   const phone = (body.phone || '').trim();
@@ -407,12 +439,10 @@ async function submitQuickMessage(request, env, cors) {
     'INSERT INTO contact_submissions (id,name,email,data_json,source,status,created_at) VALUES (?,?,?,?,?,?,?)'
   ).bind(newId(), name || 'WhatsApp widget', '', JSON.stringify({ phone, message, name }), 'whatsapp-widget', 'unread', now).run();
 
-  const { results: admins } = await env.DB.prepare('SELECT email, name FROM users WHERE is_admin = 1').all();
-  await Promise.all(admins.map(a => sendEmail(env, {
-    to: a.email, name: a.name,
-    subject: 'New WhatsApp widget message' + (name ? ' from ' + name : ''),
-    message: `${name ? name + ' (' + phone + ')' : phone} sent a message via the site's WhatsApp button:\n\n"${message}"\n\nReply to them on WhatsApp: https://wa.me/${phone.replace(/[^0-9]/g, '')}`
-  })));
+  const { results: admins } = await env.DB.prepare('SELECT whatsapp FROM users WHERE is_admin = 1 AND whatsapp IS NOT NULL').all();
+  await Promise.all(admins.map(a => sendWhatsAppTemplate(
+    env, a.whatsapp, 'yan_website_inquiry', [name || 'Anonymous', phone, message]
+  )));
 
   return json({ ok: true }, 201, cors);
 }
@@ -434,6 +464,7 @@ export default {
       if (path === '/api/stories' && request.method === 'GET') return await getStories(env, cors);
       if (path === '/api/join' && request.method === 'POST') return await submitJoin(request, env, cors);
       if (path === '/api/contact' && request.method === 'POST') return await submitContact(request, env, cors);
+      if (path === '/api/quick-message' && request.method === 'POST') return await submitQuickMessage(request, env, cors);
       if (path === '/api/quick-message' && request.method === 'POST') return await submitQuickMessage(request, env, cors);
 
       if (path === '/api/notifications' && request.method === 'GET') return await getNotifications(request, env, cors, url);

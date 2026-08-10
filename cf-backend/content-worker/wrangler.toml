@@ -25,3 +25,4 @@ service = "yan-ops-worker"
 [vars]
 EMAIL_WORKER_URL = "https://yan-email-worker.youngafricansn.workers.dev"
 ALLOWED_ORIGINS = "https://youngafricansnetwork.org,https://young-africans-network.web.app,http://localhost:8080"
+WHATSAPP_PHONE_NUMBER_ID = "1154581514414836"

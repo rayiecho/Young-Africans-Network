@@ -1,7 +1,7 @@
 // Replaces the floating WhatsApp button's wa.me redirect. Visitors no longer leave the
-// site - they type their message and phone number in place, and it's emailed straight to
-// every admin (same delivery mechanism as join/contact form submissions), who can then
-// reply on real WhatsApp using the number provided. Include with
+// site - they type their message and phone number in place, and it's sent straight into
+// every admin's real WhatsApp via the WhatsApp Business Cloud API (content-worker's
+// /api/quick-message -> sendWhatsAppTemplate), not email. Include with
 // <script src="/assets/yan-whatsapp-widget.js"></script> - injects its own modal markup,
 // no HTML changes needed beyond swapping the button's onclick.
 
