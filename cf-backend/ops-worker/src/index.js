@@ -249,6 +249,18 @@ async function updateSessionHandler(request, env, cors, id) {
   return json({ ok: true }, 200, cors);
 }
 
+// Admin explicitly marks a session done rather than it happening automatically once
+// the date passes - the feedback form's session picker only lists non-completed
+// sessions, so a session stays pickable until admin says it's actually over (covers
+// admin being late to mark it, or a session running past its scheduled date).
+async function markSessionComplete(request, env, cors, id) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  await env.DB.prepare(`UPDATE dept_sessions SET status = 'completed', updated_at = ? WHERE id = ?`)
+    .bind(Date.now(), id).run();
+  return json({ ok: true }, 200, cors);
+}
+
 async function listSessions(request, env, cors, url) {
   const department = url.searchParams.get('department');
   const headId = url.searchParams.get('headId');
@@ -1109,6 +1121,7 @@ export default {
         if (!sub && request.method === 'DELETE') return await deleteSession(request, env, cors, id);
         if (!sub && request.method === 'PUT') return await updateSessionHandler(request, env, cors, id);
         if (sub === 'confirm' && request.method === 'POST') return await confirmSession(request, env, cors, id);
+        if (sub === 'complete' && request.method === 'POST') return await markSessionComplete(request, env, cors, id);
         if (sub === 'prep-complete' && request.method === 'POST') return await markPrepComplete(request, env, cors, id);
         if (sub === 'needs-help' && request.method === 'POST') return await flagNeedsHelp(request, env, cors, id);
         if (sub === 'guests' && request.method === 'POST') return await addGuest(request, env, cors, id);

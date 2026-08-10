@@ -16,9 +16,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
-<script src="/assets/yan-api.js?v=1786370299"></script>
-<script src="/assets/yan-upload.js?v=1786370299"></script>
-<script src="/assets/yan-youtube.js?v=1786370299"></script>
+<script src="/assets/yan-api.js?v=1786372842"></script>
+<script src="/assets/yan-upload.js?v=1786372842"></script>
+<script src="/assets/yan-youtube.js?v=1786372842"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -4631,6 +4631,7 @@ async function loadSessionsAdminList() {
         </div>
         <div style="display:flex;align-items:center;gap:0.6rem;">
           <span style="background:${badgeColors[s.status]}22;color:${badgeColors[s.status]};padding:0.25rem 0.75rem;border-radius:50px;font-size:0.68rem;font-weight:700;text-transform:uppercase;">${s.status.replace('_',' ')}</span>
+          ${s.status !== 'completed' ? `<button onclick="markSessionCompleteAdmin('${s.id}')" style="background:none;border:none;color:#27AE60;cursor:pointer;font-size:0.78rem;font-weight:700;">Mark Done</button>` : ''}
           <button onclick="editSessionAdmin('${s.id}')" style="background:none;border:none;color:var(--navy);cursor:pointer;font-size:0.78rem;font-weight:700;">Edit</button>
           <button onclick="deleteSessionAdmin('${s.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.78rem;font-weight:700;">Delete</button>
         </div>
@@ -4692,6 +4693,12 @@ window.submitSessionAdmin = async function() {
 window.deleteSessionAdmin = async function(id) {
   if (!confirm('Delete this session?')) return;
   try { await YanAPI.deleteSession(id); showToast('Session deleted'); await loadSessionsAdminList(); }
+  catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+window.markSessionCompleteAdmin = async function(id) {
+  if (!confirm('Mark this session as done? It will drop off the feedback form\'s session list.')) return;
+  try { await YanAPI.markSessionComplete(id); showToast('Session marked done'); await loadSessionsAdminList(); }
   catch(e) { showToast('Error: ' + e.message, 'error'); }
 };
 

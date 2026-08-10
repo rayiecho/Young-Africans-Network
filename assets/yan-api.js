@@ -184,6 +184,7 @@
       return data.session;
     },
     async confirmSession(id) { return opsRequest('/api/sessions/' + id + '/confirm', { method: 'POST' }); },
+    async markSessionComplete(id) { return opsRequest('/api/sessions/' + id + '/complete', { method: 'POST' }); },
     async markSessionPrepComplete(id) { return opsRequest('/api/sessions/' + id + '/prep-complete', { method: 'POST' }); },
     async flagSessionNeedsHelp(id, note, taskType) {
       return opsRequest('/api/sessions/' + id + '/needs-help', { method: 'POST', body: { note, taskType } });
