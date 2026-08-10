@@ -133,7 +133,7 @@ body{font-family:Poppins,sans-serif;background:var(--light);min-height:100vh;ove
   <p>Young Africans Network · youngafricansnetwork.org · info@youngafricansnetwork.org</p>
 </div>
 
-<script src="/assets/yan-api.js?v=1786113572"></script>
+<script src="/assets/yan-api.js?v=1786368764"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -158,10 +158,11 @@ const state = {
   ratings:{overall:0,content:0,facilitator:0,time:0,engagement:0,organization:0},
   highlight:'', improvements:'', topicsWanted:'', otherComments:'',
   willApply:'', wouldRecommend:'', feeling:'',
-  volunteeredThisSession:'', volunteerMonths:[]
+  volunteeredThisSession:'', volunteerMonths:[], volunteerSkills:[]
 };
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const VOLUNTEER_SKILLS = ['Video Recording','Video Editing','Session Moderation','Assisting Speaker','Slides Design','Poster Design','WhatsApp Session Coordination'];
 const STAR_LABELS = ['','Poor','Fair','Good','Very Good','Excellent!'];
 const DEPARTMENTS = ['Programs','Scholarships','Career','Community','Mental Health','Communications','Partnerships','Finance'];
 const FEEDBACK_DEPT_MAP = {
@@ -250,6 +251,10 @@ const steps = [
         <div class="month-grid" id="month-grid">
           ${MONTHS.map(m=>`<div class="month-opt ${state.volunteerMonths.includes(m)?'selected':''}" data-val="${m}">${m}</div>`).join('')}
         </div></div>
+        <div class="form-group"><label>What would you like to help with? <span>(select all that apply)</span></label>
+        <div class="month-grid" id="skills-grid">
+          ${VOLUNTEER_SKILLS.map(s=>`<div class="month-opt ${state.volunteerSkills.includes(s)?'selected':''}" data-val="${s}">${s}</div>`).join('')}
+        </div></div>
       </div>`,
     bind: () => {
       bindPills('volThis-options','volunteeredThisSession');
@@ -261,6 +266,18 @@ const steps = [
             el.classList.remove('selected');
           } else {
             state.volunteerMonths.push(v);
+            el.classList.add('selected');
+          }
+        };
+      });
+      document.querySelectorAll('#skills-grid .month-opt').forEach(el => {
+        el.onclick = () => {
+          const v = el.dataset.val;
+          if (state.volunteerSkills.includes(v)) {
+            state.volunteerSkills = state.volunteerSkills.filter(s=>s!==v);
+            el.classList.remove('selected');
+          } else {
+            state.volunteerSkills.push(v);
             el.classList.add('selected');
           }
         };
@@ -374,6 +391,7 @@ const steps = [
           <div class="review-head"><h4>Volunteering</h4><span class="review-edit" data-goto="2">Edit</span></div>
           <div class="review-row"><b>Volunteered this session:</b> ${state.volunteeredThisSession || '—'}</div>
           <div class="review-row"><b>Available months:</b> ${state.volunteerMonths.length ? state.volunteerMonths.join(', ') : 'None selected'}</div>
+          <div class="review-row"><b>Willing to help with:</b> ${state.volunteerSkills.length ? state.volunteerSkills.join(', ') : 'None selected'}</div>
         </div>
         <div class="review-section">
           <div class="review-head"><h4>Ratings</h4><span class="review-edit" data-goto="3">Edit</span></div>
@@ -514,6 +532,7 @@ async function submitFeedback() {
       heardFrom: state.heardFrom,
       volunteeredThisSession: state.volunteeredThisSession,
       volunteerMonths: state.volunteerMonths,
+      volunteerSkills: state.volunteerSkills,
       ratings: { ...state.ratings },
       averageRating: Object.values(state.ratings).filter(r=>r>0).length
         ? (Object.values(state.ratings).reduce((a,b)=>a+b,0) / Object.values(state.ratings).filter(r=>r>0).length).toFixed(1)

@@ -87,9 +87,11 @@ async function getFirestoreVolunteersForMonth(env, monthAbbrev) {
     const email = fields.email?.stringValue || '';
     if (!email || seen.has(email)) continue;
     seen.add(email);
+    const skillValues = fields.volunteerSkills?.arrayValue?.values || [];
     people.push({
       name: fields.name?.stringValue || 'Anonymous',
-      email, role: fields.role?.stringValue || '', country: fields.country?.stringValue || ''
+      email, role: fields.role?.stringValue || '', country: fields.country?.stringValue || '',
+      skills: skillValues.map(v => v.stringValue).filter(Boolean)
     });
   }
   return people;
@@ -171,22 +173,30 @@ async function requireAdmin(request, env, cors) {
 // ---- sessions: shaping ----
 
 async function hydrateSession(env, row) {
-  const [guests, roles, attendanceCount] = await Promise.all([
+  const [guests, roles, attendanceCount, assistanceTask] = await Promise.all([
     env.DB.prepare('SELECT * FROM session_guests WHERE session_id = ?').bind(row.id).all(),
     env.DB.prepare(
       `SELECT sr.*, u.name as filled_by_name FROM session_roles sr
        LEFT JOIN users u ON u.id = sr.filled_by WHERE sr.session_id = ?`
     ).bind(row.id).all(),
-    env.DB.prepare('SELECT COUNT(*) as c FROM session_attendance WHERE session_id = ?').bind(row.id).first()
+    env.DB.prepare('SELECT COUNT(*) as c FROM session_attendance WHERE session_id = ?').bind(row.id).first(),
+    // The task flagNeedsHelp() creates for this session - surfaced here so the head can
+    // see/download the finished deliverable right on the session card instead of having
+    // to go find it in the Volunteer Room.
+    env.DB.prepare('SELECT * FROM volunteer_tasks WHERE related_session_id = ? ORDER BY created_at DESC LIMIT 1').bind(row.id).first()
   ]);
   return {
     id: row.id, sessionDate: row.session_date, department: row.department, topic: row.topic,
     meetLink: row.meet_link, briefing: row.briefing, assignedHeadId: row.assigned_head_id, assignedHeadName: row.head_name,
     status: row.status, prepComplete: !!row.prep_complete, needsAssistance: !!row.needs_assistance,
-    assistanceNote: row.assistance_note, createdAt: row.created_at,
+    assistanceNote: row.assistance_note, speakerPhotoUrl: row.speaker_photo_url, createdAt: row.created_at,
     guests: guests.results.map(g => ({ id: g.id, name: g.name, contact: g.contact, confirmed: !!g.confirmed })),
     roles: roles.results.map(r => ({ id: r.id, roleName: r.role_name, filledBy: r.filled_by, filledByName: r.filled_by_name, notes: r.notes })),
-    attendanceCount: attendanceCount.c
+    attendanceCount: attendanceCount.c,
+    assistanceTask: assistanceTask ? {
+      id: assistanceTask.id, taskType: assistanceTask.task_type, status: assistanceTask.status,
+      submittedFileUrl: assistanceTask.submitted_file_url
+    } : null
   };
 }
 
@@ -387,6 +397,18 @@ async function flagNeedsHelp(request, env, cors, id) {
   return json({ ok: true, volunteerTaskId: taskId }, 200, cors);
 }
 
+// Head/guest photo for the volunteer designing the poster to work from - downloadable
+// by admin and by whoever picks up the related poster task in the Volunteer Room.
+async function setSpeakerPhoto(request, env, cors, id) {
+  const { error } = await requireSessionAccess(request, env, cors, id);
+  if (error) return error;
+  const { photoUrl } = await request.json();
+  if (!photoUrl) return json({ error: 'photoUrl required' }, 400, cors);
+  await env.DB.prepare('UPDATE dept_sessions SET speaker_photo_url = ?, updated_at = ? WHERE id = ?')
+    .bind(photoUrl, Date.now(), id).run();
+  return json({ ok: true }, 200, cors);
+}
+
 async function addGuest(request, env, cors, id) {
   const { error } = await requireSessionAccess(request, env, cors, id);
   if (error) return error;
@@ -582,7 +604,7 @@ function taskRow(row) {
     status: row.status, claimedBy: row.claimed_by, claimedByName: row.claimed_by_name,
     submittedFileUrl: row.submitted_file_url, reviewNote: row.review_note,
     dueDate: row.due_date, pointsAwarded: row.points_awarded, createdAt: row.created_at,
-    youtubeUrl: row.youtube_url
+    youtubeUrl: row.youtube_url, speakerPhotoUrl: row.speaker_photo_url
   };
 }
 
@@ -637,7 +659,8 @@ async function listTasks(request, env, cors, url) {
     if (r.error) return r.error;
     user = r.user;
   }
-  let query = `SELECT t.*, u.name as claimed_by_name FROM volunteer_tasks t LEFT JOIN users u ON u.id = t.claimed_by`;
+  let query = `SELECT t.*, u.name as claimed_by_name, s.speaker_photo_url FROM volunteer_tasks t
+    LEFT JOIN users u ON u.id = t.claimed_by LEFT JOIN dept_sessions s ON s.id = t.related_session_id`;
   const conditions = [];
   const binds = [];
   if (status) { conditions.push('t.status = ?'); binds.push(status); }
@@ -912,6 +935,7 @@ async function getOrderedVolunteerAvailability(env, month) {
   }
   const merged = roster.map(r => ({
     id: r.id, name: r.name, email: r.email, userId: r.user_id || null,
+    skills: r.skills ? JSON.parse(r.skills) : [],
     lastClaimedAt: r.user_id ? (lastClaimedByUser[r.user_id] || 0) : 0
   }));
   merged.sort((a, b) => a.lastClaimedAt - b.lastClaimedAt);
@@ -936,13 +960,14 @@ async function addToVolunteerRoster(request, env, cors) {
   const { error, user } = await requireAdmin(request, env, cors);
   if (error) return error;
   const body = await request.json();
-  const { month, email, name } = body;
+  const { month, email, name, skills } = body;
   if (!month || !email || !name) return json({ error: 'month, email and name are required' }, 400, cors);
   const matched = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(email.toLowerCase()).first();
   await env.DB.prepare(
-    `INSERT INTO volunteer_roster (id,month,user_id,email,name,added_by,added_at) VALUES (?,?,?,?,?,?,?)
+    `INSERT INTO volunteer_roster (id,month,user_id,email,name,added_by,added_at,skills) VALUES (?,?,?,?,?,?,?,?)
      ON CONFLICT(month,email) DO NOTHING`
-  ).bind(newId(), month, matched?.id || null, email.toLowerCase(), name, user.id, Date.now()).run();
+  ).bind(newId(), month, matched?.id || null, email.toLowerCase(), name, user.id, Date.now(),
+    Array.isArray(skills) && skills.length ? JSON.stringify(skills) : null).run();
   return json({ ok: true }, 201, cors);
 }
 
@@ -1087,6 +1112,7 @@ export default {
         if (sub === 'prep-complete' && request.method === 'POST') return await markPrepComplete(request, env, cors, id);
         if (sub === 'needs-help' && request.method === 'POST') return await flagNeedsHelp(request, env, cors, id);
         if (sub === 'guests' && request.method === 'POST') return await addGuest(request, env, cors, id);
+        if (sub === 'speaker-photo' && request.method === 'POST') return await setSpeakerPhoto(request, env, cors, id);
         if (sub === 'checkin' && request.method === 'POST') return await checkIn(request, env, cors, id);
         if (sub === 'attendance' && request.method === 'GET') return await getAttendance(request, env, cors, id);
         if (sub === 'attendance/mark' && request.method === 'POST') return await markAttendance(request, env, cors, id);

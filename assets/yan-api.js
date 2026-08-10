@@ -194,6 +194,9 @@
     async confirmSessionGuest(id, guestId) {
       return opsRequest('/api/sessions/' + id + '/guests/' + guestId + '/confirm', { method: 'POST' });
     },
+    async setSessionSpeakerPhoto(id, photoUrl) {
+      return opsRequest('/api/sessions/' + id + '/speaker-photo', { method: 'POST', body: { photoUrl } });
+    },
     async addSessionRole(id, roleName) {
       return opsRequest('/api/sessions/' + id + '/roles', { method: 'POST', body: { roleName } });
     },
@@ -263,8 +266,8 @@
       const data = await opsRequest('/api/volunteer-candidates' + (month ? '?month=' + encodeURIComponent(month) : ''));
       return data.candidates;
     },
-    async addVolunteerToRoster(month, email, name) {
-      return opsRequest('/api/volunteer-roster', { method: 'POST', body: { month, email, name } });
+    async addVolunteerToRoster(month, email, name, skills) {
+      return opsRequest('/api/volunteer-roster', { method: 'POST', body: { month, email, name, skills } });
     },
     async removeVolunteerFromRoster(id) {
       return opsRequest('/api/volunteer-roster/' + id, { method: 'DELETE' });

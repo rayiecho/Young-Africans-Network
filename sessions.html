@@ -162,6 +162,22 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
   </div>
 </div>
 
+<!-- SPEAKER PHOTO MODAL -->
+<div class="modal-overlay" id="speaker-photo-modal">
+  <div class="modal">
+    <h3>Speaker / Guest Photo</h3>
+    <p style="font-size:0.8rem;color:var(--gray);margin-bottom:0.9rem;">For whoever designs the poster to work from - your own photo or the guest speaker's.</p>
+    <div class="form-group">
+      <input type="file" accept="image/*" id="sp-file" onchange="uploadSpeakerPhoto()">
+      <input type="hidden" id="sp-url">
+      <small id="sp-status" style="color:var(--gray);"></small>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('speaker-photo-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- ATTENDANCE MODAL -->
 <div class="modal-overlay" id="attendance-modal">
   <div class="modal">
@@ -175,7 +191,8 @@ nav{background:var(--white);box-shadow:0 2px 20px rgba(27,42,107,0.1);padding:0 
 
 <div class="toast" id="toast"></div>
 
-<script src="/assets/yan-api.js?v=1786113572"></script>
+<script src="/assets/yan-api.js?v=1786368764"></script>
+<script src="/assets/yan-upload.js?v=1786368764"></script>
 <script>
 let currentUser = null;
 let activeSessionForModal = null;
@@ -259,7 +276,11 @@ function renderSessionCard(s) {
     </div>
     ${s.meetLink ? `<a class="meet-link" href="${escapeHtml(s.meetLink)}" target="_blank">🔗 Join Google Meet</a>` : ''}
     ${s.briefing ? `<div style="background:var(--light);border-radius:10px;padding:0.75rem;margin-top:0.75rem;font-size:0.82rem;color:var(--navy);"><strong>Briefing:</strong> ${escapeHtml(s.briefing)}</div>` : ''}
-    ${s.needsAssistance ? `<div style="background:rgba(230,51,41,0.06);border-radius:10px;padding:0.75rem;margin-top:0.75rem;font-size:0.82rem;color:var(--red);"><strong>Needs help:</strong> ${escapeHtml(s.assistanceNote||'')}</div>` : ''}
+    ${s.needsAssistance ? `<div style="background:rgba(230,51,41,0.06);border-radius:10px;padding:0.75rem;margin-top:0.75rem;font-size:0.82rem;color:var(--red);">
+      <strong>Needs help:</strong> ${escapeHtml(s.assistanceNote||'')}
+      ${s.assistanceTask ? `<div style="margin-top:0.4rem;color:var(--navy);">Status: <strong>${s.assistanceTask.status.replace('_',' ')}</strong>${s.assistanceTask.submittedFileUrl ? ` · <a href="${escapeHtml(s.assistanceTask.submittedFileUrl)}" target="_blank" style="color:var(--navy);font-weight:700;">⬇ Download</a>` : ''}</div>` : ''}
+    </div>` : ''}
+    ${s.speakerPhotoUrl ? `<div style="margin-top:0.75rem;"><a href="${escapeHtml(s.speakerPhotoUrl)}" target="_blank" style="display:inline-flex;align-items:center;gap:0.4rem;background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.4rem 0.9rem;border-radius:50px;font-size:0.76rem;font-weight:700;">⬇ Speaker/Guest Photo</a></div>` : ''}
 
     <div class="section-label">Guest Speakers</div>
     <div>${guestsHtml}</div>
@@ -273,6 +294,7 @@ function renderSessionCard(s) {
       ${canManage ? `<button class="btn btn-outline" onclick="openAddGuestModal('${s.id}')">+ Guest</button>` : ''}
       ${canManage ? `<button class="btn btn-outline" onclick="openAddRoleModal('${s.id}')">+ Role</button>` : ''}
       ${canManage && !s.needsAssistance ? `<button class="btn btn-red" onclick="openNeedsHelpModal('${s.id}')">Request Help</button>` : ''}
+      ${canManage ? `<button class="btn btn-outline" onclick="openSpeakerPhotoModal('${s.id}')">${s.speakerPhotoUrl?'Change':'Upload'} Speaker Photo</button>` : ''}
       ${canManage ? `<button class="btn btn-outline" onclick="viewAttendance('${s.id}', '${escapeHtml(s.topic)}')">Attendance (${s.attendanceCount})</button>` : ''}
       <button class="btn btn-gold" onclick="checkIn('${s.id}')">I'm Here — Check In</button>
       ${currentUser.isAdmin ? `<button class="btn btn-outline" style="color:var(--red);" onclick="deleteSession('${s.id}')">Delete</button>` : ''}
@@ -329,6 +351,27 @@ async function submitAddGuest() {
   try { await YanAPI.addSessionGuest(activeSessionForModal, name, contact); closeModal('add-guest-modal'); showToast('Guest added'); await loadSessions(); }
   catch(e) { showToast(e.message, 'error'); }
   finally { btn.disabled = false; }
+}
+function openSpeakerPhotoModal(id) {
+  activeSessionForModal = id;
+  document.getElementById('sp-file').value = '';
+  document.getElementById('sp-url').value = '';
+  document.getElementById('sp-status').textContent = '';
+  openModal('speaker-photo-modal');
+}
+async function uploadSpeakerPhoto() {
+  const file = document.getElementById('sp-file').files[0];
+  const status = document.getElementById('sp-status');
+  if (!file) return;
+  status.textContent = '⏳ Uploading...';
+  try {
+    const url = await YanUpload.uploadFile(file, (pct) => { status.textContent = '⏳ Uploading... ' + pct + '%'; });
+    await YanAPI.setSessionSpeakerPhoto(activeSessionForModal, url);
+    status.textContent = '✅ Uploaded!';
+    showToast('Speaker photo saved');
+    await loadSessions();
+    setTimeout(() => closeModal('speaker-photo-modal'), 900);
+  } catch(e) { status.textContent = '❌ ' + e.message; }
 }
 async function confirmGuest(sessionId, guestId) {
   try { await YanAPI.confirmSessionGuest(sessionId, guestId); showToast('Guest confirmed'); await loadSessions(); }

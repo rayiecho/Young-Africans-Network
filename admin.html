@@ -16,9 +16,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
-<script src="/assets/yan-api.js?v=1786120002"></script>
-<script src="/assets/yan-upload.js?v=1786120002"></script>
-<script src="/assets/yan-youtube.js?v=1786120002"></script>
+<script src="/assets/yan-api.js?v=1786368764"></script>
+<script src="/assets/yan-upload.js?v=1786368764"></script>
+<script src="/assets/yan-youtube.js?v=1786368764"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -4626,7 +4626,8 @@ async function loadSessionsAdminList() {
           <div style="font-size:0.95rem;font-weight:800;color:var(--navy);">${sanitize(s.topic)}</div>
           <div style="font-size:0.78rem;color:var(--gray);">${SESSION_DEPT_NAMES[s.department]||s.department}${s.assignedHeadName?' · Led by '+sanitize(s.assignedHeadName):' · No head assigned yet'}</div>
           ${s.briefing ? `<div style="font-size:0.78rem;color:var(--gray);margin-top:0.35rem;background:var(--light);border-radius:8px;padding:0.5rem 0.75rem;">${sanitize(s.briefing)}</div>` : ''}
-          ${s.needsAssistance ? `<div style="font-size:0.78rem;color:#E63329;margin-top:0.35rem;"><strong>Needs help:</strong> ${sanitize(s.assistanceNote||'')}</div>` : ''}
+          ${s.needsAssistance ? `<div style="font-size:0.78rem;color:#E63329;margin-top:0.35rem;"><strong>Needs help:</strong> ${sanitize(s.assistanceNote||'')}${s.assistanceTask ? ' · Status: ' + s.assistanceTask.status.replace('_',' ') + (s.assistanceTask.submittedFileUrl ? ` · <a href="${sanitize(s.assistanceTask.submittedFileUrl)}" target="_blank" style="color:var(--navy);font-weight:700;">Download</a>` : '') : ''}</div>` : ''}
+          ${s.speakerPhotoUrl ? `<div style="margin-top:0.35rem;"><a href="${sanitize(s.speakerPhotoUrl)}" target="_blank" style="font-size:0.76rem;color:var(--navy);font-weight:700;">⬇ Speaker/Guest Photo</a></div>` : ''}
         </div>
         <div style="display:flex;align-items:center;gap:0.6rem;">
           <span style="background:${badgeColors[s.status]}22;color:${badgeColors[s.status]};padding:0.25rem 0.75rem;border-radius:50px;font-size:0.68rem;font-weight:700;text-transform:uppercase;">${s.status.replace('_',' ')}</span>
@@ -4864,24 +4865,32 @@ window.loadVolunteerCandidatesAdmin = async function() {
   el.innerHTML = '<p style="color:var(--gray);font-size:0.82rem;">Loading...</p>';
   try {
     const candidates = await YanAPI.getVolunteerCandidates(month);
+    window._vrCandidatesByEmail = Object.fromEntries(candidates.map(c => [c.email.toLowerCase(), c]));
+    const skillTags = (skills) => (skills && skills.length)
+      ? '<div style="margin-top:0.3rem;">' + skills.map(s => `<span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.1rem 0.55rem;border-radius:50px;font-size:0.65rem;font-weight:700;margin-right:0.3rem;display:inline-block;margin-bottom:0.2rem;">${sanitize(s)}</span>`).join('') + '</div>'
+      : '';
     el.innerHTML = candidates.length
       ? '<div style="background:var(--light);border-radius:14px;">' + candidates.map((c,i) => `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.65rem 1rem;${i<candidates.length-1?'border-bottom:1px solid rgba(27,42,107,0.08);':''}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:0.65rem 1rem;${i<candidates.length-1?'border-bottom:1px solid rgba(27,42,107,0.08);':''}">
           <div>
             <div style="font-size:0.84rem;font-weight:700;color:var(--navy);">${sanitize(c.name)}</div>
             <div style="font-size:0.73rem;color:var(--gray);">${sanitize(c.email)}</div>
+            ${skillTags(c.skills)}
           </div>
-          <button onclick="addVolunteerToRosterAdmin('${sanitize(c.name)}','${encodeURIComponent(c.email)}')" style="background:var(--navy);color:#fff;border:none;padding:0.35rem 0.9rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;">Add</button>
+          <button onclick="addVolunteerToRosterAdmin('${encodeURIComponent(c.email)}')" style="background:var(--navy);color:#fff;border:none;padding:0.35rem 0.9rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;flex-shrink:0;">Add</button>
         </div>`).join('') + '</div>'
       : '<p style="color:var(--gray);font-size:0.82rem;">Everyone who signed up for ' + month + ' is already on the roster.</p>';
   } catch(e) { el.innerHTML = '<p style="color:var(--red);font-size:0.82rem;">Error: ' + e.message + '</p>'; }
 };
 
-window.addVolunteerToRosterAdmin = async function(name, emailEncoded) {
+window.addVolunteerToRosterAdmin = async function(emailEncoded) {
   const month = document.getElementById('vr-month').value;
+  const email = decodeURIComponent(emailEncoded);
+  const candidate = (window._vrCandidatesByEmail || {})[email.toLowerCase()];
+  if (!candidate) return showToast('Could not find that candidate - try reloading', 'error');
   try {
-    await YanAPI.addVolunteerToRoster(month, decodeURIComponent(emailEncoded), name);
-    showToast(name + ' added to the ' + month + ' roster');
+    await YanAPI.addVolunteerToRoster(month, email, candidate.name, candidate.skills || []);
+    showToast(candidate.name + ' added to the ' + month + ' roster');
     await loadVolunteerCandidatesAdmin();
     if (document.getElementById('vr-roster-wrap').style.display !== 'none') await loadVolunteerRosterAdmin();
   } catch(e) { showToast('Error: ' + e.message, 'error'); }
@@ -4900,14 +4909,18 @@ async function loadVolunteerRosterAdmin() {
   el.innerHTML = '<p style="color:var(--gray);font-size:0.82rem;">Loading...</p>';
   try {
     const roster = await YanAPI.getVolunteerQueue(month);
+    const skillTags = (skills) => (skills && skills.length)
+      ? '<div style="margin-top:0.3rem;">' + skills.map(s => `<span style="background:rgba(27,42,107,0.08);color:var(--navy);padding:0.1rem 0.55rem;border-radius:50px;font-size:0.65rem;font-weight:700;margin-right:0.3rem;display:inline-block;margin-bottom:0.2rem;">${sanitize(s)}</span>`).join('') + '</div>'
+      : '';
     el.innerHTML = roster.length
       ? '<div style="background:#fff;border:1px solid rgba(27,42,107,0.08);border-radius:14px;">' + roster.map((v,i) => `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1.1rem;${i<roster.length-1?'border-bottom:1px solid rgba(27,42,107,0.08);':''}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:0.75rem 1.1rem;${i<roster.length-1?'border-bottom:1px solid rgba(27,42,107,0.08);':''}">
           <div>
             <div style="font-size:0.85rem;font-weight:700;color:var(--navy);">#${i+1} ${sanitize(v.name)}</div>
             <div style="font-size:0.75rem;color:var(--gray);">${sanitize(v.email)}</div>
+            ${skillTags(v.skills)}
           </div>
-          <div style="display:flex;gap:0.5rem;">
+          <div style="display:flex;gap:0.5rem;flex-shrink:0;">
             <button onclick="openMessagePersonModal('${sanitize(v.name)}','${encodeURIComponent(v.email)}')" style="background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.35rem 0.9rem;border-radius:50px;font-size:0.72rem;font-weight:700;font-family:Poppins,sans-serif;cursor:pointer;">Message</button>
             <button onclick="removeVolunteerFromRosterAdmin('${v.id}')" style="background:none;border:1px solid rgba(230,51,41,0.3);color:var(--red);padding:0.35rem 0.9rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;">Remove</button>
           </div>
