@@ -113,6 +113,17 @@ async function sendEmail(env, { to, name, subject, message }) {
   } catch (e) { console.error('Email send failed:', e.message); }
 }
 
+// SES enforces a real per-account send rate (currently 14/sec) - firing a whole
+// recipient list at once via Promise.all can burst past that and get some sends
+// silently throttled/rejected once a list is more than a handful of people. Sending
+// one at a time keeps each request's own round-trip as the natural pacing, which in
+// practice stays well under the cap without needing an artificial delay.
+async function sendToEach(items, sendOne) {
+  for (const item of items) {
+    await sendOne(item).catch(e => console.error('Bulk send item failed:', e.message));
+  }
+}
+
 // "Pop-up": a notifications row with a distinct type the client (community.html)
 // shows as a prominent in-app alert the moment it's seen, instead of just badge count -
 // see the pollForPopups() polling loop client-side. Email is the second, independent
@@ -131,9 +142,9 @@ async function notifyAdmins(env, { title, message, emailSubject }) {
   await Promise.all(admins.results.map(a => env.DB.prepare(
     `INSERT INTO notifications (id,user_id,title,message,type,posted_by,created_at) VALUES (?,?,?,?,?,?,?)`
   ).bind(newId(), a.id, title, message, 'popup_task', 'YAN System', now).run()));
-  await Promise.all(admins.results.filter(a => a.email).map(a =>
+  await sendToEach(admins.results.filter(a => a.email), a =>
     sendEmail(env, { to: a.email, name: a.name, subject: emailSubject || title, message })
-  ));
+  );
 }
 
 async function sha256Hex(input) {
@@ -398,14 +409,14 @@ async function flagNeedsHelp(request, env, cors, id) {
   const available = await getOrderedVolunteerAvailability(env, monthNow);
   const grabUrl = 'https://youngafricansnetwork.org/volunteer.html';
   const helpTaskMessage = `A new ${taskType.replace('_',' ')} task is open: "Help needed: ${session.topic}". Click here to grab and serve: ${grabUrl}`;
-  await Promise.all(available.map(v => v.userId
+  await sendToEach(available, v => v.userId
     ? notifyUser(env, v.userId, {
         title: 'New Volunteer Room task: ' + session.topic,
         message: helpTaskMessage,
         emailSubject: 'YAN Volunteer Room: Help needed for ' + session.topic
       })
     : sendEmail(env, { to: v.email, name: v.name, subject: 'YAN Volunteer Room: Help needed for ' + session.topic, message: helpTaskMessage })
-  ));
+  );
 
   return json({ ok: true, volunteerTaskId: taskId }, 200, cors);
 }
@@ -629,14 +640,14 @@ async function notifyVolunteersOfNewTask(env, { taskType, title }) {
   const available = await getOrderedVolunteerAvailability(env, monthNow);
   const grabUrl = 'https://youngafricansnetwork.org/volunteer.html';
   const taskMessage = `There's a new ${taskType.replace('_',' ')} task open: "${title}". Click here to grab and serve: ${grabUrl}`;
-  await Promise.all(available.map(v => v.userId
+  await sendToEach(available, v => v.userId
     ? notifyUser(env, v.userId, {
         title: 'New Volunteer Room task: ' + title,
         message: taskMessage,
         emailSubject: 'YAN Volunteer Room: ' + title
       })
     : sendEmail(env, { to: v.email, name: v.name, subject: 'YAN Volunteer Room: ' + title, message: taskMessage })
-  ));
+  );
 }
 
 async function createTask(request, env, cors) {
@@ -739,7 +750,7 @@ async function emailVolunteerQueue(request, env, cors) {
   if (!body.subject || !body.message) return json({ error: 'Subject and message required' }, 400, cors);
   const month = body.month || MONTH_ABBREVS[new Date().getMonth()];
   const people = await getOrderedVolunteerAvailability(env, month);
-  await Promise.all(people.map(p => sendEmail(env, { to: p.email, subject: body.subject, message: body.message })));
+  await sendToEach(people, p => sendEmail(env, { to: p.email, name: p.name, subject: body.subject, message: body.message }));
   return json({ ok: true, sentTo: people.length }, 200, cors);
 }
 
