@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="tiny-ps" version="1.2" viewBox="0 0 100 100" width="512" height="512">
+  <title>Young Africans Network</title>
+  <rect width="100" height="100" fill="#FFFFFF"/>
+  <circle cx="38" cy="24" r="11" fill="#F5A623"/>
+  <circle cx="21" cy="31" r="8" fill="#E63329"/>
+  <circle cx="19" cy="53" r="11" fill="#D42E27"/>
+  <circle cx="59" cy="29" r="7" fill="#4FB3E8"/>
+  <circle cx="70" cy="49" r="12" fill="#2D8FD5"/>
+  <circle cx="38" cy="58" r="10" fill="#F5941F"/>
+  <circle cx="49" cy="49" r="4" fill="#3AA65A"/>
+  <circle cx="40" cy="41" r="4" fill="#8B2020"/>
+  <rect x="46" y="66" width="5" height="10" rx="2.5" fill="#1B2A6B"/>
+  <circle cx="35" cy="79" r="10" fill="#1B2A6B"/>
+  <circle cx="61" cy="79" r="7" fill="#1B2A6B"/>
+</svg>
