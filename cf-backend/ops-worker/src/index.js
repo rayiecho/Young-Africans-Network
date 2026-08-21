@@ -97,6 +97,11 @@ async function getFirestoreVolunteersForMonth(env, monthAbbrev) {
   return people;
 }
 
+// Returns whether the send actually succeeded - swallows the error either way (callers
+// weren't checking a return value before, so this stays backward compatible with every
+// existing call site) but callers that DO care about real success/failure (e.g. the
+// newsletter sent/failed count) now have something real to check instead of everything
+// silently counting as "sent" regardless of outcome.
 async function sendEmail(env, { to, name, subject, message }) {
   try {
     // Two separate bugs stacked here: (1) yan-email-worker expects to_email/name/type,
@@ -109,19 +114,97 @@ async function sendEmail(env, { to, name, subject, message }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ to_email: to, name: name || '', subject, message, type: 'general' })
     });
-    if (!res.ok) console.error('Email send failed:', res.status, await res.text());
-  } catch (e) { console.error('Email send failed:', e.message); }
+    if (!res.ok) { console.error('Email send failed:', res.status, await res.text()); return false; }
+    const data = await res.json().catch(() => ({}));
+    if (data.success === false) { console.error('Email send failed:', data.error); return false; }
+    return true;
+  } catch (e) { console.error('Email send failed:', e.message); return false; }
 }
 
 // SES enforces a real per-account send rate (currently 14/sec) - firing a whole
 // recipient list at once via Promise.all can burst past that and get some sends
-// silently throttled/rejected once a list is more than a handful of people. Sending
-// one at a time keeps each request's own round-trip as the natural pacing, which in
-// practice stays well under the cap without needing an artificial delay.
+// silently throttled/rejected once a list is more than a handful of people. Sends in
+// batches safely under the cap, pacing each batch to take at least 1 second (via
+// padding, not by racing to fit exactly 12 requests within it) so sustained throughput
+// stays under 14/sec regardless of how fast individual requests complete - about 12
+// emails/sec in practice, so 1,000 recipients takes roughly 85 seconds, not the 1,000x
+// single-request-latency it would take fully sequential.
+const SEND_BATCH_SIZE = 12;
 async function sendToEach(items, sendOne) {
-  for (const item of items) {
-    await sendOne(item).catch(e => console.error('Bulk send item failed:', e.message));
+  for (let i = 0; i < items.length; i += SEND_BATCH_SIZE) {
+    const batch = items.slice(i, i + SEND_BATCH_SIZE);
+    const started = Date.now();
+    await Promise.all(batch.map(item => sendOne(item).catch(e => console.error('Bulk send item failed:', e.message))));
+    const elapsed = Date.now() - started;
+    if (elapsed < 1000 && i + SEND_BATCH_SIZE < items.length) {
+      await new Promise(resolve => setTimeout(resolve, 1000 - elapsed));
+    }
   }
+}
+
+async function patchFirestoreDoc(env, collectionId, docId, updates) {
+  const accessToken = await getFirestoreAccessToken(env);
+  const updateMask = Object.keys(updates).map(k => `updateMask.fieldPaths=${encodeURIComponent(k)}`).join('&');
+  const res = await fetch(
+    `https://firestore.googleapis.com/v1/projects/young-africans-network/databases/(default)/documents/${collectionId}/${docId}?${updateMask}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + accessToken },
+      body: JSON.stringify({ fields: toFirestoreFields(updates) })
+    }
+  );
+  if (!res.ok) console.error('Firestore patch failed:', res.status, await res.text());
+}
+
+// Newsletter sending was entirely client-side (admin's own browser looping over every
+// recipient) - for a few dozen members that's fine, but for hundreds it's slow AND has
+// the same "close the tab mid-send and it's silently abandoned" problem already found
+// and fixed for uploads. Moving the actual send server-side with waitUntil means it
+// keeps running (rate-limited, batched) even after the response returns to the admin,
+// independent of what their browser does next.
+async function sendNewsletterHandler(request, env, cors, ctx) {
+  const { error } = await requireAdmin(request, env, cors);
+  if (error) return error;
+  const body = await request.json();
+  const { subject, message, target, selectedUserIds, externalEmails, rsvpSessionId, newsletterDocId } = body;
+  if (!subject || !message) return json({ error: 'Subject and message are required' }, 400, cors);
+
+  let query = 'SELECT id, email, name, department FROM users WHERE email IS NOT NULL';
+  const binds = [];
+  if (target === 'specific') {
+    if (!Array.isArray(selectedUserIds) || !selectedUserIds.length) return json({ error: 'No recipients selected' }, 400, cors);
+    query += ` AND id IN (${selectedUserIds.map(() => '?').join(',')})`;
+    binds.push(...selectedUserIds);
+  } else if (target && target !== 'all') {
+    query += ' AND department = ?';
+    binds.push(target);
+  }
+  const { results } = await env.DB.prepare(query).bind(...binds).all();
+  // External emails - join-form applicants, event contacts, etc. who aren't registered
+  // members - additive to whichever member target was selected, not a replacement.
+  const recipients = results.concat((externalEmails || []).map(email => ({ id: null, name: '', email })));
+  if (!recipients.length) return json({ error: 'No recipients found' }, 400, cors);
+  if (message.includes('{{RSVP_LINK}}')) {
+    if (!rsvpSessionId) return json({ error: 'Select which session the confirmation link is for' }, 400, cors);
+    if (recipients.some(r => !r.id)) return json({ error: 'The confirmation link only works for registered members - remove external emails or the {{RSVP_LINK}} tag' }, 400, cors);
+  }
+
+  const sendJob = (async () => {
+    let sent = 0, failed = 0;
+    await sendToEach(recipients, async r => {
+      const personalMessage = rsvpSessionId
+        ? message.replace(/\{\{RSVP_LINK\}\}/g, 'https://youngafricansnetwork.org/session-rsvp.html?session=' + encodeURIComponent(rsvpSessionId) + '&u=' + encodeURIComponent(r.id))
+        : message;
+      const ok = await sendEmail(env, { to: r.email, name: r.name, subject, message: personalMessage });
+      if (ok) sent++; else failed++;
+    });
+    if (newsletterDocId) {
+      await patchFirestoreDoc(env, 'newsletters', newsletterDocId, { sentTo: sent, failed, sending: false }).catch(() => {});
+    }
+  })();
+  if (ctx?.waitUntil) ctx.waitUntil(sendJob); else await sendJob;
+
+  return json({ ok: true, recipientCount: recipients.length }, 200, cors);
 }
 
 // "Pop-up": a notifications row with a distinct type the client (community.html)
@@ -896,6 +979,7 @@ function toFirestoreFields(obj) {
     if (v === null || v === undefined) continue;
     if (v instanceof Date) fields[k] = { timestampValue: v.toISOString() };
     else if (typeof v === 'number') fields[k] = { doubleValue: v };
+    else if (typeof v === 'boolean') fields[k] = { booleanValue: v };
     else fields[k] = { stringValue: String(v) };
   }
   return fields;
@@ -1165,7 +1249,7 @@ async function recordYoutubePublish(request, env, cors, id) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const origin = request.headers.get('Origin') || '';
     const allowedOrigins = (env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -1175,6 +1259,7 @@ export default {
     try {
       const path = url.pathname;
 
+      if (path === '/api/newsletter/send' && request.method === 'POST') return await sendNewsletterHandler(request, env, cors, ctx);
       if (path === '/api/sessions' && request.method === 'POST') return await createSessionHandler(request, env, cors);
       if (path === '/api/sessions' && request.method === 'GET') return await listSessions(request, env, cors, url);
 

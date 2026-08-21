@@ -16,9 +16,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
-<script src="/assets/yan-api.js?v=1786390252"></script>
-<script src="/assets/yan-upload.js?v=1786390252"></script>
-<script src="/assets/yan-youtube.js?v=1786390252"></script>
+<script src="/assets/yan-api.js?v=1787346730"></script>
+<script src="/assets/yan-upload.js?v=1787346730"></script>
+<script src="/assets/yan-youtube.js?v=1787346730"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -726,7 +726,7 @@ async function approveJoinRequest(id, email, name) {
     await fetch('https://yan-email-worker.youngafricansn.workers.dev', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       to_email: email, name: name,
       subject: 'Application Approved — Young Africans Network',
-      message: 'Congratulations ' + name + '! Your application to join Young Africans Network has been approved. Please register at: https://youngafricansnetwork.org/register.html\n\nWelcome to the YAN family!\n\nWarm regards,\nYAN Administration Office'
+      message: 'Congratulations ' + name + '! Your application to join Young Africans Network has been approved. Please register at: https://youngafricansnetwork.org/register.html\n\nJoin our WhatsApp community to connect with members across Africa: https://chat.whatsapp.com/FDpWNXl9bWbBWOsvNgBC7i\n\nWelcome to the YAN family!\n\nWarm regards,\nYAN Administration Office'
     })});
   } catch(e) { console.log('Email error:', e); }
   showToast(name + ' approved!');
@@ -6117,66 +6117,36 @@ window.sendNewsletter = async function() {
     return showToast('Select which session the confirmation link is for', 'error');
   }
 
-  const allUsers = window._nlAllUsers || [];
-  let recipients = [];
-  if (window._nlTarget === 'all') recipients = allUsers;
-  else if (window._nlTarget === 'specific') recipients = allUsers.filter(function(u){ return (window._nlSelectedUIDs||[]).includes(u.id); });
-  else recipients = allUsers.filter(function(u){ return u.department === window._nlTarget; });
-
-  // External emails - people who filled the join form, event contacts, etc. who aren't
-  // registered members - additive to whichever member target is selected above, not a
-  // replacement for it.
   const externalEmails = window.parseExternalEmails();
-  recipients = recipients.concat(externalEmails.map(email => ({ id: null, name: '', email })));
-
-  if (recipients.length === 0) return showToast('No recipients selected', 'error');
-  if (message.includes('{{RSVP_LINK}}') && recipients.some(u => !u.id)) {
-    return showToast('The confirmation link only works for registered members - remove external emails or the {{RSVP_LINK}} tag', 'error');
+  const selectedUserIds = window._nlTarget === 'specific' ? (window._nlSelectedUIDs || []) : [];
+  if (window._nlTarget === 'specific' && !selectedUserIds.length && !externalEmails.length) {
+    return showToast('No recipients selected', 'error');
   }
 
-  let sent = 0, failed = 0;
-  showToast('Starting email broadcast...', 'info');
-
-  for (const user of recipients) {
-    if (!user.email) continue;
-    const personalMessage = rsvpSessionId
-      ? message.replace(/\{\{RSVP_LINK\}\}/g, 'https://youngafricansnetwork.org/session-rsvp.html?session=' + encodeURIComponent(rsvpSessionId) + '&u=' + encodeURIComponent(user.id))
-      : message;
-    try {
-      let response = await fetch('https://yan-email-worker.youngafricansn.workers.dev', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to_email: user.email,
-          name: user.name || 'Member',
-          subject: subject,
-          message: personalMessage,
-          type: 'general'
-        })
-      });
-      if (response.ok) {
-        sent++;
-      } else {
-        failed++;
-      }
-    } catch (e) {
-      failed++;
-    }
+  // Sending itself happens server-side (rate-limited, batched) via ctx.waitUntil, so it
+  // keeps running to completion even if this tab is closed right after this call -
+  // same lesson learned from the earlier "upload abandoned mid-flight" bug.
+  const btn = document.querySelector('button[onclick="sendNewsletter()"]');
+  if (btn) btn.disabled = true;
+  showToast('Sending in the background - this keeps going even if you leave this page.', 'info');
+  try {
+    const newsletterRef = await addDoc(collection(db, 'newsletters'), {
+      subject, message, target: window._nlTarget,
+      sentTo: 0, failed: 0, sending: true,
+      createdBy: auth.currentUser?.email || 'Admin',
+      createdAt: serverTimestamp()
+    });
+    const { recipientCount } = await YanAPI.sendNewsletterBulk({
+      subject, message, target: window._nlTarget, selectedUserIds, externalEmails,
+      rsvpSessionId: rsvpSessionId || undefined, newsletterDocId: newsletterRef.id
+    });
+    showToast('Sending to ' + recipientCount + ' recipients - check Sent Newsletters shortly for the final count.');
+    loadSection('newsletters');
+  } catch (e) {
+    showToast('Error: ' + e.message, 'error');
+  } finally {
+    if (btn) btn.disabled = false;
   }
-
-  await addDoc(collection(db, 'newsletters'), {
-    subject,
-    message,
-    target: window._nlTarget,
-    sentTo: sent,
-    failed,
-    createdBy: auth.currentUser?.email || 'Admin',
-    createdAt: serverTimestamp(),
-    sent: true
-  });
-
-  showToast('Newsletter sent to ' + sent + ' members!' + (failed > 0 ? ' (' + failed + ' failed)' : ''));
-  loadSection('newsletters');
 };
 
 window.saveNewsletterDraft = async function() {

@@ -263,6 +263,11 @@
     async messagePerson(email, subject, message) {
       return opsRequest('/api/message', { method: 'POST', body: { email, subject, message } });
     },
+    // Sending happens server-side (rate-limited, batched) via ctx.waitUntil - keeps
+    // running even if the admin closes this tab right after triggering it.
+    async sendNewsletterBulk({ subject, message, target, selectedUserIds, newsletterDocId }) {
+      return opsRequest('/api/newsletter/send', { method: 'POST', body: { subject, message, target, selectedUserIds, newsletterDocId } });
+    },
     async getVolunteerCandidates(month) {
       const data = await opsRequest('/api/volunteer-candidates' + (month ? '?month=' + encodeURIComponent(month) : ''));
       return data.candidates;
