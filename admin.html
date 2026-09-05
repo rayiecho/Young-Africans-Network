@@ -16,9 +16,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
-<script src="/assets/yan-api.js?v=1787346730"></script>
-<script src="/assets/yan-upload.js?v=1787346730"></script>
-<script src="/assets/yan-youtube.js?v=1787346730"></script>
+<script src="/assets/yan-api.js?v=1788601387"></script>
+<script src="/assets/yan-upload.js?v=1788601387"></script>
+<script src="/assets/yan-youtube.js?v=1788601387"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -48,8 +48,31 @@ const DEPARTMENTS = [
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-window._db = db;
 const auth = getAuth(app);
+// The classic (non-module) script later in this file has no access to this module's
+// imports at all - every Firestore/Auth call there (addDoc, updateDoc, etc.) was
+// silently broken, throwing "X is not defined" the instant it ran. Bare identifiers in
+// a non-strict classic script resolve through the global object, so assigning these to
+// window is enough to make them work there exactly as if they were imported directly -
+// same bridging pattern already used elsewhere in this file (e.g. showToast).
+window._db = db;
+window.db = db;
+window.auth = auth;
+window.collection = collection;
+window.addDoc = addDoc;
+window.getDocs = getDocs;
+window.deleteDoc = deleteDoc;
+window.doc = doc;
+window.updateDoc = updateDoc;
+window.serverTimestamp = serverTimestamp;
+window.query = query;
+window.orderBy = orderBy;
+window.onSnapshot = onSnapshot;
+window.where = where;
+window.getDoc = getDoc;
+window.setDoc = setDoc;
+window.limit = limit;
+window.increment = increment;
 function checkAuth() {} // no-op kept for compatibility with existing calls; real logic below
 function tryLoad(attempts) {
   if (window.loadProgramsAdmin || attempts > 20) {
