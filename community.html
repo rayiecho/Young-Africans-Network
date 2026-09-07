@@ -270,12 +270,9 @@ onAuthStateChanged(auth, async user => {
   if (user) {
     currentUser = user;
     console.log('[YAN Auth] Email verified:', user.emailVerified);
-    // Check email verification first (fast - no Firestore needed)
-    if (!user.emailVerified) {
-      console.log('[YAN Auth] Email not verified - showing verify screen');
-      showScreen('screen-verify-email');
-      return;
-    }
+    // Email verification is no longer a hard gate - unverified members can still use the
+    // platform (they were dropping off waiting on emails that sometimes arrived late/never).
+    // enterPlatform() shows a dismissible reminder banner instead for anyone still unverified.
     // Try cached data from localStorage for instant load
     console.log('[YAN Auth] About to check cache...');
     let cacheKey, cached;
@@ -490,7 +487,9 @@ async function doRegister() {
       }
       localStorage.removeItem('yan_referral');
     }
-    showScreen('screen-verify-email');
+    // No hard verify-email gate anymore - onAuthStateChanged (triggered by
+    // signInWithCustomToken above) routes straight into the platform; the reminder
+    // banner in enterPlatform() covers verification instead.
   } catch(e) {
     showToast(e.message, 'error');
   } finally {
@@ -743,6 +742,11 @@ function showIdleModal() {
 function enterPlatform() {
   startIdleWatcher();
   showScreen('screen-platform');
+  const banner = document.getElementById('verify-email-banner');
+  if (banner) {
+    const dismissed = currentUser && sessionStorage.getItem('yan_verify_banner_dismissed_' + currentUser.uid);
+    banner.style.display = (currentUser && !currentUser.emailVerified && !dismissed) ? 'flex' : 'none';
+  }
   const photo = currentUserData.photoUrl;
   const avatarHtml = photo
     ? `<img src="${photo}" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
@@ -11142,6 +11146,12 @@ window.resendVerificationEmail = async function() {
   }
 };
 
+window.dismissVerifyBanner = function() {
+  const banner = document.getElementById('verify-email-banner');
+  if (banner) banner.style.display = 'none';
+  if (currentUser) sessionStorage.setItem('yan_verify_banner_dismissed_' + currentUser.uid, '1');
+};
+
 window.checkEmailVerified = async function() {
   try {
     await currentUser.reload();
@@ -11149,6 +11159,7 @@ window.checkEmailVerified = async function() {
       const snap = await getDoc(doc(db, 'users', currentUser.uid));
       if (snap.exists()) {
         currentUserData = snap.data();
+        if (typeof showToast === 'function') showToast('Email verified! Thanks.');
         enterPlatform();
       }
     } else {
@@ -12942,6 +12953,13 @@ h2,h3{position:relative;}
           <span class="topbar-back-label">Main Site</span>
         </a>
       </div>
+    </div>
+
+    <div id="verify-email-banner" style="display:none;background:#FFF7E6;border-bottom:1.5px solid #F5A623;padding:0.7rem 1.5rem;align-items:center;justify-content:center;gap:0.75rem;flex-wrap:wrap;font-family:Poppins,sans-serif;font-size:0.85rem;color:#7A5200;">
+      <span>Please verify your email to unlock all features.</span>
+      <button onclick="resendVerificationEmail()" style="background:#F5A623;color:#fff;border:none;border-radius:50px;padding:0.35rem 0.9rem;font-size:0.8rem;font-weight:700;cursor:pointer;">Resend Email</button>
+      <button onclick="checkEmailVerified()" style="background:transparent;color:#7A5200;border:1px solid #F5A623;border-radius:50px;padding:0.35rem 0.9rem;font-size:0.8rem;font-weight:700;cursor:pointer;">I've Verified</button>
+      <button onclick="dismissVerifyBanner()" style="background:none;border:none;color:#7A5200;font-size:1.1rem;cursor:pointer;line-height:1;padding:0 0.25rem;" title="Dismiss">&times;</button>
     </div>
 
     <div class="tab-panel active" id="tab-feed" style="max-width:100%;padding:1.5rem;">
