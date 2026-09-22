@@ -140,11 +140,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .value-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:2.5rem;}
 .value-card{background:var(--light);border-radius:18px;padding:1.75rem;border-bottom:3px solid transparent;transition:border-color 0.25s,transform 0.25s;}
 .value-card:hover{border-bottom-color:var(--gold);transform:translateY(-3px);}
-.value-icon{font-size:1.9rem;margin-bottom:0.75rem;}
+.value-num{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--gold);margin-bottom:0.5rem;}
 .value-title{font-size:0.92rem;font-weight:700;color:var(--navy);margin-bottom:0.4rem;}
 .value-desc{font-size:0.8rem;color:var(--gray);line-height:1.7;}
-.important-note{margin-top:2.5rem;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.3);border-radius:16px;padding:1.5rem 1.75rem;display:flex;gap:1rem;align-items:flex-start;}
-.important-note-icon{font-size:1.4rem;flex-shrink:0;}
+.important-note{margin-top:2.5rem;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.3);border-left:3px solid var(--gold);border-radius:12px;padding:1.5rem 1.75rem;}
+.important-note-label{display:block;font-size:0.7rem;font-weight:700;color:var(--red);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:0.5rem;}
 .important-note p{font-size:0.85rem;color:var(--navy);line-height:1.75;}
 .important-note b{color:var(--red);}
 
@@ -159,8 +159,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .role-card{background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,0.05);border-top:3px solid var(--navy);transition:transform 0.25s,box-shadow 0.25s;}
 .role-card.exec{border-top-color:var(--gold);background:var(--navy);}
 .role-card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(27,42,107,0.12);}
-.role-icon{font-size:1.6rem;margin-bottom:0.6rem;}
-.role-name{font-size:0.92rem;font-weight:700;color:var(--navy);margin-bottom:0.4rem;}
+.role-name{font-size:0.92rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;}
 .role-card.exec .role-name{color:var(--gold);}
 .role-desc{font-size:0.78rem;color:var(--gray);line-height:1.65;}
 .role-card.exec .role-desc{color:rgba(255,255,255,0.75);}
@@ -307,7 +306,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
     </li>
     <li><a href="community.html">Community</a></li>
     <li><a href="contact.html">Contact</a></li>
-    <li><a href="leadership-application.html" class="active" style="color:var(--red);font-weight:700;">👑 Leadership Apply</a></li>
+    <li><a href="leadership-application.html" class="active" style="color:var(--red);font-weight:700;">Leadership Apply</a></li>
   </ul>
   <a href="join.html" class="nav-btn">Join YAN</a>
   <button class="hamburger" id="hamburger" aria-label="Open menu">
@@ -323,7 +322,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
   <li><a href="team.html">Team</a></li>
   <li><a href="community.html">Community</a></li>
   <li><a href="contact.html">Contact</a></li>
-  <li><a href="leadership-application.html" style="color:var(--red);font-weight:700;">👑 Leadership Apply</a></li>
+  <li><a href="leadership-application.html" style="color:var(--red);font-weight:700;">Leadership Apply</a></li>
   <li><a href="join.html" class="mobile-join">Join YAN</a></li>
 </ul>
 
@@ -334,9 +333,9 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
     <h1 class="app-title">Lead the Movement.<br><span>Serve Young Africans Network.</span></h1>
     <p class="app-sub">YAN is strengthening its leadership and management structure as we grow our programs, partnerships and community impact across Africa. We're inviting committed young Africans to step up — no formal title required, just commitment, integrity and the willingness to learn.</p>
     <div class="hero-meta">
-      <span class="hero-meta-chip">📋 <b>Status:</b>&nbsp;Open</span>
-      <span class="hero-meta-chip">🗓️ <b>Deadline:</b>&nbsp;To be communicated</span>
-      <span class="hero-meta-chip">🤝 <b>Type:</b>&nbsp;Volunteer Leadership</span>
+      <span class="hero-meta-chip"><b>Status:</b>&nbsp;Open</span>
+      <span class="hero-meta-chip"><b>Deadline:</b>&nbsp;To be communicated</span>
+      <span class="hero-meta-chip"><b>Type:</b>&nbsp;Volunteer Leadership</span>
     </div>
     <div class="scroll-cue">
       <a href="#apply">Start Your Application ↓</a>
@@ -352,24 +351,24 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
     <p class="intro-lede">We're looking for individuals who demonstrate commitment, integrity, responsibility, leadership potential, teamwork, initiative and a willingness to learn. Formal professional leadership experience is not mandatory — relevant leadership, volunteering, academic, community or project experience will be considered where you can show strong potential and commitment.</p>
     <div class="value-grid">
       <div class="value-card">
-        <div class="value-icon">🎯</div>
+        <div class="value-num">01</div>
         <div class="value-title">Potential Over Titles</div>
         <div class="value-desc">You don't need a formal leadership title. We care about what you've done, what you've learned, and what you're capable of contributing.</div>
       </div>
       <div class="value-card">
-        <div class="value-icon">🤝</div>
+        <div class="value-num">02</div>
         <div class="value-title">Service-Driven</div>
         <div class="value-desc">YAN is youth-led and volunteer-driven. Leadership here is built on service, responsibility and accountability — not paid employment.</div>
       </div>
       <div class="value-card">
-        <div class="value-icon">🌍</div>
+        <div class="value-num">03</div>
         <div class="value-title">Pan-African Impact</div>
         <div class="value-desc">Help shape programs, partnerships and community impact reaching young people across Africa — starting from wherever you are.</div>
       </div>
     </div>
     <div class="important-note">
-      <span class="important-note-icon">ℹ️</span>
-      <p><b>Important:</b> These are voluntary, unpaid positions and do not create an employer-employee relationship with YAN. Due to the number of applications expected, only shortlisted applicants will be contacted for the next stage — which may include an interview or leadership conversation before final appointments are made.</p>
+      <span class="important-note-label">Important</span>
+      <p>These are voluntary, unpaid positions and do not create an employer-employee relationship with YAN. Due to the number of applications expected, only shortlisted applicants will be contacted for the next stage — which may include an interview or leadership conversation before final appointments are made.</p>
     </div>
   </div>
 </div>
@@ -385,32 +384,32 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
     <div class="roles-tier">
       <div class="roles-tier-label">Executive Leadership</div>
       <div class="roles-grid">
-        <div class="role-card exec"><div class="role-icon">🏛️</div><div class="role-name">President</div><div class="role-desc">Sets strategic direction and represents YAN at the highest level, across partners and members.</div></div>
-        <div class="role-card exec"><div class="role-icon">🤝</div><div class="role-name">Vice President</div><div class="role-desc">Supports the President and leads on priority initiatives across the organization.</div></div>
-        <div class="role-card exec"><div class="role-icon">📋</div><div class="role-name">Secretary-General</div><div class="role-desc">Oversees governance, records, and coordination between leadership and departments.</div></div>
+        <div class="role-card exec"><div class="role-name">President</div><div class="role-desc">Sets strategic direction and represents YAN at the highest level, across partners and members.</div></div>
+        <div class="role-card exec"><div class="role-name">Vice President</div><div class="role-desc">Supports the President and leads on priority initiatives across the organization.</div></div>
+        <div class="role-card exec"><div class="role-name">Secretary-General</div><div class="role-desc">Oversees governance, records, and coordination between leadership and departments.</div></div>
       </div>
     </div>
 
     <div class="roles-tier">
       <div class="roles-tier-label">Directorates</div>
       <div class="roles-grid">
-        <div class="role-card"><div class="role-icon">📈</div><div class="role-name">Director of Programs & Impact</div><div class="role-desc">Leads YAN's programs portfolio and measures the impact we're having on members.</div></div>
-        <div class="role-card"><div class="role-icon">⚙️</div><div class="role-name">Director of Operations & Administration</div><div class="role-desc">Keeps YAN's day-to-day operations, systems and admin running smoothly.</div></div>
-        <div class="role-card"><div class="role-icon">🌐</div><div class="role-name">Director of Partnerships & External Relations</div><div class="role-desc">Builds and manages relationships with partner organizations and allies.</div></div>
-        <div class="role-card"><div class="role-icon">📣</div><div class="role-name">Director of Communications & Digital Engagement</div><div class="role-desc">Owns YAN's voice, brand and digital presence across platforms.</div></div>
+        <div class="role-card"><div class="role-name">Director of Programs & Impact</div><div class="role-desc">Leads YAN's programs portfolio and measures the impact we're having on members.</div></div>
+        <div class="role-card"><div class="role-name">Director of Operations & Administration</div><div class="role-desc">Keeps YAN's day-to-day operations, systems and admin running smoothly.</div></div>
+        <div class="role-card"><div class="role-name">Director of Partnerships & External Relations</div><div class="role-desc">Builds and manages relationships with partner organizations and allies.</div></div>
+        <div class="role-card"><div class="role-name">Director of Communications & Digital Engagement</div><div class="role-desc">Owns YAN's voice, brand and digital presence across platforms.</div></div>
       </div>
     </div>
 
     <div class="roles-tier">
       <div class="roles-tier-label">Program & Management Roles</div>
       <div class="roles-grid">
-        <div class="role-card"><div class="role-icon">🎓</div><div class="role-name">Program Manager — Scholarships & Global Opportunities</div><div class="role-desc">Sources and shares scholarships, fellowships and global opportunities with members.</div></div>
-        <div class="role-card"><div class="role-icon">🎤</div><div class="role-name">Program Manager — Career Development & Public Speaking</div><div class="role-desc">Runs career guidance, mock interviews and public speaking training.</div></div>
-        <div class="role-card"><div class="role-icon">👑</div><div class="role-name">Program Manager — Leadership & 21st Century Skills</div><div class="role-desc">Designs leadership training and future-skills programs for members.</div></div>
-        <div class="role-card"><div class="role-icon">💚</div><div class="role-name">Program Manager — Mental Health & Wellbeing</div><div class="role-desc">Leads wellness sessions and peer support for the YAN community.</div></div>
-        <div class="role-card"><div class="role-icon">💻</div><div class="role-name">Program Manager — Digital Skills & Innovation</div><div class="role-desc">Builds digital literacy and innovation programs for young Africans.</div></div>
-        <div class="role-card"><div class="role-icon">🌍</div><div class="role-name">Program Manager — Community Impact & Volunteerism</div><div class="role-desc">Coordinates volunteer initiatives and community impact projects.</div></div>
-        <div class="role-card"><div class="role-icon">📊</div><div class="role-name">MEL & Impact Manager</div><div class="role-desc">Tracks monitoring, evaluation and learning across all YAN programs.</div></div>
+        <div class="role-card"><div class="role-name">Program Manager — Scholarships & Global Opportunities</div><div class="role-desc">Sources and shares scholarships, fellowships and global opportunities with members.</div></div>
+        <div class="role-card"><div class="role-name">Program Manager — Career Development & Public Speaking</div><div class="role-desc">Runs career guidance, mock interviews and public speaking training.</div></div>
+        <div class="role-card"><div class="role-name">Program Manager — Leadership & 21st Century Skills</div><div class="role-desc">Designs leadership training and future-skills programs for members.</div></div>
+        <div class="role-card"><div class="role-name">Program Manager — Mental Health & Wellbeing</div><div class="role-desc">Leads wellness sessions and peer support for the YAN community.</div></div>
+        <div class="role-card"><div class="role-name">Program Manager — Digital Skills & Innovation</div><div class="role-desc">Builds digital literacy and innovation programs for young Africans.</div></div>
+        <div class="role-card"><div class="role-name">Program Manager — Community Impact & Volunteerism</div><div class="role-desc">Coordinates volunteer initiatives and community impact projects.</div></div>
+        <div class="role-card"><div class="role-name">MEL & Impact Manager</div><div class="role-desc">Tracks monitoring, evaluation and learning across all YAN programs.</div></div>
       </div>
     </div>
   </div>
@@ -641,7 +640,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
         <div class="wizard-nav">
           <button type="button" class="btn-back" id="backBtn" style="visibility:hidden;">← Back</button>
           <button type="button" class="btn-next" id="nextBtn">Continue →</button>
-          <button type="button" class="btn-submit" id="submitBtn" style="display:none;">Submit Application 🚀</button>
+          <button type="button" class="btn-submit" id="submitBtn" style="display:none;">Submit Application</button>
         </div>
       </div>
 
@@ -665,7 +664,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
 <!-- FOOTER -->
 <footer>
   <div style="max-width:1200px;margin:0 auto 2rem;text-align:center;">
-    <a href="partners.html" style="color:var(--gold);font-size:0.8rem;font-weight:700;text-decoration:none;">🤝 Proudly partnered with organizations advancing African youth — See Our Partners →</a>
+    <a href="partners.html" style="color:var(--gold);font-size:0.8rem;font-weight:700;text-decoration:none;">Proudly partnered with organizations advancing African youth — See Our Partners →</a>
   </div>
   <div class="footer-bottom">
     <p class="footer-copy">© 2026 Young Africans Network. All Rights Reserved. | Website by <a href="https://rayiecho.github.io" target="_blank">Regan Ayiecho</a></p>
@@ -767,7 +766,7 @@ submitBtn.addEventListener('click', async () => {
     formError.textContent = 'Something went wrong: ' + err.message + '. Please try again.';
     formError.style.display = 'block';
     submitBtn.disabled = false;
-    submitBtn.textContent = 'Submit Application 🚀';
+    submitBtn.textContent = 'Submit Application';
   }
 });
 
