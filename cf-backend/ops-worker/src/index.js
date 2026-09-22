@@ -1007,6 +1007,34 @@ async function mirrorJoinRequestToFirestore(request, env, cors) {
   return json({ ok: true }, 200, cors);
 }
 
+// Same mirror pattern as mirrorJoinRequestToFirestore, for leadership-application.html's
+// 2026 recruitment form - plus an admin email/popup notify, since a leadership applicant
+// is higher-stakes than a routine join request and shouldn't sit unseen until someone
+// happens to open that admin tab.
+async function mirrorLeadershipApplicationToFirestore(request, env, cors) {
+  const body = await request.json();
+  try {
+    const accessToken = await getFirestoreAccessToken(env);
+    const res = await fetch(
+      `https://firestore.googleapis.com/v1/projects/young-africans-network/databases/(default)/documents/leadershipApplications`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + accessToken },
+        body: JSON.stringify({ fields: toFirestoreFields({ ...body, status: 'pending', submittedAt: new Date() }) })
+      }
+    );
+    if (!res.ok) console.error('Firestore mirror failed:', await res.text());
+  } catch (e) { console.error('Firestore mirror failed:', e.message); }
+
+  await notifyAdmins(env, {
+    title: 'New Leadership Application: ' + (body.fullName || body.name || 'Someone') + (body.position ? ' — ' + body.position : ''),
+    message: (body.fullName || body.name || 'Someone') + ' applied for ' + (body.position || 'a leadership/management position') + '. Review it in Admin > Leadership Applications.',
+    emailSubject: 'New YAN Leadership Application'
+  }).catch(() => {});
+
+  return json({ ok: true }, 200, cors);
+}
+
 // Real admin CRUD for the public partners.html list (content-worker serves the public
 // read side of the same `partners` table) - previously there was no way to add a
 // partner at all, so the page was hardcoded to one.
@@ -1334,6 +1362,7 @@ export default {
       if (partnerMatch && request.method === 'PUT') return await updatePartner(request, env, cors, partnerMatch[1]);
       if (partnerMatch && request.method === 'DELETE') return await deletePartner(request, env, cors, partnerMatch[1]);
       if (path === '/api/internal/mirror-join-request' && request.method === 'POST') return await mirrorJoinRequestToFirestore(request, env, cors);
+      if (path === '/api/internal/mirror-leadership-application' && request.method === 'POST') return await mirrorLeadershipApplicationToFirestore(request, env, cors);
 
       return json({ error: 'Not found' }, 404, cors);
     } catch (e) {

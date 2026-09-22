@@ -377,6 +377,38 @@ async function submitJoin(request, env, cors) {
   return json({ ok: true }, 201, cors);
 }
 
+async function submitLeadershipApplication(request, env, cors) {
+  const formObj = await request.json();
+  const name = formObj.fullName || formObj.name || '';
+  const email = formObj.email || '';
+  if (!name || !email || !isValidEmail(email)) return json({ error: 'Name and a valid email are required' }, 400, cors);
+  if (!formObj.volunteerCommitmentAgree || !formObj.declarationAgree) {
+    return json({ error: 'You must agree to the volunteer commitment and declaration to apply' }, 400, cors);
+  }
+
+  const now = Date.now();
+  await env.DB.prepare(
+    'INSERT INTO leadership_applications (id,name,email,position,data_json,status,created_at) VALUES (?,?,?,?,?,?,?)'
+  ).bind(newId(), name, email, formObj.position || '', JSON.stringify(formObj), 'pending', now).run();
+
+  // Mirror + admin notify happens in ops-worker (same pattern as join_requests) - awaited,
+  // not fire-and-forget, since an un-awaited fetch can be killed mid-flight once this
+  // Worker's response is returned.
+  try {
+    await env.OPS_WORKER.fetch('https://yan-ops-worker.youngafricansn.workers.dev/api/internal/mirror-leadership-application', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formObj)
+    });
+  } catch (e) { console.error('Leadership application mirror failed:', e.message); }
+
+  await sendEmail(env, {
+    to: email, name,
+    subject: 'Application Received — YAN Leadership & Management Recruitment',
+    message: 'Thank you for applying to serve on the Young Africans Network leadership/management team' + (formObj.position ? ' as ' + formObj.position : '') + '!\n\nYour application will be reviewed based on the requirements of the position, demonstrated commitment, leadership potential, relevant skills, integrity, communication, teamwork, and organizational needs.\n\nPlease note: due to the number of applications expected, only shortlisted applicants may be contacted for the next stage of the selection process. Shortlisted applicants may be invited for an interview or leadership conversation before final appointments are made.\n\nWe appreciate your interest in serving with Young Africans Network.\n\nWarm regards,\nYAN Administration Office\nyoungafricansnetwork.org'
+  });
+
+  return json({ ok: true }, 201, cors);
+}
+
 async function submitContact(request, env, cors) {
   const formObj = await request.json();
   // contact.html submits firstName/lastName separately, not a combined name - same class
@@ -474,6 +506,7 @@ export default {
       if (path === '/api/team' && request.method === 'GET') return await getTeam(env, cors);
       if (path === '/api/stories' && request.method === 'GET') return await getStories(env, cors);
       if (path === '/api/join' && request.method === 'POST') return await submitJoin(request, env, cors);
+      if (path === '/api/leadership-application' && request.method === 'POST') return await submitLeadershipApplication(request, env, cors);
       if (path === '/api/contact' && request.method === 'POST') return await submitContact(request, env, cors);
       if (path === '/api/quick-message' && request.method === 'POST') return await submitQuickMessage(request, env, cors);
       if (path === '/api/quick-message' && request.method === 'POST') return await submitQuickMessage(request, env, cors);
