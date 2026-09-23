@@ -27,7 +27,7 @@
     "rewrites": [
       {
         "source": "/apply",
-        "destination": "/leadership-application.html"
+        "destination": "/apply.html"
       }
     ]
   },
