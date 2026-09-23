@@ -23,6 +23,12 @@
           }
         ]
       }
+    ],
+    "rewrites": [
+      {
+        "source": "/apply",
+        "destination": "/leadership-application.html"
+      }
     ]
   },
   "functions": [

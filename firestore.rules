@@ -312,6 +312,7 @@ service cloud.firestore {
 
     match /joinRequests/{reqId} { allow create: if true; allow read, update, delete: if isAdmin(); }
     match /contactSubmissions/{subId} { allow create: if true; allow read, update, delete: if isAdmin(); }
+    match /leadershipApplications/{appId} { allow create: if true; allow read, update, delete: if isAdmin(); }
 
     match /onlineUsers/{userId} { allow read: if isLoggedIn(); allow write: if isLoggedIn() && isOwner(userId); }
     match /moderation_log/{logId} { allow read: if isAdmin(); allow create: if isLoggedIn(); allow delete: if isAdmin(); }
