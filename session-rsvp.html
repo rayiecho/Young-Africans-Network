@@ -82,8 +82,8 @@ function renderConfirmScreen(info) {
     <div class="topic">${escapeHtml(info.topic)}</div>
     <div class="date">${fmtDate(info.sessionDate)}</div>
     ${alreadyNote}
-    <button class="btn btn-yes" id="btn-yes" onclick="respond(true)">✅ I'll be there</button>
-    <button class="btn btn-no" id="btn-no" onclick="respond(false)">❌ Can't make it</button>
+    <button class="btn btn-yes" id="btn-yes" onclick="respond(true)">I'll be there</button>
+    <button class="btn btn-no" id="btn-no" onclick="respond(false)">Can't make it</button>
   `);
 }
 
@@ -94,7 +94,7 @@ async function respond(attending) {
     await YanAPI.submitRsvp(sessionId, userId, attending);
     render(`
       <div class="result">
-        <div class="result-icon">${attending ? '🎉' : '👋'}</div>
+        <div class="result-icon">${attending ? '' : ''}</div>
         <div class="result-text">${attending ? "You're confirmed!" : 'Thanks for letting us know'}</div>
         <div class="result-sub">${attending ? 'See you at the session — Young Africans Network wishes you the very best.' : "We'll catch you at the next one."}</div>
       </div>

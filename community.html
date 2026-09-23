@@ -1181,7 +1181,7 @@ function renderQuoteOfDay() {
   const q = getDailyQuote();
   return `<div style="background:linear-gradient(135deg,var(--navy),#2D3F7B);border-radius:20px;padding:1.5rem;margin-bottom:1.5rem;color:#fff;position:relative;overflow:hidden;">
     <div style="position:absolute;top:-20px;right:-10px;font-size:8rem;opacity:0.08;font-family:Georgia,serif;">"</div>
-    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold);margin-bottom:0.75rem;">✨ Quote of the Day</div>
+    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold);margin-bottom:0.75rem;">Quote of the Day</div>
     <p style="font-size:0.95rem;font-style:italic;line-height:1.7;margin-bottom:1rem;color:rgba(255,255,255,0.92);">"${q.quote}"</p>
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <div>
@@ -1733,14 +1733,14 @@ async function loadHelpline() {
   container.innerHTML = `
   <div style="max-width:700px;margin:0 auto;padding:1rem;">
     <div style="background:linear-gradient(135deg,var(--navy),#2D3F7B);border-radius:20px;padding:2rem;color:#fff;margin-bottom:1.5rem;text-align:center;">
-      <div style="font-size:2.5rem;margin-bottom:0.5rem;">🆘</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;letter-spacing:2px;color:var(--gold);margin-bottom:0.5rem;">SOS</div>
       <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;margin-bottom:0.5rem;">YAN Helpline</h2>
       <p style="opacity:0.85;font-size:0.88rem;line-height:1.7;">You are not alone. YAN is here to support you. Reach out through any of the channels below.</p>
     </div>
 
     <div style="display:grid;gap:1rem;margin-bottom:1.5rem;">
       <div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);display:flex;align-items:center;gap:1rem;">
-        <div style="width:48px;height:48px;border-radius:50%;background:rgba(37,211,102,0.1);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">💬</div>
+        <div style="width:48px;height:48px;border-radius:50%;background:rgba(37,211,102,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="22" height="22" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></div>
         <div style="flex:1;">
           <h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.2rem;">WhatsApp Support</h4>
           <p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem;">Chat with a YAN support volunteer directly</p>
@@ -1749,7 +1749,7 @@ async function loadHelpline() {
       </div>
 
       <div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);display:flex;align-items:center;gap:1rem;">
-        <div style="width:48px;height:48px;border-radius:50%;background:rgba(27,42,107,0.1);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">📧</div>
+        <div style="width:48px;height:48px;border-radius:50%;background:rgba(27,42,107,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg></div>
         <div style="flex:1;">
           <h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.2rem;">Email Support</h4>
           <p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem;">Send us an email and we'll respond within 24 hours</p>
@@ -1758,7 +1758,7 @@ async function loadHelpline() {
       </div>
 
       <div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);display:flex;align-items:center;gap:1rem;">
-        <div style="width:48px;height:48px;border-radius:50%;background:rgba(231,76,60,0.1);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">🧠</div>
+        <div style="width:48px;height:48px;border-radius:50%;background:rgba(231,76,60,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
         <div style="flex:1;">
           <h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.2rem;">Mental Health Support</h4>
           <p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem;">Join our Mental Health & Wellbeing hub for peer support</p>
@@ -1767,7 +1767,7 @@ async function loadHelpline() {
       </div>
 
       <div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);display:flex;align-items:center;gap:1rem;">
-        <div style="width:48px;height:48px;border-radius:50%;background:rgba(243,156,18,0.1);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">🤝</div>
+        <div style="width:48px;height:48px;border-radius:50%;background:rgba(243,156,18,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
         <div style="flex:1;">
           <h4 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.2rem;">Peer Mentorship</h4>
           <p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.5rem;">Connect with a YAN mentor for guidance and support</p>
@@ -1777,7 +1777,7 @@ async function loadHelpline() {
     </div>
 
     <div style="background:rgba(27,42,107,0.04);border-radius:16px;padding:1.25rem;text-align:center;">
-      <p style="font-size:0.85rem;color:var(--navy);font-weight:700;margin-bottom:0.5rem;">🌍 YAN Community WhatsApp</p>
+      <p style="font-size:0.85rem;color:var(--navy);font-weight:700;margin-bottom:0.5rem;">YAN Community WhatsApp</p>
       <p style="font-size:0.82rem;color:var(--gray);margin-bottom:1rem;">Join our main community group for announcements and support</p>
       <a href="https://chat.whatsapp.com/FDpWNXl9bWbBWOsvNgBC7i" target="_blank" style="background:#25D366;color:#fff;padding:0.6rem 1.5rem;border-radius:50px;font-size:0.85rem;font-weight:700;text-decoration:none;display:inline-block;">Join WhatsApp Community</a>
     </div>
@@ -2019,13 +2019,13 @@ async function loadGradesTab() {
     const progressSnap = await getDocs(query(collection(db,'learningProgress'),where('userId','==',currentUser.uid)));
 
     // Show certificates section
-    let certHtml = '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:1.25rem;">🏆 My Certificates</h2>';
+    let certHtml = '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:1.25rem;">My Certificates</h2>';
     const approvedFromGrades = gradesSnap.docs.filter(d => d.data().certificateApproved === true);
     const collectionProgramIds = new Set(certsSnap.docs.map(d => d.data().programId));
     const uniqueGradeCerts = approvedFromGrades.filter(d => !collectionProgramIds.has(d.data().programId));
 
     if (certsSnap.empty && uniqueGradeCerts.length === 0) {
-      certHtml += '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);text-align:center;margin-bottom:1.5rem;"><p style="font-size:1.5rem;">🏆</p><p style="font-size:0.88rem;color:var(--gray);margin-top:0.5rem;">No certificates yet. Complete a program to earn your first certificate!</p></div>';
+      certHtml += '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);text-align:center;margin-bottom:1.5rem;"><p style="font-size:1.5rem;"></p><p style="font-size:0.88rem;color:var(--gray);margin-top:0.5rem;">No certificates yet. Complete a program to earn your first certificate!</p></div>';
     } else {
       certHtml += '<div style="display:grid;gap:1rem;margin-bottom:1.5rem;">';
       certsSnap.docs.forEach(d => {
@@ -2033,11 +2033,11 @@ async function loadGradesTab() {
         const isApproved = cert.status === 'approved';
         const title = cert.programTitle || cert.department || cert.programId || 'YAN Certificate';
         certHtml += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid ' + (isApproved ? '#27AE60' : '#F5A623') + ';display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">';
-        certHtml += '<div><p style="font-size:0.95rem;font-weight:800;color:var(--navy);">🏆 ' + sanitize(title) + '</p>';
+        certHtml += '<div><p style="font-size:0.95rem;font-weight:800;color:var(--navy);">' + sanitize(title) + '</p>';
         certHtml += '<p style="font-size:0.75rem;color:var(--gray);">Issued to ' + sanitize(cert.userName||currentUserData.name) + '</p>';
-        certHtml += '<span style="background:' + (isApproved?'rgba(39,174,96,0.1)':'rgba(245,166,35,0.1)') + ';color:' + (isApproved?'#27AE60':'#b37800') + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + (isApproved?'✅ APPROVED':'⏳ PENDING') + '</span></div>';
+        certHtml += '<span style="background:' + (isApproved?'rgba(39,174,96,0.1)':'rgba(245,166,35,0.1)') + ';color:' + (isApproved?'#27AE60':'#b37800') + ';padding:0.2rem 0.6rem;border-radius:50px;font-size:0.7rem;font-weight:700;">' + (isApproved?'APPROVED':'⏳ PENDING') + '</span></div>';
         if (isApproved) {
-          certHtml += '<button data-certid="' + d.id + '" data-dept="programs" data-progid="' + (cert.programId||'') + '" onclick="downloadCertificate(this.dataset.certid,this.dataset.dept,this.dataset.progid)" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">⬇️ Download</button>';
+          certHtml += '<button data-certid="' + d.id + '" data-dept="programs" data-progid="' + (cert.programId||'') + '" onclick="downloadCertificate(this.dataset.certid,this.dataset.dept,this.dataset.progid)" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">Download</button>';
         }
         certHtml += '</div>';
       });
@@ -2045,22 +2045,22 @@ async function loadGradesTab() {
         const g = d.data();
         const title = g.programTitle || g.programId || 'YAN Certificate';
         certHtml += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);border-left:4px solid #27AE60;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">';
-        certHtml += '<div><p style="font-size:0.95rem;font-weight:800;color:var(--navy);">🏆 ' + sanitize(title) + '</p>';
+        certHtml += '<div><p style="font-size:0.95rem;font-weight:800;color:var(--navy);">' + sanitize(title) + '</p>';
         certHtml += '<p style="font-size:0.75rem;color:var(--gray);">Issued to ' + sanitize(g.userName || currentUserData.name) + '</p>';
-        certHtml += '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.6rem;border-radius:50px;font-size:0.7rem;font-weight:700;">✅ APPROVED</span></div>';
-        certHtml += '<button data-certid="' + d.id + '" data-dept="grades" onclick="downloadCertificate(this.dataset.certid,this.dataset.dept)" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">⬇️ Download</button>';
+        certHtml += '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.6rem;border-radius:50px;font-size:0.7rem;font-weight:700;">APPROVED</span></div>';
+        certHtml += '<button data-certid="' + d.id + '" data-dept="grades" onclick="downloadCertificate(this.dataset.certid,this.dataset.dept)" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">Download</button>';
         certHtml += '</div>';
       });
       certHtml += '</div>';
     }
 
     if (gradesSnap.empty) {
-      container.innerHTML = certHtml + '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);text-align:center;"><p style="font-size:1.5rem;">📊</p><p style="font-size:0.88rem;color:var(--gray);margin-top:0.5rem;">No grades yet. Complete a quiz or submit an assignment to see your progress here.</p></div>';
+      container.innerHTML = certHtml + '<div style="background:var(--white);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);text-align:center;"><p style="font-size:1.5rem;"></p><p style="font-size:0.88rem;color:var(--gray);margin-top:0.5rem;">No grades yet. Complete a quiz or submit an assignment to see your progress here.</p></div>';
       return;
     }
     container._certHtml = certHtml;
 
-    let html = (container._certHtml || '') + '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:1.25rem;">📊 My Grades & Progress</h2>';
+    let html = (container._certHtml || '') + '<h2 style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:900;color:var(--navy);margin-bottom:1.25rem;">My Grades & Progress</h2>';
 
     gradesSnap.docs.forEach(d => {
       const g = d.data();
@@ -2088,12 +2088,12 @@ async function loadGradesTab() {
 
       // Program header
       html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1.5px solid rgba(27,42,107,0.08);">';
-      html += '<div><p style="font-size:0.92rem;font-weight:800;color:var(--navy);">📚 ' + sanitize(g.programId || 'Program') + '</p>';
+      html += '<div><p style="font-size:0.92rem;font-weight:800;color:var(--navy);">' + sanitize(g.programId || 'Program') + '</p>';
       html += '<p style="font-size:0.72rem;color:var(--gray);">Grade formula: Quiz avg (60%) + Assignment (40%)</p></div>';
       if (overallGrade !== null) {
         html += '<div style="text-align:center;">';
         html += '<div style="width:56px;height:56px;border-radius:50%;border:3px solid ' + overallColor + ';display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:900;color:' + overallColor + ';margin:0 auto;">' + overallGrade + '%</div>';
-        html += '<p style="font-size:0.65rem;color:var(--gray);margin-top:0.25rem;">' + (passed ? '✅ PASSED' : '❌ BELOW 70%') + '</p>';
+        html += '<p style="font-size:0.65rem;color:var(--gray);margin-top:0.25rem;">' + (passed ? 'PASSED' : 'BELOW 70%') + '</p>';
         html += '</div>';
       }
       html += '</div>';
@@ -2135,14 +2135,14 @@ async function loadGradesTab() {
           html += '<div style="background:white;border-radius:8px;padding:0.6rem 0.75rem;margin-top:0.5rem;">';
           html += '<p style="font-size:0.7rem;font-weight:700;color:var(--gray);margin-bottom:0.35rem;">ASSIGNMENT</p>';
           html += '<div style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;margin-bottom:0.35rem;">';
-          if (ag.aiScore) html += '<span style="font-size:0.72rem;color:#0A66C2;background:rgba(10,102,194,0.08);padding:0.15rem 0.5rem;border-radius:50px;">🤖 AI: ' + ag.aiScore + '%</span>';
-          if (ag.adminScore) html += '<span style="font-size:0.72rem;color:var(--navy);background:rgba(27,42,107,0.08);padding:0.15rem 0.5rem;border-radius:50px;">✍️ Admin: ' + ag.adminScore + '%</span>';
-          if (ag.finalScore) html += '<span style="font-size:0.72rem;color:#27AE60;background:rgba(39,174,96,0.1);padding:0.15rem 0.5rem;border-radius:50px;font-weight:700;">✅ Final: ' + ag.finalScore + '%</span>';
+          if (ag.aiScore) html += '<span style="font-size:0.72rem;color:#0A66C2;background:rgba(10,102,194,0.08);padding:0.15rem 0.5rem;border-radius:50px;">AI: ' + ag.aiScore + '%</span>';
+          if (ag.adminScore) html += '<span style="font-size:0.72rem;color:var(--navy);background:rgba(27,42,107,0.08);padding:0.15rem 0.5rem;border-radius:50px;">Admin: ' + ag.adminScore + '%</span>';
+          if (ag.finalScore) html += '<span style="font-size:0.72rem;color:#27AE60;background:rgba(39,174,96,0.1);padding:0.15rem 0.5rem;border-radius:50px;font-weight:700;">Final: ' + ag.finalScore + '%</span>';
           const sc = ag.status === 'approved' ? '#27AE60' : ag.status === 'rejected' ? '#dc3545' : '#F5A623';
           html += '<span style="font-size:0.7rem;font-weight:700;color:' + sc + ';">' + (ag.status||'pending').toUpperCase() + '</span>';
           html += '</div>';
-          if (ag.adminFeedback) html += '<p style="font-size:0.75rem;color:var(--gray);font-style:italic;line-height:1.5;">💬 ' + sanitize(ag.adminFeedback) + '</p>';
-          if (ag.fileUrl) html += '<a href="' + ag.fileUrl + '" target="_blank" style="font-size:0.72rem;color:#0A66C2;text-decoration:underline;display:inline-block;margin-top:0.25rem;">📎 View my submitted file</a>';
+          if (ag.adminFeedback) html += '<p style="font-size:0.75rem;color:var(--gray);font-style:italic;line-height:1.5;">' + sanitize(ag.adminFeedback) + '</p>';
+          if (ag.fileUrl) html += '<a href="' + ag.fileUrl + '" target="_blank" style="font-size:0.72rem;color:#0A66C2;text-decoration:underline;display:inline-block;margin-top:0.25rem;">View my submitted file</a>';
           html += '</div>';
         }
         html += '</div>'; // end module
@@ -2151,7 +2151,7 @@ async function loadGradesTab() {
       // Certificate
       if (g.certificateApproved) {
         html += '<div style="background:rgba(39,174,96,0.08);border-radius:10px;padding:0.85rem;margin-top:0.5rem;display:flex;align-items:center;gap:0.75rem;">';
-        html += '<span style="font-size:1.5rem;">🏆</span>';
+        html += '<span style="font-size:1.5rem;"></span>';
         html += '<div><p style="font-size:0.85rem;font-weight:700;color:#27AE60;">Certificate Approved!</p>';
         html += '<p style="font-size:0.75rem;color:var(--gray);">Go to My Profile → My Certificates to download.</p></div>';
         html += '</div>';
@@ -2169,12 +2169,12 @@ async function loadGradesTab() {
     // Quiz failures
     if (!quizFailSnap.empty) {
       html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.05);">';
-      html += '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">⚠️ Quiz Attempts Status</p>';
+      html += '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">Quiz Attempts Status</p>';
       quizFailSnap.docs.forEach(d => {
         const q = d.data();
         if (q.reviewed) {
           html += '<div style="background:rgba(39,174,96,0.06);border-radius:8px;padding:0.6rem 0.75rem;margin-bottom:0.4rem;border-left:3px solid #27AE60;">';
-          html += '<p style="font-size:0.78rem;color:#27AE60;font-weight:600;">✅ Attempts reset — <strong>' + sanitize(q.programId||'') + '</strong>. You can now retake the quiz.</p>';
+          html += '<p style="font-size:0.78rem;color:#27AE60;font-weight:600;">Attempts reset — <strong>' + sanitize(q.programId||'') + '</strong>. You can now retake the quiz.</p>';
         } else {
           html += '<div style="background:rgba(245,166,35,0.06);border-radius:8px;padding:0.6rem 0.75rem;margin-bottom:0.4rem;border-left:3px solid #F5A623;">';
           html += '<p style="font-size:0.78rem;color:#F5A623;font-weight:600;">⏳ Quiz failure under review — <strong>' + sanitize(q.programId||'') + '</strong>. Score: ' + (q.score||0) + '%. Admin will reset your attempts soon.</p>';
@@ -2787,14 +2787,14 @@ body{font-family:'Poppins',sans-serif;color:#1B2A6B;background:#fff;}
     </div>
     <div class="section-tag">Departments</div>
     <div class="dept-grid">
-      <div class="dept-card"><div class="dept-icon"></div><div><div class="dept-name">Programs & Training</div><div class="dept-desc">Digital skills, tech education and certification programs</div></div></div>
-      <div class="dept-card"><div class="dept-icon"></div><div><div class="dept-name">Scholarships & Opportunities</div><div class="dept-desc">Global scholarships, fellowships and opportunities</div></div></div>
-      <div class="dept-card"><div class="dept-icon"></div><div><div class="dept-name">Career Development</div><div class="dept-desc">CV writing, interviews, public speaking and job placement</div></div></div>
-      <div class="dept-card"><div class="dept-icon"></div><div><div class="dept-name">Community Impact</div><div class="dept-desc">Volunteering, community projects and civic engagement</div></div></div>
-      <div class="dept-card"><div class="dept-icon"></div><div><div class="dept-name">Mental Health & Wellbeing</div><div class="dept-desc">Peer support, wellness sessions and safe spaces</div></div></div>
-      <div class="dept-card"><div class="dept-icon"></div><div><div class="dept-name">Communications & Media</div><div class="dept-desc">Storytelling, content creation and brand building</div></div></div>
-      <div class="dept-card"><div class="dept-icon"></div><div><div class="dept-name">Partnerships</div><div class="dept-desc">Building alliances with organizations worldwide</div></div></div>
-      <div class="dept-card"><div class="dept-icon"></div><div><div class="dept-name">Finance & Administration</div><div class="dept-desc">Financial management and organizational administration</div></div></div>
+      <div class="dept-card"><div><div class="dept-name">Programs & Training</div><div class="dept-desc">Digital skills, tech education and certification programs</div></div></div>
+      <div class="dept-card"><div><div class="dept-name">Scholarships & Opportunities</div><div class="dept-desc">Global scholarships, fellowships and opportunities</div></div></div>
+      <div class="dept-card"><div><div class="dept-name">Career Development</div><div class="dept-desc">CV writing, interviews, public speaking and job placement</div></div></div>
+      <div class="dept-card"><div><div class="dept-name">Community Impact</div><div class="dept-desc">Volunteering, community projects and civic engagement</div></div></div>
+      <div class="dept-card"><div><div class="dept-name">Mental Health & Wellbeing</div><div class="dept-desc">Peer support, wellness sessions and safe spaces</div></div></div>
+      <div class="dept-card"><div><div class="dept-name">Communications & Media</div><div class="dept-desc">Storytelling, content creation and brand building</div></div></div>
+      <div class="dept-card"><div><div class="dept-name">Partnerships</div><div class="dept-desc">Building alliances with organizations worldwide</div></div></div>
+      <div class="dept-card"><div><div class="dept-name">Finance & Administration</div><div class="dept-desc">Financial management and organizational administration</div></div></div>
     </div>
     ${newMembers.length > 0 ? '<div class="section-tag" style="margin-top:20px;">New This Month</div><p style="font-size:12px;color:#374151;line-height:1.8;">We welcomed <strong>' + newMembers.length + ' new members</strong> this month from: ' + [...new Set(newMembers.map(m=>m.country).filter(Boolean))].join(', ') + '</p>' : ''}
   </div>
@@ -3054,7 +3054,7 @@ async function loadScholarshipGrants() {
     }
     let html = '<div style="margin-bottom:1.5rem;">';
     html += '<div style="background:linear-gradient(135deg,#1B2A6B,#27AE60);border-radius:16px;padding:1.25rem;margin-bottom:1.5rem;color:#fff;">';
-    html += '<h3 style="font-family:Playfair Display,serif;font-size:1.2rem;font-weight:900;margin-bottom:0.25rem;">💰 Grants & Funding</h3>';
+    html += '<h3 style="font-family:Playfair Display,serif;font-size:1.2rem;font-weight:900;margin-bottom:0.25rem;">Grants & Funding</h3>';
     html += '<p style="color:rgba(255,255,255,0.75);font-size:0.82rem;">Verified grants and funding opportunities for African youth and organizations</p>';
     html += '</div>';
     snap.docs.forEach(d => {
@@ -3062,12 +3062,12 @@ async function loadScholarshipGrants() {
       html += '<div style="background:var(--white);border-radius:16px;padding:1.25rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);border-left:4px solid #27AE60;">';
       html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">';
       html += '<h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);">' + sanitize(g.title||'') + '</h3>';
-      html += '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">💰 ' + sanitize(g.amount||g.funding||'') + '</span>';
+      html += '<span style="background:rgba(39,174,96,0.1);color:#27AE60;padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;">' + sanitize(g.amount||g.funding||'') + '</span>';
       html += '</div>';
       html += '<p style="font-size:0.82rem;color:var(--gray);margin-bottom:0.75rem;">' + sanitize(g.eligibility||g.description||'') + '</p>';
       html += '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;">';
-      if (g.provider) html += '<span style="background:var(--light);color:var(--navy);padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;">🏢 ' + sanitize(g.provider) + '</span>';
-      if (g.countries) html += '<span style="background:var(--light);color:var(--navy);padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;">🌍 ' + sanitize(g.countries) + '</span>';
+      if (g.provider) html += '<span style="background:var(--light);color:var(--navy);padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;">' + sanitize(g.provider) + '</span>';
+      if (g.countries) html += '<span style="background:var(--light);color:var(--navy);padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;">' + sanitize(g.countries) + '</span>';
       if (g.deadline) html += '<span style="background:rgba(245,166,35,0.1);color:#B8860B;padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;">⏰ ' + sanitize(g.deadline) + '</span>';
       html += '</div>';
       if (g.link) html += '<a href="' + sanitize(g.link) + '" target="_blank" style="display:inline-block;background:var(--navy);color:#fff;padding:0.5rem 1.25rem;border-radius:50px;font-size:0.78rem;font-weight:700;text-decoration:none;">Apply Now →</a>';
@@ -4702,7 +4702,7 @@ async function loadHeadAssignments(c, dept) {
         if (isLong) html += '<button data-id="' + d.id + '" data-full="' + sanitize(a.submission).replace(/"/g,"'") + '" onclick="document.getElementById(\'sub-text-\'+this.dataset.id).textContent=this.dataset.full;this.style.display=\'none\';" style="background:none;border:none;color:var(--navy);font-size:0.72rem;cursor:pointer;text-decoration:underline;">Read full submission</button>';
         html += '</div>';
       }
-      if (a.fileUrl) html += '<a href="' + sanitize(a.fileUrl) + '" target="_blank" style="display:inline-block;margin-bottom:0.5rem;font-size:0.78rem;color:var(--navy);font-weight:600;">📎 View attached file</a><br>';
+      if (a.fileUrl) html += '<a href="' + sanitize(a.fileUrl) + '" target="_blank" style="display:inline-block;margin-bottom:0.5rem;font-size:0.78rem;color:var(--navy);font-weight:600;">View attached file</a><br>';
       if (!graded) {
         html += '<div style="display:flex;gap:0.5rem;margin-top:0.5rem;">';
         html += '<input type="number" id="grade-' + d.id + '" placeholder="Score /100" min="0" max="100" style="width:100px;padding:0.4rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;">';
@@ -4945,11 +4945,11 @@ window.filterAchievements = filterAchievements;
 
 // RESOURCE LIBRARY
 const RESOURCE_CATEGORIES = [
-  { id: 'cv', label: 'CV Templates', icon: '📄' },
-  { id: 'cover', label: 'Cover Letters', icon: '\u2709\uFE0F' },
-  { id: 'scholarship', label: 'Scholarship Guides', icon: '🏆' },
-  { id: 'interview', label: 'Interview Prep', icon: '🎤' },
-  { id: 'general', label: 'General', icon: '📁' }
+  { id: 'cv', label: 'CV Templates', icon: '' },
+  { id: 'cover', label: 'Cover Letters', icon: '' },
+  { id: 'scholarship', label: 'Scholarship Guides', icon: '' },
+  { id: 'interview', label: 'Interview Prep', icon: '' },
+  { id: 'general', label: 'General', icon: '' }
 ];
 
 async function loadResources() {
@@ -5957,9 +5957,9 @@ async function loadJobBoard() {
     + '</div></div>'
     + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;">'
     + '<button onclick="document.getElementById(\'job-filter-type\').value=\'\';filterJobs()" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">All</button>'
-    + '<button onclick="document.getElementById(\'job-filter-type\').value=\'Internship\';filterJobs()" style="background:rgba(39,174,96,0.1);color:#27AE60;border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">🎓 Internships</button>'
-    + '<button onclick="document.getElementById(\'job-filter-type\').value=\'Fellowship\';filterJobs()" style="background:rgba(155,89,182,0.1);color:#9B59B6;border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">🌟 Fellowships</button>'
-    + '<button onclick="document.getElementById(\'job-filter-type\').value=\'Full-time\';filterJobs()" style="background:rgba(27,42,107,0.1);color:var(--navy);border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">💼 Jobs</button>'
+    + '<button onclick="document.getElementById(\'job-filter-type\').value=\'Internship\';filterJobs()" style="background:rgba(39,174,96,0.1);color:#27AE60;border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">Internships</button>'
+    + '<button onclick="document.getElementById(\'job-filter-type\').value=\'Fellowship\';filterJobs()" style="background:rgba(155,89,182,0.1);color:#9B59B6;border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">Fellowships</button>'
+    + '<button onclick="document.getElementById(\'job-filter-type\').value=\'Full-time\';filterJobs()" style="background:rgba(27,42,107,0.1);color:var(--navy);border:none;padding:0.4rem 1rem;border-radius:50px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;">Jobs</button>'
     + '</div>'
     + '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.25rem;">'
     + '<select id="job-filter-type" onchange="filterJobs()" style="background:var(--white);border:1.5px solid rgba(27,42,107,0.15);color:var(--navy);padding:0.5rem 0.75rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;"><option value="" selected>All Types</option>' + typeOpts + '</select>'
@@ -7658,7 +7658,7 @@ async function applyForProgram(programId, type) {
       const modal = document.createElement('div');
       modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
       modal.innerHTML = '<div style="background:#fff;border-radius:20px;padding:2rem;max-width:460px;width:100%;text-align:center;">'
-        + '<div style="font-size:3rem;margin-bottom:1rem;">🎓</div>'
+        + '<div style="font-size:3rem;margin-bottom:1rem;"></div>'
         + '<h3 style="font-size:1.1rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Complete Foundation Program First</h3>'
         + '<p style="color:var(--gray);font-size:0.85rem;line-height:1.7;margin-bottom:1.5rem;">You must complete the <strong>YAN Google Workspace Essentials</strong> program and earn your certificate before applying to other programs.</p>'
         + '<button onclick="document.getElementById(\'gate-modal\').remove();showProgramsSection(\'tech\');" style="background:var(--navy);color:#fff;border:none;padding:0.75rem 1.5rem;border-radius:50px;font-family:Poppins,sans-serif;font-weight:700;cursor:pointer;width:100%;margin-bottom:0.75rem;">Go to Google Workspace Program</button>'
@@ -7864,10 +7864,11 @@ async function openProgram(programId) {
     const opacity = unlocked ? '1' : '0.6';
     html += '<div style="background:white;border-radius:12px;margin-bottom:0.75rem;border-left:3px solid ' + borderColor + ';opacity:' + opacity + ';">';
     html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:1rem;cursor:' + (unlocked ? 'pointer' : 'default') + ';" onclick="' + (unlocked ? 'toggleModuleLessons(\'' + programId + '\',\'' + week + '\')' : '') + '">';
-    html += '<div style="width:32px;height:32px;border-radius:50%;background:' + borderColor + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.85rem;font-weight:700;flex-shrink:0;">' + (allDone ? '\u2713' : unlocked ? String(mi+1) : '\uD83D\uDD12') + '</div>';
+    const lockSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+    html += '<div style="width:32px;height:32px;border-radius:50%;background:' + borderColor + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.85rem;font-weight:700;flex-shrink:0;">' + (allDone ? '\u2713' : unlocked ? String(mi+1) : lockSvg) + '</div>';
     html += '<div style="flex:1;">';
     html += '<p style="font-size:0.92rem;font-weight:700;color:var(--navy);">' + sanitize(m.title||'Module '+(mi+1)) + '</p>';
-    html += '<p style="font-size:0.72rem;color:var(--gray);">' + (unlocked ? completedLessons+'/'+lessons.length+' lessons \u00b7 '+(allDone?'\u2705 Complete':'In progress') : unlockMsg) + '</p>';
+    html += '<p style="font-size:0.72rem;color:var(--gray);">' + (unlocked ? completedLessons+'/'+lessons.length+' lessons \u00b7 '+(allDone?'\u2713 Complete':'In progress') : unlockMsg) + '</p>';
     html += '</div>';
     html += unlocked ? '<span style="font-size:0.75rem;color:var(--gray);">\u25bc</span>' : '';
     html += '</div>';
@@ -7878,7 +7879,7 @@ async function openProgram(programId) {
         html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0;border-bottom:1px solid var(--light);">';
         html += '<div style="width:24px;height:24px;border-radius:50%;background:' + (isDone?'#27AE60':'#F5A623') + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.68rem;font-weight:700;flex-shrink:0;">' + (isDone?'\u2713':l.lessonNumber) + '</div>';
         html += '<div style="flex:1;"><p style="font-size:0.85rem;font-weight:600;color:var(--navy);">' + sanitize(l.title||'Lesson '+l.lessonNumber) + '</p>';
-        html += '<p style="font-size:0.7rem;color:var(--gray);">' + (l.isLastLesson?'\uD83D\uDCDD Includes assignment':'') + (isDone?' \u00b7 \u2705 Done':'') + '</p></div>';
+        html += '<p style="font-size:0.7rem;color:var(--gray);">' + (l.isLastLesson?'Includes assignment':'') + (isDone?' \u00b7 \u2713 Done':'') + '</p></div>';
         html += '<button class="btn-sm btn-navy" onclick="openLessonContent(\'' + programId + '\',\'' + l.id + '\',\'trainingPrograms\')">' + (isDone?'Review':'Start') + '</button>';
         html += '</div>';
       });
@@ -7916,7 +7917,7 @@ async function openProgram(programId) {
     html += '</div>';
   } else {
     html += '<div style="background:var(--light);border-radius:12px;padding:1rem;opacity:0.6;display:flex;align-items:center;gap:0.75rem;">';
-    html += '<div style="width:32px;height:32px;border-radius:50%;background:#ccc;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;">🔒</div>';
+    html += '<div style="width:32px;height:32px;border-radius:50%;background:#ccc;display:flex;align-items:center;justify-content:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>';
     html += '<div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Capstone Module</p>';
     html += '<p style="font-size:0.72rem;color:var(--gray);">Complete all 4 modules to unlock the Capstone Project</p></div>';
     html += '</div>';
@@ -7948,7 +7949,7 @@ async function loadCapstone(programId) {
     let html = '';
     // Project brief
     html += '<div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">';
-    html += '<p style="font-size:0.82rem;font-weight:700;color:var(--gold);margin-bottom:0.5rem;">📋 ' + sanitize(cap.title) + '</p>';
+    html += '<p style="font-size:0.82rem;font-weight:700;color:var(--gold);margin-bottom:0.5rem;">' + sanitize(cap.title) + '</p>';
     html += '<p style="font-size:0.78rem;color:rgba(255,255,255,0.85);line-height:1.7;margin-bottom:0.75rem;">' + sanitize(cap.brief) + '</p>';
     html += '<p style="font-size:0.75rem;font-weight:700;color:var(--gold);margin-bottom:0.35rem;">Deliverables:</p>';
     cap.deliverables.forEach(function(d) {
@@ -7963,7 +7964,7 @@ async function loadCapstone(programId) {
     if (submitted) {
       const subData = subSnap.data();
       html += '<div style="background:rgba(39,174,96,0.2);border-radius:12px;padding:1rem;margin-bottom:0.75rem;">';
-      html += '<p style="font-size:0.82rem;font-weight:700;color:#2ECC71;">✅ Submitted!</p>';
+      html += '<p style="font-size:0.82rem;font-weight:700;color:#2ECC71;">Submitted!</p>';
       html += '<p style="font-size:0.75rem;color:rgba(255,255,255,0.7);">Status: ' + (subData.status || 'Under Review') + '</p>';
       if (subData.adminFeedback) html += '<p style="font-size:0.78rem;color:#fff;margin-top:0.5rem;">Feedback: ' + sanitize(subData.adminFeedback) + '</p>';
       html += '</div>';
@@ -7972,13 +7973,13 @@ async function loadCapstone(programId) {
     } else {
       // Submission form
       html += '<div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:1rem;">';
-      html += '<p style="font-size:0.82rem;font-weight:700;color:#fff;margin-bottom:0.75rem;">📤 Submit Your Project</p>';
+      html += '<p style="font-size:0.82rem;font-weight:700;color:#fff;margin-bottom:0.75rem;">Submit Your Project</p>';
       html += '<input type="url" id="capstone-link-' + programId + '" placeholder="Link to your project (Google Drive, GitHub, etc.)" style="width:100%;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.65rem 0.85rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;box-sizing:border-box;margin-bottom:0.5rem;">';
       html += '<textarea id="capstone-notes-' + programId + '" placeholder="Brief description of your project (what you built, tools used, impact)..." rows="3" style="width:100%;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.65rem 0.85rem;border-radius:10px;font-family:Poppins,sans-serif;font-size:0.78rem;outline:none;resize:none;box-sizing:border-box;margin-bottom:0.75rem;"></textarea>';
       html += '<button data-prog="' + programId + '" onclick="submitCapstone(this.dataset.prog)" style="width:100%;background:var(--gold);color:var(--navy);border:none;padding:0.75rem;border-radius:12px;font-family:Poppins,sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;">Submit Project</button>';
       // Program feedback form
       html += '<div style="margin-top:1rem;background:rgba(255,255,255,0.1);border-radius:12px;padding:1rem;">';
-      html += '<p style="font-size:0.82rem;font-weight:700;color:var(--gold);margin-bottom:0.75rem;">📋 Program Feedback</p>';
+      html += '<p style="font-size:0.82rem;font-weight:700;color:var(--gold);margin-bottom:0.75rem;">Program Feedback</p>';
       html += '<p style="font-size:0.75rem;color:rgba(255,255,255,0.7);margin-bottom:0.5rem;">How would you rate this program?</p>';
       html += '<div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">';
       html += [1,2,3,4,5].map(n => '<button onclick="selectFeedbackRating(' + n + ',\'' + programId + '\')" id="fb-star-' + programId + '-' + n + '" style="width:36px;height:36px;border-radius:50%;border:2px solid var(--gold);background:rgba(255,255,255,0.1);font-size:1rem;cursor:pointer;color:#fff;">☆</button>').join('');
@@ -8006,7 +8007,7 @@ window.submitCapstone = async function(programId) {
       projectLink: link, description: notes,
       status: 'pending', submittedAt: serverTimestamp()
     });
-    showToast('Capstone submitted! Admin will review shortly. 🎉');
+    showToast('Capstone submitted! Admin will review shortly. ');
     await awardPoints(currentUserData.uid, 'capstone_submitted', 'Capstone project submitted', 20);
     loadCapstone(programId);
   } catch(e) { showToast('Error: ' + e.message, 'error'); }
@@ -8103,7 +8104,7 @@ window.submitPeerReview = async function(submissionId, programId) {
     // Check if 2 reviews done — notify
     const myReviews = await getDocs(query(collection(db, 'capstoneReviews'), where('reviewerId','==',currentUser.uid), where('programId','==',programId)));
     if (myReviews.size >= 2) {
-      showToast('🎉 You have completed both peer reviews! Your certificate is now under review.');
+      showToast('You have completed both peer reviews! Your certificate is now under review.');
     }
   } catch(e) { showToast('Error: ' + e.message, 'error'); }
 };
@@ -8128,7 +8129,7 @@ window.submitProgramFeedback = async function(programId) {
       userId: currentUser.uid, userName: currentUserData.name,
       programId, rating, feedback: text, createdAt: serverTimestamp()
     });
-    showToast('Thank you for your feedback! 🙏');
+    showToast('Thank you for your feedback! ');
   } catch(e) { showToast('Error: ' + e.message, 'error'); }
 };
 
@@ -8256,11 +8257,11 @@ async function openLessonContent(programId, lessonId, colName) {
 
   if (l.isLastLesson && l.assignment) {
     html += '<div id="assignment-section-' + lessonId + '" style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border-left:3px solid var(--navy);">'
-    html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">📝 Module Assignment</p>'
+    html += '<p style="font-size:0.82rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Module Assignment</p>'
     html += '<p style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;line-height:1.7;">' + sanitize(l.assignment) + '</p>'
     html += '<textarea id="assignment-' + lessonId + '" rows="5" style="width:100%;background:white;border:1.5px solid rgba(27,42,107,0.12);border-radius:10px;padding:0.75rem;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;box-sizing:border-box;" placeholder="Write your assignment response here... (optional if uploading a file)"></textarea>'
     html += '<div style="margin-top:0.75rem;background:var(--light);border-radius:10px;padding:1rem;">'
-    html += '<p style="font-size:0.78rem;font-weight:700;color:var(--navy);margin-bottom:0.35rem;">📎 Submit File via Google Drive <span style="color:#E63329;">*</span> (Required)</p>'
+    html += '<p style="font-size:0.78rem;font-weight:700;color:var(--navy);margin-bottom:0.35rem;">Submit File via Google Drive <span style="color:#E63329;">*</span> (Required)</p>'
     html += '<p style="font-size:0.72rem;color:var(--gray);margin-bottom:0.5rem;">Upload to Google Drive → right-click → Share → Anyone with the link → Copy link → paste below.</p>'
     html += '<input type="url" id="assignment-file-' + lessonId + '" placeholder="https://drive.google.com/file/d/..." style="width:100%;padding:0.5rem 0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:8px;font-family:Poppins,sans-serif;font-size:0.82rem;box-sizing:border-box;">'
     html += '</div>'
@@ -8316,7 +8317,7 @@ async function submitLessonQuiz(programId, lessonId, colName) {
 
   // Show detailed results
   let resultsHtml = '<div style="background:' + (passed ? 'rgba(39,174,96,0.06)' : 'rgba(220,53,69,0.06)') + ';border-radius:12px;padding:1rem;border-left:3px solid ' + (passed ? '#27AE60' : '#dc3545') + ';margin-top:0.75rem;">';
-  resultsHtml += '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">' + (passed ? '✅' : '❌') + ' Score: ' + score + '% ' + (passed ? '— Passed!' : '— Need 70%') + '</p>';
+  resultsHtml += '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">' + (passed ? '' : '') + ' Score: ' + score + '% ' + (passed ? '— Passed!' : '— Need 70%') + '</p>';
   questionResults.forEach(function(r, i) {
     resultsHtml += '<div style="margin-bottom:0.5rem;padding:0.5rem;background:white;border-radius:8px;border-left:3px solid ' + (r.isCorrect ? '#27AE60' : '#dc3545') + ';">';
     resultsHtml += '<p style="font-size:0.78rem;font-weight:600;color:var(--navy);">' + (i+1) + '. ' + sanitize(r.question) + '</p>';
@@ -8334,7 +8335,7 @@ async function submitLessonQuiz(programId, lessonId, colName) {
   if (resultDiv) resultDiv.innerHTML = resultsHtml;
 
   if (passed) {
-    showToast('Quiz passed! Score: ' + score + '% 🎉');
+    showToast('Quiz passed! Score: ' + score + '% ');
 
     // Save grade to memberGrades
     const gradeRef = doc(db, 'memberGrades', currentUser.uid + '_' + programId);
@@ -8421,12 +8422,12 @@ async function submitLessonAssignment(programId, lessonId, colName) {
   if (driveLink) {
     fileUrl = driveLink;
     fileName = 'Google Drive File';
-    if (progressDiv) progressDiv.innerHTML = '<p style="font-size:0.78rem;color:#27AE60;">✅ Google Drive link added</p>';
+    if (progressDiv) progressDiv.innerHTML = '<p style="font-size:0.78rem;color:#27AE60;">Google Drive link added</p>';
   }
 
 
   // Show loading
-  if (resultDiv) resultDiv.innerHTML = '<div style="background:rgba(39,174,96,0.1);border-radius:12px;padding:1rem;"><p style="font-size:0.85rem;color:#27AE60;font-weight:600;">✅ Assignment submitted! Admin will review and grade it shortly.</p></div>';
+  if (resultDiv) resultDiv.innerHTML = '<div style="background:rgba(39,174,96,0.1);border-radius:12px;padding:1rem;"><p style="font-size:0.85rem;color:#27AE60;font-weight:600;">Assignment submitted! Admin will review and grade it shortly.</p></div>';
 
   // Skipping AI grading — admin grades manually
   let aiScore = 0;
@@ -8498,14 +8499,14 @@ async function submitLessonAssignment(programId, lessonId, colName) {
   // Show AI feedback to member
   const scoreColor = aiScore >= 70 ? '#27AE60' : aiScore >= 50 ? '#F5A623' : '#dc3545';
   let feedbackHtml = '<div style="background:rgba(27,42,107,0.04);border-radius:12px;padding:1.25rem;border-left:3px solid var(--navy);">';
-  feedbackHtml += '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">🤖 AI Preliminary Grade</p>';
+  feedbackHtml += '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;">AI Preliminary Grade</p>';
   if (aiScore > 0) {
     feedbackHtml += '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">';
     feedbackHtml += '<div style="width:60px;height:60px;border-radius:50%;background:' + scoreColor + '18;border:3px solid ' + scoreColor + ';display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;color:' + scoreColor + ';">' + aiScore + '%</div>';
     feedbackHtml += '<div><p style="font-size:0.85rem;color:var(--navy);line-height:1.6;">' + sanitize(aiFeedback) + '</p></div>';
     feedbackHtml += '</div>';
-    if (aiStrengths) feedbackHtml += '<div style="background:rgba(39,174,96,0.06);border-radius:8px;padding:0.75rem;margin-bottom:0.5rem;"><p style="font-size:0.75rem;font-weight:700;color:#27AE60;margin-bottom:0.25rem;">✅ Strengths</p><p style="font-size:0.82rem;color:var(--navy);">' + sanitize(aiStrengths) + '</p></div>';
-    if (aiWeaknesses) feedbackHtml += '<div style="background:rgba(220,53,69,0.06);border-radius:8px;padding:0.75rem;margin-bottom:0.5rem;"><p style="font-size:0.75rem;font-weight:700;color:#dc3545;margin-bottom:0.25rem;">📝 Areas to Improve</p><p style="font-size:0.82rem;color:var(--navy);">' + sanitize(aiWeaknesses) + '</p></div>';
+    if (aiStrengths) feedbackHtml += '<div style="background:rgba(39,174,96,0.06);border-radius:8px;padding:0.75rem;margin-bottom:0.5rem;"><p style="font-size:0.75rem;font-weight:700;color:#27AE60;margin-bottom:0.25rem;">Strengths</p><p style="font-size:0.82rem;color:var(--navy);">' + sanitize(aiStrengths) + '</p></div>';
+    if (aiWeaknesses) feedbackHtml += '<div style="background:rgba(220,53,69,0.06);border-radius:8px;padding:0.75rem;margin-bottom:0.5rem;"><p style="font-size:0.75rem;font-weight:700;color:#dc3545;margin-bottom:0.25rem;">Areas to Improve</p><p style="font-size:0.82rem;color:var(--navy);">' + sanitize(aiWeaknesses) + '</p></div>';
   }
   feedbackHtml += '<p style="font-size:0.75rem;color:var(--gray);margin-top:0.75rem;font-style:italic;">This is an AI preliminary grade. Your facilitator will review and give the final grade.</p>';
   feedbackHtml += '</div>';
@@ -8543,7 +8544,7 @@ function showQuizFailureForm(programId, lessonId, score, attempts, colName) {
   modal.id = 'quiz-failure-modal';
   modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
   modal.innerHTML = '<div style="background:white;border-radius:20px;padding:2rem;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">'
-    + '<div style="text-align:center;margin-bottom:1.5rem;"><div style="font-size:2.5rem;margin-bottom:0.5rem;"></div>'
+    + '<div style="text-align:center;margin-bottom:1.5rem;">'
     + '<h3 style="font-size:1.1rem;font-weight:700;color:var(--navy);">Quiz Attempts Exhausted</h3>'
     + '<p style="font-size:0.85rem;color:var(--gray);margin-top:0.5rem;">You used all 3 attempts. Score: ' + score + '%. Please tell YAN what was difficult so we can help you.</p></div>'
     + '<div class="form-group"><label style="font-size:0.82rem;font-weight:600;color:var(--navy);">What was difficult about this quiz? *</label>'
@@ -10325,13 +10326,13 @@ async function submitAssignment(programId, moduleId) {
         programId, programTitle: title, department: 'programs',
         status: 'approved', issuedAt: serverTimestamp(), type: 'program'
       });
-      showToast('🎉 Program complete! Certificate issued. Check My Grades.');
+      showToast('Program complete! Certificate issued. Check My Grades.');
       // Send email notification
       try {
         await fetch('https://yan-email-worker.youngafricansn.workers.dev', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
           to_name: currentUserData.name,
           to_email: currentUserData.email,
-          subject: '🎓 Your YAN Certificate is Ready!',
+          subject: 'Your YAN Certificate is Ready!',
           message: 'Congratulations ' + currentUserData.name + '! You have successfully completed the ' + title + ' program on Young Africans Network. Your certificate has been issued and is available in your My Grades section. Log in to download it: https://youngafricansnetwork.org/community.html\n\nKeep learning and growing!\n\nYAN Team'
         })});
       } catch(emailErr) { console.log('Email error:', emailErr); }
@@ -10883,7 +10884,7 @@ async function openCareerProgram(programId) {
     html += '<div id="capstone-content-' + programId + '"><div style="text-align:center;padding:1rem;color:rgba(255,255,255,0.6);font-size:0.82rem;">Loading capstone...</div></div>';
     html += '</div>';
   } else {
-    html += '<div style="background:var(--light);border-radius:12px;padding:1rem;opacity:0.6;display:flex;align-items:center;gap:0.75rem;"><div style="width:32px;height:32px;border-radius:50%;background:#ccc;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;">&#x1F512;</div><div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Capstone Module</p><p style="font-size:0.72rem;color:var(--gray);">Complete all modules to unlock</p></div></div>';
+    html += '<div style="background:var(--light);border-radius:12px;padding:1rem;opacity:0.6;display:flex;align-items:center;gap:0.75rem;"><div style="width:32px;height:32px;border-radius:50%;background:#ccc;display:flex;align-items:center;justify-content:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Capstone Module</p><p style="font-size:0.72rem;color:var(--gray);">Complete all modules to unlock</p></div></div>';
   }
   html += '</div>';
   box.innerHTML = html;
@@ -10917,7 +10918,6 @@ async function loadCareerMatcher() {
   container.innerHTML = '<div style="max-width:700px;margin:0 auto;padding:1rem;">'
     + '<button onclick="loadCareerHub()" style="background:none;border:none;color:var(--navy);font-family:Poppins,sans-serif;font-size:0.85rem;cursor:pointer;margin-bottom:1.5rem;font-weight:600;">Back to Career Hub</button>'
     + '<div style="background:linear-gradient(135deg,#1B2A6B,#27AE60);border-radius:20px;padding:2rem;color:#fff;margin-bottom:1.5rem;text-align:center;">'
-    + '<div style="font-size:2.5rem;margin-bottom:0.5rem;"></div>'
     + '<h2 style="font-family:Playfair Display,serif;font-size:1.6rem;font-weight:900;margin-bottom:0.5rem;">AI Career Matcher</h2>'
     + '<p style="color:rgba(255,255,255,0.8);font-size:0.88rem;">Tell us about yourself and get personalized career guidance powered by AI</p>'
     + '</div>'
@@ -11146,6 +11146,25 @@ window.resendVerificationEmail = async function() {
   }
 };
 
+// Clicking the emailed verification link opens a new tab (auth-action.html), so the
+// original community.html tab's currentUser.emailVerified stays stale - Firebase doesn't
+// push a live update, only a reload() picks up the change. Members were reporting the
+// verify banner never going away even after they'd actually verified, because nothing
+// ever called reload() unless they knew to click "I've Verified" themselves. Re-checking
+// silently whenever the tab regains focus covers the normal flow (verify in one tab,
+// come back to this one) without relying on that.
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState !== 'visible' || !currentUser || currentUser.emailVerified) return;
+  try {
+    await currentUser.reload();
+    if (currentUser.emailVerified) {
+      const banner = document.getElementById('verify-email-banner');
+      if (banner) banner.style.display = 'none';
+      if (typeof showToast === 'function') showToast('Email verified! Thanks.');
+    }
+  } catch (e) {}
+});
+
 window.dismissVerifyBanner = function() {
   const banner = document.getElementById('verify-email-banner');
   if (banner) banner.style.display = 'none';
@@ -11230,7 +11249,7 @@ window.showMessageToast = function showMessageToast(senderName, message, convId,
 
   toast.innerHTML = avatar +
     '<div style="flex:1;min-width:0;">' +
-    '<div style="font-size:0.82rem;font-weight:700;margin-bottom:0.2rem;">💬 ' + sanitize(senderName) + '</div>' +
+    '<div style="font-size:0.82rem;font-weight:700;margin-bottom:0.2rem;">' + sanitize(senderName) + '</div>' +
     '<div style="font-size:0.75rem;color:rgba(255,255,255,0.75);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + sanitize(message.substring(0,50)) + '</div>' +
     '<div style="font-size:0.68rem;color:var(--gold);margin-top:0.2rem;">Tap to reply →</div>' +
     '</div>' +
@@ -11367,14 +11386,14 @@ window.openConversation = async function(convId, otherId, otherNameEncoded, othe
         if (msg.mentorshipSlots && Array.isArray(msg.mentorshipSlots)) {
           msgContent += '<div style="margin-top:0.75rem;display:flex;flex-direction:column;gap:0.5rem;">';
           msg.mentorshipSlots.forEach(function(slot, i) {
-            msgContent += '<button onclick="confirmMentoringSlot(\''+msg.mentorshipId+'\','+i+')" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;text-align:left;">📅 ' + slot.label + '</button>';
+            msgContent += '<button onclick="confirmMentoringSlot(\''+msg.mentorshipId+'\','+i+')" style="background:var(--navy);color:#fff;border:none;padding:0.5rem 1rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;text-align:left;">' + slot.label + '</button>';
           });
           msgContent += '</div>';
         }
         if (msg.meetingRoom) {
-          msgContent += '<div style="margin-top:0.5rem;"><button onclick="openMentorshipMeetingRoom(\'' + msg.meetingRoom + '\', \'' + (isMe ? 'Mentee' : 'Mentor') + '\')" style="background:#27AE60;color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;display:inline-block;">&#x1F3A5; Join Meeting</button></div>';
-            + '<button onclick="openMentorshipMeetingRoom(\"' + msg.meetingRoom + '\",\"' + (isMe ? 'Mentee' : 'Mentor') + '\")" style="background:#27AE60;color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;">🎥 Join Meeting</button>'
-            + 'style="background:#27AE60;color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;">🎥 Join Meeting</button>'
+          msgContent += '<div style="margin-top:0.5rem;"><button onclick="openMentorshipMeetingRoom(\'' + msg.meetingRoom + '\', \'' + (isMe ? 'Mentee' : 'Mentor') + '\')" style="background:#27AE60;color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;display:inline-block;">Join Meeting</button></div>';
+            + '<button onclick="openMentorshipMeetingRoom(\"' + msg.meetingRoom + '\",\"' + (isMe ? 'Mentee' : 'Mentor') + '\")" style="background:#27AE60;color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;">Join Meeting</button>'
+            + 'style="background:#27AE60;color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:50px;font-family:Poppins,sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;">Join Meeting</button>'
             + '</div>';
         }
         msgDiv.innerHTML += '<div style="display:flex;flex-direction:column;align-items:'+(isMe?'flex-end':'flex-start')+';margin-bottom:0.25rem;">'
@@ -11549,7 +11568,7 @@ window.showMentorshipSection = async function(section) {
       + '<h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:0.25rem;">Become a YAN Mentor</h3>'
       + '<p style="font-size:0.78rem;color:var(--gray);margin-bottom:1rem;">Your application will be reviewed and approved by the YAN admin team.</p>'
       + (!p.status || p.status === 'pending' ? '<div style="background:rgba(245,166,35,0.1);border:1px solid #F5A623;border-radius:10px;padding:0.75rem;margin-bottom:1rem;font-size:0.82rem;color:#B8860B;font-weight:600;">&#x23F3; Your application is pending admin approval.</div>' : '')
-      + (p.status === 'approved' ? '<div style="background:rgba(39,174,96,0.1);border:1px solid #27AE60;border-radius:10px;padding:0.75rem;margin-bottom:1rem;font-size:0.82rem;color:#27AE60;font-weight:600;">&#x2705; You are an approved YAN Mentor!</div>' : '')
+      + (p.status === 'approved' ? '<div style="background:rgba(39,174,96,0.1);border:1px solid #27AE60;border-radius:10px;padding:0.75rem;margin-bottom:1rem;font-size:0.82rem;color:#27AE60;font-weight:600;">&#x2713; You are an approved YAN Mentor!</div>' : '')
       + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Why do you want to be a mentor? *</label>'
       + '<textarea id="mentor-bio" rows="3" placeholder="e.g. I want to help young Africans achieve their goals through my experience in..." style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:10px;font-family:Poppins,sans-serif;font-size:0.85rem;resize:vertical;">' + (p.bio||'') + '</textarea></div>'
       + '<div style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Your Qualifications *</label>'
@@ -11688,7 +11707,7 @@ window.showAvailabilityPicker = function(mentorshipId) {
   modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;';
   const today = new Date().toISOString().split('T')[0];
   modal.innerHTML = '<div style="background:var(--white);border-radius:20px;padding:2rem;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;">' +
-    '<h3 style="font-family:Playfair Display,serif;font-size:1.2rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">📅 Share Your Availability</h3>' +
+    '<h3 style="font-family:Playfair Display,serif;font-size:1.2rem;font-weight:900;color:var(--navy);margin-bottom:0.5rem;">Share Your Availability</h3>' +
     '<p style="color:var(--gray);font-size:0.82rem;margin-bottom:1.5rem;">Share 3 available time slots with your mentee. They will pick one.</p>' +
     '<div id="slot-list">' +
     buildSlotHTML(1) + buildSlotHTML(2) + buildSlotHTML(3) +
@@ -11735,7 +11754,7 @@ window.submitAvailability = async function(mentorshipId) {
   const slotsText = slots.map((s,i) => (i+1)+'. '+s.label).join(' | ');
   await addDoc(collection(db,'conversations',convId,'messages'), {
     senderId: currentUser.uid, senderName: currentUserData.name,
-    text: '📅 I have accepted your mentorship request! Please pick a time for our first session: ' + slotsText,
+    text: 'I have accepted your mentorship request! Please pick a time for our first session: ' + slotsText,
     mentorshipSlots: slots, mentorshipId,
     createdAt: serverTimestamp()
   });
@@ -11744,14 +11763,14 @@ window.submitAvailability = async function(mentorshipId) {
     await setDoc(doc(db,'conversations',convId), {
       participants: [currentUser.uid, m.menteeId],
       participantNames: {[currentUser.uid]: currentUserData.name, [m.menteeId]: m.menteeName},
-      lastMessage: '📅 Please pick a time for our first session',
+      lastMessage: 'Please pick a time for our first session',
       lastMessageAt: serverTimestamp(),
       lastSenderName: currentUserData.name, lastSenderId: currentUser.uid,
       unreadCount: {[m.menteeId]: 1, [currentUser.uid]: 0}
     });
   } else {
     await updateDoc(doc(db,'conversations',convId), {
-      lastMessage: '📅 Please pick a time for our first session',
+      lastMessage: 'Please pick a time for our first session',
       lastMessageAt: serverTimestamp(),
       lastSenderName: currentUserData.name, lastSenderId: currentUser.uid,
       ['unreadCount.' + m.menteeId]: increment(1), ['unreadCount.' + currentUser.uid]: 0
@@ -11791,13 +11810,13 @@ window.confirmMentoringSlot = async function(mentorshipId, slotIndex) {
   const meetingUrl = 'https://youngafricansnetwork.daily.co/YAN_GENERAL_FORUM';
   await addDoc(collection(db,'conversations',convId,'messages'), {
     senderId: currentUser.uid, senderName: currentUserData.name,
-    text: '✅ Session confirmed for ' + slot.label + '! I will be ready.',
+    text: 'Session confirmed for ' + slot.label + '! I will be ready.',
     createdAt: serverTimestamp()
   });
 
   // Notify mentor
   await YanAPI.createNotification({
-    title: '✅ Session Confirmed!',
+    title: 'Session Confirmed!',
     message: s.menteeName + ' confirmed your mentorship session for ' + slot.label,
     type: 'info', userId: s.mentorId
   });
@@ -11952,7 +11971,7 @@ window.startMentorshipMeeting = async function(menteeId, menteeNameEncoded, ment
   await addDoc(collection(db,'conversations',convId,'messages'),{
     senderId: currentUser.uid,
     senderName: currentUserData.name,
-    text: '🎥 I have started our mentorship meeting! Click the button below to join now.',
+    text: 'I have started our mentorship meeting! Click the button below to join now.',
     meetingRoom: roomName,
     createdAt: serverTimestamp()
   });
@@ -11961,14 +11980,14 @@ window.startMentorshipMeeting = async function(menteeId, menteeNameEncoded, ment
     await setDoc(doc(db,'conversations',convId),{
       participants:[currentUser.uid,menteeId],
       participantNames:{[currentUser.uid]:currentUserData.name,[menteeId]:menteeName},
-      lastMessage:'🎥 Mentorship meeting started! Click to join.',
+      lastMessage:'Mentorship meeting started! Click to join.',
       lastMessageAt:serverTimestamp(),
       lastSenderName:currentUserData.name, lastSenderId:currentUser.uid,
       unreadCount:{[currentUser.uid]:0,[menteeId]:1}
     });
   } else {
     await updateDoc(doc(db,'conversations',convId),{
-      lastMessage:'🎥 Mentorship meeting started! Click to join.',
+      lastMessage:'Mentorship meeting started! Click to join.',
       lastMessageAt:serverTimestamp(),
       lastSenderName:currentUserData.name, lastSenderId:currentUser.uid,
       ['unreadCount.'+menteeId]:increment(1),
@@ -12033,7 +12052,7 @@ window.showSessionNotesForm = function() {
   modal.id = 'session-notes-modal';
   modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;';
   modal.innerHTML = '<div style="background:var(--white);border-radius:20px;padding:2rem;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;">' +
-    '<h3 style="font-family:Playfair Display,serif;font-size:1.2rem;font-weight:900;color:var(--navy);margin-bottom:0.25rem;">📝 Session Notes</h3>' +
+    '<h3 style="font-family:Playfair Display,serif;font-size:1.2rem;font-weight:900;color:var(--navy);margin-bottom:0.25rem;">Session Notes</h3>' +
     '<p style="color:var(--gray);font-size:0.82rem;margin-bottom:1.5rem;">Record what was discussed to track your mentee\'s progress.</p>' +
     '<div class="form-group" style="margin-bottom:1rem;"><label style="font-size:0.82rem;font-weight:700;color:var(--navy);display:block;margin-bottom:0.4rem;">Topics Discussed *</label>' +
     '<textarea id="sn-topics" rows="3" placeholder="What topics did you cover in this session?" style="width:100%;padding:0.75rem;border:1.5px solid rgba(27,42,107,0.15);border-radius:12px;font-family:Poppins,sans-serif;font-size:0.82rem;outline:none;resize:vertical;"></textarea></div>' +
@@ -12223,7 +12242,7 @@ window.redeemReward = async function(tierName, reward, points) {
       status: 'pending',
       createdAt: serverTimestamp()
     });
-    showToast('Reward redemption submitted! We will contact you within 48 hours 🎉');
+    showToast('Reward redemption submitted! We will contact you within 48 hours ');
   } catch(e) {
     showToast('Error: ' + e.message, 'error');
   }
@@ -12688,9 +12707,9 @@ h2,h3{position:relative;}
       <button class="btn-land-login" onclick="safeShowScreen('screen-login')">Sign In</button>
     </div>
     <div class="landing-features">
-      <div class="landing-feature"><div class="lf-icon"></div><p>Department training materials, videos & articles</p></div>
-      <div class="landing-feature"><div class="lf-icon"></div><p>Showcase your skills, build your portfolio, and connect with diverse professionals</p></div>
-      <div class="landing-feature"><div class="lf-icon"></div><p>Earn certificates after completing your training</p></div>
+      <div class="landing-feature"><p>Department training materials, videos & articles</p></div>
+      <div class="landing-feature"><p>Showcase your skills, build your portfolio, and connect with diverse professionals</p></div>
+      <div class="landing-feature"><p>Earn certificates after completing your training</p></div>
     </div>
     <p style="margin-top:2rem;"><a href="index.html" style="color:rgba(255,255,255,0.5);font-size:0.82rem;text-decoration:none;">← Back to main website</a></p>
   </div>
@@ -12899,7 +12918,7 @@ h2,h3{position:relative;}
           <button class="dd-item" onclick="showTab('messages');closeDropdowns()">Messages <span id="msg-unread-badge" style="display:none;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:0.65rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;">0</span></button>
           <button class="dd-item" onclick="showTab('notifications');closeDropdowns()">Notifications</button>
 
-          <button class="dd-item" onclick="showTab('grades');closeDropdowns()">📊 My Grades</button>
+          <button class="dd-item" onclick="showTab('grades');closeDropdowns()">My Grades</button>
         </div>
       </div>
 
@@ -13024,7 +13043,7 @@ h2,h3{position:relative;}
     <div class="tab-panel" id="tab-mentorship"><div id="mentorship-container" style="max-width:900px;margin:0 auto;padding:1rem;"></div></div>
     <div class="tab-panel" id="tab-helpline"><div id="helpline-container" style="max-width:900px;margin:0 auto;padding:1rem;"></div></div>
   </main>
-<div id="members-drawer" style="display:none;position:fixed;bottom:0;left:0;right:0;background:var(--white);border-radius:20px 20px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,0.15);z-index:9990;max-height:70vh;overflow-y:auto;padding:1rem;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;"><h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);">&#x1F465; YAN Members</h3><button onclick="toggleMembersDrawer()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--gray);">&#x2715;</button></div><div id="members-drawer-list"><div style="color:var(--gray);font-size:0.8rem;text-align:center;padding:1rem;">Loading...</div></div></div>
+<div id="members-drawer" style="display:none;position:fixed;bottom:0;left:0;right:0;background:var(--white);border-radius:20px 20px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,0.15);z-index:9990;max-height:70vh;overflow-y:auto;padding:1rem;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;"><h3 style="font-size:0.95rem;font-weight:800;color:var(--navy);">YAN Members</h3><button onclick="toggleMembersDrawer()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--gray);">&#x2715;</button></div><div id="members-drawer-list"><div style="color:var(--gray);font-size:0.8rem;text-align:center;padding:1rem;">Loading...</div></div></div>
 </div>
 
 <script>

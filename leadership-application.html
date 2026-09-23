@@ -110,10 +110,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .nav-logo-text::after{content:'';display:block;width:100%;height:1.5px;background:var(--gold);margin-top:2px;}
 
 /* ========== HERO ========== */
-.app-hero{background:linear-gradient(135deg,var(--navy),var(--dark));padding:9rem 2rem 5rem;text-align:center;position:relative;overflow:hidden;}
-.app-hero::before{content:'';position:absolute;top:-50%;right:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(245,166,35,0.12) 0%,transparent 70%);}
-.app-hero::after{content:'';position:absolute;bottom:-50%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(230,51,41,0.1) 0%,transparent 70%);}
-.app-hero-inner{max-width:820px;margin:0 auto;position:relative;z-index:1;}
+.app-hero{background:var(--dark);padding:9rem 2rem 5rem;text-align:center;position:relative;overflow:hidden;}
+.app-hero-video-wrap{position:absolute;inset:0;z-index:0;overflow:hidden;}
+.app-hero-video-wrap iframe{position:absolute;width:100%;height:100%;top:0;left:0;border:none;padding:0;margin:0;overflow:hidden;object-fit:cover;pointer-events:none;}
+.app-hero-video-overlay{position:absolute;inset:0;background:rgba(10,18,60,0.82);z-index:1;}
+.app-hero-inner{max-width:820px;margin:0 auto;position:relative;z-index:2;}
 .status-pill{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(39,174,96,0.15);border:1px solid rgba(39,174,96,0.4);color:#6FE39B;padding:0.4rem 1.1rem;border-radius:50px;font-size:0.75rem;font-weight:700;letter-spacing:0.5px;margin-bottom:1.25rem;}
 .status-dot{width:8px;height:8px;border-radius:50%;background:#27AE60;box-shadow:0 0 0 4px rgba(39,174,96,0.25);animation:pulse-dot 2s infinite;}
 @keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:0.4;}}
@@ -286,22 +287,22 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
     <li>
       <a href="about.html">About <span class="arrow">▼</span></a>
       <div class="dropdown">
-        <a href="about.html"><span class="drop-icon">🌍</span> About YAN</a>
-        <a href="Journey_Stories.html"><span class="drop-icon">📖</span> Journey Stories</a>
+        <a href="about.html">About YAN</a>
+        <a href="Journey_Stories.html">Journey Stories</a>
       </div>
     </li>
     <li>
       <a href="programs.html">Programs <span class="arrow">▼</span></a>
       <div class="dropdown">
-        <a href="programs.html"><span class="drop-icon">💻</span> Our Programs</a>
-        <a href="events.html"><span class="drop-icon">📅</span> Events</a>
+        <a href="programs.html">Our Programs</a>
+        <a href="events.html">Events</a>
       </div>
     </li>
     <li>
       <a href="team.html">Team <span class="arrow">▼</span></a>
       <div class="dropdown">
-        <a href="team.html"><span class="drop-icon">👥</span> Our Team</a>
-        <a href="gallery.html"><span class="drop-icon">📸</span> Gallery</a>
+        <a href="team.html">Our Team</a>
+        <a href="gallery.html">Gallery</a>
       </div>
     </li>
     <li><a href="community.html">Community</a></li>
@@ -328,6 +329,10 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
 
 <!-- HERO -->
 <div class="app-hero">
+  <div class="app-hero-video-wrap">
+    <iframe src="https://share.synthesia.io/embeds/videos/2d2d7cc5-0d31-4d31-9af2-9c2788639f74" loading="lazy" title="YAN Video" allowfullscreen allow="encrypted-media; fullscreen;"></iframe>
+    <div class="app-hero-video-overlay"></div>
+  </div>
   <div class="app-hero-inner">
     <span class="status-pill"><span class="status-dot"></span> Applications Open — 2026 Restructuring</span>
     <h1 class="app-title">Lead the Movement.<br><span>Serve Young Africans Network.</span></h1>

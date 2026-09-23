@@ -287,13 +287,13 @@ function renderSessionCard(s) {
       </div>
       <span class="badge badge-${s.status}">${s.status.replace('_',' ')}</span>
     </div>
-    ${s.meetLink ? `<a class="meet-link" href="${escapeHtml(s.meetLink)}" target="_blank">🔗 Join Google Meet</a>` : ''}
+    ${s.meetLink ? `<a class="meet-link" href="${escapeHtml(s.meetLink)}" target="_blank">Join Google Meet</a>` : ''}
     ${s.briefing ? `<div style="background:var(--light);border-radius:10px;padding:0.75rem;margin-top:0.75rem;font-size:0.82rem;color:var(--navy);"><strong>Briefing:</strong> ${escapeHtml(s.briefing)}</div>` : ''}
     ${s.needsAssistance ? `<div style="background:rgba(230,51,41,0.06);border-radius:10px;padding:0.75rem;margin-top:0.75rem;font-size:0.82rem;color:var(--red);">
       <strong>Needs help:</strong> ${escapeHtml(s.assistanceNote||'')}
-      ${s.assistanceTask ? `<div style="margin-top:0.4rem;color:var(--navy);">Status: <strong>${s.assistanceTask.status.replace('_',' ')}</strong>${s.assistanceTask.submittedFileUrl ? ` · <a href="${escapeHtml(s.assistanceTask.submittedFileUrl)}" target="_blank" style="color:var(--navy);font-weight:700;">⬇ Download</a>` : ''}</div>` : ''}
+      ${s.assistanceTask ? `<div style="margin-top:0.4rem;color:var(--navy);">Status: <strong>${s.assistanceTask.status.replace('_',' ')}</strong>${s.assistanceTask.submittedFileUrl ? ` · <a href="${escapeHtml(s.assistanceTask.submittedFileUrl)}" target="_blank" style="color:var(--navy);font-weight:700;">Download</a>` : ''}</div>` : ''}
     </div>` : ''}
-    ${s.speakerPhotoUrl ? `<div style="margin-top:0.75rem;"><a href="${escapeHtml(s.speakerPhotoUrl)}" target="_blank" style="display:inline-flex;align-items:center;gap:0.4rem;background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.4rem 0.9rem;border-radius:50px;font-size:0.76rem;font-weight:700;">⬇ Speaker/Guest Photo</a></div>` : ''}
+    ${s.speakerPhotoUrl ? `<div style="margin-top:0.75rem;"><a href="${escapeHtml(s.speakerPhotoUrl)}" target="_blank" style="display:inline-flex;align-items:center;gap:0.4rem;background:var(--light);color:var(--navy);border:1px solid rgba(27,42,107,0.15);padding:0.4rem 0.9rem;border-radius:50px;font-size:0.76rem;font-weight:700;">Speaker/Guest Photo</a></div>` : ''}
 
     <div class="section-label">Guest Speakers</div>
     <div>${guestsHtml}</div>
@@ -380,11 +380,11 @@ async function uploadSpeakerPhoto() {
   try {
     const url = await YanUpload.uploadFile(file, (pct) => { status.textContent = '⏳ Uploading... ' + pct + '%'; });
     await YanAPI.setSessionSpeakerPhoto(activeSessionForModal, url);
-    status.textContent = '✅ Uploaded!';
+    status.textContent = 'Uploaded!';
     showToast('Speaker photo saved');
     await loadSessions();
     setTimeout(() => closeModal('speaker-photo-modal'), 900);
-  } catch(e) { status.textContent = '❌ ' + e.message; }
+  } catch(e) { status.textContent = '' + e.message; }
 }
 async function confirmGuest(sessionId, guestId) {
   try { await YanAPI.confirmSessionGuest(sessionId, guestId); showToast('Guest confirmed'); await loadSessions(); }

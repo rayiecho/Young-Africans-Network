@@ -76,7 +76,7 @@ footer{background:var(--navy);padding:1.5rem 2rem;text-align:center;}
   <div class="auth-card">
     <div class="auth-logo"><img src="images/logo.jpeg" alt="YAN Logo"></div>
     <div class="auth-title">Welcome Back</div>
-    <div class="auth-sub">Login to your Young Africans Network account 🌍</div>
+    <div class="auth-sub">Login to your Young Africans Network account </div>
 
     <div class="error-msg" id="errorMsg"></div>
 
@@ -90,7 +90,7 @@ footer{background:var(--navy);padding:1.5rem 2rem;text-align:center;}
       <div class="forgot-link"><a href="reset.html">Forgot password?</a></div>
     </div>
 
-    <button class="btn-auth" id="loginBtn">Login to YAN 🚀</button>
+    <button class="btn-auth" id="loginBtn">Login to YAN </button>
 
     <div class="divider"><span>or</span></div>
     <a href="community.html" class="btn-community">Browse Community Without Account</a>
@@ -101,7 +101,7 @@ footer{background:var(--navy);padding:1.5rem 2rem;text-align:center;}
 
 <footer>
   <div style="max-width:1200px;margin:0 auto 2rem;text-align:center;">
-    <a href="partners.html" style="color:var(--gold);font-size:0.8rem;font-weight:700;text-decoration:none;">🤝 Proudly partnered with organizations advancing African youth — See Our Partners →</a>
+    <a href="partners.html" style="color:var(--gold);font-size:0.8rem;font-weight:700;text-decoration:none;">Proudly partnered with organizations advancing African youth — See Our Partners →</a>
   </div>
 
   <div class="footer-copy">© 2026 Young Africans Network. All Rights Reserved. | <a href="index.html">Back to Website</a></div>
@@ -135,7 +135,7 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
   errorEl.style.display = 'none';
 
   if (!email || !password) {
-    errorEl.textContent = '❌ Please enter your email and password.';
+    errorEl.textContent = 'Please enter your email and password.';
     errorEl.style.display = 'block'; return;
   }
 
@@ -146,12 +146,12 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
     await signInWithEmailAndPassword(auth, email, password);
     window.location.href = 'profile.html';
   } catch (err) {
-    let msg = '❌ Login failed. Please try again.';
-    if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') msg = '❌ Incorrect email or password.';
-    if (err.code === 'auth/too-many-requests') msg = '❌ Too many attempts. Please try again later.';
+    let msg = 'Login failed. Please try again.';
+    if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') msg = 'Incorrect email or password.';
+    if (err.code === 'auth/too-many-requests') msg = 'Too many attempts. Please try again later.';
     errorEl.textContent = msg;
     errorEl.style.display = 'block';
-    btn.disabled = false; btn.textContent = 'Login to YAN 🚀';
+    btn.disabled = false; btn.textContent = 'Login to YAN ';
   }
 });
 

@@ -151,7 +151,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .membership-card{border-radius:20px;padding:2rem;border:2px solid var(--light);transition:all 0.3s;}
 .membership-card:hover{border-color:var(--navy);transform:translateY(-4px);}
 .membership-card.featured{background:var(--navy);border-color:var(--navy);}
-.membership-icon{font-size:2.5rem;margin-bottom:1rem;}
+.membership-icon{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--gold);margin-bottom:0.75rem;}
 .membership-type{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;}
 .membership-card.featured .membership-type{color:var(--gold);}
 .membership-age{font-size:0.78rem;color:var(--red);font-weight:600;margin-bottom:1rem;}
@@ -181,8 +181,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);box-
 .exp-card{background:var(--light);border-radius:20px;padding:2rem;}
 .exp-title{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;display:flex;align-items:center;gap:0.75rem;}
 .exp-list{list-style:none;display:flex;flex-direction:column;gap:0.75rem;}
-.exp-list li{display:flex;align-items:flex-start;gap:0.75rem;font-size:0.85rem;color:var(--gray);line-height:1.6;}
-.exp-list li span{flex-shrink:0;}
+.exp-list li{position:relative;padding-left:1.4rem;font-size:0.85rem;color:var(--gray);line-height:1.6;}
+.exp-list li::before{content:'\2713';position:absolute;left:0;color:var(--gold);font-weight:700;}
 
 /* FOOTER */
 footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255,0.1);}
@@ -263,27 +263,27 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
     <li>
       <a href="about.html">About <span class="arrow">▼</span></a>
       <div class="dropdown">
-        <a href="about.html"><span class="drop-icon">🌍</span> About YAN</a>
-        <a href="Journey_Stories.html"><span class="drop-icon">📖</span> Journey Stories</a>
+        <a href="about.html">About YAN</a>
+        <a href="Journey_Stories.html">Journey Stories</a>
       </div>
     </li>
     <li>
       <a href="programs.html">Programs <span class="arrow">▼</span></a>
       <div class="dropdown">
-        <a href="programs.html"><span class="drop-icon">💻</span> Our Programs</a>
-        <a href="events.html"><span class="drop-icon">📅</span> Events</a>
+        <a href="programs.html">Our Programs</a>
+        <a href="events.html">Events</a>
       </div>
     </li>
     <li>
       <a href="team.html">Team <span class="arrow">▼</span></a>
       <div class="dropdown">
-        <a href="team.html"><span class="drop-icon">👥</span> Our Team</a>
-        <a href="gallery.html"><span class="drop-icon">📸</span> Gallery</a>
+        <a href="team.html">Our Team</a>
+        <a href="gallery.html">Gallery</a>
       </div>
     </li>
     <li><a href="community.html">Community</a></li>
     <li><a href="contact.html">Contact</a></li>
-    <li><a href="Entrepreneaurs_Lab.html" style="color:#E63329;font-weight:700;">🧪 Entrepreneurs Lab</a></li>
+    <li><a href="Entrepreneaurs_Lab.html" style="color:#E63329;font-weight:700;">Entrepreneurs Lab</a></li>
   </ul>
   <a href="join.html" class="nav-btn active">Join YAN</a>
   <button class="hamburger" id="hamburger" aria-label="Open menu">
@@ -297,27 +297,27 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
   <li>
     <a href="about.html">About <span class="m-arrow">▼</span></a>
     <div class="mobile-submenu">
-      <a href="about.html"><span class="drop-icon">🌍</span> About YAN</a>
-      <a href="Journey_Stories.html"><span class="drop-icon">📖</span> Journey Stories</a>
+      <a href="about.html">About YAN</a>
+      <a href="Journey_Stories.html">Journey Stories</a>
     </div>
   </li>
   <li>
     <a href="programs.html">Programs <span class="m-arrow">▼</span></a>
     <div class="mobile-submenu">
-      <a href="programs.html"><span class="drop-icon">💻</span> Our Programs</a>
-      <a href="events.html"><span class="drop-icon">📅</span> Events</a>
+      <a href="programs.html">Our Programs</a>
+      <a href="events.html">Events</a>
     </div>
   </li>
   <li>
     <a href="team.html">Team <span class="m-arrow">▼</span></a>
     <div class="mobile-submenu">
-      <a href="team.html"><span class="drop-icon">👥</span> Our Team</a>
-      <a href="gallery.html"><span class="drop-icon">📸</span> Gallery</a>
+      <a href="team.html">Our Team</a>
+      <a href="gallery.html">Gallery</a>
     </div>
   </li>
   <li><a href="community.html">Community</a></li>
   <li><a href="contact.html">Contact</a></li>
-    <li><a href="Entrepreneaurs_Lab.html" style="color:#E63329;font-weight:700;">🧪 Entrepreneurs Lab</a></li>
+    <li><a href="Entrepreneaurs_Lab.html" style="color:#E63329;font-weight:700;">Entrepreneurs Lab</a></li>
   <li><a href="join.html" class="mobile-join">Join YAN </a></li>
 </ul>
 
@@ -339,32 +339,26 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
     </div>
     <div class="benefits-grid">
       <div class="benefit-card">
-        <div class="benefit-icon">🏆</div>
         <div class="benefit-title">Scholarship Access</div>
         <div class="benefit-desc">Get first access to scholarships, fellowships, internships and global opportunities shared weekly by our dedicated team.</div>
       </div>
       <div class="benefit-card">
-        <div class="benefit-icon">👑</div>
         <div class="benefit-title">Leadership Development</div>
         <div class="benefit-desc">Participate in leadership training, workshops and mentorship programs designed to build future African leaders.</div>
       </div>
       <div class="benefit-card">
-        <div class="benefit-icon">🌍</div>
         <div class="benefit-title">Pan-African Network</div>
         <div class="benefit-desc">Connect with young Africans from Kenya, Cameroon, Rwanda, Nigeria, Ghana and beyond — building lifelong friendships.</div>
       </div>
       <div class="benefit-card">
-        <div class="benefit-icon">💼</div>
         <div class="benefit-title">Career Support</div>
         <div class="benefit-desc">Get CV reviews, mock interviews, career guidance and public speaking training to boost your professional life.</div>
       </div>
       <div class="benefit-card">
-        <div class="benefit-icon">🎓</div>
         <div class="benefit-title">Certificates</div>
         <div class="benefit-desc">Earn official YAN certificates of participation, volunteer service and leadership — recognized across Africa.</div>
       </div>
       <div class="benefit-card">
-        <div class="benefit-icon">💚</div>
         <div class="benefit-title">Mental Health Support</div>
         <div class="benefit-desc">Access peer support, wellness sessions and a safe community that understands and supports your wellbeing journey.</div>
       </div>
@@ -380,19 +374,19 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
   </div>
   <div class="membership-grid">
     <div class="membership-card">
-      <div class="membership-icon">🌟</div>
+      <div class="membership-icon">01</div>
       <div class="membership-type">Ordinary Member</div>
       <div class="membership-age">Ages 18–35</div>
       <div class="membership-desc">Actively participate in all programs. Eligible to vote and hold leadership positions within YAN.</div>
     </div>
     <div class="membership-card featured">
-      <div class="membership-icon">🔥</div>
+      <div class="membership-icon">02</div>
       <div class="membership-type">Volunteer Member</div>
       <div class="membership-age">Ages 18–40</div>
       <div class="membership-desc">Join a department and contribute your skills to building YAN. Minimum 3-month commitment required.</div>
     </div>
     <div class="membership-card">
-      <div class="membership-icon">🤝</div>
+      <div class="membership-icon">03</div>
       <div class="membership-type">Associate Member</div>
       <div class="membership-age">All Ages</div>
       <div class="membership-desc">Organizations, mentors, researchers and allies who support YAN's mission and want to partner with us.</div>
@@ -476,25 +470,25 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
   <div class="exp-card">
     <div class="exp-title">What You Get</div>
     <ul class="exp-list">
-      <li><span>🏆</span> Access to scholarships and global opportunities</li>
-      <li><span>👑</span> Leadership training and development programs</li>
-      <li><span>💼</span> Career guidance, CV support and mock interviews</li>
-      <li><span>🌍</span> Pan-African network and community</li>
-      <li><span>🎓</span> Official YAN certificates after 3 months</li>
-      <li><span>💚</span> Mental health support and peer community</li>
-      <li><span>📢</span> Platform to share your voice and ideas</li>
+      <li>Access to scholarships and global opportunities</li>
+      <li>Leadership training and development programs</li>
+      <li>Career guidance, CV support and mock interviews</li>
+      <li>Pan-African network and community</li>
+      <li>Official YAN certificates after 3 months</li>
+      <li>Mental health support and peer community</li>
+      <li>Platform to share your voice and ideas</li>
     </ul>
   </div>
   <div class="exp-card">
-    <div class="exp-title">📋 What We Expect</div>
+    <div class="exp-title">What We Expect</div>
     <ul class="exp-list">
-      <li><span>⏰</span> Minimum 3-month commitment to YAN</li>
-      <li><span>🤝</span> Active participation in activities and meetings</li>
-      <li><span>💡</span> Professional conduct in all engagements</li>
-      <li><span>📱</span> Regular engagement on WhatsApp and platforms</li>
-      <li><span>🌍</span> Uphold African values of unity and respect</li>
-      <li><span></span> Represent YAN positively in all spaces</li>
-      <li><span>❤️</span> Service over self — impact over titles</li>
+      <li>Minimum 3-month commitment to YAN</li>
+      <li>Active participation in activities and meetings</li>
+      <li>Professional conduct in all engagements</li>
+      <li>Regular engagement on WhatsApp and platforms</li>
+      <li>Uphold African values of unity and respect</li>
+      <li>Represent YAN positively in all spaces</li>
+      <li>Service over self — impact over titles</li>
     </ul>
   </div>
 </div>
@@ -502,7 +496,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
 <!-- FOOTER -->
 <footer>
   <div style="max-width:1200px;margin:0 auto 2rem;text-align:center;">
-    <a href="partners.html" style="color:var(--gold);font-size:0.8rem;font-weight:700;text-decoration:none;">🤝 Proudly partnered with organizations advancing African youth — See Our Partners →</a>
+    <a href="partners.html" style="color:var(--gold);font-size:0.8rem;font-weight:700;text-decoration:none;">Proudly partnered with organizations advancing African youth — See Our Partners →</a>
   </div>
 
   <div class="footer-bottom">
@@ -577,7 +571,7 @@ form.addEventListener('submit', async function(e) {
       }, 5000);
     } else { throw new Error(); }
   } catch (err) {
-    btn.textContent = '❌ Error — Try Again';
+    btn.textContent = 'Error — Try Again';
     btn.style.background = 'var(--red)';
     btn.disabled = false;
   }

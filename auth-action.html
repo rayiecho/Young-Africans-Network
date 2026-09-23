@@ -19,10 +19,10 @@ body{font-family:Poppins,sans-serif;background:var(--light);min-height:100vh;dis
 
 .card{background:#fff;border-radius:24px;padding:2.5rem;max-width:480px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.1);text-align:center;}
 
-.icon-circle{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2.5rem;}
+.icon-circle{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2rem;font-weight:700;}
 .icon-circle.loading{background:rgba(27,42,107,0.08);}
-.icon-circle.success{background:rgba(39,174,96,0.1);}
-.icon-circle.error{background:rgba(230,51,41,0.1);}
+.icon-circle.success{background:rgba(39,174,96,0.1);color:#27AE60;}
+.icon-circle.error{background:rgba(230,51,41,0.1);color:var(--red);}
 .icon-circle.reset{background:rgba(245,166,35,0.1);}
 
 .card h2{font-family:Playfair Display,serif;font-size:1.5rem;font-weight:900;color:var(--navy);margin-bottom:0.75rem;}
@@ -70,16 +70,16 @@ body{font-family:Poppins,sans-serif;background:var(--light);min-height:100vh;dis
 
   <!-- EMAIL VERIFIED -->
   <div class="card" id="card-verified" style="display:none;">
-    <div class="icon-circle success">✅</div>
+    <div class="icon-circle success">&#10003;</div>
     <h2>Email Verified!</h2>
-    <p>Your email address has been successfully verified. You are now a full member of the Young Africans Network community.<br><br>Welcome aboard — let's build the future together! 🌍</p>
+    <p>Your email address has been successfully verified. You are now a full member of the Young Africans Network community.<br><br>Welcome aboard — let's build the future together! </p>
     <a href="community.html" class="btn-primary">Enter YAN Platform</a>
     <a href="index.html" class="btn-secondary">Go to Homepage</a>
   </div>
 
   <!-- ALREADY VERIFIED -->
   <div class="card" id="card-already-verified" style="display:none;">
-    <div class="icon-circle success">✅</div>
+    <div class="icon-circle success">&#10003;</div>
     <h2>Already Verified</h2>
     <p>Your email address is already verified. You can go ahead and log into the YAN platform.</p>
     <a href="community.html" class="btn-primary">Go to Platform</a>
@@ -87,7 +87,7 @@ body{font-family:Poppins,sans-serif;background:var(--light);min-height:100vh;dis
 
   <!-- RESET PASSWORD FORM -->
   <div class="card" id="card-reset" style="display:none;">
-    <div class="icon-circle reset">🔐</div>
+    <div class="icon-circle reset"></div>
     <h2>Reset Your Password</h2>
     <p>Create a new secure password for your YAN account.</p>
     <div class="form-group">
@@ -106,7 +106,7 @@ body{font-family:Poppins,sans-serif;background:var(--light);min-height:100vh;dis
 
   <!-- RESET SUCCESS -->
   <div class="card" id="card-reset-success" style="display:none;">
-    <div class="icon-circle success">🎉</div>
+    <div class="icon-circle success">&#10003;</div>
     <h2>Password Updated!</h2>
     <p>Your password has been successfully changed. You can now log in to the YAN platform with your new password.</p>
     <a href="community.html" class="btn-primary">Log In Now</a>
@@ -114,7 +114,7 @@ body{font-family:Poppins,sans-serif;background:var(--light);min-height:100vh;dis
 
   <!-- ERROR STATE -->
   <div class="card" id="card-error" style="display:none;">
-    <div class="icon-circle error">⚠️</div>
+    <div class="icon-circle error">&#10007;</div>
     <h2>Link Expired</h2>
     <p id="error-message">This link has expired or is invalid. Please request a new one from the YAN platform.</p>
     <div class="divider"></div>

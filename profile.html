@@ -118,7 +118,7 @@ footer{background:var(--navy);padding:1.5rem 2rem;text-align:center;margin-top:2
     <div class="nav-logo-text">Young Africans Network<span>Building the Future, Together</span></div>
   </a>
   <div class="nav-actions">
-    <a href="community.html" class="nav-link">🌍 Community</a>
+    <a href="community.html" class="nav-link">Community</a>
     <button class="btn-logout" id="logoutBtn">Logout</button>
   </div>
 </nav>
@@ -130,7 +130,7 @@ footer{background:var(--navy);padding:1.5rem 2rem;text-align:center;margin-top:2
       <span class="profile-photo-initials" id="profileInitials">YAN</span>
     </div>
     <img class="profile-photo-img" id="profilePhotoImg" src="" alt="Profile photo">
-    <button class="photo-edit-btn" onclick="document.getElementById('photoEditInput').click()" title="Change photo">✏️</button>
+    <button class="photo-edit-btn" onclick="document.getElementById('photoEditInput').click()" title="Change photo"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
     <input type="file" id="photoEditInput" accept="image/*">
   </div>
   <div class="uploading-text" id="uploadingText">⏳ Uploading...</div>
@@ -144,7 +144,7 @@ footer{background:var(--navy);padding:1.5rem 2rem;text-align:center;margin-top:2
 
   <!-- INFO CARD -->
   <div class="profile-card">
-    <div class="card-title">👤 Profile Info</div>
+    <div class="card-title">Profile Info</div>
     <div class="info-row"><span class="info-label">Email</span><span class="info-value" id="infoEmail">—</span></div>
     <div class="info-row"><span class="info-label">Country</span><span class="info-value" id="infoCountry">—</span></div>
     <div class="info-row"><span class="info-label">Role</span><span class="info-value" id="infoRole">—</span></div>
@@ -155,13 +155,13 @@ footer{background:var(--navy);padding:1.5rem 2rem;text-align:center;margin-top:2
 
   <!-- BIO CARD -->
   <div class="profile-card">
-    <div class="card-title">💬 About Me</div>
+    <div class="card-title">About Me</div>
     <p id="infoBio" style="font-size:0.88rem;color:var(--gray);line-height:1.8;">No bio added yet.</p>
   </div>
 
   <!-- EDIT FORM -->
   <div class="profile-card edit-section">
-    <div class="card-title">✏️ Edit Profile</div>
+    <div class="card-title">Edit Profile</div>
     <div class="form-row">
       <div class="form-group">
         <label>First Name</label>
@@ -210,7 +210,7 @@ footer{background:var(--navy);padding:1.5rem 2rem;text-align:center;margin-top:2
   <!-- COMMUNITY CARD -->
   <div class="community-card">
     <div class="community-card-text">
-      <div class="community-card-title">🌍 Go to Community</div>
+      <div class="community-card-title">Go to Community</div>
       <div class="community-card-sub">Share posts, reply to discussions and connect with young Africans</div>
     </div>
     <a href="community.html" class="btn-community">Open Community →</a>
@@ -220,7 +220,7 @@ footer{background:var(--navy);padding:1.5rem 2rem;text-align:center;margin-top:2
 
 <footer>
   <div style="max-width:1200px;margin:0 auto 2rem;text-align:center;">
-    <a href="partners.html" style="color:var(--gold);font-size:0.8rem;font-weight:700;text-decoration:none;">🤝 Proudly partnered with organizations advancing African youth — See Our Partners →</a>
+    <a href="partners.html" style="color:var(--gold);font-size:0.8rem;font-weight:700;text-decoration:none;">Proudly partnered with organizations advancing African youth — See Our Partners →</a>
   </div>
 
   <div class="footer-copy">© 2026 Young Africans Network. All Rights Reserved. | <a href="index.html">Back to Website</a></div>
@@ -279,7 +279,7 @@ onAuthStateChanged(auth, async (user) => {
   const initials = getInitials(data.firstName || '', data.lastName || '');
   document.getElementById('profileInitials').textContent = initials;
   document.getElementById('profileName').textContent = `${data.firstName} ${data.lastName}`;
-  document.getElementById('profileCountry').textContent = `📍 ${data.country || ''}`;
+  document.getElementById('profileCountry').textContent = `${data.country || ''}`;
 
   const badge = document.getElementById('profileRoleBadge');
   badge.textContent = data.role || 'Member';
@@ -326,17 +326,17 @@ onAuthStateChanged(auth, async (user) => {
       };
       await updateDoc(doc(db, 'users', user.uid), updates);
       document.getElementById('profileName').textContent = `${updates.firstName} ${updates.lastName}`;
-      document.getElementById('profileCountry').textContent = `📍 ${updates.country}`;
+      document.getElementById('profileCountry').textContent = `${updates.country}`;
       document.getElementById('infoCountry').textContent = updates.country || '—';
       document.getElementById('infoDept').textContent = updates.department || '—';
       document.getElementById('infoWhatsapp').textContent = updates.whatsapp || '—';
       document.getElementById('infoBio').textContent = updates.bio || 'No bio added yet.';
       document.getElementById('profileInitials').textContent = getInitials(updates.firstName, updates.lastName);
-      msg.textContent = '✅ Saved!'; msg.className = 'save-msg success'; msg.style.display = 'inline';
-      showToast('Profile updated! ✅', 'success');
+      msg.textContent = 'Saved!'; msg.className = 'save-msg success'; msg.style.display = 'inline';
+      showToast('Profile updated! ', 'success');
       setTimeout(() => msg.style.display = 'none', 3000);
     } catch (e) {
-      msg.textContent = '❌ Save failed.'; msg.className = 'save-msg error'; msg.style.display = 'inline';
+      msg.textContent = 'Save failed.'; msg.className = 'save-msg error'; msg.style.display = 'inline';
     } finally { btn.disabled = false; btn.textContent = 'Save Changes'; }
   });
 
@@ -359,11 +359,11 @@ onAuthStateChanged(auth, async (user) => {
       document.getElementById('profilePhotoPlaceholder').style.display = 'none';
       const img = document.getElementById('profilePhotoImg');
       img.src = photoUrl; img.style.display = 'block';
-      uploadText.textContent = '✅ Photo updated!';
-      showToast('Profile photo updated! 📸', 'success');
+      uploadText.textContent = 'Photo updated!';
+      showToast('Profile photo updated! ', 'success');
       setTimeout(() => uploadText.style.display = 'none', 2000);
     } catch (err) {
-      uploadText.textContent = '❌ Upload failed. Try again.';
+      uploadText.textContent = 'Upload failed. Try again.';
       setTimeout(() => uploadText.style.display = 'none', 3000);
     }
   });
