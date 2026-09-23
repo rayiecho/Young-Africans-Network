@@ -613,10 +613,9 @@ async function rejectRecLetter(recId) {
 
 async function loadFormsAdmin(c) {
   try {
-    const [joinSnap, contactSnap, leadershipSnap] = await Promise.all([
+    const [joinSnap, contactSnap] = await Promise.all([
       getDocs(query(collection(db, 'joinRequests'), orderBy('submittedAt', 'desc'))).catch(() => getDocs(collection(db, 'joinRequests'))),
-      getDocs(query(collection(db, 'contactSubmissions'), orderBy('submittedAt', 'desc'))).catch(() => getDocs(collection(db, 'contactSubmissions'))),
-      getDocs(query(collection(db, 'leadershipApplications'), orderBy('submittedAt', 'desc'))).catch(() => getDocs(collection(db, 'leadershipApplications')))
+      getDocs(query(collection(db, 'contactSubmissions'), orderBy('submittedAt', 'desc'))).catch(() => getDocs(collection(db, 'contactSubmissions')))
     ]);
 
     // Join-request submissions live in Firestore and don't automatically become D1
@@ -628,59 +627,14 @@ async function loadFormsAdmin(c) {
     const unregisteredEmails = [...new Set(joinEmails.filter(e => !registeredSet.has(e)))];
     window.__unregisteredJoinEmails = unregisteredEmails;
 
-    let html = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem;">'
+    let html = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem;">'
       + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Join Requests</p>'
       + '<p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + joinSnap.size + '</p></div>'
       + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Not Registered Yet</p>'
       + '<p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--red);">' + unregisteredEmails.length + '</p></div>'
       + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Contact Messages</p>'
       + '<p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--navy);">' + contactSnap.size + '</p></div>'
-      + '<div class="section-card" style="text-align:center;"><p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Leadership Applications</p>'
-      + '<p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + leadershipSnap.size + '</p></div>'
       + '</div>';
-
-    // Leadership & Management Applications (leadership-application.html)
-    html += '<div class="section-card" style="margin-bottom:1.5rem;">'
-      + '<h3 style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;"> Leadership Applications (' + leadershipSnap.size + ')</h3>';
-    if (leadershipSnap.empty) {
-      html += '<p style="color:var(--gray);font-size:0.85rem;">No leadership applications yet.</p>';
-    } else {
-      leadershipSnap.docs.forEach(d => {
-        const r = d.data();
-        const date = r.submittedAt?.toDate?.().toLocaleDateString() || '';
-        const name = r.fullName || r.name || 'Unknown';
-        const isPending = !r.status || r.status === 'pending';
-        const statusColors = { pending: ['rgba(245,166,35,0.1)', '#b37800'], shortlisted: ['rgba(39,174,96,0.1)', '#27AE60'], rejected: ['rgba(230,51,41,0.1)', 'var(--red)'] };
-        const [bg, fg] = statusColors[r.status] || statusColors.pending;
-        html += '<div style="padding:1rem 0;border-bottom:1px solid var(--light);">'
-          + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;">'
-          + '<div style="flex:1;min-width:240px;">'
-          + '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + name + (r.position ? ' <span style="color:var(--red);font-weight:600;">— ' + r.position + '</span>' : '') + '</p>'
-          + '<p style="font-size:0.75rem;color:var(--gray);">' + (r.email||'') + ' · ' + (r.whatsapp||r.whatsappPhone||'') + ' · ' + (r.country||'') + (r.city?(', '+r.city):'') + '</p>'
-          + '<p style="font-size:0.75rem;color:var(--gray);">' + (r.currentStatus||'') + ' at ' + (r.institution||'') + ' · ' + (r.fieldOfStudy||'') + '</p>'
-          + (r.skills ? '<p style="font-size:0.75rem;color:var(--gray);margin-top:0.25rem;"><strong>Skills:</strong> ' + r.skills + '</p>' : '')
-          + (r.whyLeadership ? '<div style="background:var(--light);border-radius:8px;padding:0.75rem;margin-top:0.5rem;border-left:3px solid var(--gold);">'
-            + '<p style="font-size:0.72rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Why join leadership:</p>'
-            + '<p style="font-size:0.78rem;color:var(--gray);line-height:1.6;">' + r.whyLeadership + '</p></div>' : '')
-          + (r.whyPosition ? '<div style="background:var(--light);border-radius:8px;padding:0.75rem;margin-top:0.5rem;border-left:3px solid var(--navy);">'
-            + '<p style="font-size:0.72rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Why this role:</p>'
-            + '<p style="font-size:0.78rem;color:var(--gray);line-height:1.6;">' + r.whyPosition + '</p></div>' : '')
-          + (r.experience ? '<div style="background:var(--light);border-radius:8px;padding:0.75rem;margin-top:0.5rem;border-left:3px solid var(--red);">'
-            + '<p style="font-size:0.72rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Experience:</p>'
-            + '<p style="font-size:0.78rem;color:var(--gray);line-height:1.6;">' + r.experience + '</p></div>' : '')
-          + '<p style="font-size:0.72rem;color:var(--gray);margin-top:0.35rem;">Hours/week: ' + (r.hoursPerWeek||'') + ' · Heard via: ' + (r.heardVia||'') + ' · ' + date + '</p>'
-          + '</div>'
-          + '<div style="display:flex;flex-direction:column;gap:0.4rem;align-items:flex-end;">'
-          + '<span style="background:' + bg + ';color:' + fg + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;text-transform:capitalize;">' + (r.status||'pending') + '</span>'
-          + (isPending ? '<div style="display:flex;gap:0.4rem;">'
-            + '<button class="btn-sm btn-navy" onclick="shortlistLeadershipApp(\'' + d.id + '\',\'' + (r.email||'') + '\',\'' + name.replace(/'/g,"\\'") + '\')">Shortlist</button>'
-            + '<button class="btn-sm btn-red" onclick="rejectLeadershipApp(\'' + d.id + '\',\'' + (r.email||'') + '\',\'' + name.replace(/'/g,"\\'") + '\')">Not Selected</button>'
-            + '</div>' : '')
-          + '</div>'
-          + '</div></div>';
-      });
-    }
-    html += '</div>';
 
     // Join Requests
     html += '<div class="section-card" style="margin-bottom:1.5rem;">'
@@ -771,6 +725,65 @@ async function markContactRead(id) {
 window.loadFormsAdmin = loadFormsAdmin;
 window.markContactRead = markContactRead;
 
+// Leadership & Management Applications (apply.html) - its own tab, not bundled into
+// Form Submissions, since admins were missing it entirely when it was just a card
+// buried inside that section.
+async function loadLeadershipApplicationsAdmin(c) {
+  try {
+    const leadershipSnap = await getDocs(query(collection(db, 'leadershipApplications'), orderBy('submittedAt', 'desc')))
+      .catch(() => getDocs(collection(db, 'leadershipApplications')));
+
+    let html = '<div class="section-card" style="text-align:center;margin-bottom:1.5rem;max-width:220px;">'
+      + '<p style="font-size:0.85rem;font-weight:700;color:var(--navy);">Total Applications</p>'
+      + '<p style="font-family:Playfair Display,serif;font-size:2rem;font-weight:900;color:var(--gold);">' + leadershipSnap.size + '</p></div>';
+
+    html += '<div class="section-card">';
+    if (leadershipSnap.empty) {
+      html += '<p style="color:var(--gray);font-size:0.85rem;">No leadership applications yet.</p>';
+    } else {
+      leadershipSnap.docs.forEach(d => {
+        const r = d.data();
+        const date = r.submittedAt?.toDate?.().toLocaleDateString() || '';
+        const name = r.fullName || r.name || 'Unknown';
+        const isPending = !r.status || r.status === 'pending';
+        const statusColors = { pending: ['rgba(245,166,35,0.1)', '#b37800'], shortlisted: ['rgba(39,174,96,0.1)', '#27AE60'], rejected: ['rgba(230,51,41,0.1)', 'var(--red)'] };
+        const [bg, fg] = statusColors[r.status] || statusColors.pending;
+        html += '<div style="padding:1rem 0;border-bottom:1px solid var(--light);">'
+          + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;">'
+          + '<div style="flex:1;min-width:240px;">'
+          + '<p style="font-size:0.88rem;font-weight:700;color:var(--navy);">' + name + (r.position ? ' <span style="color:var(--red);font-weight:600;">— ' + r.position + '</span>' : '') + '</p>'
+          + '<p style="font-size:0.75rem;color:var(--gray);">' + (r.email||'') + ' · ' + (r.whatsapp||r.whatsappPhone||'') + ' · ' + (r.country||'') + (r.city?(', '+r.city):'') + '</p>'
+          + '<p style="font-size:0.75rem;color:var(--gray);">' + (r.currentStatus||'') + ' at ' + (r.institution||'') + ' · ' + (r.fieldOfStudy||'') + '</p>'
+          + (r.skills ? '<p style="font-size:0.75rem;color:var(--gray);margin-top:0.25rem;"><strong>Skills:</strong> ' + r.skills + '</p>' : '')
+          + (r.whyLeadership ? '<div style="background:var(--light);border-radius:8px;padding:0.75rem;margin-top:0.5rem;border-left:3px solid var(--gold);">'
+            + '<p style="font-size:0.72rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Why join leadership:</p>'
+            + '<p style="font-size:0.78rem;color:var(--gray);line-height:1.6;">' + r.whyLeadership + '</p></div>' : '')
+          + (r.whyPosition ? '<div style="background:var(--light);border-radius:8px;padding:0.75rem;margin-top:0.5rem;border-left:3px solid var(--navy);">'
+            + '<p style="font-size:0.72rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Why this role:</p>'
+            + '<p style="font-size:0.78rem;color:var(--gray);line-height:1.6;">' + r.whyPosition + '</p></div>' : '')
+          + (r.experience ? '<div style="background:var(--light);border-radius:8px;padding:0.75rem;margin-top:0.5rem;border-left:3px solid var(--red);">'
+            + '<p style="font-size:0.72rem;font-weight:700;color:var(--navy);margin-bottom:0.25rem;">Experience:</p>'
+            + '<p style="font-size:0.78rem;color:var(--gray);line-height:1.6;">' + r.experience + '</p></div>' : '')
+          + '<p style="font-size:0.72rem;color:var(--gray);margin-top:0.35rem;">Hours/week: ' + (r.hoursPerWeek||'') + ' · Heard via: ' + (r.heardVia||'') + ' · ' + date + '</p>'
+          + '</div>'
+          + '<div style="display:flex;flex-direction:column;gap:0.4rem;align-items:flex-end;">'
+          + '<span style="background:' + bg + ';color:' + fg + ';padding:0.2rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700;text-transform:capitalize;">' + (r.status||'pending') + '</span>'
+          + (isPending ? '<div style="display:flex;gap:0.4rem;">'
+            + '<button class="btn-sm btn-navy" onclick="shortlistLeadershipApp(\'' + d.id + '\',\'' + (r.email||'') + '\',\'' + name.replace(/'/g,"\\'") + '\')">Shortlist</button>'
+            + '<button class="btn-sm btn-red" onclick="rejectLeadershipApp(\'' + d.id + '\',\'' + (r.email||'') + '\',\'' + name.replace(/'/g,"\\'") + '\')">Not Selected</button>'
+            + '</div>' : '')
+          + '</div>'
+          + '</div></div>';
+      });
+    }
+    html += '</div>';
+    c.innerHTML = html;
+  } catch(e) {
+    c.innerHTML = '<p style="color:var(--gray);">Error: ' + e.message + '</p>';
+  }
+}
+window.loadLeadershipApplicationsAdmin = loadLeadershipApplicationsAdmin;
+
 async function replyToContact(email, name) {
   if (!email) return showToast('No email address found', 'error');
   const message = prompt('Type your reply to ' + name + ':');
@@ -854,7 +867,7 @@ async function shortlistLeadershipApp(id, email, name) {
     })});
   } catch(e) { console.log('Email error:', e); }
   showToast(name + ' shortlisted! Applicant notified.');
-  loadSection('forms');
+  window.switchGroupTab('community_group', 'leadershipapps');
 }
 
 async function rejectLeadershipApp(id, email, name) {
@@ -867,7 +880,7 @@ async function rejectLeadershipApp(id, email, name) {
     })});
   } catch(e) { console.log('Email error:', e); }
   showToast('Applicant notified');
-  loadSection('forms');
+  window.switchGroupTab('community_group', 'leadershipapps');
 }
 
 window.shortlistLeadershipApp = shortlistLeadershipApp;
@@ -1473,6 +1486,7 @@ window.switchGroupTab = function(groupId, tabId) {
     headaccess: window.loadHeadAccessRequests,
     hubs: window.loadHubsAdmin,
     forms: window.loadFormsAdmin,
+    leadershipapps: window.loadLeadershipApplicationsAdmin,
     notifications: window.loadNotificationCenter,
     newsletters: window.loadNewslettersAdmin,
     partnerships: window.loadPartnershipsAdmin,
@@ -1531,6 +1545,7 @@ window.loadSection = async function(section, customContainer) {
       {id:'members', label:'Members'},
       {id:'moderation', label:'Moderation'},
       {id:'forms', label:'Form Submissions'},
+      {id:'leadershipapps', label:'Leadership Applications'},
       {id:'notifications', label:'Notifications'},
       {id:'hubs', label:'YAN Hubs'},
       {id:'errors', label:'System Errors'},
@@ -6455,6 +6470,7 @@ window.switchGroupTab = function(groupId, tabId) {
     headaccess: window.loadHeadAccessRequests,
     hubs: window.loadHubsAdmin,
     forms: window.loadFormsAdmin,
+    leadershipapps: window.loadLeadershipApplicationsAdmin,
     notifications: window.loadNotificationCenter,
     newsletters: window.loadNewslettersAdmin,
     partnerships: window.loadPartnershipsAdmin,
@@ -6513,6 +6529,7 @@ window.loadSection = async function(section, customContainer) {
       {id:'members', label:'Members'},
       {id:'moderation', label:'Moderation'},
       {id:'forms', label:'Form Submissions'},
+      {id:'leadershipapps', label:'Leadership Applications'},
       {id:'notifications', label:'Notifications'},
       {id:'hubs', label:'YAN Hubs'},
       {id:'errors', label:'System Errors'},
