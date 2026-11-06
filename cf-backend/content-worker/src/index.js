@@ -377,7 +377,15 @@ async function submitJoin(request, env, cors) {
   return json({ ok: true }, 201, cors);
 }
 
+// 11:59:59pm East Africa Time (UTC+3), Nov 11 2026 - matches apply.html's own cutoff.
+// Enforced here too since the frontend's disabled form is only a UI nicety - nothing
+// stops a direct POST to this endpoint after the deadline without this check.
+const LEADERSHIP_APPLICATION_DEADLINE = Date.parse('2026-11-11T20:59:59Z');
+
 async function submitLeadershipApplication(request, env, cors) {
+  if (Date.now() >= LEADERSHIP_APPLICATION_DEADLINE) {
+    return json({ error: 'Applications for this round closed on November 11, 2026.' }, 403, cors);
+  }
   const formObj = await request.json();
   const name = formObj.fullName || formObj.name || '';
   const email = formObj.email || '';

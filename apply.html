@@ -334,15 +334,16 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
     <div class="app-hero-video-overlay"></div>
   </div>
   <div class="app-hero-inner">
-    <span class="status-pill"><span class="status-dot"></span> Applications Open — 2026 Restructuring</span>
+    <span class="status-pill" id="statusPill"><span class="status-dot"></span> <span id="statusPillText">Applications Open — 2026 Restructuring</span></span>
     <h1 class="app-title">Lead the Movement.<br><span>Serve Young Africans Network.</span></h1>
     <p class="app-sub">YAN is strengthening its leadership and management structure as we grow our programs, partnerships and community impact across Africa. We're inviting committed young Africans to step up — no formal title required, just commitment, integrity and the willingness to learn.</p>
     <div class="hero-meta">
-      <span class="hero-meta-chip"><b>Status:</b>&nbsp;Open</span>
-      <span class="hero-meta-chip"><b>Deadline:</b>&nbsp;To be communicated</span>
+      <span class="hero-meta-chip" id="statusChip"><b>Status:</b>&nbsp;Open</span>
+      <span class="hero-meta-chip"><b>Deadline:</b>&nbsp;November 11, 2026</span>
       <span class="hero-meta-chip"><b>Type:</b>&nbsp;Volunteer Leadership</span>
     </div>
-    <div class="scroll-cue">
+    <div class="hero-meta" id="countdownRow" style="margin-top:0.75rem;"></div>
+    <div class="scroll-cue" id="scrollCue">
       <a href="#apply">Start Your Application ↓</a>
     </div>
   </div>
@@ -428,6 +429,12 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
       <h2 class="section-title centered">Tell Us <span>About You</span></h2>
     </div>
 
+    <div class="form-card" id="closedCard" style="display:none;text-align:center;">
+      <div class="step-title">Applications Are Now Closed</div>
+      <p class="step-sub">The window for the 2026 Leadership &amp; Management Recruitment closed on November 11, 2026. Thank you to everyone who applied — shortlisted applicants will be contacted directly.</p>
+      <p class="step-sub" style="margin-bottom:0;">Want to stay involved in the meantime? <a href="join.html" style="color:var(--red);font-weight:700;">Join YAN as a member</a> or follow our <a href="https://chat.whatsapp.com/FDpWNXl9bWbBWOsvNgBC7i" target="_blank" style="color:var(--red);font-weight:700;">WhatsApp community</a> for future openings.</p>
+    </div>
+
     <div class="progress-track" id="progressTrack">
       <div class="progress-line-fill" id="progressFill"></div>
       <div class="progress-step active" data-step="1"><div class="progress-num">1</div><div class="progress-label">Your Info</div></div>
@@ -438,7 +445,7 @@ footer{background:var(--navy);padding:2rem;border-top:1px solid rgba(255,255,255
     </div>
 
     <form id="leadershipForm" onsubmit="return false;">
-      <div class="form-card">
+      <div class="form-card" id="wizardCard">
 
         <!-- STEP 1 -->
         <div class="fstep active" data-step="1">
@@ -693,6 +700,38 @@ hamburger.addEventListener('click', () => {
   mobileMenu.classList.toggle('open');
 });
 
+// ===== DEADLINE =====
+// 11:59:59pm East Africa Time (UTC+3), Nov 11 2026 - matches the backend's own cutoff
+// in content-worker so a closed form can't be bypassed by posting to the API directly.
+const APPLICATION_DEADLINE = new Date('2026-11-11T20:59:59Z');
+const applicationsClosed = new Date() >= APPLICATION_DEADLINE;
+
+(function renderDeadlineState() {
+  const daysLeft = Math.max(0, Math.ceil((APPLICATION_DEADLINE - new Date()) / 86400000));
+  const pillText = document.getElementById('statusPillText');
+  const statusChip = document.getElementById('statusChip');
+  const countdownRow = document.getElementById('countdownRow');
+  const scrollCue = document.getElementById('scrollCue');
+  const closedCard = document.getElementById('closedCard');
+  const progressTrack = document.getElementById('progressTrack');
+  const leadershipForm = document.getElementById('leadershipForm');
+
+  if (applicationsClosed) {
+    if (pillText) pillText.textContent = 'Applications Closed';
+    const pill = document.getElementById('statusPill');
+    if (pill) { pill.style.background = 'rgba(230,51,41,0.15)'; pill.style.borderColor = 'rgba(230,51,41,0.4)'; pill.style.color = '#FF8A80'; }
+    const dot = pill ? pill.querySelector('.status-dot') : null;
+    if (dot) { dot.style.background = '#E63329'; dot.style.animation = 'none'; dot.style.boxShadow = 'none'; }
+    if (statusChip) statusChip.innerHTML = '<b>Status:</b>&nbsp;Closed';
+    if (scrollCue) scrollCue.style.display = 'none';
+    if (closedCard) closedCard.style.display = 'block';
+    if (progressTrack) progressTrack.style.display = 'none';
+    if (leadershipForm) leadershipForm.style.display = 'none';
+  } else if (countdownRow) {
+    countdownRow.innerHTML = '<span class="hero-meta-chip" style="background:rgba(245,166,35,0.18);border-color:rgba(245,166,35,0.4);">Applications end in <b>' + daysLeft + '</b> day' + (daysLeft === 1 ? '' : 's') + '</span>';
+  }
+})();
+
 // ===== WIZARD LOGIC =====
 const TOTAL_STEPS = 5;
 let currentStep = 1;
@@ -747,6 +786,7 @@ backBtn.addEventListener('click', () => {
 });
 
 submitBtn.addEventListener('click', async () => {
+  if (new Date() >= APPLICATION_DEADLINE) { location.reload(); return; }
   if (!validateStep(currentStep)) return;
   submitBtn.disabled = true;
   submitBtn.textContent = 'Submitting...';
@@ -762,8 +802,9 @@ submitBtn.addEventListener('click', async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formObj)
     });
+    if (res.status === 403) { location.reload(); return; }
     if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Submission failed');
-    document.querySelector('.form-card:not(.success-step)').style.display = 'none';
+    document.getElementById('wizardCard').style.display = 'none';
     document.getElementById('progressTrack').style.display = 'none';
     document.getElementById('successStep').style.display = 'block';
     window.scrollTo({ top: document.getElementById('apply').offsetTop - 90, behavior: 'smooth' });
